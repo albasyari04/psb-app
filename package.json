@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next build",
     "clean": "rmdir /s /q .next 2>nul || cd . && rmdir /s /q out 2>nul || cd .",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
