@@ -1,0 +1,8 @@
+{
+  "appId": "com.psb.app",
+  "appName": "psb-app",
+  "webDir": "out",
+  "server": {
+    "cleartext": true
+  }
+}
