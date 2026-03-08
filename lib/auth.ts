@@ -39,32 +39,38 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-
         try {
-          // Ambil encrypted_password langsung dari auth_users_view
-          const { data: viewData, error: viewErr } = await supabaseAdmin
+          if (!credentials?.email || !credentials?.password) return null
+
+          const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+          const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+          
+          if (!url || !key) return null
+
+          const client = createClient(url, key, {
+            auth: { autoRefreshToken: false, persistSession: false }
+          })
+
+          const { data: viewData, error: viewErr } = await client
             .from('auth_users_view')
             .select('id, encrypted_password')
             .eq('email', credentials.email)
-            .single<{ id: string; encrypted_password: string }>()
+            .single() as { data: { id: string; encrypted_password: string } | null; error: unknown }
 
           if (viewErr || !viewData) return null
 
-          // Normalize $2a$ → $2b$ dan verifikasi password
           const hash = viewData.encrypted_password.replace(/^\$2a\$/, '$2b$')
           const valid = await bcrypt.compare(credentials.password, hash)
 
           if (!valid) return null
 
-          // Ambil profile
-          const { data: profile } = await supabaseAdmin
+          const { data: profile, error: profileErr } = await client
             .from('profiles')
             .select('id, name, email, role, avatar_url')
             .eq('id', viewData.id)
-            .single<ProfileRow>()
+            .single() as { data: ProfileRow | null; error: unknown }
 
-          if (!profile) return null
+          if (profileErr || !profile) return null
 
           return {
             id: profile.id,
@@ -73,7 +79,10 @@ export const authOptions: NextAuthOptions = {
             role: profile.role,
             avatar_url: profile.avatar_url ?? undefined,
           }
-        } catch { return null }
+        } catch (e) {
+          console.error('[auth] authorize error:', e)
+          return null
+        }
       },
     }),
   ],
@@ -150,6 +159,6 @@ export const authOptions: NextAuthOptions = {
 
   pages: { signIn: '/login', error: '/login' },
   session: { strategy: 'jwt', maxAge: 60 * 60 * 8 },
-  debug: process.env.NODE_ENV === 'development',
+  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
 }
