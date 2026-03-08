@@ -2,7 +2,7 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, PostgrestError } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
 
 interface UserWithRole { role: string; avatar_url?: string }
@@ -39,38 +39,74 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('[auth] Authorize attempt for email:', credentials?.email)
         try {
-          if (!credentials?.email || !credentials?.password) return null
+          if (!credentials?.email || !credentials?.password) {
+            console.log('[auth] Missing email or password.')
+            return null
+          }
 
           const url = process.env.NEXT_PUBLIC_SUPABASE_URL
           const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-          
-          if (!url || !key) return null
+
+          if (!url || !key) {
+            console.error('[auth] CRITICAL: Supabase URL or Service Role Key is missing in env.')
+            return null
+          }
+          console.log('[auth] Supabase credentials found. Creating client.')
 
           const client = createClient(url, key, {
-            auth: { autoRefreshToken: false, persistSession: false }
+            auth: { autoRefreshToken: false, persistSession: false },
           })
 
-          const { data: viewData, error: viewErr } = await client
+          console.log('[auth] Querying auth_users_view for user.')
+          const { data: viewData, error: viewErr } = (await client
             .from('auth_users_view')
             .select('id, encrypted_password')
             .eq('email', credentials.email)
-            .single() as { data: { id: string; encrypted_password: string } | null; error: unknown }
+            .single()) as { data: { id: string; encrypted_password: string } | null; error: PostgrestError | null }
 
-          if (viewErr || !viewData) return null
+          if (viewErr) {
+            console.error('[auth] Error querying auth_users_view:', viewErr)
+            return null
+          }
 
+          if (!viewData) {
+            console.log('[auth] No user found in auth_users_view for this email.')
+            return null
+          }
+
+          if (!viewData.encrypted_password) {
+            console.error('[auth] User found, but has no encrypted_password. Cannot use credentials login.')
+            return null
+          }
+
+          console.log('[auth] User found in view. Comparing password.')
           const valid = await bcrypt.compare(credentials.password, viewData.encrypted_password)
 
-          if (!valid) return null
+          if (!valid) {
+            console.log('[auth] Password comparison failed.')
+            return null
+          }
 
-          const { data: profile, error: profileErr } = await client
+          console.log('[auth] Password is valid. Fetching profile.')
+          const { data: profile, error: profileErr } = (await client
             .from('profiles')
             .select('id, name, email, role, avatar_url')
             .eq('id', viewData.id)
-            .single() as { data: ProfileRow | null; error: unknown }
+            .single()) as { data: ProfileRow | null; error: PostgrestError | null }
 
-          if (profileErr || !profile) return null
+          if (profileErr) {
+            console.error('[auth] Error fetching profile:', profileErr)
+            return null
+          }
 
+          if (!profile) {
+            console.error('[auth] CRITICAL: Profile not found for a valid user. Data inconsistency!')
+            return null
+          }
+
+          console.log('[auth] Authorization successful. Returning user object.')
           return {
             id: profile.id,
             name: profile.name,
@@ -79,7 +115,7 @@ export const authOptions: NextAuthOptions = {
             avatar_url: profile.avatar_url ?? undefined,
           }
         } catch (e) {
-          console.error('[auth] authorize error:', e)
+          console.error('[auth] UNHANDLED authorize error:', e)
           return null
         }
       },
