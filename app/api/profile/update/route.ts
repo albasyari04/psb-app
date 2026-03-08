@@ -5,13 +5,11 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Cek session
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 2. Ambil body
     const body = await req.json()
     const { name, avatar_url } = body as { name?: string; avatar_url?: string }
 
@@ -19,17 +17,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nama tidak boleh kosong' }, { status: 400 })
     }
 
-    // 3. Siapkan data update
-    const updateData: Record<string, string> = {
-      name: name.trim(),
-    }
-    if (avatar_url) {
-      updateData.avatar_url = avatar_url
-    }
+    const updateData: Record<string, string> = { name: name.trim() }
+    if (avatar_url) updateData.avatar_url = avatar_url
 
-    // 4. Update di tabel users Supabase
     const { error } = await supabaseAdmin
-      .from('users')
+      .from('admin')
       .update(updateData)
       .eq('email', session.user.email)
 
