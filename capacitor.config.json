@@ -1,6 +1,6 @@
 {
   "appId": "com.psb.app",
-  "appName": "PSB App",
+  "appName": "PSB",
   "webDir": "out",
   "server": {
     "url": "https://psb-app.vercel.app/login",
@@ -8,5 +8,17 @@
   },
   "android": {
     "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2500,
+      "launchAutoHide": true,
+      "backgroundColor": "#1e40af",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
   }
 }
