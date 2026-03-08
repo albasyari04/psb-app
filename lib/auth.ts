@@ -3,6 +3,7 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider       from 'next-auth/providers/google'
 import { createClient }     from '@supabase/supabase-js'
+import bcrypt               from 'bcryptjs'
 
 // ── Tipe helper ───────────────────────────────────────────────────────────────
 interface UserWithRole {
@@ -55,16 +56,39 @@ async function findAuthUserByEmail(email: string): Promise<string | null> {
   }
 }
 
+// ── Helper: verify password dengan bcrypt (handle $2a$ dan $2b$) ─────────────
+async function verifyPasswordManual(email: string, password: string): Promise<string | null> {
+  try {
+    // Ambil user list via admin
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    const foundUser = users?.users?.find((u) => u.email === email)
+    if (!foundUser) return null
+
+    // Query encrypted_password via auth_users_view
+    const { data: viewData } = await supabaseAdmin
+      .from('auth_users_view')
+      .select('encrypted_password')
+      .eq('email', email)
+      .single<{ encrypted_password: string }>()
+
+    if (!viewData?.encrypted_password) return null
+
+    // Normalize $2a$ → $2b$ agar bcryptjs bisa verifikasi
+    const normalizedHash = viewData.encrypted_password.replace(/^\$2a\$/, '$2b$')
+    const isValid = await bcrypt.compare(password, normalizedHash)
+
+    return isValid ? foundUser.id : null
+  } catch {
+    return null
+  }
+}
+
 // ── Auth Options ──────────────────────────────────────────────────────────────
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId:     process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      // ✅ FIX DEFINITIF: Hapus SEMUA authorization.params
-      // Setiap tambahan params (prompt, access_type, response_type)
-      // bisa menyebabkan Google OAuth URL malformed → error 400.
-      // NextAuth sudah menangani semua params yang diperlukan secara otomatis.
     }),
 
     CredentialsProvider({
@@ -76,18 +100,27 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
+        // ── STEP 1: Coba login via Supabase Auth normal ───────────────────────
         const { data: authData, error: authError } =
           await supabaseAuth.auth.signInWithPassword({
             email:    credentials.email,
             password: credentials.password,
           })
 
-        if (authError || !authData.user) return null
+        let userId: string | null = authData?.user?.id ?? null
 
+        // ── STEP 2: Jika gagal, fallback manual bcrypt (untuk hash $2a$) ──────
+        if (authError || !userId) {
+          userId = await verifyPasswordManual(credentials.email, credentials.password)
+        }
+
+        if (!userId) return null
+
+        // ── STEP 3: Ambil profile ─────────────────────────────────────────────
         const { data: profile } = await supabaseAdmin
           .from('profiles')
           .select('id, name, email, role, avatar_url')
-          .eq('id', authData.user.id)
+          .eq('id', userId)
           .single<ProfileRow>()
 
         if (!profile) return null
@@ -104,7 +137,6 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    // ── signIn ────────────────────────────────────────────────────────────────
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return true
 
@@ -113,7 +145,6 @@ export const authOptions: NextAuthOptions = {
         const name      = user.name  ?? ''
         const avatarUrl = user.image ?? null
 
-        // 1. Cek tabel profiles berdasarkan email
         const { data: existingProfile } = await supabaseAdmin
           .from('profiles')
           .select('id, role, avatar_url')
@@ -121,21 +152,17 @@ export const authOptions: NextAuthOptions = {
           .maybeSingle<ProfileMini>()
 
         if (existingProfile) {
-          // Profile sudah ada → update avatar dan return
           await supabaseAdmin
             .from('profiles')
             .update({ avatar_url: avatarUrl })
             .eq('email', email)
-
           user.id = existingProfile.id
           return true
         }
 
-        // 2. Profile belum ada → cari apakah sudah ada di Supabase Auth
         let userId = await findAuthUserByEmail(email)
 
         if (!userId) {
-          // 3. Belum ada di Supabase Auth → buat user baru
           const { data: newUser, error: createErr } =
             await supabaseAdmin.auth.admin.createUser({
               email,
@@ -143,46 +170,27 @@ export const authOptions: NextAuthOptions = {
               user_metadata: { name, avatar_url: avatarUrl },
             })
 
-          if (createErr || !newUser?.user?.id) {
-            console.error('[auth] createUser error:', createErr)
-            return false
-          }
-
+          if (createErr || !newUser?.user?.id) return false
           userId = newUser.user.id
         }
 
-        // 4. Simpan profile baru
         const { error: upsertErr } = await supabaseAdmin
           .from('profiles')
           .upsert(
-            {
-              id:         userId,
-              email,
-              name,
-              role:       'siswa',
-              avatar_url: avatarUrl,
-            },
-            {
-              onConflict:       'id',
-              ignoreDuplicates: false,
-            }
+            { id: userId, email, name, role: 'siswa', avatar_url: avatarUrl },
+            { onConflict: 'id', ignoreDuplicates: false }
           )
 
-        if (upsertErr) {
-          console.error('[auth] upsert profile error:', upsertErr)
-          return false
-        }
+        if (upsertErr) return false
 
         user.id = userId
         return true
 
-      } catch (err) {
-        console.error('[auth] signIn unexpected error:', err)
+      } catch {
         return false
       }
     },
 
-    // ── jwt ───────────────────────────────────────────────────────────────────
     async jwt({ token, user, account, trigger, session }) {
       if (user && account?.provider === 'credentials') {
         const u          = user as UserWithRole
@@ -212,7 +220,6 @@ export const authOptions: NextAuthOptions = {
       return token
     },
 
-    // ── session ───────────────────────────────────────────────────────────────
     async session({ session, token }) {
       if (session.user) {
         session.user.id         = token.id        as string
