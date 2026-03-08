@@ -1,8 +1,12 @@
 {
   "appId": "com.psb.app",
-  "appName": "psb-app",
+  "appName": "PSB App",
   "webDir": "out",
   "server": {
+    "url": "https://psb-app.vercel.app/login",
     "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
   }
 }
