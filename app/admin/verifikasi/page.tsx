@@ -2,6 +2,7 @@
 import { supabaseAdmin } from '@/lib/supabase'  // ← PERBAIKAN: supabaseAdmin bukan supabase
 import Link from 'next/link'
 import type { Pendaftaran } from '@/types'
+export const dynamic = 'force-dynamic'
 
 // ── Avatar palette ──────────────────────────────────────────────────────────
 const avatarGradients = [
