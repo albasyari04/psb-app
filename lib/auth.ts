@@ -59,8 +59,7 @@ export const authOptions: NextAuthOptions = {
 
           if (viewErr || !viewData) return null
 
-          const hash = viewData.encrypted_password.replace(/^\$2a\$/, '$2b$')
-          const valid = await bcrypt.compare(credentials.password, hash)
+          const valid = await bcrypt.compare(credentials.password, viewData.encrypted_password)
 
           if (!valid) return null
 
