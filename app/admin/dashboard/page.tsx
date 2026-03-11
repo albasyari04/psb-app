@@ -24,35 +24,11 @@ const statusConfig: Record<string, { label: string; cls: string }> = {
 }
 
 const avatarCls = [
-  "avatar-violet",
-  "avatar-blue",
-  "avatar-emerald",
-  "avatar-rose",
-  "avatar-amber",
+  "avatar-violet", "avatar-blue", "avatar-emerald",
+  "avatar-rose", "avatar-amber",
 ]
 
-// ── Donut Chart Helper ─────────────────────────────────────────────────────
-function buildDonutSegments(
-  data: { value: number; color: string }[],
-  radius = 54
-) {
-  const total = data.reduce((s, d) => s + d.value, 0)
-  if (total === 0) return []
-
-  const circumference = 2 * Math.PI * radius
-  let cumulative = 0
-
-  return data.map((d) => {
-    const pct = d.value / total
-    const dash = pct * circumference
-    const gap  = circumference - dash
-    const offset = circumference * (1 - cumulative)
-    cumulative += pct
-    return { ...d, dash, gap, offset, circumference }
-  })
-}
-
-// ── SVG Icons (match navbar icons) ────────────────────────────────────────
+// ── SVG Icons ──────────────────────────────────────────────────────────────
 function IconUsers({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -65,7 +41,6 @@ function IconUsers({ size = 22 }: { size?: number }) {
   )
 }
 
-
 function IconVerifikasi({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -74,6 +49,40 @@ function IconVerifikasi({ size = 22 }: { size?: number }) {
       <polyline points="9 12 11 14 15 10"/>
     </svg>
   )
+}
+
+function IconBell({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  )
+}
+
+function IconSettings({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  )
+}
+
+// ── Bar Chart Helper ───────────────────────────────────────────────────────
+function buildBarSegments(stats: {
+  total: number; menunggu: number; diproses: number;
+  diterima: number; ditolak: number;
+}) {
+  const maxVal = Math.max(stats.menunggu, stats.diproses, stats.diterima, stats.ditolak, 1)
+  return [
+    { key: "diterima", label: "Diterima", value: stats.diterima, barCls: "adm-bar-emerald", pct: Math.round((stats.diterima / maxVal) * 100) },
+    { key: "menunggu", label: "Menunggu", value: stats.menunggu, barCls: "adm-bar-amber",   pct: Math.round((stats.menunggu / maxVal) * 100) },
+    { key: "diproses", label: "Diproses", value: stats.diproses, barCls: "adm-bar-blue",    pct: Math.round((stats.diproses / maxVal) * 100) },
+    { key: "ditolak",  label: "Ditolak",  value: stats.ditolak,  barCls: "adm-bar-rose",    pct: Math.round((stats.ditolak  / maxVal) * 100) },
+  ]
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -88,10 +97,10 @@ export default async function AdminDashboard() {
 
   const stats = {
     total:    rows.length,
-    menunggu: rows.filter((p: StatusRow) => p.status === "menunggu").length,
-    diproses: rows.filter((p: StatusRow) => p.status === "diproses").length,
-    diterima: rows.filter((p: StatusRow) => p.status === "diterima").length,
-    ditolak:  rows.filter((p: StatusRow) => p.status === "ditolak").length,
+    menunggu: rows.filter((p) => p.status === "menunggu").length,
+    diproses: rows.filter((p) => p.status === "diproses").length,
+    diterima: rows.filter((p) => p.status === "diterima").length,
+    ditolak:  rows.filter((p) => p.status === "ditolak").length,
   }
 
   const acceptRate = stats.total > 0
@@ -104,107 +113,171 @@ export default async function AdminDashboard() {
     .order("created_at", { ascending: false })
     .limit(5)
 
-  const firstName = session?.user.name?.split(" ")[0] ?? "Admin"
+  const firstName  = session?.user.name?.split(" ")[0] ?? "Admin"
+  const barSegments = buildBarSegments(stats)
 
-  const statItems = [
-    { label: "Total Pendaftar", value: stats.total,    icon: <IconUsers size={22} />,    cardCls: "stat-card-violet"  },
-    { label: "Menunggu Review", value: stats.menunggu, icon: "⏳",                        cardCls: "stat-card-amber"   },
-    { label: "Diterima",        value: stats.diterima, icon: "✅",                        cardCls: "stat-card-emerald" },
-    { label: "Ditolak",         value: stats.ditolak,  icon: "❌",                        cardCls: "stat-card-rose"    },
-  ]
-
-  // Donut chart data
-  const donutData = [
-    { value: stats.diterima, color: "#10b981", label: "Diterima" },
-    { value: stats.diproses, color: "#3b82f6", label: "Diproses" },
-    { value: stats.menunggu, color: "#f59e0b", label: "Menunggu" },
-    { value: stats.ditolak,  color: "#ef4444", label: "Ditolak"  },
-  ]
-  const donutSegments = buildDonutSegments(donutData)
-  const hasData = stats.total > 0
+  // ring circumference for r=42: 2πr ≈ 263.89
+  const CIRC       = 263.89
+  const ringDash   = (acceptRate / 100) * CIRC
 
   return (
-    <div className="app-shell admin-dashboard-bg">
+    <div className="app-shell adm-bg">
 
-      {/* ── Hero Header ──────────────────────────────────────── */}
-      <div className="admin-hero">
-        <div className="admin-hero-orb admin-hero-orb-1" />
-        <div className="admin-hero-orb admin-hero-orb-2" />
-        <div className="admin-hero-orb admin-hero-orb-3" />
+      {/* ════════════════════════════════════════════════
+          APP BAR
+      ════════════════════════════════════════════════ */}
+      <div className="adm-appbar">
+        <div className="adm-appbar-left">
+          <div className="adm-appbar-avatar">
+            {firstName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="adm-appbar-greeting">Selamat datang 👋</p>
+            <p className="adm-appbar-name">{firstName}</p>
+          </div>
+        </div>
+        <div className="adm-appbar-right">
+          <Link href="/admin/profile" className="adm-appbar-btn no-underline">
+            <IconSettings size={18} />
+          </Link>
+          <div className="adm-appbar-btn adm-appbar-bell-wrap">
+            <IconBell size={18} />
+            {stats.menunggu > 0 && <span className="adm-appbar-notif" />}
+          </div>
+        </div>
+      </div>
 
-        <div className="admin-hero-content">
-          <div className="admin-online-badge">
-            <span className="admin-online-dot" />
-            <span>PANEL ADMIN · PSB 2025/2026</span>
+      {/* ════════════════════════════════════════════════
+          HERO BANNER
+      ════════════════════════════════════════════════ */}
+      <div className="adm-hero">
+        <div className="adm-orb adm-orb-1" />
+        <div className="adm-orb adm-orb-2" />
+        <div className="adm-orb adm-orb-3" />
+        <div className="adm-hero-mesh" />
+
+        <div className="adm-hero-inner">
+          <div className="adm-hero-eyebrow">
+            <span className="adm-hero-eyebrow-dot" />
+            PSB 2025/2026 · PANEL AKTIF
           </div>
 
-          <h1 className="admin-hero-title">Selamat datang, {firstName}! 👋</h1>
-          <p className="admin-hero-subtitle">
-            Pantau seluruh aktivitas penerimaan siswa baru
-          </p>
-
-          <div className="admin-rate-card">
-            <div>
-              <p className="admin-rate-label">Tingkat Penerimaan</p>
-              <div className="admin-rate-value-row">
-                <span className="admin-rate-number">{acceptRate}</span>
-                <span className="admin-rate-pct">%</span>
+          <div className="adm-hero-body">
+            {/* Ring gauge */}
+            <div className="adm-ring-wrap">
+              <svg viewBox="0 0 100 100" width="108" height="108">
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="rgba(255,255,255,0.12)" strokeWidth="9" />
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="rgba(255,255,255,0.92)" strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeDasharray={`${ringDash} ${CIRC}`}
+                  strokeDashoffset={CIRC * 0.25}
+                  className="adm-ring-arc"
+                />
+              </svg>
+              <div className="adm-ring-inner">
+                <span className="adm-ring-num">{acceptRate}</span>
+                <span className="adm-ring-pct">%</span>
               </div>
-              <p className="admin-rate-sublabel">dari {stats.total} pendaftar</p>
             </div>
-            <div className="admin-rate-badge">
-              <span className="admin-rate-badge-icon">🎯</span>
+
+            {/* Text info */}
+            <div className="adm-hero-info">
+              <p className="adm-hero-info-title">Tingkat Penerimaan</p>
+              <p className="adm-hero-info-sub">
+                dari <strong>{stats.total}</strong> total pendaftar
+              </p>
+              <div className="adm-hero-chips">
+                <span className="adm-chip adm-chip-green">
+                  <span className="adm-chip-dot" />
+                  {stats.diterima} diterima
+                </span>
+                <span className="adm-chip adm-chip-red">
+                  <span className="adm-chip-dot" />
+                  {stats.ditolak} ditolak
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Main Content ─────────────────────────────────────── */}
-      <div className="admin-main">
+      {/* ════════════════════════════════════════════════
+          MAIN CONTENT
+      ════════════════════════════════════════════════ */}
+      <div className="adm-main">
 
-        {/* Stats Grid */}
-        <div className="admin-stats-grid">
-          {statItems.map(item => (
-            <div key={item.label} className={"admin-stat-card " + item.cardCls}>
-              <div className="admin-stat-icon">{item.icon}</div>
-              <div className="admin-stat-value">{item.value}</div>
-              <div className="admin-stat-label">{item.label}</div>
+        {/* ── Bar Chart Card ───────────────────────────── */}
+        <div className="adm-card">
+          <div className="adm-card-head">
+            <div>
+              <p className="adm-card-title">Statistik Pendaftar</p>
+              <p className="adm-card-sub">Distribusi status saat ini</p>
             </div>
-          ))}
+            <div className="adm-total-pill">
+              <span className="adm-total-pill-num">{stats.total}</span>
+              <span className="adm-total-pill-lbl">Total</span>
+            </div>
+          </div>
+
+          <div className="adm-barchart">
+            {barSegments.map((seg) => {
+              const w = stats.total > 0
+                ? Math.max(seg.pct, seg.value > 0 ? 5 : 0)
+                : 0
+              const sharePct = stats.total > 0
+                ? Math.round((seg.value / stats.total) * 100)
+                : 0
+              return (
+                <div key={seg.key} className="adm-bar-row">
+                  <span className="adm-bar-label">{seg.label}</span>
+                  <div className="adm-bar-track">
+                    <div
+                      className={"adm-bar-fill " + seg.barCls}
+                      data-w={w}
+                    />
+                  </div>
+                  <div className="adm-bar-right">
+                    <span className="adm-bar-val">{seg.value}</span>
+                    <span className="adm-bar-pct">{sharePct}%</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="admin-section">
-          <p className="admin-section-title">Akses Cepat</p>
-          <div className="admin-actions-grid">
-
+        {/* ── Akses Cepat ──────────────────────────────── */}
+        <div>
+          <p className="adm-section-title">Akses Cepat</p>
+          <div className="adm-actions-grid">
             <Link href="/admin/pendaftar" className="no-underline">
-              <div className="admin-action-card admin-action-violet">
-                {/* Background decorative icon */}
-                <div className="admin-action-bg-svg">
-                  <IconUsers size={52} />
+              <div className="adm-action-card adm-action-violet">
+                <div className="adm-action-bg-icon">
+                  <IconUsers size={56} />
                 </div>
-                <div className="admin-action-icon-svg">
-                  <IconUsers size={26} />
+                <div className="adm-action-icon">
+                  <IconUsers size={28} />
                 </div>
-                <p className="admin-action-name">Semua Pendaftar</p>
-                <p className="admin-action-sub">{stats.total} total</p>
+                <p className="adm-action-name">Semua Pendaftar</p>
+                <p className="adm-action-sub">{stats.total} total</p>
               </div>
             </Link>
 
             <Link href="/admin/verifikasi" className="no-underline">
-              <div className={"admin-action-card " + (stats.menunggu > 0 ? "admin-action-amber" : "admin-action-blue")}>
-                <div className="admin-action-bg-svg">
-                  <IconVerifikasi size={52} />
+              <div className={"adm-action-card " + (stats.menunggu > 0 ? "adm-action-amber" : "adm-action-blue")}>
+                <div className="adm-action-bg-icon">
+                  <IconVerifikasi size={56} />
                 </div>
                 {stats.menunggu > 0 && (
-                  <div className="admin-action-badge">{stats.menunggu}</div>
+                  <div className="adm-action-badge">{stats.menunggu}</div>
                 )}
-                <div className="admin-action-icon-svg">
-                  <IconVerifikasi size={26} />
+                <div className="adm-action-icon">
+                  <IconVerifikasi size={28} />
                 </div>
-                <p className="admin-action-name">Verifikasi</p>
-                <p className="admin-action-sub">
+                <p className="adm-action-name">Verifikasi</p>
+                <p className="adm-action-sub">
                   {stats.menunggu > 0 ? `${stats.menunggu} menunggu` : "Semua selesai"}
                 </p>
               </div>
@@ -212,112 +285,40 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* ── Distribusi Status — Donut Chart ──────────────── */}
-        <div className="admin-card admin-section">
-          <p className="admin-dist-title">DISTRIBUSI STATUS</p>
-
-          {hasData ? (
-            <div className="admin-donut-wrap">
-              {/* Donut SVG */}
-              <div className="admin-donut-svg-wrap">
-                <svg viewBox="0 0 128 128" width="128" height="128" className="admin-donut-svg">
-                  {/* track */}
-                  <circle
-                    cx="64" cy="64" r="54"
-                    fill="none"
-                    stroke="#f1f5f9"
-                    strokeWidth="14"
-                  />
-                  {donutSegments.map((seg, i) => (
-                    <circle
-                      key={i}
-                      cx="64" cy="64" r="54"
-                      fill="none"
-                      stroke={seg.color}
-                      strokeWidth="14"
-                      strokeDasharray={`${seg.dash} ${seg.gap}`}
-                      strokeDashoffset={seg.offset}
-                      strokeLinecap="butt"
-                      className="admin-donut-segment"
-                    />
-                  ))}
-                  {/* center text */}
-                  <text x="64" y="58" textAnchor="middle" className="admin-donut-text-total">
-                    {stats.total}
-                  </text>
-                  <text x="64" y="72" textAnchor="middle" className="admin-donut-text-label">
-                    TOTAL
-                  </text>
-                </svg>
-              </div>
-
-              {/* Legend + values */}
-              <div className="admin-donut-legend">
-                {[
-                  { key: "diterima", label: "Diterima", dotCls: "admin-donut-dot-emerald", val: stats.diterima },
-                  { key: "diproses", label: "Diproses", dotCls: "admin-donut-dot-blue",    val: stats.diproses },
-                  { key: "menunggu", label: "Menunggu", dotCls: "admin-donut-dot-amber",   val: stats.menunggu },
-                  { key: "ditolak",  label: "Ditolak",  dotCls: "admin-donut-dot-rose",    val: stats.ditolak  },
-                ].map(s => {
-                  const pct = stats.total > 0 ? Math.round((s.val / stats.total) * 100) : 0
-                  return (
-                    <div key={s.key} className="admin-donut-legend-row">
-                      <div className="admin-donut-legend-left">
-                        <div className={"admin-donut-legend-dot " + s.dotCls} />
-                        <span className="admin-donut-legend-label">{s.label}</span>
-                      </div>
-                      <div className="admin-donut-legend-right">
-                        <span className="admin-donut-legend-val">{s.val}</span>
-                        <span className="admin-donut-legend-pct">{pct}%</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="admin-empty">
-              <div className="admin-empty-icon">📊</div>
-              <p className="admin-empty-title">Belum ada data</p>
-              <p className="admin-empty-sub">Diagram akan muncul saat ada pendaftar</p>
-            </div>
-          )}
-        </div>
-
-        {/* Pendaftar Terbaru */}
-        <div className="admin-card">
-          <div className="admin-card-header">
+        {/* ── Pendaftar Terbaru ─────────────────────────── */}
+        <div className="adm-card">
+          <div className="adm-card-head">
             <div>
-              <p className="admin-card-title">Pendaftar Terbaru</p>
-              <p className="admin-card-sub">5 entri terakhir</p>
+              <p className="adm-card-title">Pendaftar Terbaru</p>
+              <p className="adm-card-sub">5 entri terakhir</p>
             </div>
-            <Link href="/admin/pendaftar" className="admin-see-all no-underline">
+            <Link href="/admin/pendaftar" className="adm-see-all no-underline">
               Lihat semua →
             </Link>
           </div>
 
           {terbaru && terbaru.length > 0 ? (
-            <div className="admin-list">
+            <div className="adm-list">
               {(terbaru as Pendaftaran[]).map((p, i) => {
                 const cfg = statusConfig[p.status] ?? statusConfig.menunggu
                 return (
                   <Link
                     key={p.id ?? i}
                     href={"admin/pendaftar/" + p.id}
-                    className="admin-list-row no-underline"
+                    className="adm-list-row no-underline"
                   >
                     <div className={"admin-avatar " + avatarCls[i % avatarCls.length]}>
                       {p.nama_lengkap?.charAt(0) ?? "?"}
                     </div>
-                    <div className="admin-list-info">
-                      <p className="admin-list-name">{p.nama_lengkap}</p>
-                      <p className="admin-list-sub">{p.jurusan_pilihan}</p>
+                    <div className="adm-list-info">
+                      <p className="adm-list-name">{p.nama_lengkap}</p>
+                      <p className="adm-list-sub">{p.jurusan_pilihan}</p>
                     </div>
                     <div className={"admin-status-pill " + cfg.cls}>
                       <div className="admin-status-dot" />
                       {cfg.label}
                     </div>
-                    <span className="admin-chevron">›</span>
+                    <span className="adm-chevron">›</span>
                   </Link>
                 )
               })}

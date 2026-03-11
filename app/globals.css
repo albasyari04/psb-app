@@ -2621,3 +2621,679 @@ h1, h2, h3, h4, h5 {
 .admin-donut-dot-blue    { background: #3b82f6; }
 .admin-donut-dot-amber   { background: #f59e0b; }
 .admin-donut-dot-rose    { background: #ef4444; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADMIN DASHBOARD v2 — Redesign (adm-* prefix)
+   Tambahkan di paling bawah globals.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page background ──────────────────────────────────────────────────────── */
+.adm-bg {
+  background: #f4f3ff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Main scroll area ─────────────────────────────────────────────────────── */
+.adm-main {
+  padding: 16px 16px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 1px 12px rgba(109, 40, 217, 0.06);
+}
+
+.adm-appbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-appbar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.3);
+}
+
+.adm-appbar-greeting {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.adm-appbar-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+
+.adm-appbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-appbar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f4f3ff;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7c3aed;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.adm-appbar-btn:hover {
+  background: #ede9fe;
+}
+
+.adm-appbar-bell-wrap {
+  position: relative;
+}
+
+.adm-appbar-notif {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HERO BANNER
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-hero {
+  background: linear-gradient(135deg, #3b0764 0%, #4c1d95 30%, #6d28d9 65%, #7c3aed 100%);
+  padding: 28px 20px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative orbs */
+.adm-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.adm-orb-1 {
+  width: 180px; height: 180px;
+  top: -60px; right: -50px;
+  background: radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%);
+}
+.adm-orb-2 {
+  width: 120px; height: 120px;
+  bottom: -30px; left: -20px;
+  background: radial-gradient(circle, rgba(196,181,253,0.16) 0%, transparent 70%);
+}
+.adm-orb-3 {
+  width: 80px; height: 80px;
+  top: 10px; left: 45%;
+  background: radial-gradient(circle, rgba(221,214,254,0.12) 0%, transparent 70%);
+}
+
+/* mesh grid overlay */
+.adm-hero-mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.adm-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* eyebrow */
+.adm-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.06em;
+  margin-bottom: 18px;
+}
+
+.adm-hero-eyebrow-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+  flex-shrink: 0;
+}
+
+/* hero body row */
+.adm-hero-body {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Ring gauge */
+.adm-ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 108px;
+  height: 108px;
+}
+
+.adm-ring-arc {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.adm-ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.adm-ring-num {
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.adm-ring-pct {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 6px;
+}
+
+/* hero info */
+.adm-hero-info {
+  flex: 1;
+}
+
+.adm-hero-info-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.adm-hero-info-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.adm-hero-info-sub strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 700;
+}
+
+/* chips */
+.adm-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.adm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.adm-chip-green {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.adm-chip-red {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.adm-chip-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GENERIC CARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px 16px;
+  box-shadow:
+    0 4px 24px rgba(109, 40, 217, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(167, 139, 250, 0.1);
+}
+
+.adm-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.adm-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.adm-card-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* total pill */
+.adm-total-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f4f3ff;
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+
+.adm-total-pill-num {
+  font-size: 18px;
+  font-weight: 900;
+  color: #7c3aed;
+  line-height: 1;
+}
+
+.adm-total-pill-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BAR CHART
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-barchart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adm-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-bar-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  width: 58px;
+  flex-shrink: 0;
+}
+
+.adm-bar-track {
+  flex: 1;
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.adm-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 0;
+}
+
+.adm-bar-emerald { background: linear-gradient(90deg, #059669, #34d399); }
+.adm-bar-amber   { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.adm-bar-blue    { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.adm-bar-rose    { background: linear-gradient(90deg, #be123c, #f87171); }
+
+.adm-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 48px;
+  justify-content: flex-end;
+}
+
+.adm-bar-val {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.adm-bar-pct {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION TITLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUICK ACTION CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.adm-action-card {
+  border-radius: 20px;
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.adm-action-card:hover {
+  transform: translateY(-2px);
+}
+
+.adm-action-violet {
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.32);
+}
+
+.adm-action-amber {
+  background: linear-gradient(135deg, #92400e, #d97706);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.32);
+}
+
+.adm-action-blue {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.32);
+}
+
+.adm-action-bg-icon {
+  position: absolute;
+  right: -12px;
+  bottom: -12px;
+  opacity: 0.15;
+  pointer-events: none;
+  color: #fff;
+}
+
+.adm-action-icon {
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+}
+
+.adm-action-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 20px;
+  padding: 2px 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.adm-action-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 3px;
+  letter-spacing: -0.2px;
+}
+
+.adm-action-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PENDAFTAR LIST
+   ═══════════════════════════════════════════════════════════════════════════ */
+.adm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adm-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 14px;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.adm-list-row:hover { background: #f8f7ff; }
+
+.adm-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-list-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.adm-list-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-chevron {
+  font-size: 18px;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* see all link */
+.adm-see-all {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #f3f0ff;
+  border-radius: 20px;
+  padding: 5px 12px;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+
+.adm-see-all:hover { background: #ede9fe; }
+
+/* no-underline utility */
+.no-underline { text-decoration: none; }
+
+/* ── Bar chart width via data-w attribute (0–100) ─────────────────────────
+   Menghindari inline style, mengikuti pola admin-dist-seg yang sudah ada   */
+.adm-bar-fill[data-w="0"]   { width: 0%; }
+.adm-bar-fill[data-w="1"]   { width: 1%; }
+.adm-bar-fill[data-w="2"]   { width: 2%; }
+.adm-bar-fill[data-w="3"]   { width: 3%; }
+.adm-bar-fill[data-w="4"]   { width: 4%; }
+.adm-bar-fill[data-w="5"]   { width: 5%; }
+.adm-bar-fill[data-w="6"]   { width: 6%; }
+.adm-bar-fill[data-w="7"]   { width: 7%; }
+.adm-bar-fill[data-w="8"]   { width: 8%; }
+.adm-bar-fill[data-w="9"]   { width: 9%; }
+.adm-bar-fill[data-w="10"]  { width: 10%; }
+.adm-bar-fill[data-w="11"]  { width: 11%; }
+.adm-bar-fill[data-w="12"]  { width: 12%; }
+.adm-bar-fill[data-w="13"]  { width: 13%; }
+.adm-bar-fill[data-w="14"]  { width: 14%; }
+.adm-bar-fill[data-w="15"]  { width: 15%; }
+.adm-bar-fill[data-w="16"]  { width: 16%; }
+.adm-bar-fill[data-w="17"]  { width: 17%; }
+.adm-bar-fill[data-w="18"]  { width: 18%; }
+.adm-bar-fill[data-w="19"]  { width: 19%; }
+.adm-bar-fill[data-w="20"]  { width: 20%; }
+.adm-bar-fill[data-w="21"]  { width: 21%; }
+.adm-bar-fill[data-w="22"]  { width: 22%; }
+.adm-bar-fill[data-w="23"]  { width: 23%; }
+.adm-bar-fill[data-w="24"]  { width: 24%; }
+.adm-bar-fill[data-w="25"]  { width: 25%; }
+.adm-bar-fill[data-w="26"]  { width: 26%; }
+.adm-bar-fill[data-w="27"]  { width: 27%; }
+.adm-bar-fill[data-w="28"]  { width: 28%; }
+.adm-bar-fill[data-w="29"]  { width: 29%; }
+.adm-bar-fill[data-w="30"]  { width: 30%; }
+.adm-bar-fill[data-w="31"]  { width: 31%; }
+.adm-bar-fill[data-w="32"]  { width: 32%; }
+.adm-bar-fill[data-w="33"]  { width: 33%; }
+.adm-bar-fill[data-w="34"]  { width: 34%; }
+.adm-bar-fill[data-w="35"]  { width: 35%; }
+.adm-bar-fill[data-w="36"]  { width: 36%; }
+.adm-bar-fill[data-w="37"]  { width: 37%; }
+.adm-bar-fill[data-w="38"]  { width: 38%; }
+.adm-bar-fill[data-w="39"]  { width: 39%; }
+.adm-bar-fill[data-w="40"]  { width: 40%; }
+.adm-bar-fill[data-w="41"]  { width: 41%; }
+.adm-bar-fill[data-w="42"]  { width: 42%; }
+.adm-bar-fill[data-w="43"]  { width: 43%; }
+.adm-bar-fill[data-w="44"]  { width: 44%; }
+.adm-bar-fill[data-w="45"]  { width: 45%; }
+.adm-bar-fill[data-w="46"]  { width: 46%; }
+.adm-bar-fill[data-w="47"]  { width: 47%; }
+.adm-bar-fill[data-w="48"]  { width: 48%; }
+.adm-bar-fill[data-w="49"]  { width: 49%; }
+.adm-bar-fill[data-w="50"]  { width: 50%; }
+.adm-bar-fill[data-w="51"]  { width: 51%; }
+.adm-bar-fill[data-w="52"]  { width: 52%; }
+.adm-bar-fill[data-w="53"]  { width: 53%; }
+.adm-bar-fill[data-w="54"]  { width: 54%; }
+.adm-bar-fill[data-w="55"]  { width: 55%; }
+.adm-bar-fill[data-w="56"]  { width: 56%; }
+.adm-bar-fill[data-w="57"]  { width: 57%; }
+.adm-bar-fill[data-w="58"]  { width: 58%; }
+.adm-bar-fill[data-w="59"]  { width: 59%; }
+.adm-bar-fill[data-w="60"]  { width: 60%; }
+.adm-bar-fill[data-w="61"]  { width: 61%; }
+.adm-bar-fill[data-w="62"]  { width: 62%; }
+.adm-bar-fill[data-w="63"]  { width: 63%; }
+.adm-bar-fill[data-w="64"]  { width: 64%; }
+.adm-bar-fill[data-w="65"]  { width: 65%; }
+.adm-bar-fill[data-w="66"]  { width: 66%; }
+.adm-bar-fill[data-w="67"]  { width: 67%; }
+.adm-bar-fill[data-w="68"]  { width: 68%; }
+.adm-bar-fill[data-w="69"]  { width: 69%; }
+.adm-bar-fill[data-w="70"]  { width: 70%; }
+.adm-bar-fill[data-w="71"]  { width: 71%; }
+.adm-bar-fill[data-w="72"]  { width: 72%; }
+.adm-bar-fill[data-w="73"]  { width: 73%; }
+.adm-bar-fill[data-w="74"]  { width: 74%; }
+.adm-bar-fill[data-w="75"]  { width: 75%; }
+.adm-bar-fill[data-w="76"]  { width: 76%; }
+.adm-bar-fill[data-w="77"]  { width: 77%; }
+.adm-bar-fill[data-w="78"]  { width: 78%; }
+.adm-bar-fill[data-w="79"]  { width: 79%; }
+.adm-bar-fill[data-w="80"]  { width: 80%; }
+.adm-bar-fill[data-w="81"]  { width: 81%; }
+.adm-bar-fill[data-w="82"]  { width: 82%; }
+.adm-bar-fill[data-w="83"]  { width: 83%; }
+.adm-bar-fill[data-w="84"]  { width: 84%; }
+.adm-bar-fill[data-w="85"]  { width: 85%; }
+.adm-bar-fill[data-w="86"]  { width: 86%; }
+.adm-bar-fill[data-w="87"]  { width: 87%; }
+.adm-bar-fill[data-w="88"]  { width: 88%; }
+.adm-bar-fill[data-w="89"]  { width: 89%; }
+.adm-bar-fill[data-w="90"]  { width: 90%; }
+.adm-bar-fill[data-w="91"]  { width: 91%; }
+.adm-bar-fill[data-w="92"]  { width: 92%; }
+.adm-bar-fill[data-w="93"]  { width: 93%; }
+.adm-bar-fill[data-w="94"]  { width: 94%; }
+.adm-bar-fill[data-w="95"]  { width: 95%; }
+.adm-bar-fill[data-w="96"]  { width: 96%; }
+.adm-bar-fill[data-w="97"]  { width: 97%; }
+.adm-bar-fill[data-w="98"]  { width: 98%; }
+.adm-bar-fill[data-w="99"]  { width: 99%; }
+.adm-bar-fill[data-w="100"] { width: 100%; }
