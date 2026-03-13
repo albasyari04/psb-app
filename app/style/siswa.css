@@ -1882,6 +1882,158 @@
   margin-top: 12px;
 }
 
+/* ================================================================
+   TAMBAHKAN ke file siswa.css yang sudah ada
+   — CSS untuk fitur upload foto profil
+   ================================================================ */
+
+/* ── Avatar wrap (container avatar + tombol kamera) ───────────── */
+.sp-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Avatar image (pakai di <Image> className) ────────────────── */
+.sp-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ── Overlay loading di atas avatar ──────────────────────────── */
+.sp-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp-avatar-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinAvatar 0.7s linear infinite;
+}
+
+@keyframes spinAvatar {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Tombol kamera (pojok kanan bawah avatar) ─────────────────── */
+.sp-camera-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  z-index: 10;
+}
+
+.sp-camera-btn:hover:not(:disabled) {
+  background: #eff6ff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.sp-camera-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Input file tersembunyi ───────────────────────────────────── */
+.sp-file-input {
+  display: none;
+}
+
+/* ── Feedback messages ────────────────────────────────────────── */
+.sp-upload-error {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  max-width: 260px;
+}
+
+.sp-upload-success {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  max-width: 260px;
+  animation: fadeInPop 0.3s ease;
+}
+
+.sp-upload-hint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+@keyframes fadeInPop {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Hint card di body ────────────────────────────────────────── */
+.sp-upload-hint-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 0.85rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0;
+}
+
+.sp-upload-hint-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.sp-upload-hint-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.sp-upload-hint-sub {
+  font-size: 0.72rem;
+  color: #0284c7;
+  margin-top: 0.2rem;
+  line-height: 1.5;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    ADMIN PENDAFTAR DETAIL — Bottom Sheet Fix
    Menaikkan sheet agar tidak tertutup AdminBottomNav (tinggi ~65px)
