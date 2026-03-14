@@ -35,3 +35,14 @@ export interface Session {
   user: User
   expires: string
 }
+
+// ── BARU: Notification ────────────────────────────────────────────────────────
+export interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  type: 'success' | 'error' | 'info'
+  is_read: boolean
+  created_at: string
+}

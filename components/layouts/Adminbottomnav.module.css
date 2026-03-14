@@ -1,0 +1,94 @@
+/* ================================================================
+   AdminBottomNav.module.css
+   Warna tema admin: violet (#7c3aed)
+   FIX: tidak ada inline styles, semua di sini
+   FIX css-prefix-order: -webkit- DULU, standar BELAKANGAN
+   ================================================================ */
+
+/* ── Spacer ──────────────────────────────────────────────────── */
+.spacer { height: 5rem; }
+
+/* ── Nav container ───────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ── Glassmorphism background ────────────────────────────────── */
+.navBg {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.10);
+}
+
+/* ── Nav inner row ───────────────────────────────────────────── */
+.navInner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem 0.5rem 0.75rem;
+}
+
+/* ── Single nav item ─────────────────────────────────────────── */
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 60px;
+  text-decoration: none;
+}
+
+/* ── Icon wrap ───────────────────────────────────────────────── */
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 2.5rem;
+  border-radius: 1rem;
+  transition: background 0.2s;
+}
+
+/* Active tints — semua violet untuk admin */
+.iconActive_beranda   { background: rgba(124, 58, 237, 0.094); }
+.iconActive_pendaftar { background: rgba(124, 58, 237, 0.094); }
+.iconActive_verifikasi { background: rgba(124, 58, 237, 0.094); }
+.iconActive_profil    { background: rgba(124, 58, 237, 0.094); }
+
+/* ── Active bar ──────────────────────────────────────────────── */
+.activeBar {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: #7c3aed;
+}
+/* Semua menu admin pakai warna yang sama */
+.activeBar_beranda    { background: #7c3aed; }
+.activeBar_pendaftar  { background: #7c3aed; }
+.activeBar_verifikasi { background: #7c3aed; }
+.activeBar_profil     { background: #7c3aed; }
+
+/* ── Nav label ───────────────────────────────────────────────── */
+.navLabel         { font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em; transition: color 0.2s; }
+.navLabelInactive { color: #94a3b8; }
+
+.navLabelActive_beranda    { color: #7c3aed; }
+.navLabelActive_pendaftar  { color: #7c3aed; }
+.navLabelActive_verifikasi { color: #7c3aed; }
+.navLabelActive_profil     { color: #7c3aed; }

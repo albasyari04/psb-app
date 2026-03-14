@@ -1,0 +1,124 @@
+/* ================================================================
+   SiswaBottomNav.module.css
+   PENTING — urutan backdrop-filter:
+     -webkit-backdrop-filter harus ditulis SEBELUM backdrop-filter
+   Nama class pakai underscore (_) bukan dash (-) agar valid
+   sebagai computed key TypeScript: styles[`key_${val}`]
+   ================================================================ */
+
+/* ── Spacer ──────────────────────────────────────────────────── */
+.spacer { height: 5rem; }
+
+/* ── Nav container ───────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ── Glassmorphism background ────────────────────────────────── */
+.navBg {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.10);
+}
+
+/* ── Nav inner row ───────────────────────────────────────────── */
+.navInner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem 0.5rem 0.75rem;
+}
+
+/* ── Single nav item ─────────────────────────────────────────── */
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 60px;
+  text-decoration: none;
+}
+
+/* ── Icon wrap ───────────────────────────────────────────────── */
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 2.5rem;
+  border-radius: 1rem;
+  transition: background 0.2s;
+}
+
+/* Active background tints — underscore agar valid sebagai computed key */
+.iconActive_beranda { background: rgba(37,  99, 235, 0.094); }
+.iconActive_daftar  { background: rgba(79,  70, 229, 0.094); }
+.iconActive_status  { background: rgba(5,  150, 105, 0.094); }
+.iconActive_profil  { background: rgba(217, 119,   6, 0.094); }
+
+/* ── Active bar ──────────────────────────────────────────────── */
+.activeBar {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5rem;
+  height: 0.25rem;
+  border-radius: 999px;
+}
+.activeBar_beranda { background: #2563eb; }
+.activeBar_daftar  { background: #4f46e5; }
+.activeBar_status  { background: #059669; }
+.activeBar_profil  { background: #d97706; }
+
+/* ── Unread badge ────────────────────────────────────────────── */
+.navBadge {
+  position: absolute;
+  top: 0.125rem;
+  right: 0.375rem;
+  background: #ef4444;
+  color: white;
+  font-size: 8px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid white;
+  line-height: 1;
+  animation: navBadgePop 0.3s ease;
+}
+@keyframes navBadgePop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ── Nav label ───────────────────────────────────────────────── */
+.navLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+.navLabelInactive { color: #94a3b8; }
+
+/* Active label colors — underscore */
+.navLabelActive_beranda { color: #2563eb; }
+.navLabelActive_daftar  { color: #4f46e5; }
+.navLabelActive_status  { color: #059669; }
+.navLabelActive_profil  { color: #d97706; }

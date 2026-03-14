@@ -1,0 +1,221 @@
+/* ================================================================
+   NotificationBell.module.css
+   FIX css-prefix-order:
+   - -webkit-backdrop-filter SEBELUM backdrop-filter
+   - -webkit-line-clamp SEBELUM line-clamp (standar)
+   ================================================================ */
+
+/* ── Bell Button ─────────────────────────────────────────────── */
+.bellBtn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s, background 0.2s;
+  padding: 0;
+}
+.bellBtn:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Badge ───────────────────────────────────────────────────── */
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  animation: badgePulse 2s infinite;
+}
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
+}
+
+/* ── Overlay ─────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.4);
+  /* FIX prefix-order: vendor prefix DULU, lalu standar */
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* ── Drawer ──────────────────────────────────────────────────── */
+.drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: white;
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.drawerOpen   { transform: translateY(0); }
+.drawerClosed { transform: translateY(100%); }
+
+/* ── Handle ──────────────────────────────────────────────────── */
+.handleWrap {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0 0;
+}
+.handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+/* ── Drawer header ───────────────────────────────────────────── */
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.drawerHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.drawerHeaderIcon  { font-size: 1.1rem; }
+.drawerHeaderTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.drawerHeaderBadge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+.markAllBtn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.markAllBtn:hover { color: #1d4ed8; }
+
+/* ── List area ───────────────────────────────────────────────── */
+.listArea {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Loading ─────────────────────────────────────────────────── */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  gap: 0.5rem;
+  color: #94a3b8;
+}
+.loadingIcon { font-size: 1.2rem; }
+.loadingText { font-size: 0.85rem; }
+
+/* ── Empty ───────────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  gap: 0.5rem;
+}
+.emptyIcon  { font-size: 2.5rem; }
+.emptyTitle { font-size: 0.9rem; font-weight: 600; color: #475569; }
+.emptySub   { font-size: 0.78rem; color: #94a3b8; text-align: center; line-height: 1.5; }
+
+/* ── Notif list ──────────────────────────────────────────────── */
+.notifList { padding: 0.5rem 0 1rem; }
+
+.notifItem {
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f8fafc;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  transition: filter 0.2s;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.notifItem:hover { filter: brightness(0.97); }
+
+/* Backgrounds — nama pakai underscore agar valid sebagai CSS Module computed key */
+.notifRead           { background: white; }
+.notifUnread_success { background: #f0fdf4; }
+.notifUnread_error   { background: #fff1f2; }
+.notifUnread_info    { background: #eff6ff; }
+
+/* ── Dots ────────────────────────────────────────────────────── */
+.dotWrap { padding-top: 4px; flex-shrink: 0; }
+.dot     { width: 8px; height: 8px; border-radius: 50%; }
+.dotRead    { background: #cbd5e1; }
+.dotSuccess { background: #10b981; }
+.dotError   { background: #ef4444; }
+.dotInfo    { background: #3b82f6; }
+.dotRight   { flex-shrink: 0; margin-top: 4px; }
+
+/* ── Content ─────────────────────────────────────────────────── */
+.notifContent  { flex: 1; min-width: 0; }
+.notifTitle    { font-size: 0.85rem; color: #1e293b; margin-bottom: 0.2rem; line-height: 1.4; }
+.notifTitleUnread { font-weight: 700; }
+.notifTitleRead   { font-weight: 500; }
+
+.notifMsg {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+  /* FIX prefix-order: vendor prefix DULU, lalu standar */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.notifTime {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 0.3rem;
+}

@@ -1,124 +1,128 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import styles from './AdminBottomNav.module.css'
 
+// ── Nav items ─────────────────────────────────────────────────────────────────
 const navItems = [
   {
-    href: '/admin/dashboard',
-    label: 'Dashboard',
-    color: '#7c3aed',
+    href:  '/admin/dashboard',
+    label: 'Beranda',
+    key:   'beranda',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="3" width="8" height="8" rx="2"
+        <path
+          d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H15V15H9V21H4C3.44772 21 3 20.5523 3 20V9.5Z"
           fill={active ? '#7c3aed' : 'none'}
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8"
-        />
-        <rect x="13" y="3" width="8" height="8" rx="2"
-          fill={active ? '#a78bfa' : 'none'}
-          stroke={active ? '#a78bfa' : '#94a3b8'} strokeWidth="1.8"
-        />
-        <rect x="3" y="13" width="8" height="8" rx="2"
-          fill={active ? '#a78bfa' : 'none'}
-          stroke={active ? '#a78bfa' : '#94a3b8'} strokeWidth="1.8"
-        />
-        <rect x="13" y="13" width="8" height="8" rx="2"
-          fill={active ? '#6d28d9' : 'none'}
-          stroke={active ? '#6d28d9' : '#94a3b8'} strokeWidth="1.8"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinejoin="round"
         />
       </svg>
     ),
   },
   {
-    href: '/admin/pendaftar',
+    href:  '/admin/pendaftar',
     label: 'Pendaftar',
-    color: '#7c3aed',
+    key:   'pendaftar',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="9" cy="7" r="3.5"
+        <path
+          d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
           fill={active ? '#7c3aed' : 'none'}
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         />
-        <path d="M2 20C2 16.134 5.13401 13 9 13H11"
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8" strokeLinecap="round"
+        <circle cx="9" cy="7" r="4"
+          fill={active ? '#7c3aed' : 'none'}
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8"
         />
-        <path d="M17 14V20M14 17H20"
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8" strokeLinecap="round"
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         />
       </svg>
     ),
   },
   {
-    href: '/admin/verifikasi',
+    href:  '/admin/verifikasi',
     label: 'Verifikasi',
-    color: '#d97706',
+    key:   'verifikasi',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M12 3L13.8 8.2H19.2L14.7 11.5L16.5 16.7L12 13.4L7.5 16.7L9.3 11.5L4.8 8.2H10.2L12 3Z"
-          fill={active ? '#d97706' : 'none'}
-          stroke={active ? '#d97706' : '#94a3b8'} strokeWidth="1.8" strokeLinejoin="round"
+        <path
+          d="M9 11l3 3L22 4"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         />
-        <circle cx="18" cy="18" r="4"
-          fill={active ? '#10b981' : 'none'}
-          stroke={active ? '#10b981' : '#94a3b8'} strokeWidth="1.8"
-        />
-        <path d="M16 18L17.5 19.5L20 17"
-          stroke={active ? 'white' : 'none'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+        <path
+          d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+          fill={active ? 'rgba(124,58,237,0.1)' : 'none'}
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
         />
       </svg>
     ),
   },
   {
-    href: '/admin/profile',
-    label: 'Admin',
-    color: '#7c3aed',
+    href:  '/admin/profile',
+    label: 'Profil',
+    key:   'profil',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="8" r="3.5"
+        <circle cx="12" cy="8" r="4"
           fill={active ? '#7c3aed' : 'none'}
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8"
         />
-        <path d="M4 20C4 16.134 7.58172 14 12 14C16.4183 14 20 16.134 20 20"
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.8" strokeLinecap="round"
-        />
-        <path d="M18 9L19.5 10V12.5C19.5 13.5 18 14.5 18 14.5C18 14.5 16.5 13.5 16.5 12.5V10L18 9Z"
-          fill={active ? '#7c3aed' : 'none'}
-          stroke={active ? '#7c3aed' : '#94a3b8'} strokeWidth="1.4"
+        <path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20"
+          stroke={active ? '#7c3aed' : '#94a3b8'}
+          strokeWidth="1.8" strokeLinecap="round"
         />
       </svg>
     ),
   },
-]
+] as const
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function AdminBottomNav() {
   const pathname = usePathname()
 
   return (
     <>
-      <div className="h-20" />
-      <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-107.5">
-        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(15,23,42,0.10)]" />
-        <div className="relative flex items-center justify-around px-2 pt-2 pb-3">
+      <div className={styles.spacer} />
+      <nav className={styles.nav} aria-label="Navigasi utama admin">
+        <div className={styles.navBg} />
+        <div className={styles.navInner}>
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href)
+            const isActive = pathname === item.href ||
+              (item.key !== 'beranda' && pathname.startsWith(item.href))
+
+            const iconActiveClass  = isActive
+              ? (styles[`iconActive_${item.key}`]     as string | undefined) ?? ''
+              : ''
+            const activeBarClass   = isActive
+              ? (styles[`activeBar_${item.key}`]      as string | undefined) ?? ''
+              : ''
+            const labelActiveClass = isActive
+              ? (styles[`navLabelActive_${item.key}`] as string | undefined) ?? ''
+              : styles.navLabelInactive
+
             return (
-              <Link key={item.href} href={item.href}
-                className="flex flex-col items-center gap-1"
-                style={{ minWidth: 60 }}
+              <Link
+                key={item.href}
+                href={item.href}
+                className={styles.navItem}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <span
-                  className="relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-200"
-                  style={isActive ? { backgroundColor: `${item.color}18` } : {}}
-                >
+                <span className={`${styles.iconWrap} ${iconActiveClass}`}>
                   {isActive && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-1 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
+                    <span className={`${styles.activeBar} ${activeBarClass}`} />
                   )}
                   {item.icon(isActive)}
                 </span>
-                <span className="text-[10.5px] font-bold tracking-wide transition-colors duration-200"
-                  style={{ color: isActive ? item.color : '#94a3b8' }}
-                >
+                <span className={`${styles.navLabel} ${labelActiveClass}`}>
                   {item.label}
                 </span>
               </Link>

@@ -1,28 +1,33 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useSession } from 'next-auth/react'
+import styles from './SiswaBottomNav.module.css'
 
+// ── Nav items ─────────────────────────────────────────────────────────────────
 const navItems = [
   {
-    href: '/siswa/dashboard',
+    href:  '/siswa/dashboard',
     label: 'Beranda',
-    color: '#2563eb',
+    key:   'beranda',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path
           d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H15V15H9V21H4C3.44772 21 3 20.5523 3 20V9.5Z"
           fill={active ? '#2563eb' : 'none'}
           stroke={active ? '#2563eb' : '#94a3b8'}
-          strokeWidth="1.8"
-          strokeLinejoin="round"
+          strokeWidth="1.8" strokeLinejoin="round"
         />
       </svg>
     ),
   },
   {
-    href: '/siswa/pendaftaran',
+    href:  '/siswa/pendaftaran',
     label: 'Daftar',
-    color: '#4f46e5',
+    key:   'daftar',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <rect x="4" y="3" width="16" height="18" rx="2.5"
@@ -38,9 +43,9 @@ const navItems = [
     ),
   },
   {
-    href: '/siswa/status',
+    href:  '/siswa/status',
     label: 'Status',
-    color: '#059669',
+    key:   'status',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="18" height="18" rx="3"
@@ -56,9 +61,9 @@ const navItems = [
     ),
   },
   {
-    href: '/siswa/profile',
+    href:  '/siswa/profile',
     label: 'Profil',
-    color: '#d97706',
+    key:   'profil',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="8" r="4"
@@ -73,38 +78,90 @@ const navItems = [
       </svg>
     ),
   },
-]
+] as const
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function SiswaBottomNav() {
-  const pathname = usePathname()
+  const pathname          = usePathname()
+  const { data: session } = useSession()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const uid = session?.user?.id
+    if (!uid) return
+
+    // Fungsi fetch didefinisikan DALAM effect — tidak perlu useRef/useCallback
+    // setState dipanggil dari dalam fungsi async ini, bukan dari body effect langsung
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', uid)
+        .eq('is_read', false)
+      setUnreadCount(count ?? 0)
+    }
+
+    void fetchUnread()
+
+    const channel = supabase
+      .channel(`nav-notif-${uid}`)
+      .on(
+        'postgres_changes',
+        {
+          event:  '*',
+          schema: 'public',
+          table:  'notifications',
+          filter: `user_id=eq.${uid}`,
+        },
+        () => {
+          // setState dipanggil dari Realtime callback = sistem eksternal = valid
+          void fetchUnread()
+        }
+      )
+      .subscribe()
+
+    return () => { void supabase.removeChannel(channel) }
+  }, [session?.user?.id])
 
   return (
     <>
-      <div className="h-20" />
-      <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-107.5">
-        <div className="absolute inset-0 bg-white/85 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(15,23,42,0.10)]" />
-        <div className="relative flex items-center justify-around px-2 pt-2 pb-3">
+      <div className={styles.spacer} />
+      <nav className={styles.nav} aria-label="Navigasi utama siswa">
+        <div className={styles.navBg} />
+        <div className={styles.navInner}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive  = pathname === item.href
+            const showBadge = item.key === 'beranda' && unreadCount > 0
+
+            const iconActiveClass  = isActive
+              ? (styles[`iconActive_${item.key}`]     as string | undefined) ?? ''
+              : ''
+            const activeBarClass   = isActive
+              ? (styles[`activeBar_${item.key}`]      as string | undefined) ?? ''
+              : ''
+            const labelActiveClass = isActive
+              ? (styles[`navLabelActive_${item.key}`] as string | undefined) ?? ''
+              : styles.navLabelInactive
+
             return (
-              <Link key={item.href} href={item.href}
-                className="flex flex-col items-center gap-1"
-                style={{ minWidth: 60 }}
+              <Link
+                key={item.href}
+                href={item.href}
+                className={styles.navItem}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <span
-                  className="relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-200"
-                  style={isActive ? { backgroundColor: `${item.color}18` } : {}}
-                >
+                <span className={`${styles.iconWrap} ${iconActiveClass}`}>
                   {isActive && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-1 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
+                    <span className={`${styles.activeBar} ${activeBarClass}`} />
                   )}
                   {item.icon(isActive)}
+                  {showBadge && (
+                    <span className={styles.navBadge}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </span>
-                <span className="text-[10.5px] font-bold tracking-wide transition-colors duration-200"
-                  style={{ color: isActive ? item.color : '#94a3b8' }}
-                >
+                <span className={`${styles.navLabel} ${labelActiveClass}`}>
                   {item.label}
                 </span>
               </Link>
