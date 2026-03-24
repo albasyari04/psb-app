@@ -2,20 +2,17 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { PostgrestError } from '@supabase/supabase-js'
+import { User } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
 
 interface UserWithRole { role: string; avatar_url?: string }
-interface ProfileRow { id: string; name: string; email: string; role: string; avatar_url: string | null }
-interface ProfileMini { id: string; role: string; avatar_url: string | null }
-interface ProfileRoleAvatar { role: string; avatar_url: string | null }
 
 async function findAuthUserByEmail(email: string): Promise<string | null> {
   try {
     const { data, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
     if (error || !data) return null
-    const found = data.users.find((u) => u.email === email)
+    const found = data.users.find((u: User) => u.email === email)
     return found?.id ?? null
   } catch { return null }
 }
@@ -42,11 +39,11 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[auth] Using supabaseAdmin to query auth_users_view.')
-          const { data: viewData, error: viewErr } = (await supabaseAdmin
+          const { data: viewData, error: viewErr } = await supabaseAdmin
             .from('auth_users_view')
             .select('id, encrypted_password')
             .eq('email', credentials.email)
-            .single()) as { data: { id: string; encrypted_password: string } | null; error: PostgrestError | null }
+            .single()
 
           if (viewErr) {
             console.error('[auth] Error querying auth_users_view:', viewErr)
@@ -72,11 +69,11 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[auth] Password is valid. Fetching profile.')
-          const { data: profile, error: profileErr } = (await supabaseAdmin
+          const { data: profile, error: profileErr } = await supabaseAdmin
             .from('profiles')
             .select('id, name, email, role, avatar_url')
             .eq('id', viewData.id)
-            .single()) as { data: ProfileRow | null; error: PostgrestError | null }
+            .single()
 
           if (profileErr) {
             console.error('[auth] Error fetching profile:', profileErr)
@@ -114,7 +111,7 @@ export const authOptions: NextAuthOptions = {
 
         const { data: existingProfile } = await supabaseAdmin
           .from('profiles').select('id, role, avatar_url')
-          .eq('email', email).maybeSingle<ProfileMini>()
+          .eq('email', email).maybeSingle()
 
         if (existingProfile) {
           await supabaseAdmin.from('profiles').update({ avatar_url: avatarUrl }).eq('email', email)
@@ -139,6 +136,7 @@ export const authOptions: NextAuthOptions = {
           avatar_url: avatarUrl,
         })
         if (upsertErr) return false
+        if (!userId) return false // Guard against null userId
         user.id = userId
         return true
       } catch { return false }
@@ -155,7 +153,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         const { data: profile } = await supabaseAdmin
           .from('profiles').select('role, avatar_url')
-          .eq('email', token.email!).maybeSingle<ProfileRoleAvatar>()
+          .eq('email', token.email!).maybeSingle()
         token.role = profile?.role ?? 'siswa'
         token.avatar_url = profile?.avatar_url ?? user.image ?? undefined
       }
