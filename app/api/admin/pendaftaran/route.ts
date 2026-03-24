@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'  // ✅ pakai fungsi, bukan proxy
 
 // ── GET: Ambil semua pendaftaran (opsional filter by id atau status) ──────────
 export async function GET(req: NextRequest) {
@@ -11,13 +11,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()  // ✅ type-safe
   const { searchParams } = new URL(req.url)
   const id     = searchParams.get('id')
   const status = searchParams.get('status')
 
   // ── Fetch detail by id ──────────────────────────────────────────────────────
   if (id) {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await admin
       .from('pendaftaran')
       .select('*')
       .eq('id', id)
@@ -28,12 +29,11 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Fetch semua (dengan opsional filter status) ─────────────────────────────
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '20')
+  const page   = parseInt(searchParams.get('page')  || '1')
+  const limit  = parseInt(searchParams.get('limit') || '20')
   const offset = (page - 1) * limit
 
-  // ✅ Select hanya kolom yang perlu
-  let query = supabaseAdmin
+  let query = admin
     .from('pendaftaran')
     .select('id, nama_lengkap, nisn, asal_sekolah, jurusan_pilihan, status, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -46,8 +46,8 @@ export async function GET(req: NextRequest) {
   const { data, error, count } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ 
-    data: data ?? [],
+  return NextResponse.json({
+    data:  data ?? [],
     total: count || 0,
     page,
     limit,
@@ -61,7 +61,8 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json()
+  const admin = getSupabaseAdmin()  // ✅ type-safe
+  const body  = await req.json()
   const { id, status, catatan_admin } = body as {
     id: string
     status: 'menunggu' | 'diproses' | 'diterima' | 'ditolak'
@@ -73,7 +74,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // 1. Ambil data pendaftaran dulu (untuk user_id & nama)
-  const { data: existing, error: fetchErr } = await supabaseAdmin
+  const { data: existing, error: fetchErr } = await admin
     .from('pendaftaran')
     .select('user_id, nama_lengkap, jurusan_pilihan')
     .eq('id', id)
@@ -84,8 +85,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   // 2. Update status pendaftaran
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: updateErr } = await (supabaseAdmin.from('pendaftaran') as any)
+  const { error: updateErr } = await admin
+    .from('pendaftaran')
     .update({
       status,
       catatan_admin: catatan_admin ?? null,
@@ -98,29 +99,29 @@ export async function PATCH(req: NextRequest) {
   }
 
   // 3. Buat pesan notifikasi berdasarkan status
-  const notifMap: Record<string, { title: string; message: string; type: 'success' | 'error' | 'info' }> = {
+  const notifMap: Record<string, { title: string; message: string; type: string }> = {
     diproses: {
-      title: '🔍 Berkas Sedang Diverifikasi',
+      title:   '🔍 Berkas Sedang Diverifikasi',
       message: `Halo ${existing.nama_lengkap}, berkas pendaftaran kamu sedang dalam proses verifikasi oleh panitia. Pantau terus status pendaftaranmu.`,
-      type: 'info',
+      type:    'info',
     },
     diterima: {
-      title: '🎉 Selamat! Pendaftaran Diterima',
+      title:   '🎉 Selamat! Pendaftaran Diterima',
       message: `Selamat ${existing.nama_lengkap}! Kamu resmi diterima di jurusan ${existing.jurusan_pilihan}. ${catatan_admin ? `Catatan: ${catatan_admin}` : ''}`,
-      type: 'success',
+      type:    'success',
     },
     ditolak: {
-      title: '❌ Pendaftaran Tidak Diterima',
+      title:   '❌ Pendaftaran Tidak Diterima',
       message: `Maaf ${existing.nama_lengkap}, pendaftaranmu tidak lolos seleksi. ${catatan_admin ? `Catatan panitia: ${catatan_admin}` : 'Semangat dan terus berusaha!'}`,
-      type: 'error',
+      type:    'error',
     },
   }
 
   // 4. Insert notifikasi (hanya untuk status yang relevan)
   const notifData = notifMap[status]
   if (notifData) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: notifErr } = await (supabaseAdmin.from('notifications') as any)
+    const { error: notifErr } = await admin
+      .from('notifications')
       .insert({
         user_id: existing.user_id,
         title:   notifData.title,

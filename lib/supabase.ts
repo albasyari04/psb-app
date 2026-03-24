@@ -1,20 +1,25 @@
+// lib/supabase.ts
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database.types'
 
 const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// ── Type alias agar tidak perlu tulis panjang terus ───────────────────────────
+export type TypedSupabaseClient = SupabaseClient<Database>
+
 // ── Singleton instances ───────────────────────────────────────────────────────
-let supabaseInstance: ReturnType<typeof createClient> | null = null
-let supabaseAdminInstance: ReturnType<typeof createClient> | null = null
+let supabaseInstance: TypedSupabaseClient | null = null
+let supabaseAdminInstance: TypedSupabaseClient | null = null
 
 // ── Browser client (anon key) - Gunakan HANYA di 'use client' components ──────
-export function getSupabaseClient(): ReturnType<typeof createClient> {
+export function getSupabaseClient(): TypedSupabaseClient {
   if (typeof window === 'undefined') {
     throw new Error('[supabase] Browser client hanya tersedia di browser')
   }
 
   if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+    supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -25,14 +30,14 @@ export function getSupabaseClient(): ReturnType<typeof createClient> {
   return supabaseInstance
 }
 
-// ── Server admin client (service role) - Lazy initialized, safe untuk modules ──
-export function getSupabaseAdmin(): ReturnType<typeof createClient> {
+// ── Server admin client (service role) ───────────────────────────────────────
+export function getSupabaseAdmin(): TypedSupabaseClient {
   if (!supabaseAdminInstance) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceRoleKey) {
       console.error('[supabase] SUPABASE_SERVICE_ROLE_KEY is not set!')
     }
-    supabaseAdminInstance = createClient(
+    supabaseAdminInstance = createClient<Database>(
       supabaseUrl,
       serviceRoleKey || supabaseAnonKey,
       {
@@ -46,21 +51,19 @@ export function getSupabaseAdmin(): ReturnType<typeof createClient> {
   return supabaseAdminInstance
 }
 
-// ── Client browser (anon key) - Gunakan di 'use client' components ──────────
-// FIX: Cast prop ke keyof SupabaseClient agar TypeScript strict mode tidak error
-export const supabase = new Proxy({} as SupabaseClient, {
+// ── Browser Proxy (untuk 'use client' components) ─────────────────────────────
+export const supabase = new Proxy({} as TypedSupabaseClient, {
   get: (_target, prop: string | symbol) => {
     if (typeof window === 'undefined') return undefined
     const client = getSupabaseClient()
-    return client[prop as keyof SupabaseClient]
+    return client[prop as keyof TypedSupabaseClient]
   },
 })
 
-// ── Server admin client (service role) - Gunakan di Server Components & API ──
-// FIX: Cast prop ke keyof SupabaseClient agar TypeScript strict mode tidak error
-export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+// ── Admin Proxy (untuk Server Components & API routes) ───────────────────────
+export const supabaseAdmin = new Proxy({} as TypedSupabaseClient, {
   get: (_target, prop: string | symbol) => {
     const client = getSupabaseAdmin()
-    return client[prop as keyof SupabaseClient]
+    return client[prop as keyof TypedSupabaseClient]
   },
 })

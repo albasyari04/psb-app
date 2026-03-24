@@ -3,14 +3,15 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { User } from '@supabase/supabase-js'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'  // ✅ pakai fungsi, bukan proxy
 import bcrypt from 'bcryptjs'
 
 interface UserWithRole { role: string; avatar_url?: string }
 
 async function findAuthUserByEmail(email: string): Promise<string | null> {
   try {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    const admin = getSupabaseAdmin()
+    const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 })
     if (error || !data) return null
     const found = data.users.find((u: User) => u.email === email)
     return found?.id ?? null
@@ -38,8 +39,10 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
+          const admin = getSupabaseAdmin()  // ✅ type-safe
+
           console.log('[auth] Using supabaseAdmin to query auth_users_view.')
-          const { data: viewData, error: viewErr } = await supabaseAdmin
+          const { data: viewData, error: viewErr } = await admin
             .from('auth_users_view')
             .select('id, encrypted_password')
             .eq('email', credentials.email)
@@ -56,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (!viewData.encrypted_password) {
-            console.error('[auth] User found, but has no encrypted_password. Cannot use credentials login.')
+            console.error('[auth] User found, but has no encrypted_password.')
             return null
           }
 
@@ -69,7 +72,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[auth] Password is valid. Fetching profile.')
-          const { data: profile, error: profileErr } = await supabaseAdmin
+          const { data: profile, error: profileErr } = await admin
             .from('profiles')
             .select('id, name, email, role, avatar_url')
             .eq('id', viewData.id)
@@ -81,7 +84,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (!profile) {
-            console.error('[auth] CRITICAL: Profile not found for a valid user. Data inconsistency!')
+            console.error('[auth] CRITICAL: Profile not found for a valid user.')
             return null
           }
 
@@ -105,38 +108,47 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return true
       try {
+        const admin = getSupabaseAdmin()  // ✅ type-safe
         const email = user.email!
         const name = user.name ?? ''
         const avatarUrl = user.image ?? null
 
-        const { data: existingProfile } = await supabaseAdmin
-          .from('profiles').select('id, role, avatar_url')
-          .eq('email', email).maybeSingle()
+        const { data: existingProfile } = await admin
+          .from('profiles')
+          .select('id, role, avatar_url')
+          .eq('email', email)
+          .maybeSingle()
 
         if (existingProfile) {
-          await supabaseAdmin.from('profiles').update({ avatar_url: avatarUrl }).eq('email', email)
+          await admin
+            .from('profiles')
+            .update({ avatar_url: avatarUrl })
+            .eq('email', email)
           user.id = existingProfile.id
           return true
         }
 
         let userId = await findAuthUserByEmail(email)
         if (!userId) {
-          const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+          const { data: newUser, error: createErr } = await admin.auth.admin.createUser({
             email, email_confirm: true, user_metadata: { name, avatar_url: avatarUrl },
           })
           if (createErr || !newUser?.user?.id) return false
           userId = newUser.user.id
         }
 
-        const { error: upsertErr } = await supabaseAdmin.from('profiles').upsert({
-          id: userId,
-          email,
-          name,
-          role: 'siswa',
-          avatar_url: avatarUrl,
-        })
+        const { error: upsertErr } = await admin
+          .from('profiles')
+          .upsert({
+            id: userId,
+            email,
+            name,
+            role: 'siswa',
+            avatar_url: avatarUrl,
+          })
+
         if (upsertErr) return false
-        if (!userId) return false // Guard against null userId
+        if (!userId) return false
         user.id = userId
         return true
       } catch { return false }
@@ -150,10 +162,13 @@ export const authOptions: NextAuthOptions = {
         token.avatar_url = u.avatar_url ?? undefined
       }
       if (user && account?.provider === 'google') {
+        const admin = getSupabaseAdmin()  // ✅ type-safe
         token.id = user.id
-        const { data: profile } = await supabaseAdmin
-          .from('profiles').select('role, avatar_url')
-          .eq('email', token.email!).maybeSingle()
+        const { data: profile } = await admin
+          .from('profiles')
+          .select('role, avatar_url')
+          .eq('email', token.email!)
+          .maybeSingle()
         token.role = profile?.role ?? 'siswa'
         token.avatar_url = profile?.avatar_url ?? user.image ?? undefined
       }
