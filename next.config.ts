@@ -1,5 +1,3 @@
-// next.config.ts
-// ⚠️ HAPUS next.config.js — gunakan HANYA file ini
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {

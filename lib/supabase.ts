@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -12,7 +12,7 @@ export function getSupabaseClient(): ReturnType<typeof createClient> {
   if (typeof window === 'undefined') {
     throw new Error('[supabase] Browser client hanya tersedia di browser')
   }
-  
+
   if (!supabaseInstance) {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
@@ -47,17 +47,20 @@ export function getSupabaseAdmin(): ReturnType<typeof createClient> {
 }
 
 // ── Client browser (anon key) - Gunakan di 'use client' components ──────────
-export const supabase = new Proxy({} as any, {
-  get: (_, prop) => {
+// FIX: Cast prop ke keyof SupabaseClient agar TypeScript strict mode tidak error
+export const supabase = new Proxy({} as SupabaseClient, {
+  get: (_target, prop: string | symbol) => {
     if (typeof window === 'undefined') return undefined
-    return getSupabaseClient()[prop]
+    const client = getSupabaseClient()
+    return client[prop as keyof SupabaseClient]
   },
 })
 
 // ── Server admin client (service role) - Gunakan di Server Components & API ──
-// Lazy Proxy - hanya create saat diakses pertama kali
-export const supabaseAdmin = new Proxy({} as any, {
-  get: (_, prop) => {
-    return getSupabaseAdmin()[prop]
+// FIX: Cast prop ke keyof SupabaseClient agar TypeScript strict mode tidak error
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get: (_target, prop: string | symbol) => {
+    const client = getSupabaseAdmin()
+    return client[prop as keyof SupabaseClient]
   },
 })
