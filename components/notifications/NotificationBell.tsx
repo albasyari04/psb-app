@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react'
 import type { Notification } from '@/types'
 import styles from './Notificationbell.module.css'
 
-// Dipanggil sekali di module level — bukan saat render, bukan impure
 const MODULE_START_TIME = Date.now()
 
 function formatTime(dateStr: string, nowMs: number): string {

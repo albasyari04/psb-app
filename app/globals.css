@@ -1045,10 +1045,10 @@ h1, h2, h3, h4, h5 {
 .pnd-action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
 /* ── Confirm Sheet ─────────────────────────────────────────────────────────── */
-.pnd-sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; z-index: 50; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.pnd-sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; z-index: 60; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .pnd-sheet {
   background: #fff; width: 100%; border-radius: 24px 24px 0 0;
-  padding: 8px 20px 36px; animation: pnd-sheet-up 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  padding: 8px 20px calc(5rem + env(safe-area-inset-bottom, 16px)); animation: pnd-sheet-up 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
 @keyframes pnd-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .pnd-sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 99px; margin: 12px auto 20px; }
