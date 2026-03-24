@@ -35,7 +35,6 @@ export default function PendaftarPage() {
   const [total, setTotal] = useState(0)
   const LIMIT = 20
 
-  // ✅ Hapus fetchData dari dependency, gunakan string params langsung
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
@@ -74,7 +73,6 @@ export default function PendaftarPage() {
     ditolak:  list.filter(p => p.status === 'ditolak').length,
   }
 
-  // ✅ Reset ke page 1 ketika filter berubah
   const handleFilterChange = (newFilter: string) => {
     setFilter(newFilter)
     setPage(1)
@@ -200,9 +198,12 @@ export default function PendaftarPage() {
             </p>
             <div className="pnd-list-card">
               {filtered.map((p, i) => {
-                const date = new Date(p.created_at).toLocaleDateString('id-ID', {
-                  day: '2-digit', month: 'short', year: 'numeric',
-                })
+                // ✅ Handle null created_at
+                const date = p.created_at
+                  ? new Date(p.created_at).toLocaleDateString('id-ID', {
+                      day: '2-digit', month: 'short', year: 'numeric',
+                    })
+                  : '-'
                 return (
                   <Link key={p.id} href={`/admin/pendaftar/${p.id}`} className="pnd-list-row">
                     <div className={AVATAR_CLS[i % AVATAR_CLS.length]}>
@@ -228,10 +229,10 @@ export default function PendaftarPage() {
                 )
               })}
             </div>
-            
-            {/* ✅ Pagination Controls */}
+
+            {/* Pagination Controls */}
             <div className="pnd-pagination">
-              <button 
+              <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="pnd-page-btn"
@@ -241,7 +242,7 @@ export default function PendaftarPage() {
               <span className="pnd-page-info">
                 Halaman {page} dari {Math.ceil(total / LIMIT) || 1}
               </span>
-              <button 
+              <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page * LIMIT >= total}
                 className="pnd-page-btn"
