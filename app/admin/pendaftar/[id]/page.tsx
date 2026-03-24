@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'  // ← tambah `use` dari React
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Pendaftaran } from '@/types'
 
@@ -27,13 +27,11 @@ const confirmSheetCls: Record<string, string> = {
   diproses: 'pnd-sheet-confirm-ok pnd-confirm-process',
 }
 
-// ── PERBAIKAN Next.js 15: params adalah Promise, harus pakai tipe Promise<{id}>
 export default function DetailPendaftarPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  // ── PERBAIKAN: unwrap params dengan React.use() sebelum akses .id ──────────
   const { id } = use(params)
 
   const router = useRouter()
@@ -43,7 +41,6 @@ export default function DetailPendaftarPage({
   const [confirm,  setConfirm]  = useState<Action>(null)
   const [fetchErr, setFetchErr] = useState<string | null>(null)
 
-  // Fetch detail via API route (supabaseAdmin) — bypass RLS
   useEffect(() => {
     if (!id) return
     const fetchDetail = async () => {
@@ -61,7 +58,6 @@ export default function DetailPendaftarPage({
     fetchDetail()
   }, [id])
 
-  // Update status via API route (supabaseAdmin) — bypass RLS
   const updateStatus = async (action: Action) => {
     if (!action) return
     setLoading(true)
@@ -89,7 +85,6 @@ export default function DetailPendaftarPage({
     }
   }
 
-  /* ── Loading state ──────────────────────────────────────────────────── */
   if (!data && !fetchErr) return (
     <div className="pnd-loading-screen">
       <div className="pnd-loading-inner">
@@ -99,7 +94,6 @@ export default function DetailPendaftarPage({
     </div>
   )
 
-  /* ── Error state ────────────────────────────────────────────────────── */
   if (fetchErr) return (
     <div className="pnd-loading-screen">
       <div className="pnd-loading-inner">
@@ -114,23 +108,34 @@ export default function DetailPendaftarPage({
 
   const isFinished = data!.status === 'diterima' || data!.status === 'ditolak'
 
-  const infoRows: [string, string | number | undefined][] = [
+  // ✅ Hapus 'nis' dan 'nilai_rata_rata' — field ini tidak ada di database
+  const infoRows: [string, string | number | undefined | null][] = [
     ['NISN',          data!.nisn],
-    ['NIS',           data!.nis],
+    ['NIK',           data!.nik],
     ['Tempat Lahir',  data!.tempat_lahir],
     ['Tanggal Lahir', data!.tanggal_lahir
       ? new Date(data!.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
       : undefined],
-    ['Jenis Kelamin', data!.jenis_kelamin === 'L' ? '♂ Laki-laki' : '♀ Perempuan'],
+    ['Jenis Kelamin', data!.jenis_kelamin],
     ['Agama',         data!.agama],
     ['No. HP / WA',   data!.no_hp],
     ['Alamat',        data!.alamat],
   ]
 
-  const akademikRows: [string, string | number | undefined][] = [
+  // ✅ Hapus 'nilai_rata_rata' — field ini tidak ada di database
+  const akademikRows: [string, string | number | undefined | null][] = [
     ['Asal Sekolah',    data!.asal_sekolah],
+    ['NPSN',            data!.npsn],
     ['Jurusan Pilihan', data!.jurusan_pilihan],
-    ['Nilai Rata-rata', data!.nilai_rata_rata],
+  ]
+
+  // ✅ Tambah data orang tua
+  const orangtuaRows: [string, string | number | undefined | null][] = [
+    ['Nama Ayah',       data!.nama_ayah],
+    ['Nama Ibu',        data!.nama_ibu],
+    ['Pekerjaan Ayah',  data!.pekerjaan_ayah],
+    ['Pekerjaan Ibu',   data!.pekerjaan_ibu],
+    ['No. HP Orang Tua', data!.no_hp_ortu],
   ]
 
   return (
@@ -210,6 +215,22 @@ export default function DetailPendaftarPage({
           </div>
           <div className="pnd-info-body">
             {akademikRows.map(([k, v]) => (
+              <div key={k} className="pnd-info-row">
+                <span className="pnd-info-label">{k}</span>
+                <span className="pnd-info-val">{v ?? '—'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Data Orang Tua */}
+        <div className="pnd-info-card">
+          <div className="pnd-info-header">
+            <div className="pnd-info-header-dot pnd-dot-violet" />
+            <p className="pnd-info-title">Data Orang Tua</p>
+          </div>
+          <div className="pnd-info-body">
+            {orangtuaRows.map(([k, v]) => (
               <div key={k} className="pnd-info-row">
                 <span className="pnd-info-label">{k}</span>
                 <span className="pnd-info-val">{v ?? '—'}</span>
