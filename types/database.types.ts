@@ -11,6 +11,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin: {
+        Row: {
+          id: string
+          email: string
+          password: string
+          nama: string | null
+          name: string | null
+          avatar_url: string | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          password: string
+          nama?: string | null
+          name?: string | null
+          avatar_url?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          password?: string
+          nama?: string | null
+          name?: string | null
+          avatar_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           id: string
