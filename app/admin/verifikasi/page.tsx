@@ -1,10 +1,9 @@
 // app/admin/verifikasi/page.tsx
-import { supabaseAdmin } from '@/lib/supabase'  // ← PERBAIKAN: supabaseAdmin bukan supabase
+import { supabaseAdmin } from '@/lib/supabase'
 import Link from 'next/link'
 import type { Pendaftaran } from '@/types'
 export const dynamic = 'force-dynamic'
 
-// ── Avatar palette ──────────────────────────────────────────────────────────
 const avatarGradients = [
   'vrk-av-violet',
   'vrk-av-amber',
@@ -13,9 +12,7 @@ const avatarGradients = [
   'vrk-av-emerald',
 ]
 
-// ── Page ────────────────────────────────────────────────────────────────────
 export default async function VerifikasiPage() {
-  // PERBAIKAN: supabaseAdmin → bypass RLS
   const { data: pending, error } = await supabaseAdmin
     .from('pendaftaran')
     .select('*')
@@ -168,9 +165,12 @@ function VerifikasiCard({
   const avatarCls = avatarGradients[avatarIdx % avatarGradients.length]
   const isHigh    = urgency === 'high'
 
-  const date = new Date(p.created_at).toLocaleDateString('id-ID', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  })
+  // ✅ Handle null created_at
+  const date = p.created_at
+    ? new Date(p.created_at).toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      })
+    : '-'
 
   return (
     <Link
@@ -184,9 +184,7 @@ function VerifikasiCard({
         <p className="vrk-card-name">{p.nama_lengkap}</p>
         <p className="vrk-card-jurusan">📚 {p.jurusan_pilihan ?? '—'}</p>
         <div className="vrk-card-meta">
-          {p.nilai_rata_rata != null && (
-            <span className="vrk-meta-nilai">⭐ {p.nilai_rata_rata}</span>
-          )}
+          {/* ✅ Hapus nilai_rata_rata — tidak ada di database */}
           <span className="vrk-meta-date">{date}</span>
         </div>
       </div>
