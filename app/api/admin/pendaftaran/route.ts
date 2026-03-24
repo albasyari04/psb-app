@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
-// ── GET: Ambil detail pendaftaran by id ───────────────────────────────────────
+// ── GET: Ambil semua pendaftaran (opsional filter by id atau status) ──────────
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
@@ -12,17 +12,35 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'ID diperlukan' }, { status: 400 })
+  const id     = searchParams.get('id')
+  const status = searchParams.get('status')
 
-  const { data, error } = await supabaseAdmin
+  // ── Fetch detail by id ──────────────────────────────────────────────────────
+  if (id) {
+    const { data, error } = await supabaseAdmin
+      .from('pendaftaran')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ data })
+  }
+
+  // ── Fetch semua (dengan opsional filter status) ─────────────────────────────
+  let query = supabaseAdmin
     .from('pendaftaran')
     .select('*')
-    .eq('id', id)
-    .single()
+    .order('created_at', { ascending: false })
+
+  if (status && status !== 'semua') {
+    query = query.eq('status', status)
+  }
+
+  const { data, error } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data: data ?? [] })
 }
 
 // ── PATCH: Update status + kirim notifikasi ke siswa ─────────────────────────
