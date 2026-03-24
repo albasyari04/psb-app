@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
 import type { Pendaftaran } from '@/types'
@@ -36,7 +36,7 @@ const MENU_ITEMS = [
   { href: '/siswa/pendaftaran', icon: '📝', title: 'Formulir', sub: 'Isi & edit data diri',   bgClass: 'menuBgBlue',   iconClass: 'iconBgBlue'   },
   { href: '/siswa/status',      icon: '📊', title: 'Status',   sub: 'Pantau progres seleksi', bgClass: 'menuBgViolet', iconClass: 'iconBgViolet' },
   { href: '/siswa/profile',     icon: '👤', title: 'Profil',   sub: 'Kelola akun & foto',     bgClass: 'menuBgGreen',  iconClass: 'iconBgGreen'  },
-  { href: '/siswa/pendaftaran', icon: '📁', title: 'Berkas',   sub: 'Upload dokumen wajib',   bgClass: 'menuBgAmber',  iconClass: 'iconBgAmber'  },
+  { href: '/siswa/berkas',      icon: '📁', title: 'Berkas',   sub: 'Upload dokumen wajib',   bgClass: 'menuBgAmber',  iconClass: 'iconBgAmber'  },
 ] as const
 const JADWAL = [
   { label: 'Batas Pendaftaran', date: '28 Feb 2025',   dotClass: 'dotRed'   },
@@ -78,19 +78,24 @@ function GearIcon() {
 export default function DashboardClient({
   fullName, avatarInitial, avatarUrl, pendaftaran, status,
 }: Props) {
-  const [now, setNow] = useState<Date | null>(null)
-  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [now, setNow] = useState<Date>(() => new Date())
 
   useEffect(() => {
-    timerRef.current = setInterval(() => { setNow(new Date()) }, 60_000)
-    Promise.resolve().then(() => setNow(new Date()))
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+    // Update time setiap 60 detik TANPA immediate call
+    // Karena initial value sudah set di useState initializer
+    const timerInterval = setInterval(() => {
+      setNow(new Date())
+    }, 60_000)
+
+    // Cleanup: clear interval
+    return () => {
+      clearInterval(timerInterval)
+    }
   }, [])
 
-  const mounted      = now !== null
-  const hour         = now?.getHours() ?? 13
+  const hour         = now.getHours()
   const greetingText = getGreeting(hour)
-  const dateStr      = mounted ? formatDate(now!) : ''
+  const dateStr      = formatDate(now)
   const progressClass = status ? (PROGRESS_CLASS[status] ?? styles.progress25) : styles.progress25
 
   return (
@@ -127,9 +132,7 @@ export default function DashboardClient({
             <h1 className={styles.heroName}>{fullName} 👋</h1>
             <p className={styles.heroSchool}>PSB 2025/2026 · SMA Negeri 1</p>
           </div>
-          {mounted && (
-            <p className={cx(styles, 'dateText', 'fadeUp', 'd2')}>📅 {dateStr}</p>
-          )}
+          <p className={cx(styles, 'dateText', 'fadeUp', 'd2')}>📅 {dateStr}</p>
         </div>
       </div>
 

@@ -3,20 +3,61 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// ── Client browser (anon key) ─────────────────────────────────────────────
-// Gunakan di 'use client' components → tunduk pada RLS
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// ── Singleton instances ───────────────────────────────────────────────────────
+let supabaseInstance: ReturnType<typeof createClient> | null = null
+let supabaseAdminInstance: ReturnType<typeof createClient> | null = null
 
-// ── Client server (service role key) ─────────────────────────────────────
-// Gunakan di Server Components & API routes → BYPASS RLS
-// Key ini RAHASIA — tidak boleh dikirim ke browser
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession:   false,
-    },
+// ── Browser client (anon key) - Gunakan HANYA di 'use client' components ──────
+export function getSupabaseClient(): ReturnType<typeof createClient> {
+  if (typeof window === 'undefined') {
+    throw new Error('[supabase] Browser client hanya tersedia di browser')
   }
-)
+  
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
+    })
+  }
+  return supabaseInstance
+}
+
+// ── Server admin client (service role) - Lazy initialized, safe untuk modules ──
+export function getSupabaseAdmin(): ReturnType<typeof createClient> {
+  if (!supabaseAdminInstance) {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      console.error('[supabase] SUPABASE_SERVICE_ROLE_KEY is not set!')
+    }
+    supabaseAdminInstance = createClient(
+      supabaseUrl,
+      serviceRoleKey || supabaseAnonKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
+  }
+  return supabaseAdminInstance
+}
+
+// ── Client browser (anon key) - Gunakan di 'use client' components ──────────
+export const supabase = new Proxy({} as any, {
+  get: (_, prop) => {
+    if (typeof window === 'undefined') return undefined
+    return getSupabaseClient()[prop]
+  },
+})
+
+// ── Server admin client (service role) - Gunakan di Server Components & API ──
+// Lazy Proxy - hanya create saat diakses pertama kali
+export const supabaseAdmin = new Proxy({} as any, {
+  get: (_, prop) => {
+    return getSupabaseAdmin()[prop]
+  },
+})

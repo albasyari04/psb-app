@@ -966,6 +966,28 @@ h1, h2, h3, h4, h5 {
 }
 .pnd-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,0.45); }
 
+/* ── Pagination ────────────────────────────────────────────────────────────── */
+.pnd-pagination {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 20px 16px; margin-top: 16px;
+  background: #fff; border-radius: 12px; flex-wrap: wrap;
+  border: 1px solid #f3f4f6;
+}
+.pnd-page-btn {
+  background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 8px 12px; font-size: 12px; font-weight: 600; color: #374151;
+  cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.pnd-page-btn:hover:not(:disabled) {
+  background: #4f46e5; color: #fff; border-color: #4f46e5; box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+}
+.pnd-page-btn:disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
+.pnd-page-info {
+  font-size: 12px; color: #6b7280; font-weight: 600; white-space: nowrap;
+}
+
 /* ── Detail Page ───────────────────────────────────────────────────────────── */
 .pnd-detail-bg { background: #f5f4f0; min-height: 100vh; }
 .pnd-detail-hero {
@@ -2645,104 +2667,86 @@ h1, h2, h3, h4, h5 {
 /* ═══════════════════════════════════════════════════════════════════════════
    APP BAR
    ═══════════════════════════════════════════════════════════════════════════ */
-.adm-appbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px 12px;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.07);
-  position: sticky;
+/* ── Admin topbar — overlay transparan di atas hero (sama persis seperti siswa) ── */
+.adm-topbar {
+  position: absolute;
   top: 0;
-  z-index: 20;
-  box-shadow: 0 1px 12px rgba(109, 40, 217, 0.06);
-}
-
-.adm-appbar-left {
+  left: 0;
+  right: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  pointer-events: none;
 }
+.adm-topbar > * { pointer-events: auto; }
 
-.adm-appbar-avatar {
+.adm-topbar-avatar {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
   font-size: 15px;
   font-weight: 800;
   color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.3);
+  transition: transform 0.2s, border-color 0.2s;
 }
+.adm-topbar-avatar:hover { transform: scale(1.08); border-color: white; }
 
-.adm-appbar-greeting {
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
-  line-height: 1;
-  margin-bottom: 2px;
-}
-
-.adm-appbar-name {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1;
-  letter-spacing: -0.3px;
-}
-
-.adm-appbar-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.adm-appbar-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: #f4f3ff;
-  border: 1px solid rgba(124, 58, 237, 0.1);
+.adm-topbar-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #7c3aed;
+  color: white;
   cursor: pointer;
-  transition: background 0.15s;
   text-decoration: none;
-}
-
-.adm-appbar-btn:hover {
-  background: #ede9fe;
-}
-
-.adm-appbar-bell-wrap {
+  flex-shrink: 0;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
   position: relative;
 }
+.adm-topbar-btn:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
 
-.adm-appbar-notif {
+.adm-topbar-notif {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 4px;
+  right: 4px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #ef4444;
-  border: 2px solid #ffffff;
+  border: 2px solid rgba(255,255,255,0.8);
 }
+
+/* hero padding naik agar konten tidak ketutupan topbar */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HERO BANNER
    ═══════════════════════════════════════════════════════════════════════════ */
 .adm-hero {
   background: linear-gradient(135deg, #3b0764 0%, #4c1d95 30%, #6d28d9 65%, #7c3aed 100%);
-  padding: 28px 20px 32px;
+  padding: 72px 24px 4.5rem;
   position: relative;
   overflow: hidden;
+  border-radius: 0 0 2rem 2rem;
 }
 
 /* Decorative orbs */
@@ -2807,6 +2811,21 @@ h1, h2, h3, h4, h5 {
   background: #4ade80;
   box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
   flex-shrink: 0;
+}
+
+/* ── Admin greeting (seperti siswa) ──────────────────────────── */
+.adm-hero-greeting {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+  margin-bottom: 0.1rem;
+}
+.adm-hero-name {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
 }
 
 /* hero body row */

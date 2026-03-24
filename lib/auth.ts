@@ -2,19 +2,14 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { createClient, PostgrestError } from '@supabase/supabase-js'
+import { PostgrestError } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
 
 interface UserWithRole { role: string; avatar_url?: string }
 interface ProfileRow { id: string; name: string; email: string; role: string; avatar_url: string | null }
 interface ProfileMini { id: string; role: string; avatar_url: string | null }
 interface ProfileRoleAvatar { role: string; avatar_url: string | null }
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
 
 async function findAuthUserByEmail(email: string): Promise<string | null> {
   try {
@@ -46,21 +41,8 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-          const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-          if (!url || !key) {
-            console.error('[auth] CRITICAL: Supabase URL or Service Role Key is missing in env.')
-            return null
-          }
-          console.log('[auth] Supabase credentials found. Creating client.')
-
-          const client = createClient(url, key, {
-            auth: { autoRefreshToken: false, persistSession: false },
-          })
-
-          console.log('[auth] Querying auth_users_view for user.')
-          const { data: viewData, error: viewErr } = (await client
+          console.log('[auth] Using supabaseAdmin to query auth_users_view.')
+          const { data: viewData, error: viewErr } = (await supabaseAdmin
             .from('auth_users_view')
             .select('id, encrypted_password')
             .eq('email', credentials.email)
@@ -90,7 +72,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[auth] Password is valid. Fetching profile.')
-          const { data: profile, error: profileErr } = (await client
+          const { data: profile, error: profileErr } = (await supabaseAdmin
             .from('profiles')
             .select('id, name, email, role, avatar_url')
             .eq('id', viewData.id)
@@ -149,10 +131,13 @@ export const authOptions: NextAuthOptions = {
           userId = newUser.user.id
         }
 
-        const { error: upsertErr } = await supabaseAdmin.from('profiles').upsert(
-          { id: userId, email, name, role: 'siswa', avatar_url: avatarUrl },
-          { onConflict: 'id', ignoreDuplicates: false }
-        )
+        const { error: upsertErr } = await supabaseAdmin.from('profiles').upsert({
+          id: userId,
+          email,
+          name,
+          role: 'siswa',
+          avatar_url: avatarUrl,
+        })
         if (upsertErr) return false
         user.id = userId
         return true

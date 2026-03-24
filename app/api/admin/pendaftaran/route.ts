@@ -28,19 +28,30 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Fetch semua (dengan opsional filter status) ─────────────────────────────
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = parseInt(searchParams.get('limit') || '20')
+  const offset = (page - 1) * limit
+
+  // ✅ Select hanya kolom yang perlu
   let query = supabaseAdmin
     .from('pendaftaran')
-    .select('*')
+    .select('id, nama_lengkap, nisn, asal_sekolah, jurusan_pilihan, status, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (status && status !== 'semua') {
     query = query.eq('status', status)
   }
 
-  const { data, error } = await query
+  const { data, error, count } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data: data ?? [] })
+  return NextResponse.json({ 
+    data: data ?? [],
+    total: count || 0,
+    page,
+    limit,
+  })
 }
 
 // ── PATCH: Update status + kirim notifikasi ke siswa ─────────────────────────
@@ -73,8 +84,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   // 2. Update status pendaftaran
-  const { error: updateErr } = await supabaseAdmin
-    .from('pendaftaran')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateErr } = await (supabaseAdmin.from('pendaftaran') as any)
     .update({
       status,
       catatan_admin: catatan_admin ?? null,
@@ -108,8 +119,8 @@ export async function PATCH(req: NextRequest) {
   // 4. Insert notifikasi (hanya untuk status yang relevan)
   const notifData = notifMap[status]
   if (notifData) {
-    const { error: notifErr } = await supabaseAdmin
-      .from('notifications')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: notifErr } = await (supabaseAdmin.from('notifications') as any)
       .insert({
         user_id: existing.user_id,
         title:   notifData.title,

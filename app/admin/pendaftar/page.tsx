@@ -31,22 +31,30 @@ export default function PendaftarPage() {
   const [filter,  setFilter]  = useState('semua')
   const [search,  setSearch]  = useState('')
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const LIMIT = 20
 
-  // PERBAIKAN: fetch via API route (supabaseAdmin) bukan supabase anon langsung
+  // ✅ Hapus fetchData dari dependency, gunakan string params langsung
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const params = filter !== 'semua' ? `?status=${filter}` : ''
-      const res  = await fetch(`/api/admin/pendaftaran${params}`)
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: LIMIT.toString(),
+        ...(filter !== 'semua' && { status: filter })
+      })
+      const res  = await fetch(`/api/admin/pendaftaran?${params}`)
       const json = await res.json()
       setList((json.data as Pendaftaran[]) || [])
+      setTotal(json.total || 0)
     } catch (err) {
       console.error('Fetch pendaftar error:', err)
       setList([])
     } finally {
       setLoading(false)
     }
-  }, [filter])
+  }, [page, filter])
 
   useEffect(() => {
     fetchData()
@@ -59,11 +67,17 @@ export default function PendaftarPage() {
   )
 
   const counts = {
-    semua:    list.length,
+    semua:    total,
     menunggu: list.filter(p => p.status === 'menunggu').length,
     diproses: list.filter(p => p.status === 'diproses').length,
     diterima: list.filter(p => p.status === 'diterima').length,
     ditolak:  list.filter(p => p.status === 'ditolak').length,
+  }
+
+  // ✅ Reset ke page 1 ketika filter berubah
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter)
+    setPage(1)
   }
 
   return (
@@ -127,7 +141,7 @@ export default function PendaftarPage() {
         {STATUS_FILTERS.map(f => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => handleFilterChange(f)}
             className={`pnd-chip ${filter === f ? 'pnd-chip-on' : 'pnd-chip-off'}`}
           >
             {filterLabel[f]}
@@ -213,6 +227,27 @@ export default function PendaftarPage() {
                   </Link>
                 )
               })}
+            </div>
+            
+            {/* ✅ Pagination Controls */}
+            <div className="pnd-pagination">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="pnd-page-btn"
+              >
+                ← Sebelumnya
+              </button>
+              <span className="pnd-page-info">
+                Halaman {page} dari {Math.ceil(total / LIMIT) || 1}
+              </span>
+              <button 
+                onClick={() => setPage(p => p + 1)}
+                disabled={page * LIMIT >= total}
+                className="pnd-page-btn"
+              >
+                Berikutnya →
+              </button>
             </div>
           </>
         )}

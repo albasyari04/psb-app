@@ -99,7 +99,8 @@ export default function NotificationBell() {
           table:  'notifications',
           filter: `user_id=eq.${uid}`,
         },
-        (payload) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
           const newNotif = payload.new as Notification
           setNotifs((prev) => [newNotif, ...prev])
           setOpen(true)
@@ -113,22 +114,26 @@ export default function NotificationBell() {
   const markAllRead = async () => {
     const uid = session?.user?.id
     if (!uid || unreadCount === 0) return
-    await supabase
+    const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ is_read: true } as never)
       .eq('user_id', uid)
       .eq('is_read', false)
-    setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })))
+    if (!error) {
+      setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })))
+    }
   }
 
   const markRead = async (id: string) => {
-    await supabase
+    const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ is_read: true } as never)
       .eq('id', id)
-    setNotifs((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    )
+    if (!error) {
+      setNotifs((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      )
+    }
   }
 
   const handleBellClick = () => setOpen((v) => !v)

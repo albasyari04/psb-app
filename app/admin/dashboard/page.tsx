@@ -2,12 +2,10 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
 import Link from "next/link"
+import AdminGreeting from "@/components/admin/AdminGreeting"
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface StatusRow {
-  status: string
-}
-
+interface StatusRow { status: string }
 interface Pendaftaran {
   id: string
   nama_lengkap: string
@@ -22,13 +20,9 @@ const statusConfig: Record<string, { label: string; cls: string }> = {
   diterima: { label: "Diterima", cls: "status-diterima" },
   ditolak:  { label: "Ditolak",  cls: "status-ditolak"  },
 }
+const avatarCls = ["avatar-violet","avatar-blue","avatar-emerald","avatar-rose","avatar-amber"]
 
-const avatarCls = [
-  "avatar-violet", "avatar-blue", "avatar-emerald",
-  "avatar-rose", "avatar-amber",
-]
-
-// ── SVG Icons ──────────────────────────────────────────────────────────────
+// ── Icons ──────────────────────────────────────────────────────────────────
 function IconUsers({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -40,8 +34,7 @@ function IconUsers({ size = 22 }: { size?: number }) {
     </svg>
   )
 }
-
-function IconVerifikasi({ size = 22 }: { size?: number }) {
+function IconShield({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -50,8 +43,7 @@ function IconVerifikasi({ size = 22 }: { size?: number }) {
     </svg>
   )
 }
-
-function IconBell({ size = 20 }: { size?: number }) {
+function IconBell({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -60,8 +52,7 @@ function IconBell({ size = 20 }: { size?: number }) {
     </svg>
   )
 }
-
-function IconSettings({ size = 20 }: { size?: number }) {
+function IconGear({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -71,41 +62,38 @@ function IconSettings({ size = 20 }: { size?: number }) {
   )
 }
 
-// ── Bar Chart Helper ───────────────────────────────────────────────────────
-function buildBarSegments(stats: {
-  total: number; menunggu: number; diproses: number;
-  diterima: number; ditolak: number;
-}) {
+// ── Bar helper ─────────────────────────────────────────────────────────────
+function buildBarSegments(stats: { total:number; menunggu:number; diproses:number; diterima:number; ditolak:number }) {
   const maxVal = Math.max(stats.menunggu, stats.diproses, stats.diterima, stats.ditolak, 1)
   return [
-    { key: "diterima", label: "Diterima", value: stats.diterima, barCls: "adm-bar-emerald", pct: Math.round((stats.diterima / maxVal) * 100) },
-    { key: "menunggu", label: "Menunggu", value: stats.menunggu, barCls: "adm-bar-amber",   pct: Math.round((stats.menunggu / maxVal) * 100) },
-    { key: "diproses", label: "Diproses", value: stats.diproses, barCls: "adm-bar-blue",    pct: Math.round((stats.diproses / maxVal) * 100) },
-    { key: "ditolak",  label: "Ditolak",  value: stats.ditolak,  barCls: "adm-bar-rose",    pct: Math.round((stats.ditolak  / maxVal) * 100) },
+    { key:"diterima", label:"Diterima", value:stats.diterima, barCls:"adm-bar-emerald", pct:Math.round((stats.diterima/maxVal)*100) },
+    { key:"menunggu", label:"Menunggu", value:stats.menunggu, barCls:"adm-bar-amber",   pct:Math.round((stats.menunggu/maxVal)*100) },
+    { key:"diproses", label:"Diproses", value:stats.diproses, barCls:"adm-bar-blue",    pct:Math.round((stats.diproses/maxVal)*100) },
+    { key:"ditolak",  label:"Ditolak",  value:stats.ditolak,  barCls:"adm-bar-rose",    pct:Math.round((stats.ditolak /maxVal)*100) },
   ]
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────────────────────
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
 
-  const { data: semua } = await supabaseAdmin
-    .from("pendaftaran")
-    .select("status")
-
+  const { data: semua } = await supabaseAdmin.from("pendaftaran").select("status")
   const rows = (semua ?? []) as StatusRow[]
 
   const stats = {
     total:    rows.length,
-    menunggu: rows.filter((p) => p.status === "menunggu").length,
-    diproses: rows.filter((p) => p.status === "diproses").length,
-    diterima: rows.filter((p) => p.status === "diterima").length,
-    ditolak:  rows.filter((p) => p.status === "ditolak").length,
+    menunggu: rows.filter(p => p.status === "menunggu").length,
+    diproses: rows.filter(p => p.status === "diproses").length,
+    diterima: rows.filter(p => p.status === "diterima").length,
+    ditolak:  rows.filter(p => p.status === "ditolak").length,
   }
 
-  const acceptRate = stats.total > 0
-    ? Math.round((stats.diterima / stats.total) * 100)
-    : 0
+  const acceptRate  = stats.total > 0 ? Math.round((stats.diterima / stats.total) * 100) : 0
+  const CIRC        = 263.89
+  const ringDash    = (acceptRate / 100) * CIRC
+  const barSegments = buildBarSegments(stats)
+  const firstName   = session?.user.name?.split(" ")[0] ?? "Admin"
+  const initial     = firstName.charAt(0).toUpperCase()
 
   const { data: terbaru } = await supabaseAdmin
     .from("pendaftaran")
@@ -113,57 +101,46 @@ export default async function AdminDashboard() {
     .order("created_at", { ascending: false })
     .limit(5)
 
-  const firstName  = session?.user.name?.split(" ")[0] ?? "Admin"
-  const barSegments = buildBarSegments(stats)
-
-  // ring circumference for r=42: 2πr ≈ 263.89
-  const CIRC       = 263.89
-  const ringDash   = (acceptRate / 100) * CIRC
-
   return (
     <div className="app-shell adm-bg">
 
-      {/* ════════════════════════════════════════════════
-          APP BAR
-      ════════════════════════════════════════════════ */}
-      <div className="adm-appbar">
-        <div className="adm-appbar-left">
-          <div className="adm-appbar-avatar">
-            {firstName.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <p className="adm-appbar-greeting">Selamat datang 👋</p>
-            <p className="adm-appbar-name">{firstName}</p>
-          </div>
-        </div>
-        <div className="adm-appbar-right">
-          <Link href="/admin/profile" className="adm-appbar-btn no-underline">
-            <IconSettings size={18} />
-          </Link>
-          <div className="adm-appbar-btn adm-appbar-bell-wrap">
-            <IconBell size={18} />
-            {stats.menunggu > 0 && <span className="adm-appbar-notif" />}
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════════════════════════════════════════
-          HERO BANNER
-      ════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════
+          HERO dengan topbar float + greeting + lengkungan bawah
+      ══════════════════════════════════════════ */}
       <div className="adm-hero">
         <div className="adm-orb adm-orb-1" />
         <div className="adm-orb adm-orb-2" />
         <div className="adm-orb adm-orb-3" />
         <div className="adm-hero-mesh" />
 
+        {/* Topbar overlay — persis seperti siswa */}
+        <div className="adm-topbar">
+          <Link href="/admin/profile" className="adm-topbar-avatar" aria-label="Profil admin">
+            {initial}
+          </Link>
+          <div className="adm-topbar-btn" aria-label="Notifikasi">
+            <IconBell size={18} />
+            {stats.menunggu > 0 && <span className="adm-topbar-notif" />}
+          </div>
+          <Link href="/admin/profile" className="adm-topbar-btn" aria-label="Pengaturan">
+            <IconGear size={18} />
+          </Link>
+        </div>
+
+        {/* Hero inner */}
         <div className="adm-hero-inner">
+
+          {/* Greeting — pakai client component agar jam real-time */}
+          <AdminGreeting firstName={firstName} />
+
+          {/* Eyebrow badge */}
           <div className="adm-hero-eyebrow">
             <span className="adm-hero-eyebrow-dot" />
             PSB 2025/2026 · PANEL AKTIF
           </div>
 
+          {/* Ring gauge + info */}
           <div className="adm-hero-body">
-            {/* Ring gauge */}
             <div className="adm-ring-wrap">
               <svg viewBox="0 0 100 100" width="108" height="108">
                 <circle cx="50" cy="50" r="42" fill="none"
@@ -182,7 +159,6 @@ export default async function AdminDashboard() {
               </div>
             </div>
 
-            {/* Text info */}
             <div className="adm-hero-info">
               <p className="adm-hero-info-title">Tingkat Penerimaan</p>
               <p className="adm-hero-info-sub">
@@ -190,12 +166,10 @@ export default async function AdminDashboard() {
               </p>
               <div className="adm-hero-chips">
                 <span className="adm-chip adm-chip-green">
-                  <span className="adm-chip-dot" />
-                  {stats.diterima} diterima
+                  <span className="adm-chip-dot" />{stats.diterima} diterima
                 </span>
                 <span className="adm-chip adm-chip-red">
-                  <span className="adm-chip-dot" />
-                  {stats.ditolak} ditolak
+                  <span className="adm-chip-dot" />{stats.ditolak} ditolak
                 </span>
               </div>
             </div>
@@ -203,12 +177,12 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════
+      {/* ══════════════════════════════════════════
           MAIN CONTENT
-      ════════════════════════════════════════════════ */}
+      ══════════════════════════════════════════ */}
       <div className="adm-main">
 
-        {/* ── Bar Chart Card ───────────────────────────── */}
+        {/* Bar Chart */}
         <div className="adm-card">
           <div className="adm-card-head">
             <div>
@@ -220,23 +194,15 @@ export default async function AdminDashboard() {
               <span className="adm-total-pill-lbl">Total</span>
             </div>
           </div>
-
           <div className="adm-barchart">
-            {barSegments.map((seg) => {
-              const w = stats.total > 0
-                ? Math.max(seg.pct, seg.value > 0 ? 5 : 0)
-                : 0
-              const sharePct = stats.total > 0
-                ? Math.round((seg.value / stats.total) * 100)
-                : 0
+            {barSegments.map(seg => {
+              const w = stats.total > 0 ? Math.max(seg.pct, seg.value > 0 ? 5 : 0) : 0
+              const sharePct = stats.total > 0 ? Math.round((seg.value / stats.total) * 100) : 0
               return (
                 <div key={seg.key} className="adm-bar-row">
                   <span className="adm-bar-label">{seg.label}</span>
                   <div className="adm-bar-track">
-                    <div
-                      className={"adm-bar-fill " + seg.barCls}
-                      data-w={w}
-                    />
+                    <div className={"adm-bar-fill " + seg.barCls} data-w={w} />
                   </div>
                   <div className="adm-bar-right">
                     <span className="adm-bar-val">{seg.value}</span>
@@ -248,34 +214,23 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* ── Akses Cepat ──────────────────────────────── */}
+        {/* Akses Cepat */}
         <div>
           <p className="adm-section-title">Akses Cepat</p>
           <div className="adm-actions-grid">
             <Link href="/admin/pendaftar" className="no-underline">
               <div className="adm-action-card adm-action-violet">
-                <div className="adm-action-bg-icon">
-                  <IconUsers size={56} />
-                </div>
-                <div className="adm-action-icon">
-                  <IconUsers size={28} />
-                </div>
+                <div className="adm-action-bg-icon"><IconUsers size={56} /></div>
+                <div className="adm-action-icon"><IconUsers size={28} /></div>
                 <p className="adm-action-name">Semua Pendaftar</p>
                 <p className="adm-action-sub">{stats.total} total</p>
               </div>
             </Link>
-
             <Link href="/admin/verifikasi" className="no-underline">
               <div className={"adm-action-card " + (stats.menunggu > 0 ? "adm-action-amber" : "adm-action-blue")}>
-                <div className="adm-action-bg-icon">
-                  <IconVerifikasi size={56} />
-                </div>
-                {stats.menunggu > 0 && (
-                  <div className="adm-action-badge">{stats.menunggu}</div>
-                )}
-                <div className="adm-action-icon">
-                  <IconVerifikasi size={28} />
-                </div>
+                <div className="adm-action-bg-icon"><IconShield size={56} /></div>
+                {stats.menunggu > 0 && <div className="adm-action-badge">{stats.menunggu}</div>}
+                <div className="adm-action-icon"><IconShield size={28} /></div>
                 <p className="adm-action-name">Verifikasi</p>
                 <p className="adm-action-sub">
                   {stats.menunggu > 0 ? `${stats.menunggu} menunggu` : "Semua selesai"}
@@ -285,7 +240,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* ── Pendaftar Terbaru ─────────────────────────── */}
+        {/* Pendaftar Terbaru */}
         <div className="adm-card">
           <div className="adm-card-head">
             <div>
@@ -296,17 +251,12 @@ export default async function AdminDashboard() {
               Lihat semua →
             </Link>
           </div>
-
           {terbaru && terbaru.length > 0 ? (
             <div className="adm-list">
               {(terbaru as Pendaftaran[]).map((p, i) => {
                 const cfg = statusConfig[p.status] ?? statusConfig.menunggu
                 return (
-                  <Link
-                    key={p.id ?? i}
-                    href={"admin/pendaftar/" + p.id}
-                    className="adm-list-row no-underline"
-                  >
+                  <Link key={p.id ?? i} href={"admin/pendaftar/" + p.id} className="adm-list-row no-underline">
                     <div className={"admin-avatar " + avatarCls[i % avatarCls.length]}>
                       {p.nama_lengkap?.charAt(0) ?? "?"}
                     </div>
