@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // ✅ Tambah batas ukuran body untuk upload berkas (max 30MB)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '30mb',
+    },
+  },
 }
 
 export default nextConfig
