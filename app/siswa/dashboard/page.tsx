@@ -11,7 +11,8 @@ async function getPendaftaran(userId: string): Promise<Pendaftaran | null> {
     .eq('user_id', userId)
     .single()
   if (error) return null
-  return data
+  // ✅ Cast ke Pendaftaran agar TypeScript tidak error
+  return data as Pendaftaran
 }
 
 export default async function DashboardPage() {
@@ -20,7 +21,6 @@ export default async function DashboardPage() {
   const fullName      = session?.user.name ?? 'Siswa'
   const status        = pendaftaran?.status ?? null
   const avatarUrl     = session?.user.avatar_url ?? null
-  // ✅ avatarInitial dihitung di sini, firstName tidak perlu dikirim sebagai prop
   const avatarInitial = fullName.split(' ')[0]?.[0]?.toUpperCase() ?? 'S'
 
   return (
