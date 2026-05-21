@@ -23,6 +23,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     }),
 
     CredentialsProvider({
@@ -105,6 +106,13 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Jika URL sudah absolute dan dari domain yang sama, gunakan itu
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
+
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return true
       try {
@@ -194,4 +202,8 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt', maxAge: 60 * 60 * 8 },
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
+  // Pastikan URL dikonfigurasi dengan benar untuk production
+  ...(process.env.NEXTAUTH_URL && {
+    trustHost: true,
+  }),
 }

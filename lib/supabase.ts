@@ -32,14 +32,18 @@ export function getSupabaseClient(): TypedSupabaseClient {
 
 // ── Server admin client (service role) ───────────────────────────────────────
 export function getSupabaseAdmin(): TypedSupabaseClient {
+  if (typeof window !== 'undefined') {
+    throw new Error('[supabase] Admin client hanya tersedia di server-side!')
+  }
+  
   if (!supabaseAdminInstance) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceRoleKey) {
-      console.error('[supabase] SUPABASE_SERVICE_ROLE_KEY is not set!')
+      throw new Error('[supabase] SUPABASE_SERVICE_ROLE_KEY is not set! Tambahkan ke .env.local')
     }
     supabaseAdminInstance = createClient<Database>(
       supabaseUrl,
-      serviceRoleKey || supabaseAnonKey,
+      serviceRoleKey,
       {
         auth: {
           autoRefreshToken: false,
@@ -63,6 +67,9 @@ export const supabase = new Proxy({} as TypedSupabaseClient, {
 // ── Admin Proxy (untuk Server Components & API routes) ───────────────────────
 export const supabaseAdmin = new Proxy({} as TypedSupabaseClient, {
   get: (_target, prop: string | symbol) => {
+    if (typeof window !== 'undefined') {
+      throw new Error('[supabase] Admin client hanya tersedia di server-side!')
+    }
     const client = getSupabaseAdmin()
     return client[prop as keyof TypedSupabaseClient]
   },
