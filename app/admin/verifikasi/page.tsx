@@ -182,7 +182,6 @@ function VerifikasiCard({
       </div>
       <div className="vrk-card-info">
         <p className="vrk-card-name">{p.nama_lengkap}</p>
-        <p className="vrk-card-jurusan">📚 {p.jurusan_pilihan ?? '—'}</p>
         <div className="vrk-card-meta">
           {/* ✅ Hapus nilai_rata_rata — tidak ada di database */}
           <span className="vrk-meta-date">{date}</span>
