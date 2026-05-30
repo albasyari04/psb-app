@@ -2,16 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getSupabaseAdmin } from '@/lib/supabase'  // ✅ pakai fungsi, bukan proxy
+import { getSupabaseAdmin } from '@/lib/supabase'
 
-// ── GET: Ambil semua pendaftaran (opsional filter by id atau status) ──────────
+// ── GET: Ambil semua pendaftaran ──────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const admin = getSupabaseAdmin()  // ✅ type-safe
+  const admin = getSupabaseAdmin()
   const { searchParams } = new URL(req.url)
   const id     = searchParams.get('id')
   const status = searchParams.get('status')
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
   let query = admin
     .from('pendaftaran')
-    .select('id, nama_lengkap, nisn, asal_sekolah, jurusan_pilihan, status, created_at', { count: 'exact' })
+    .select('id, nama_lengkap, nisn, asal_sekolah, status, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -54,14 +54,14 @@ export async function GET(req: NextRequest) {
   })
 }
 
-// ── PATCH: Update status + kirim notifikasi ke siswa ─────────────────────────
+// ── PATCH: Update status + kirim notifikasi ───────────────────────────────────
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const admin = getSupabaseAdmin()  // ✅ type-safe
+  const admin = getSupabaseAdmin()
   const body  = await req.json()
   const { id, status, catatan_admin } = body as {
     id: string
@@ -76,7 +76,7 @@ export async function PATCH(req: NextRequest) {
   // 1. Ambil data pendaftaran dulu (untuk user_id & nama)
   const { data: existing, error: fetchErr } = await admin
     .from('pendaftaran')
-    .select('user_id, nama_lengkap, jurusan_pilihan')
+    .select('user_id, nama_lengkap')
     .eq('id', id)
     .single()
 
@@ -107,7 +107,7 @@ export async function PATCH(req: NextRequest) {
     },
     diterima: {
       title:   '🎉 Selamat! Pendaftaran Diterima',
-      message: `Selamat ${existing.nama_lengkap}! Kamu resmi diterima di jurusan ${existing.jurusan_pilihan}. ${catatan_admin ? `Catatan: ${catatan_admin}` : ''}`,
+      message: `Selamat ${existing.nama_lengkap}! Kamu resmi diterima di Ponpes Al Istiqomah. ${catatan_admin ? `Catatan: ${catatan_admin}` : ''}`,
       type:    'success',
     },
     ditolak: {
@@ -131,7 +131,6 @@ export async function PATCH(req: NextRequest) {
       })
 
     if (notifErr) {
-      // Log error tapi jangan gagalkan seluruh request
       console.error('[API] Gagal insert notifikasi:', notifErr.message)
     }
   }

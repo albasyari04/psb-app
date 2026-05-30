@@ -1,5 +1,5 @@
 'use client'
-import '@/app/style/siswa.css'
+// app/siswa/pendaftaran/page.tsx
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -10,61 +10,89 @@ interface PendaftaranData {
   id: string
   user_id: string
   nama_lengkap: string
-  nis: string
+  nik: string
   nisn: string
   tempat_lahir: string
   tanggal_lahir: string
   jenis_kelamin: string
   agama: string
   alamat: string
+  alamat_kota?: string
+  alamat_kecamatan?: string
+  alamat_rt_rw?: string
   no_hp: string
   asal_sekolah: string
-  jurusan_pilihan: string
-  nilai_rata_rata: number | string
+  npsn: string
+  nama_ayah: string
+  nama_ibu: string
+  pekerjaan_ayah: string
+  pekerjaan_ibu: string
+  no_hp_ortu: string
   status: 'menunggu' | 'diproses' | 'diterima' | 'ditolak'
 }
 
+// FIX: Hapus 'email' dari FormState — email tidak ada di tabel pendaftaran
+// Email siswa sudah tersimpan di tabel profiles dan bisa diambil dari session
 interface FormState {
   nama_lengkap: string
-  nis: string
+  nik: string
   nisn: string
   tempat_lahir: string
   tanggal_lahir: string
   jenis_kelamin: string
   agama: string
   alamat: string
+  alamat_kota: string
+  alamat_kecamatan: string
+  alamat_rt_rw: string
   no_hp: string
   asal_sekolah: string
-  jurusan_pilihan: string
-  nilai_rata_rata: string
+  npsn: string
+  nama_ayah: string
+  nama_ibu: string
+  pekerjaan_ayah: string
+  pekerjaan_ibu: string
+  no_hp_ortu: string
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const JURUSAN = ['IPA', 'IPS', 'Bahasa', 'Teknik Komputer', 'Akuntansi', 'Multimedia']
-const AGAMA   = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu']
-
-const STEPS = [
-  { label: 'Data Diri',  icon: '👤' },
-  { label: 'Akademik',   icon: '📚' },
-  { label: 'Konfirmasi', icon: '✅' },
+const AGAMA     = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu']
+const PEKERJAAN = [
+  'Petani', 'Nelayan', 'PNS', 'TNI/Polri', 'Guru', 'Pengusaha',
+  'Pedagang', 'Tukang', 'Karyawan Swasta', 'Profesional', 'Tidak Bekerja', 'Lainnya',
 ]
 
+const STEPS = [
+  { label: 'Data Diri',       icon: '👤' },
+  { label: 'Asal Sekolah',    icon: '🏫' },
+  { label: 'Alamat & Kontak', icon: '📍' },
+  { label: 'Data Orang Tua',  icon: '👨‍👩‍👧' },
+  { label: 'Konfirmasi',      icon: '✅' },
+]
+
+// FIX: Hapus 'email' dari INIT
 const INIT: FormState = {
-  nama_lengkap: '', nis: '', nisn: '',
+  nama_lengkap: '', nik: '', nisn: '',
   tempat_lahir: '', tanggal_lahir: '',
   jenis_kelamin: 'L', agama: 'Islam',
-  alamat: '', no_hp: '',
-  asal_sekolah: '', jurusan_pilihan: 'IPA',
-  nilai_rata_rata: '',
+  alamat: '', alamat_kota: '', alamat_kecamatan: '', alamat_rt_rw: '',
+  no_hp: '',
+  asal_sekolah: '', npsn: '',
+  nama_ayah: '', nama_ibu: '',
+  pekerjaan_ayah: 'Petani', pekerjaan_ibu: 'Tidak Bekerja',
+  no_hp_ortu: '',
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 function Field({
   label, value, onChange, placeholder = '', type = 'text', disabled = false,
 }: {
-  label: string; value: string
+  label: string
+  value: string
   onChange: (v: string) => void
-  placeholder?: string; type?: string; disabled?: boolean
+  placeholder?: string
+  type?: string
+  disabled?: boolean
 }) {
   return (
     <div className="sf-field">
@@ -84,8 +112,11 @@ function Field({
 function SelectField({
   label, value, options, onChange, disabled = false,
 }: {
-  label: string; value: string; options: string[]
-  onChange: (v: string) => void; disabled?: boolean
+  label: string
+  value: string
+  options: string[]
+  onChange: (v: string) => void
+  disabled?: boolean
 }) {
   return (
     <div className="sf-field">
@@ -108,17 +139,15 @@ export default function PendaftaranPage() {
   const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
 
-  const [step,      setStep]     = useState(1)
-  const [loading,   setLoading]  = useState(false)
-  const [fetching,  setFetching] = useState(true)
-  const [existing,  setExisting] = useState<PendaftaranData | null>(null)
-  const [form,      setForm]     = useState<FormState>(INIT)
-  const [errorMsg,  setErrorMsg] = useState<string | null>(null)
-  const [successMsg,setSuccessMsg] = useState<string | null>(null)
+  const [step,       setStep]      = useState(1)
+  const [loading,    setLoading]   = useState(false)
+  const [fetching,   setFetching]  = useState(true)
+  const [existing,   setExisting]  = useState<PendaftaranData | null>(null)
+  const [form,       setForm]      = useState<FormState>(INIT)
+  const [errorMsg,   setErrorMsg]  = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
   // ── Fetch data existing via API Route ──────────────────────────────────────
-  // PERBAIKAN: Tidak lagi menggunakan supabase client (anon) langsung dari browser
-  // karena tunduk RLS. Sekarang lewat API route yang menggunakan supabaseAdmin.
   useEffect(() => {
     if (sessionStatus === 'loading') return
     if (!session?.user?.id) {
@@ -129,12 +158,33 @@ export default function PendaftaranPage() {
     const fetchExisting = async () => {
       setFetching(true)
       try {
-        const res = await fetch('/api/pendaftaran')
+        const res  = await fetch('/api/pendaftaran')
         const json = await res.json()
         if (json.data) {
           const d = json.data as PendaftaranData
           setExisting(d)
-          setForm({ ...d, nilai_rata_rata: String(d.nilai_rata_rata) })
+          // FIX: Spread hanya field yang ada di FormState (tanpa email)
+          setForm({
+            nama_lengkap:     d.nama_lengkap     ?? '',
+            nik:              d.nik               ?? '',
+            nisn:             d.nisn              ?? '',
+            tempat_lahir:     d.tempat_lahir      ?? '',
+            tanggal_lahir:    d.tanggal_lahir     ?? '',
+            jenis_kelamin:    d.jenis_kelamin     ?? 'L',
+            agama:            d.agama             ?? 'Islam',
+            alamat:           d.alamat            ?? '',
+            alamat_kota:      d.alamat_kota       ?? '',
+            alamat_kecamatan: d.alamat_kecamatan  ?? '',
+            alamat_rt_rw:     d.alamat_rt_rw      ?? '',
+            no_hp:            d.no_hp             ?? '',
+            asal_sekolah:     d.asal_sekolah      ?? '',
+            npsn:             d.npsn              ?? '',
+            nama_ayah:        d.nama_ayah         ?? '',
+            nama_ibu:         d.nama_ibu          ?? '',
+            pekerjaan_ayah:   d.pekerjaan_ayah    ?? 'Petani',
+            pekerjaan_ibu:    d.pekerjaan_ibu     ?? 'Tidak Bekerja',
+            no_hp_ortu:       d.no_hp_ortu        ?? '',
+          })
         }
       } catch (err) {
         console.error('Fetch existing error:', err)
@@ -146,46 +196,51 @@ export default function PendaftaranPage() {
     fetchExisting()
   }, [session, sessionStatus])
 
+  const isEditable = !existing || existing.status === 'menunggu'
   const set = (key: keyof FormState, val: string) =>
     setForm(f => ({ ...f, [key]: val }))
 
-  const isEditable = !existing || existing.status === 'menunggu'
-  const nilai      = parseFloat(form.nilai_rata_rata)
-  const nilaiValid = !isNaN(nilai) && nilai >= 0 && nilai <= 100
-
   // ── Validasi sebelum lanjut step ──────────────────────────────────────────
+  // FIX: Hapus validasi email karena bukan bagian dari form pendaftaran
   const validateStep = (currentStep: number): string | null => {
     if (currentStep === 1) {
       if (!form.nama_lengkap.trim()) return 'Nama lengkap wajib diisi'
-      if (!form.nis.trim())          return 'NIS wajib diisi'
+      if (!form.nik.trim())          return 'NIK wajib diisi'
       if (!form.nisn.trim())         return 'NISN wajib diisi'
       if (!form.tempat_lahir.trim()) return 'Tempat lahir wajib diisi'
       if (!form.tanggal_lahir)       return 'Tanggal lahir wajib diisi'
-      if (!form.alamat.trim())       return 'Alamat wajib diisi'
-      if (!form.no_hp.trim())        return 'No. HP wajib diisi'
     }
     if (currentStep === 2) {
-      if (!form.asal_sekolah.trim()) return 'Nama sekolah asal wajib diisi'
-      if (!form.nilai_rata_rata)     return 'Nilai rata-rata wajib diisi'
-      if (!nilaiValid)               return 'Nilai rata-rata harus antara 0–100'
-      if (!form.jurusan_pilihan)     return 'Pilihan jurusan wajib dipilih'
+      if (!form.asal_sekolah.trim()) return 'Nama asal sekolah wajib diisi'
+      if (!form.npsn.trim())         return 'NPSN wajib diisi'
+    }
+    if (currentStep === 3) {
+      if (!form.alamat.trim())           return 'Alamat wajib diisi'
+      if (!form.alamat_kota.trim())      return 'Kota wajib diisi'
+      if (!form.alamat_kecamatan.trim()) return 'Kecamatan wajib diisi'
+      if (!form.alamat_rt_rw.trim())     return 'RT/RW wajib diisi'
+      if (!form.no_hp.trim())            return 'No. HP wajib diisi'
+    }
+    if (currentStep === 4) {
+      if (!form.nama_ayah.trim())  return 'Nama ayah wajib diisi'
+      if (!form.nama_ibu.trim())   return 'Nama ibu wajib diisi'
+      if (!form.pekerjaan_ayah)    return 'Pekerjaan ayah wajib dipilih'
+      if (!form.pekerjaan_ibu)     return 'Pekerjaan ibu wajib dipilih'
+      if (!form.no_hp_ortu.trim()) return 'No. HP orang tua wajib diisi'
     }
     return null
   }
 
   const handleNextStep = () => {
     const err = validateStep(step)
-    if (err) {
-      setErrorMsg(err)
-      return
-    }
+    if (err) { setErrorMsg(err); return }
     setErrorMsg(null)
     setStep(s => s + 1)
   }
 
   // ── Submit via API Route ───────────────────────────────────────────────────
-  // PERBAIKAN: Insert/Update sekarang lewat API route (supabaseAdmin)
-  // agar tidak terblokir RLS Supabase.
+  // FIX: payload tidak lagi menyertakan 'email'
+  // karena kolom email tidak ada di tabel pendaftaran
   const handleSubmit = async () => {
     if (!isEditable || loading) return
 
@@ -195,27 +250,23 @@ export default function PendaftaranPage() {
     setLoading(true)
     setErrorMsg(null)
 
-    const payload = {
-      ...form,
-      nilai_rata_rata: parseFloat(form.nilai_rata_rata),
-    }
+    // FIX: Hanya kirim field yang benar-benar ada di tabel pendaftaran
+    const payload: FormState = { ...form }
 
     try {
       let res: Response
 
       if (existing) {
-        // UPDATE
         res = await fetch('/api/pendaftaran', {
-          method: 'PUT',
+          method:  'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: existing.id, ...payload }),
+          body:    JSON.stringify({ id: existing.id, ...payload }),
         })
       } else {
-        // INSERT
         res = await fetch('/api/pendaftaran', {
-          method: 'POST',
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body:    JSON.stringify(payload),
         })
       }
 
@@ -227,7 +278,6 @@ export default function PendaftaranPage() {
       }
 
       setSuccessMsg('Pendaftaran berhasil dikirim!')
-      // Delay sebentar agar user melihat pesan sukses
       setTimeout(() => router.push('/siswa/status'), 1000)
 
     } catch (err) {
@@ -238,19 +288,35 @@ export default function PendaftaranPage() {
     }
   }
 
-  // ── Session loading state ─────────────────────────────────────────────────
+  // ── Loading state ─────────────────────────────────────────────────────────
   if (sessionStatus === 'loading' || fetching) {
     return (
-      <div className="app-shell sf-bg sf-loading-screen">
-        <div className="sf-loading-inner">
-          <div className="sf-loading-icon">⏳</div>
-          <p className="sf-loading-text">Memuat data...</p>
-        </div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#F8FAFC',
+        gap: 12,
+      }}>
+        <div style={{
+          width: 44,
+          height: 44,
+          border: '4px solid #E2E8F0',
+          borderTopColor: '#6366F1',
+          borderRadius: '50%',
+          animation: 'spin .8s linear infinite',
+        }} />
+        <p style={{ color: '#94A3B8', fontSize: 13, fontWeight: 500 }}>
+          Memuat data pendaftaran...
+        </p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="app-shell sf-bg">
 
@@ -260,16 +326,14 @@ export default function PendaftaranPage() {
         <div className="sf-header-orb" />
         <div className="sf-header-content">
 
-          {/* Back + Title */}
           <div className="sf-header-top">
             <Link href="/siswa/dashboard" className="sf-back-btn">←</Link>
             <div>
               <h1 className="sf-header-title">Formulir Pendaftaran</h1>
-              <p className="sf-header-sub">Tahun Ajaran 2025/2026 · SMA Negeri 1</p>
+              <p className="sf-header-sub">Tahun Ajaran 2025/2026 · Pon-Pes Al Istiqomah</p>
             </div>
           </div>
 
-          {/* Steps */}
           <div className="sf-steps">
             {STEPS.map((s, i) => {
               const idx   = i + 1
@@ -307,15 +371,13 @@ export default function PendaftaranPage() {
         </div>
       )}
 
-      {/* ── Error message ── */}
+      {/* ── Error & Success messages ── */}
       {errorMsg && (
         <div className="sf-alert sf-alert-error">
           <span>⚠️</span>
           <span>{errorMsg}</span>
         </div>
       )}
-
-      {/* ── Success message ── */}
       {successMsg && (
         <div className="sf-alert sf-alert-success">
           <span>✅</span>
@@ -329,8 +391,7 @@ export default function PendaftaranPage() {
         {/* ── STEP 1: Data Diri ── */}
         {step === 1 && (
           <div className="sf-card">
-            <p className="sf-card-title">👤 Identitas Diri</p>
-
+            <p className="sf-card-title">👤 Identitas Diri Santri</p>
             <Field
               label="Nama Lengkap"
               value={form.nama_lengkap}
@@ -338,18 +399,14 @@ export default function PendaftaranPage() {
               placeholder="Sesuai ijazah"
               disabled={!isEditable}
             />
-
             <div className="sf-grid-2">
-              <Field label="NIS"  value={form.nis}  onChange={v => { set('nis', v); setErrorMsg(null) }}  placeholder="NIS"  disabled={!isEditable} />
+              <Field label="NIK"  value={form.nik}  onChange={v => { set('nik', v);  setErrorMsg(null) }} placeholder="NIK"  disabled={!isEditable} />
               <Field label="NISN" value={form.nisn} onChange={v => { set('nisn', v); setErrorMsg(null) }} placeholder="NISN" disabled={!isEditable} />
             </div>
-
             <div className="sf-grid-2">
-              <Field label="Tempat Lahir"  value={form.tempat_lahir}  onChange={v => { set('tempat_lahir', v); setErrorMsg(null) }}  placeholder="Kota"   disabled={!isEditable} />
-              <Field label="Tanggal Lahir" value={form.tanggal_lahir} onChange={v => { set('tanggal_lahir', v); setErrorMsg(null) }} type="date"          disabled={!isEditable} />
+              <Field label="Tempat Lahir"  value={form.tempat_lahir}  onChange={v => { set('tempat_lahir', v);  setErrorMsg(null) }} placeholder="Kota" disabled={!isEditable} />
+              <Field label="Tanggal Lahir" value={form.tanggal_lahir} onChange={v => { set('tanggal_lahir', v); setErrorMsg(null) }} type="date"        disabled={!isEditable} />
             </div>
-
-            {/* Jenis Kelamin */}
             <div className="sf-field">
               <label className="sf-label">Jenis Kelamin</label>
               <div className="sf-gender-wrap">
@@ -367,110 +424,161 @@ export default function PendaftaranPage() {
                 ))}
               </div>
             </div>
-
-            <SelectField label="Agama"         value={form.agama}  options={AGAMA}  onChange={v => set('agama', v)}  disabled={!isEditable} />
-            <Field       label="Alamat Lengkap" value={form.alamat} onChange={v => { set('alamat', v); setErrorMsg(null) }} placeholder="Jl. Contoh No. 1, RT/RW, Kecamatan" disabled={!isEditable} />
-            <Field       label="No. HP / WA"    value={form.no_hp}  onChange={v => { set('no_hp', v); setErrorMsg(null) }}  placeholder="08xxxxxxxxxx" disabled={!isEditable} />
+            <SelectField label="Agama" value={form.agama} options={AGAMA} onChange={v => set('agama', v)} disabled={!isEditable} />
           </div>
         )}
 
-        {/* ── STEP 2: Data Akademik ── */}
+        {/* ── STEP 2: Asal Sekolah ── */}
         {step === 2 && (
-          <>
-            <div className="sf-card">
-              <p className="sf-card-title">🏫 Asal Sekolah</p>
-              <Field
-                label="Nama SMP / MTs Asal"
-                value={form.asal_sekolah}
-                onChange={v => { set('asal_sekolah', v); setErrorMsg(null) }}
-                placeholder="Nama sekolah asal"
-                disabled={!isEditable}
-              />
-              <div className="sf-field">
-                <label className="sf-label">Nilai Rata-rata Rapor (Semester 1–5)</label>
-                <input
-                  type="number"
-                  min={0} max={100} step={0.1}
-                  value={form.nilai_rata_rata}
-                  onChange={e => { set('nilai_rata_rata', e.target.value); setErrorMsg(null) }}
-                  placeholder="Contoh: 85.50"
-                  disabled={!isEditable}
-                  className="sf-input"
-                />
-              </div>
-
-              {/* Nilai preview */}
-              {nilaiValid && (
-                <div className="sf-nilai-preview">
-                  <div>
-                    <span className="sf-nilai-number">{nilai.toFixed(1)}</span>
-                    <span className="sf-nilai-of">/ 100</span>
-                  </div>
-                  <div className="sf-nilai-bar-wrap">
-                    <div className="sf-nilai-bar-track">
-                      <div
-                        className="sf-nilai-bar-fill"
-                        data-width={Math.min(nilai, 100)}
-                        ref={(el) => { if (el) el.style.setProperty('--nilai-width', `${Math.min(nilai, 100)}%`) }}
-                      />
-                    </div>
-                  </div>
-                  <span className={`sf-nilai-badge ${nilai >= 80 ? 'ok' : 'low'}`}>
-                    {nilai >= 80 ? '✓ Memenuhi' : '✗ Di bawah'}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="sf-card">
-              <p className="sf-card-title">📚 Pilihan Jurusan</p>
-              <div className="sf-jurusan-grid">
-                {JURUSAN.map(j => (
-                  <button
-                    key={j}
-                    type="button"
-                    onClick={() => isEditable && set('jurusan_pilihan', j)}
-                    disabled={!isEditable}
-                    className={`sf-jurusan-btn${form.jurusan_pilihan === j ? ' active' : ''}`}
-                  >
-                    {j}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
+          <div className="sf-card">
+            <p className="sf-card-title">🏫 Asal Sekolah Santri</p>
+            <Field
+              label="Nama SMP / MTs Asal"
+              value={form.asal_sekolah}
+              onChange={v => { set('asal_sekolah', v); setErrorMsg(null) }}
+              placeholder="Nama sekolah asal"
+              disabled={!isEditable}
+            />
+            <Field
+              label="NPSN (Nomor Pokok Sekolah Nasional)"
+              value={form.npsn}
+              onChange={v => { set('npsn', v); setErrorMsg(null) }}
+              placeholder="NPSN"
+              disabled={!isEditable}
+            />
+          </div>
         )}
 
-        {/* ── STEP 3: Konfirmasi ── */}
+        {/* ── STEP 3: Alamat & Kontak ── */}
         {step === 3 && (
+          <div className="sf-card">
+            <p className="sf-card-title">📍 Alamat & Kontak Santri</p>
+            <Field
+              label="Alamat Lengkap"
+              value={form.alamat}
+              onChange={v => { set('alamat', v); setErrorMsg(null) }}
+              placeholder="Jl., Nomor, Gang, dsb"
+              disabled={!isEditable}
+            />
+            <div className="sf-grid-2">
+              <Field label="Kota"       value={form.alamat_kota}       onChange={v => { set('alamat_kota', v);       setErrorMsg(null) }} placeholder="Kota"       disabled={!isEditable} />
+              <Field label="Kecamatan"  value={form.alamat_kecamatan}  onChange={v => { set('alamat_kecamatan', v);  setErrorMsg(null) }} placeholder="Kecamatan"  disabled={!isEditable} />
+            </div>
+            <div className="sf-grid-2">
+              <Field label="RT/RW" value={form.alamat_rt_rw} onChange={v => { set('alamat_rt_rw', v); setErrorMsg(null) }} placeholder="RT/RW" disabled={!isEditable} />
+            </div>
+            <Field
+              label="No. HP / WA"
+              value={form.no_hp}
+              onChange={v => { set('no_hp', v); setErrorMsg(null) }}
+              placeholder="08xxxxxxxxxx"
+              disabled={!isEditable}
+            />
+            {/* FIX: Email ditampilkan read-only dari session (bukan input form) */}
+            <div className="sf-field">
+              <label className="sf-label">Email</label>
+              <input
+                type="email"
+                value={session?.user?.email ?? ''}
+                disabled
+                className="sf-input"
+                style={{ opacity: 0.6, cursor: 'not-allowed' }}
+              />
+              <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '4px' }}>
+                Email diambil dari akun Anda dan tidak dapat diubah di sini.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP 4: Data Orang Tua ── */}
+        {step === 4 && (
+          <div className="sf-card">
+            <p className="sf-card-title">👨‍👩‍👧 Data Orang Tua & Wali</p>
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <p style={{ fontWeight: 600, marginBottom: '1rem' }}>👨 Data Ayah</p>
+              <Field label="Nama Ayah" value={form.nama_ayah} onChange={v => { set('nama_ayah', v); setErrorMsg(null) }} placeholder="Nama lengkap ayah" disabled={!isEditable} />
+              <SelectField label="Pekerjaan Ayah" value={form.pekerjaan_ayah} options={PEKERJAAN} onChange={v => set('pekerjaan_ayah', v)} disabled={!isEditable} />
+            </div>
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <p style={{ fontWeight: 600, marginBottom: '1rem' }}>👩 Data Ibu</p>
+              <Field label="Nama Ibu" value={form.nama_ibu} onChange={v => { set('nama_ibu', v); setErrorMsg(null) }} placeholder="Nama lengkap ibu" disabled={!isEditable} />
+              <SelectField label="Pekerjaan Ibu" value={form.pekerjaan_ibu} options={PEKERJAAN} onChange={v => set('pekerjaan_ibu', v)} disabled={!isEditable} />
+            </div>
+            <Field label="No. HP Orang Tua" value={form.no_hp_ortu} onChange={v => { set('no_hp_ortu', v); setErrorMsg(null) }} placeholder="08xxxxxxxxxx" disabled={!isEditable} />
+          </div>
+        )}
+
+        {/* ── STEP 5: Konfirmasi ── */}
+        {step === 5 && (
           <div className="sf-card">
             <p className="sf-card-title">📋 Ringkasan Pendaftaran</p>
 
-            {[
-              { key: 'Nama Lengkap',      val: form.nama_lengkap },
-              { key: 'NIS / NISN',        val: `${form.nis} / ${form.nisn}` },
-              { key: 'Tempat, Tgl Lahir', val: `${form.tempat_lahir}, ${form.tanggal_lahir ? new Date(form.tanggal_lahir).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) : '-'}` },
-              { key: 'Jenis Kelamin',     val: form.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
-              { key: 'Agama',             val: form.agama },
-              { key: 'Alamat',            val: form.alamat },
-              { key: 'No. HP / WA',       val: form.no_hp },
-              { key: 'Asal Sekolah',      val: form.asal_sekolah },
-              { key: 'Jurusan Pilihan',   val: form.jurusan_pilihan },
-              { key: 'Nilai Rata-rata',   val: form.nilai_rata_rata ? `${parseFloat(form.nilai_rata_rata).toFixed(2)} / 100` : '-' },
-            ].map(({ key, val }) => (
-              <div key={key} className="sf-summary-row">
-                <span className="sf-summary-key">{key}</span>
-                <span className="sf-summary-val">{val || '-'}</span>
-              </div>
-            ))}
+            {/* Data Diri */}
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <p style={{ fontWeight: 600, marginBottom: '1rem', color: '#1976d2' }}>👤 Data Diri</p>
+              {[
+                { key: 'Nama Lengkap',      val: form.nama_lengkap },
+                { key: 'NIK / NISN',        val: `${form.nik} / ${form.nisn}` },
+                { key: 'Tempat, Tgl Lahir', val: `${form.tempat_lahir}, ${form.tanggal_lahir ? new Date(form.tanggal_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}` },
+                { key: 'Jenis Kelamin',     val: form.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
+                { key: 'Agama',             val: form.agama },
+              ].map(({ key, val }) => (
+                <div key={key} className="sf-summary-row">
+                  <span className="sf-summary-key">{key}</span>
+                  <span className="sf-summary-val">{val || '-'}</span>
+                </div>
+              ))}
+            </div>
 
-            {/* Syarat minimum */}
-            <div className={`sf-syarat-card ${nilaiValid && nilai >= 80 ? 'ok' : 'low'}`}>
-              <p className={`sf-syarat-text ${nilaiValid && nilai >= 80 ? 'ok' : 'low'}`}>
-                {nilaiValid && nilai >= 80
-                  ? '✅ Nilai memenuhi syarat minimum (≥ 80)'
-                  : '⚠️ Nilai di bawah syarat minimum (80)'}
-              </p>
+            {/* Asal Sekolah */}
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <p style={{ fontWeight: 600, marginBottom: '1rem', color: '#1976d2' }}>🏫 Asal Sekolah</p>
+              {[
+                { key: 'Nama Sekolah', val: form.asal_sekolah },
+                { key: 'NPSN',         val: form.npsn },
+              ].map(({ key, val }) => (
+                <div key={key} className="sf-summary-row">
+                  <span className="sf-summary-key">{key}</span>
+                  <span className="sf-summary-val">{val || '-'}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Alamat & Kontak */}
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <p style={{ fontWeight: 600, marginBottom: '1rem', color: '#1976d2' }}>📍 Alamat & Kontak</p>
+              {[
+                { key: 'Alamat Lengkap', val: form.alamat },
+                { key: 'Kota',           val: form.alamat_kota },
+                { key: 'Kecamatan',      val: form.alamat_kecamatan },
+                { key: 'RT/RW',          val: form.alamat_rt_rw },
+                { key: 'No. HP / WA',    val: form.no_hp },
+                // FIX: Email diambil dari session, bukan dari form state
+                { key: 'Email',          val: session?.user?.email ?? '-' },
+              ].map(({ key, val }) => (
+                <div key={key} className="sf-summary-row">
+                  <span className="sf-summary-key">{key}</span>
+                  <span className="sf-summary-val">{val || '-'}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Data Orang Tua */}
+            <div>
+              <p style={{ fontWeight: 600, marginBottom: '1rem', color: '#1976d2' }}>👨‍👩‍👧 Data Orang Tua</p>
+              {[
+                { key: 'Nama Ayah',      val: form.nama_ayah },
+                { key: 'Pekerjaan Ayah', val: form.pekerjaan_ayah },
+                { key: 'Nama Ibu',       val: form.nama_ibu },
+                { key: 'Pekerjaan Ibu',  val: form.pekerjaan_ibu },
+                { key: 'No. HP Ortu',    val: form.no_hp_ortu },
+              ].map(({ key, val }) => (
+                <div key={key} className="sf-summary-row">
+                  <span className="sf-summary-key">{key}</span>
+                  <span className="sf-summary-val">{val || '-'}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -480,12 +588,16 @@ export default function PendaftaranPage() {
       {/* ══ BOTTOM NAVIGATION BAR ════════════════════════════════════════════ */}
       <div className="sf-bottom-bar">
         {step > 1 && (
-          <button type="button" onClick={() => { setStep(s => s - 1); setErrorMsg(null) }} className="sf-btn-back">
+          <button
+            type="button"
+            onClick={() => { setStep(s => s - 1); setErrorMsg(null) }}
+            className="sf-btn-back"
+          >
             ← Kembali
           </button>
         )}
 
-        {step < 3 ? (
+        {step < STEPS.length ? (
           <button
             type="button"
             onClick={handleNextStep}
@@ -501,10 +613,7 @@ export default function PendaftaranPage() {
             className="sf-btn-submit"
           >
             {loading ? (
-              <>
-                <span className="sf-spinner">⏳</span>
-                Menyimpan...
-              </>
+              <><span className="sf-spinner">⏳</span>Menyimpan...</>
             ) : existing ? (
               <>✏️ Perbarui Data</>
             ) : (

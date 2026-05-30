@@ -1,288 +1,95 @@
+// app/admin/dashboard/page.tsx
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { supabaseAdmin } from "@/lib/supabase"
-import Link from "next/link"
-import AdminGreeting from "@/components/admin/AdminGreeting"
+import { authOptions }      from "@/lib/auth"
+import { getSupabaseAdmin } from "@/lib/supabase"
+import AdminDashboardClient from '@/app/siswa/dashboard/AdminDashboardClient'
+import type { TrenBulan }   from '@/app/api/admin/tren/route'
 
-// ── Types ──────────────────────────────────────────────────────────────────
-interface StatusRow { status: string }
-interface Pendaftaran {
-  id: string
-  nama_lengkap: string
-  jurusan_pilihan: string
-  status: "menunggu" | "diproses" | "diterima" | "ditolak"
-}
-
-// ── Config ─────────────────────────────────────────────────────────────────
-const statusConfig: Record<string, { label: string; cls: string }> = {
-  menunggu: { label: "Menunggu", cls: "status-menunggu" },
-  diproses: { label: "Diproses", cls: "status-diproses" },
-  diterima: { label: "Diterima", cls: "status-diterima" },
-  ditolak:  { label: "Ditolak",  cls: "status-ditolak"  },
-}
-const avatarCls = ["avatar-violet","avatar-blue","avatar-emerald","avatar-rose","avatar-amber"]
-
-// ── Icons ──────────────────────────────────────────────────────────────────
-function IconUsers({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-  )
-}
-function IconShield({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <polyline points="9 12 11 14 15 10"/>
-    </svg>
-  )
-}
-function IconBell({ size = 18 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-    </svg>
-  )
-}
-function IconGear({ size = 18 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-  )
-}
-
-// ── Bar helper ─────────────────────────────────────────────────────────────
-function buildBarSegments(stats: { total:number; menunggu:number; diproses:number; diterima:number; ditolak:number }) {
-  const maxVal = Math.max(stats.menunggu, stats.diproses, stats.diterima, stats.ditolak, 1)
-  return [
-    { key:"diterima", label:"Diterima", value:stats.diterima, barCls:"adm-bar-emerald", pct:Math.round((stats.diterima/maxVal)*100) },
-    { key:"menunggu", label:"Menunggu", value:stats.menunggu, barCls:"adm-bar-amber",   pct:Math.round((stats.menunggu/maxVal)*100) },
-    { key:"diproses", label:"Diproses", value:stats.diproses, barCls:"adm-bar-blue",    pct:Math.round((stats.diproses/maxVal)*100) },
-    { key:"ditolak",  label:"Ditolak",  value:stats.ditolak,  barCls:"adm-bar-rose",    pct:Math.round((stats.ditolak /maxVal)*100) },
-  ]
-}
-
-// ── Page ───────────────────────────────────────────────────────────────────
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
+  const admin   = getSupabaseAdmin()
 
-  const { data: semua } = await supabaseAdmin.from("pendaftaran").select("status")
+  const fullName      = session?.user.name      ?? 'Admin'
+  const avatarUrl     = session?.user.avatar_url ?? null
+  const avatarInitial = fullName.split(' ')[0]?.[0]?.toUpperCase() ?? 'A'
+
+  // ── 1. Stats (total per status) ─────────────────────────────────────────────
+  interface StatusRow { status: string; created_at: string | null }
+  const { data: semua } = await admin
+    .from('pendaftaran')
+    .select('status, created_at')
+
   const rows = (semua ?? []) as StatusRow[]
 
   const stats = {
     total:    rows.length,
-    menunggu: rows.filter(p => p.status === "menunggu").length,
-    diproses: rows.filter(p => p.status === "diproses").length,
-    diterima: rows.filter(p => p.status === "diterima").length,
-    ditolak:  rows.filter(p => p.status === "ditolak").length,
+    menunggu: rows.filter(p => p.status === 'menunggu').length,
+    diproses: rows.filter(p => p.status === 'diproses').length,
+    diterima: rows.filter(p => p.status === 'diterima').length,
+    ditolak:  rows.filter(p => p.status === 'ditolak').length,
   }
 
-  const acceptRate  = stats.total > 0 ? Math.round((stats.diterima / stats.total) * 100) : 0
-  const CIRC        = 263.89
-  const ringDash    = (acceptRate / 100) * CIRC
-  const barSegments = buildBarSegments(stats)
-  const firstName   = session?.user.name?.split(" ")[0] ?? "Admin"
-  const initial     = firstName.charAt(0).toUpperCase()
+  // ── 2. Tren data (12 bulan terakhir, cumulative) ────────────────────────────
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des']
+  const now   = new Date()
+  const since = new Date(now.getFullYear(), now.getMonth() - 11, 1)
 
-  const { data: terbaru } = await supabaseAdmin
-    .from("pendaftaran")
-    .select("id, nama_lengkap, jurusan_pilihan, status")
-    .order("created_at", { ascending: false })
-    .limit(5)
+  // Filter hanya 12 bulan ke belakang
+  const recentRows = rows.filter(r => {
+    if (!r.created_at) return false
+    return new Date(r.created_at) >= since
+  })
+
+  // Buat 12 slot bulan
+  const slots: TrenBulan[] = []
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(since.getFullYear(), since.getMonth() + i, 1)
+    slots.push({
+      month:         MONTH_NAMES[d.getMonth()],
+      year:          d.getFullYear(),
+      pendaftar:     0,
+      terverifikasi: 0,
+    })
+  }
+
+  const verifiedStatuses = new Set(['diterima', 'diproses'])
+
+  for (const row of recentRows) {
+    if (!row.created_at) continue
+    const d       = new Date(row.created_at)
+    const slotIdx = slots.findIndex(
+      s => s.year === d.getFullYear() && s.month === MONTH_NAMES[d.getMonth()]
+    )
+    if (slotIdx === -1) continue
+    slots[slotIdx].pendaftar += 1
+    if (verifiedStatuses.has(row.status)) {
+      slots[slotIdx].terverifikasi += 1
+    }
+  }
+
+  // Ubah ke cumulative
+  let cumP = 0, cumV = 0
+  const trendData: TrenBulan[] = slots.map(s => {
+    cumP += s.pendaftar
+    cumV += s.terverifikasi
+    return { ...s, pendaftar: cumP, terverifikasi: cumV }
+  })
+
+  // Trim dari bulan pertama ada data (min 6 slot)
+  const firstNonZero = trendData.findIndex(s => s.pendaftar > 0)
+  const startIdx     = Math.max(0, Math.min(firstNonZero < 0 ? 6 : firstNonZero, trendData.length - 6))
+  const trimmedTrend = trendData.slice(startIdx)
 
   return (
-    <div className="app-shell adm-bg">
-
-      {/* ══════════════════════════════════════════
-          HERO dengan topbar float + greeting + lengkungan bawah
-      ══════════════════════════════════════════ */}
-      <div className="adm-hero">
-        <div className="adm-orb adm-orb-1" />
-        <div className="adm-orb adm-orb-2" />
-        <div className="adm-orb adm-orb-3" />
-        <div className="adm-hero-mesh" />
-
-        {/* Topbar overlay — persis seperti siswa */}
-        <div className="adm-topbar">
-          <Link href="/admin/profile" className="adm-topbar-avatar" aria-label="Profil admin">
-            {initial}
-          </Link>
-          <div className="adm-topbar-btn" aria-label="Notifikasi">
-            <IconBell size={18} />
-            {stats.menunggu > 0 && <span className="adm-topbar-notif" />}
-          </div>
-          <Link href="/admin/profile" className="adm-topbar-btn" aria-label="Pengaturan">
-            <IconGear size={18} />
-          </Link>
-        </div>
-
-        {/* Hero inner */}
-        <div className="adm-hero-inner">
-
-          {/* Greeting — pakai client component agar jam real-time */}
-          <AdminGreeting firstName={firstName} />
-
-          {/* Eyebrow badge */}
-          <div className="adm-hero-eyebrow">
-            <span className="adm-hero-eyebrow-dot" />
-            PSB 2025/2026 · PANEL AKTIF
-          </div>
-
-          {/* Ring gauge + info */}
-          <div className="adm-hero-body">
-            <div className="adm-ring-wrap">
-              <svg viewBox="0 0 100 100" width="108" height="108">
-                <circle cx="50" cy="50" r="42" fill="none"
-                  stroke="rgba(255,255,255,0.12)" strokeWidth="9" />
-                <circle cx="50" cy="50" r="42" fill="none"
-                  stroke="rgba(255,255,255,0.92)" strokeWidth="9"
-                  strokeLinecap="round"
-                  strokeDasharray={`${ringDash} ${CIRC}`}
-                  strokeDashoffset={CIRC * 0.25}
-                  className="adm-ring-arc"
-                />
-              </svg>
-              <div className="adm-ring-inner">
-                <span className="adm-ring-num">{acceptRate}</span>
-                <span className="adm-ring-pct">%</span>
-              </div>
-            </div>
-
-            <div className="adm-hero-info">
-              <p className="adm-hero-info-title">Tingkat Penerimaan</p>
-              <p className="adm-hero-info-sub">
-                dari <strong>{stats.total}</strong> total pendaftar
-              </p>
-              <div className="adm-hero-chips">
-                <span className="adm-chip adm-chip-green">
-                  <span className="adm-chip-dot" />{stats.diterima} diterima
-                </span>
-                <span className="adm-chip adm-chip-red">
-                  <span className="adm-chip-dot" />{stats.ditolak} ditolak
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════
-          MAIN CONTENT
-      ══════════════════════════════════════════ */}
-      <div className="adm-main">
-
-        {/* Bar Chart */}
-        <div className="adm-card">
-          <div className="adm-card-head">
-            <div>
-              <p className="adm-card-title">Statistik Pendaftar</p>
-              <p className="adm-card-sub">Distribusi status saat ini</p>
-            </div>
-            <div className="adm-total-pill">
-              <span className="adm-total-pill-num">{stats.total}</span>
-              <span className="adm-total-pill-lbl">Total</span>
-            </div>
-          </div>
-          <div className="adm-barchart">
-            {barSegments.map(seg => {
-              const w = stats.total > 0 ? Math.max(seg.pct, seg.value > 0 ? 5 : 0) : 0
-              const sharePct = stats.total > 0 ? Math.round((seg.value / stats.total) * 100) : 0
-              return (
-                <div key={seg.key} className="adm-bar-row">
-                  <span className="adm-bar-label">{seg.label}</span>
-                  <div className="adm-bar-track">
-                    <div className={"adm-bar-fill " + seg.barCls} data-w={w} />
-                  </div>
-                  <div className="adm-bar-right">
-                    <span className="adm-bar-val">{seg.value}</span>
-                    <span className="adm-bar-pct">{sharePct}%</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Akses Cepat */}
-        <div>
-          <p className="adm-section-title">Akses Cepat</p>
-          <div className="adm-actions-grid">
-            <Link href="/admin/pendaftar" className="no-underline">
-              <div className="adm-action-card adm-action-violet">
-                <div className="adm-action-bg-icon"><IconUsers size={56} /></div>
-                <div className="adm-action-icon"><IconUsers size={28} /></div>
-                <p className="adm-action-name">Semua Pendaftar</p>
-                <p className="adm-action-sub">{stats.total} total</p>
-              </div>
-            </Link>
-            <Link href="/admin/verifikasi" className="no-underline">
-              <div className={"adm-action-card " + (stats.menunggu > 0 ? "adm-action-amber" : "adm-action-blue")}>
-                <div className="adm-action-bg-icon"><IconShield size={56} /></div>
-                {stats.menunggu > 0 && <div className="adm-action-badge">{stats.menunggu}</div>}
-                <div className="adm-action-icon"><IconShield size={28} /></div>
-                <p className="adm-action-name">Verifikasi</p>
-                <p className="adm-action-sub">
-                  {stats.menunggu > 0 ? `${stats.menunggu} menunggu` : "Semua selesai"}
-                </p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Pendaftar Terbaru */}
-        <div className="adm-card">
-          <div className="adm-card-head">
-            <div>
-              <p className="adm-card-title">Pendaftar Terbaru</p>
-              <p className="adm-card-sub">5 entri terakhir</p>
-            </div>
-            <Link href="/admin/pendaftar" className="adm-see-all no-underline">
-              Lihat semua →
-            </Link>
-          </div>
-          {terbaru && terbaru.length > 0 ? (
-            <div className="adm-list">
-              {(terbaru as Pendaftaran[]).map((p, i) => {
-                const cfg = statusConfig[p.status] ?? statusConfig.menunggu
-                return (
-                  <Link key={p.id ?? i} href={"admin/pendaftar/" + p.id} className="adm-list-row no-underline">
-                    <div className={"admin-avatar " + avatarCls[i % avatarCls.length]}>
-                      {p.nama_lengkap?.charAt(0) ?? "?"}
-                    </div>
-                    <div className="adm-list-info">
-                      <p className="adm-list-name">{p.nama_lengkap}</p>
-                      <p className="adm-list-sub">{p.jurusan_pilihan}</p>
-                    </div>
-                    <div className={"admin-status-pill " + cfg.cls}>
-                      <div className="admin-status-dot" />
-                      {cfg.label}
-                    </div>
-                    <span className="adm-chevron">›</span>
-                  </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="admin-empty">
-              <div className="admin-empty-icon">📭</div>
-              <p className="admin-empty-title">Belum ada pendaftar</p>
-              <p className="admin-empty-sub">Data akan muncul saat ada pendaftar baru</p>
-            </div>
-          )}
-        </div>
-
-      </div>
-    </div>
+    <AdminDashboardClient
+      fullName={fullName}
+      avatarInitial={avatarInitial}
+      avatarUrl={avatarUrl}
+      pendaftaran={null}
+      status={null}
+      isAdmin={true}
+      stats={stats}
+      trendData={trimmedTrend}
+    />
   )
 }

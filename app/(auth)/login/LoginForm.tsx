@@ -62,7 +62,7 @@ export default function LoginForm() {
           <span className="login-wave-icon">🎓</span>
         </div>
         <h1 className="login-wave-app-name">PSB Online</h1>
-        <p className="login-wave-app-sub">Penerimaan Siswa Baru 2025/2026</p>
+        <p className="login-wave-app-sub">Penerimaan Santri Baru Pondok Pesantren Al-Istiqomah</p>
 
         <svg className="login-wave-svg" viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M0,32 C360,80 1080,-16 1440,32 L1440,64 L0,64 Z" fill="#f0f4f8"/>

@@ -1,19 +1,17 @@
 // app/api/pendaftaran/route.ts
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
-// ── GET: Ambil data pendaftaran milik user yang sedang login ──────────────────
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('pendaftaran')
       .select('*')
       .eq('user_id', session.user.id)
@@ -31,19 +29,16 @@ export async function GET() {
   }
 }
 
-// ── POST: Buat pendaftaran baru ───────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await req.json()
 
-    // Cek apakah sudah pernah daftar
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await getSupabaseAdmin()
       .from('pendaftaran')
       .select('id')
       .eq('user_id', session.user.id)
@@ -57,23 +52,30 @@ export async function POST(req: Request) {
     }
 
     const payload = {
-      user_id:         session.user.id,
-      nama_lengkap:    body.nama_lengkap,
-      nis:             body.nis,
-      nisn:            body.nisn,
-      tempat_lahir:    body.tempat_lahir,
-      tanggal_lahir:   body.tanggal_lahir,
-      jenis_kelamin:   body.jenis_kelamin,
-      agama:           body.agama,
-      alamat:          body.alamat,
-      no_hp:           body.no_hp,
-      asal_sekolah:    body.asal_sekolah,
-      jurusan_pilihan: body.jurusan_pilihan,
-      nilai_rata_rata: body.nilai_rata_rata,
-      status:          'menunggu',
+      user_id:          session.user.id,
+      nama_lengkap:     body.nama_lengkap,
+      nik:              body.nik,
+      nisn:             body.nisn,
+      tempat_lahir:     body.tempat_lahir,
+      tanggal_lahir:    body.tanggal_lahir,
+      jenis_kelamin:    body.jenis_kelamin,
+      agama:            body.agama,
+      alamat:           body.alamat,
+      alamat_kota:      body.alamat_kota,
+      alamat_kecamatan: body.alamat_kecamatan,
+      alamat_rt_rw:     body.alamat_rt_rw,
+      no_hp:            body.no_hp,
+      asal_sekolah:     body.asal_sekolah,
+      npsn:             body.npsn,
+      nama_ayah:        body.nama_ayah,
+      nama_ibu:         body.nama_ibu,
+      pekerjaan_ayah:   body.pekerjaan_ayah,
+      pekerjaan_ibu:    body.pekerjaan_ibu,
+      no_hp_ortu:       body.no_hp_ortu,
+      status:           'menunggu',
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('pendaftaran')
       .insert(payload)
       .select()
@@ -91,11 +93,9 @@ export async function POST(req: Request) {
   }
 }
 
-// ── PUT: Update pendaftaran (hanya jika status masih 'menunggu') ──────────────
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -107,8 +107,9 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'ID pendaftaran diperlukan' }, { status: 400 })
     }
 
-    // Pastikan data milik user ini dan statusnya masih 'menunggu'
-    const { data: existing, error: fetchErr } = await supabaseAdmin
+    const admin = getSupabaseAdmin()
+
+    const { data: existing, error: fetchErr } = await admin
       .from('pendaftaran')
       .select('id, user_id, status')
       .eq('id', id)
@@ -130,22 +131,29 @@ export async function PUT(req: Request) {
     }
 
     const payload = {
-      nama_lengkap:    rest.nama_lengkap,
-      nis:             rest.nis,
-      nisn:            rest.nisn,
-      tempat_lahir:    rest.tempat_lahir,
-      tanggal_lahir:   rest.tanggal_lahir,
-      jenis_kelamin:   rest.jenis_kelamin,
-      agama:           rest.agama,
-      alamat:          rest.alamat,
-      no_hp:           rest.no_hp,
-      asal_sekolah:    rest.asal_sekolah,
-      jurusan_pilihan: rest.jurusan_pilihan,
-      nilai_rata_rata: rest.nilai_rata_rata,
-      updated_at:      new Date().toISOString(),
+      nama_lengkap:     rest.nama_lengkap,
+      nik:              rest.nik,
+      nisn:             rest.nisn,
+      tempat_lahir:     rest.tempat_lahir,
+      tanggal_lahir:    rest.tanggal_lahir,
+      jenis_kelamin:    rest.jenis_kelamin,
+      agama:            rest.agama,
+      alamat:           rest.alamat,
+      alamat_kota:      rest.alamat_kota,
+      alamat_kecamatan: rest.alamat_kecamatan,
+      alamat_rt_rw:     rest.alamat_rt_rw,
+      no_hp:            rest.no_hp,
+      asal_sekolah:     rest.asal_sekolah,
+      npsn:             rest.npsn,
+      nama_ayah:        rest.nama_ayah,
+      nama_ibu:         rest.nama_ibu,
+      pekerjaan_ayah:   rest.pekerjaan_ayah,
+      pekerjaan_ibu:    rest.pekerjaan_ibu,
+      no_hp_ortu:       rest.no_hp_ortu,
+      updated_at:       new Date().toISOString(),
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await admin
       .from('pendaftaran')
       .update(payload)
       .eq('id', id)

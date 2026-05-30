@@ -3,8 +3,8 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'PSB App - Penerimaan Siswa Baru',
-  description: 'Sistem Penerimaan Siswa Baru Online',
+  title: 'PSB App - Penerimaan Santri Baru',
+  description: 'Sistem Penerimaan Santri Baru Online',
   manifest: '/manifest.json',
 }
 

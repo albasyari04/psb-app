@@ -1,124 +1,205 @@
 /* ================================================================
    SiswaBottomNav.module.css
-   PENTING — urutan backdrop-filter:
-     -webkit-backdrop-filter harus ditulis SEBELUM backdrop-filter
-   Nama class pakai underscore (_) bukan dash (-) agar valid
-   sebagai computed key TypeScript: styles[`key_${val}`]
+   Design: Premium Glassmorphism • Violet Theme
+   Identik dengan AdminBottomNav — unified look
    ================================================================ */
 
-/* ── Spacer ──────────────────────────────────────────────────── */
-.spacer { height: 5rem; }
+/* ── Safe area spacer ─────────────────────────────────────────── */
+.spacer {
+  height: 5rem;
+}
 
-/* ── Nav container ───────────────────────────────────────────── */
+/* ── Fixed nav container ──────────────────────────────────────── */
 .nav {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
   max-width: 430px;
-  margin: 0 auto;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ── Glassmorphism background ────────────────────────────────── */
+/* ── Glassmorphism background layer ──────────────────────────── */
 .navBg {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 -6px 32px rgba(109, 40, 217, 0.10),
+    0 -1px 0 rgba(124, 58, 237, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-/* ── Nav inner row ───────────────────────────────────────────── */
+/* ── Inner row ────────────────────────────────────────────────── */
 .navInner {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0.5rem 0.5rem 0.75rem;
+  height: 64px;
+  padding: 0 6px;
 }
 
-/* ── Single nav item ─────────────────────────────────────────── */
+/* ── Single nav item (Link wrapper) ──────────────────────────── */
 .navItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  min-width: 60px;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
   text-decoration: none;
+  position: relative;
+  padding: 6px 2px 4px;
+  border-radius: 20px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
 }
 
-/* ── Icon wrap ───────────────────────────────────────────────── */
+.navItem:active {
+  transform: scale(0.92);
+}
+
+/* ── Icon container ───────────────────────────────────────────── */
 .iconWrap {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 2.5rem;
-  border-radius: 1rem;
-  transition: background 0.2s;
+  width: 48px;
+  height: 32px;
+  border-radius: 16px;
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Active background tints — underscore agar valid sebagai computed key */
-.iconActive_beranda { background: rgba(37,  99, 235, 0.094); }
-.iconActive_daftar  { background: rgba(79,  70, 229, 0.094); }
-.iconActive_status  { background: rgba(5,  150, 105, 0.094); }
-.iconActive_profil  { background: rgba(217, 119,   6, 0.094); }
+/* Active pill background — violet */
+.iconWrapActive {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.14) 0%, rgba(139, 92, 246, 0.10) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
+}
 
-/* ── Active bar ──────────────────────────────────────────────── */
-.activeBar {
+/* ── Active glow dot below icon ──────────────────────────────── */
+.iconWrap::after {
+  content: '';
   position: absolute;
-  top: -0.5rem;
+  bottom: -6px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 1.5rem;
-  height: 0.25rem;
-  border-radius: 999px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7c3aed;
+  opacity: 0;
+  transform: translateX(-50%) scale(0);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.activeBar_beranda { background: #2563eb; }
-.activeBar_daftar  { background: #4f46e5; }
-.activeBar_status  { background: #059669; }
-.activeBar_profil  { background: #d97706; }
 
-/* ── Unread badge ────────────────────────────────────────────── */
-.navBadge {
-  position: absolute;
-  top: 0.125rem;
-  right: 0.375rem;
-  background: #ef4444;
-  color: white;
-  font-size: 8px;
-  font-weight: 800;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  border: 1.5px solid white;
-  line-height: 1;
-  animation: navBadgePop 0.3s ease;
+.iconWrapActive::after {
+  opacity: 0.8;
+  transform: translateX(-50%) scale(1);
 }
-@keyframes navBadgePop {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
+
+/* ── SVG icon transition ─────────────────────────────────────── */
+.iconWrap svg {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.iconWrapActive svg {
+  transform: scale(1.08);
+  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.35));
 }
 
 /* ── Nav label ───────────────────────────────────────────────── */
 .navLabel {
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 500;
   letter-spacing: 0.01em;
-  transition: color 0.2s;
+  line-height: 1;
+  transition:
+    color 0.25s ease,
+    font-weight 0.25s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.navLabelInactive { color: #94a3b8; }
 
-/* Active label colors — underscore */
-.navLabelActive_beranda { color: #2563eb; }
-.navLabelActive_daftar  { color: #4f46e5; }
-.navLabelActive_status  { color: #059669; }
-.navLabelActive_profil  { color: #d97706; }
+.navLabelInactive {
+  color: #94a3b8;
+}
+
+.navLabelActive {
+  color: #7c3aed;
+  font-weight: 700;
+  transform: translateY(-1px);
+}
+
+/* ── Active top bar indicator ────────────────────────────────── */
+.activeBar {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.5);
+  animation: slideInBar 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideInBar {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+/* ── Badge (notification count) ─────────────────────────────── */
+.badge {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes badgePop {
+  from { transform: scale(0) rotate(-15deg); }
+  to   { transform: scale(1) rotate(0deg); }
+}
+
+/* ── Hover state (desktop / large touch targets) ─────────────── */
+@media (hover: hover) {
+  .navItem:hover .iconWrap:not(.iconWrapActive) {
+    background: rgba(124, 58, 237, 0.06);
+    transform: translateY(-1px);
+  }
+  .navItem:hover .navLabel:not(.navLabelActive) {
+    color: #6d28d9;
+  }
+}

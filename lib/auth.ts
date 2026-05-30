@@ -3,7 +3,7 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { User } from '@supabase/supabase-js'
-import { getSupabaseAdmin } from '@/lib/supabase'  // ✅ pakai fungsi, bukan proxy
+import { getSupabaseAdmin } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
 
 interface UserWithRole { role: string; avatar_url?: string }
@@ -21,15 +21,20 @@ async function findAuthUserByEmail(email: string): Promise<string | null> {
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId:     process.env.GOOGLE_CLIENT_ID     ?? '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          prompt: 'consent',
+        },
+      },
     }),
 
     CredentialsProvider({
       name: 'credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        email:    { label: 'Email',    type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
@@ -40,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          const admin = getSupabaseAdmin()  // ✅ type-safe
+          const admin = getSupabaseAdmin()
 
           console.log('[auth] Using supabaseAdmin to query auth_users_view.')
           const { data: viewData, error: viewErr } = await admin
@@ -91,10 +96,10 @@ export const authOptions: NextAuthOptions = {
 
           console.log('[auth] Authorization successful. Returning user object.')
           return {
-            id: profile.id,
-            name: profile.name,
-            email: profile.email,
-            role: profile.role,
+            id:         profile.id,
+            name:       profile.name,
+            email:      profile.email,
+            role:       profile.role,
             avatar_url: profile.avatar_url ?? undefined,
           }
         } catch (e) {
@@ -107,18 +112,22 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Jika URL sudah absolute dan dari domain yang sama, gunakan itu
+      if (!url) return baseUrl
       if (url.startsWith('/')) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
+      try {
+        if (new URL(url).origin === new URL(baseUrl).origin) return url
+      } catch {
+        return baseUrl
+      }
       return baseUrl
     },
 
     async signIn({ user, account }) {
       if (account?.provider !== 'google') return true
       try {
-        const admin = getSupabaseAdmin()  // ✅ type-safe
-        const email = user.email!
-        const name = user.name ?? ''
+        const admin     = getSupabaseAdmin()
+        const email     = user.email!
+        const name      = user.name ?? ''
         const avatarUrl = user.image ?? null
 
         const { data: existingProfile } = await admin
@@ -139,7 +148,9 @@ export const authOptions: NextAuthOptions = {
         let userId = await findAuthUserByEmail(email)
         if (!userId) {
           const { data: newUser, error: createErr } = await admin.auth.admin.createUser({
-            email, email_confirm: true, user_metadata: { name, avatar_url: avatarUrl },
+            email,
+            email_confirm: true,
+            user_metadata: { name, avatar_url: avatarUrl },
           })
           if (createErr || !newUser?.user?.id) return false
           userId = newUser.user.id
@@ -148,42 +159,49 @@ export const authOptions: NextAuthOptions = {
         const { error: upsertErr } = await admin
           .from('profiles')
           .upsert({
-            id: userId,
+            id:         userId,
             email,
             name,
-            role: 'siswa',
+            role:       'siswa',
             avatar_url: avatarUrl,
           })
 
         if (upsertErr) return false
-        if (!userId) return false
+        if (!userId)   return false
         user.id = userId
         return true
       } catch { return false }
     },
 
     async jwt({ token, user, account, trigger, session }) {
-      if (user && account?.provider === 'credentials') {
-        const u = user as UserWithRole
+      // Initial sign in
+      if (user && account) {
         token.id = user.id
-        token.role = u.role
-        token.avatar_url = u.avatar_url ?? undefined
+        // For credentials provider, the user object from authorize already has the role
+        if (account.provider === 'credentials') {
+          const u = user as UserWithRole
+          token.role = u.role
+          token.avatar_url = u.avatar_url
+        }
+        // For Google provider, we need to fetch the profile from our DB
+        else if (account.provider === 'google') {
+          const admin = getSupabaseAdmin()
+          const { data: profile } = await admin
+            .from('profiles')
+            .select('role, avatar_url')
+            .eq('id', user.id) // user.id is set in the signIn callback
+            .single()
+          token.role = profile?.role ?? 'siswa'
+          token.avatar_url = profile?.avatar_url ?? user.image ?? undefined
+        }
       }
-      if (user && account?.provider === 'google') {
-        const admin = getSupabaseAdmin()  // ✅ type-safe
-        token.id = user.id
-        const { data: profile } = await admin
-          .from('profiles')
-          .select('role, avatar_url')
-          .eq('email', token.email!)
-          .maybeSingle()
-        token.role = profile?.role ?? 'siswa'
-        token.avatar_url = profile?.avatar_url ?? user.image ?? undefined
-      }
+
+      // Handle session updates (e.g., user updates their profile)
       if (trigger === 'update' && session) {
-        if (session.name !== undefined) token.name = session.name as string
-        if (session.avatar_url !== undefined) token.avatar_url = session.avatar_url as string
+        if (session.name) token.name = session.name
+        if (session.avatar_url) token.avatar_url = session.avatar_url
       }
+
       return token
     },
 
@@ -199,11 +217,21 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: { signIn: '/login', error: '/login' },
-  session: { strategy: 'jwt', maxAge: 60 * 60 * 8 },
-  debug: process.env.NODE_ENV === 'development',
+
+  session: {
+    strategy:  'jwt',
+    maxAge:    60 * 60 * 8,  // 8 jam
+    updateAge: 60 * 60,
+  },
+
+  // ✅ FIX #3: Hapus jwt.secret (deprecated di NextAuth v4)
+  // secret cukup satu tempat saja yaitu di root config.
+  // jwt.maxAge disamakan dengan session.maxAge agar tidak konflik.
+  jwt: {
+    maxAge: 60 * 60 * 8,  // ✅ sama dengan session.maxAge
+  },
+
   secret: process.env.NEXTAUTH_SECRET,
-  // Pastikan URL dikonfigurasi dengan benar untuk production
-  ...(process.env.NEXTAUTH_URL && {
-    trustHost: true,
-  }),
+
+  debug: process.env.NODE_ENV === 'development',
 }
