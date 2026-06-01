@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -47,6 +48,11 @@ function getAvatarColor(name: string) {
 }
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
+const IconArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+  </svg>
+)
 const IconUsers = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -184,42 +190,33 @@ const CSS = `
 
 /* ── Topbar ── */
 .pnd-topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px 12px;
+  gap: 16px;
+  padding: 12px 16px;
   background: #fff;
   position: sticky; top: 0; z-index: 50;
   border-bottom: 1px solid #f1f5f9;
 }
-.pnd-topbar-left { display: flex; align-items: center; gap: 10px; }
-.pnd-topbar-menu-btn {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: #f8fafc; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; color: #475569;
+.pnd-topbar-back-btn, .pnd-notif-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #475569;
+  text-decoration: none;
+  position: relative;
 }
-.pnd-topbar-title h1 { font-size: 17px; font-weight: 800; color: #0f172a; }
-.pnd-topbar-title p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
-.pnd-topbar-right { display: flex; align-items: center; gap: 8px; }
-.pnd-notif-btn {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: #f8fafc; border: 1.5px solid #e2e8f0;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: #475569; position: relative;
-}
+.pnd-topbar-title { text-align: center; min-width: 0; }
+.pnd-topbar-title h1 { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+.pnd-topbar-title p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pnd-notif-badge {
-  position: absolute; top: -3px; right: -3px;
-  width: 17px; height: 17px; border-radius: 50%;
-  background: #ef4444; font-size: 9px; font-weight: 800; color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid #fff;
-}
-.pnd-av-btn {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: #1e1b4b;
-  color: #fff; font-size: 15px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid #e0e7ff; cursor: pointer;
+  position: absolute; top: 9px; right: 9px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444;
+  border: 1.5px solid #fff;
 }
 
 /* ── Hero Banner ── */
@@ -607,20 +604,17 @@ export default function PendaftarPage() {
 
         {/* ── Topbar ── */}
         <div className="pnd-topbar">
-          <div className="pnd-topbar-left">
-            <button className="pnd-topbar-menu-btn"><IconMenu /></button>
-            <div className="pnd-topbar-title">
-              <h1>Pendaftar</h1>
-              <p>Kelola seluruh pendaftar dengan mudah dan efisien</p>
-            </div>
+          <Link href="/admin/dashboard" className="pnd-topbar-back-btn">
+            <IconArrowLeft />
+          </Link>
+          <div className="pnd-topbar-title">
+            <h1>Pendaftar</h1>
+            <p>Kelola data pendaftar</p>
           </div>
-          <div className="pnd-topbar-right">
-            <button className="pnd-notif-btn">
-              <IconBell />
-              <span className="pnd-notif-badge">3</span>
-            </button>
-            <div className="pnd-av-btn">N</div>
-          </div>
+          <Link href="/admin/notifikasi" className="pnd-notif-btn">
+            <IconBell />
+            {/* <div className="pnd-notif-badge" /> */}
+          </Link>
         </div>
 
         {/* ── Hero Banner ── */}
@@ -633,7 +627,7 @@ export default function PendaftarPage() {
           </div>
           <div className="pnd-hero-img">
             <Image
-                src="/image/pendaftar.jpg"
+                src="/image/pendaftar.gif"
                 alt="Kelola Pendaftar"
                 width={130}
                 height={130}

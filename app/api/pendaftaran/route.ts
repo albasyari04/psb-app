@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { sendNotification, notifyAllAdmins, NotifTemplate } from '@/lib/notifications'
 
 export async function GET() {
   try {
@@ -51,9 +52,11 @@ export async function POST(req: Request) {
       )
     }
 
+    const namaLengkap: string = body.nama_lengkap ?? session.user.name ?? 'Siswa'
+
     const payload = {
       user_id:          session.user.id,
-      nama_lengkap:     body.nama_lengkap,
+      nama_lengkap:     namaLengkap,
       nik:              body.nik,
       nisn:             body.nisn,
       tempat_lahir:     body.tempat_lahir,
@@ -85,6 +88,16 @@ export async function POST(req: Request) {
       console.error('[POST /api/pendaftaran] Supabase error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    // ── Kirim notifikasi setelah pendaftaran berhasil tersimpan ──────────────
+    // Notif ke siswa: konfirmasi pendaftaran berhasil
+    await sendNotification({
+      user_id: session.user.id,
+      ...NotifTemplate.pendaftaranDiterima(namaLengkap),
+    })
+
+    // Notif ke semua admin: ada pendaftar baru
+    await notifyAllAdmins(NotifTemplate.pendaftarBaru(namaLengkap))
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (err) {
