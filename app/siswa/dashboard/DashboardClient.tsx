@@ -44,24 +44,21 @@ const PROGRESS_CLASS: Record<string, string> = {
   ditolak:  styles.progress100red,
 }
 
-// 6 menu Akses Cepat sesuai desain
 const MENU_ITEMS = [
-  { href: '/siswa/pendaftaran', icon: '/image/icon formulir.jpg',    title: 'Formulir',    sub: 'Isi & edit data diri',   bgClass: 'menuBgBlue',   iconClass: 'iconBgBlue'   },
-  { href: '/siswa/berkas',      icon: '/image/icon berkas.jpg',      title: 'Berkas',      sub: 'Upload dokumen',         bgClass: 'menuBgAmber',  iconClass: 'iconBgAmber'  },
-  { href: '/siswa/status',      icon: '/image/icon status.webp',      title: 'Status',      sub: 'Pantau seleksi',         bgClass: 'menuBgGreen',  iconClass: 'iconBgGreen'  },
-  { href: '/siswa/pembayaran',  icon: '/image/icon dompet.png',      title: 'Bayar',       sub: 'Biaya pendaftaran',      bgClass: 'menuBgViolet', iconClass: 'iconBgViolet' },
-  { href: '/siswa/pengumuman',  icon: '/image/icon pengumuman.png',  title: 'Pengumuman',  sub: 'Info terbaru',           bgClass: 'menuBgRed',    iconClass: 'iconBgRed'    },
-  { href: '/siswa/bantuan',     icon: '/image/icon bantuan.png',     title: 'Bantuan',     sub: 'Pusat bantuan',          bgClass: 'menuBgCyan',   iconClass: 'iconBgCyan'   },
+  { href: '/siswa/pendaftaran', icon: '/image/icon formulir.jpg',   title: 'Formulir',   sub: 'Isi & edit data diri',  bgClass: 'menuBgBlue',   iconClass: 'iconBgBlue'   },
+  { href: '/siswa/berkas',      icon: '/image/icon berkas.jpg',     title: 'Berkas',     sub: 'Upload dokumen',        bgClass: 'menuBgAmber',  iconClass: 'iconBgAmber'  },
+  { href: '/siswa/status',      icon: '/image/icon status.webp',    title: 'Status',     sub: 'Pantau seleksi',        bgClass: 'menuBgGreen',  iconClass: 'iconBgGreen'  },
+  { href: '/siswa/pembayaran',  icon: '/image/icon pembayaran.avif',title: 'Bayar',      sub: 'Biaya pendaftaran',     bgClass: 'menuBgViolet', iconClass: 'iconBgViolet' },
+  { href: '/siswa/pengumuman',  icon: '/image/pengumuman.png',      title: 'Pengumuman', sub: 'Info terbaru',          bgClass: 'menuBgRed',    iconClass: 'iconBgRed'    },
+  { href: '/siswa/bantuan',     icon: '/image/bantuan.jpg',         title: 'Bantuan',    sub: 'Pusat bantuan',         bgClass: 'menuBgCyan',   iconClass: 'iconBgCyan'   },
 ] as const
 
-// Jadwal penting
 const JADWAL = [
-  { label: 'Batas Pendaftaran', date: '28 Feb 2025',   dotClass: 'dotRed',   icon: '📅', statusLabel: 'Selesai', statusClass: 'jadwalDone'   },
-  { label: 'Pengumuman Hasil',  date: '15 Maret 2025', dotClass: 'dotBlue',  icon: '📢', statusLabel: 'Selesai', statusClass: 'jadwalDone'   },
-  { label: 'Daftar Ulang',      date: '1–15 Apr 2025', dotClass: 'dotGreen', icon: '🚩', statusLabel: 'Berlangsung', statusClass: 'jadwalOngoing' },
+  { label: 'Batas Pendaftaran', date: '28 Feb 2026',   dotClass: 'dotRed',   icon: '📅', statusLabel: 'Selesai',      statusClass: 'jadwalDone'    },
+  { label: 'Pengumuman Hasil',  date: '15 Maret 2026', dotClass: 'dotBlue',  icon: '📢', statusLabel: 'Selesai',      statusClass: 'jadwalDone'    },
+  { label: 'Daftar Ulang',      date: '1–15 Apr 2026', dotClass: 'dotGreen', icon: '🚩', statusLabel: 'Berlangsung',  statusClass: 'jadwalOngoing' },
 ] as const
 
-// Tipe pengumuman config
 const TIPE_CONFIG: Record<string, {
   badge: string; icon: string; accent: string; pill: string;
 }> = {
@@ -102,7 +99,13 @@ function AnnouncementCard({
       aria-label={`Buka pengumuman: ${item.judul}`}
     >
       <div className={styles.annIconWrap}>
-        <Image src="/icons/icon_pengumuman.png" alt="" width={36} height={36} className={styles.annIcon} />
+        <Image
+          src="/image/laporan.jpg"
+          alt=""
+          width={36}
+          height={36}
+          className={styles.annIcon}
+        />
       </div>
       <div className={styles.annCardLeft}>
         <span className={`${styles.annTypePill} ${cfg.pill}`}>
@@ -207,8 +210,8 @@ export default function DashboardClient({
     fetchAnnouncements()
   }, [])
 
-  const hour         = now.getHours()
-  const greetingText = getGreeting(hour)
+  const hour          = now.getHours()
+  const greetingText  = getGreeting(hour)
   const progressClass = status ? (PROGRESS_CLASS[status] ?? styles.progress25) : styles.progress25
 
   return (
@@ -216,23 +219,28 @@ export default function DashboardClient({
 
       {/* ══ HERO HEADER ══════════════════════════════════════════════════════ */}
       <div className={styles.hero}>
-        {/* Decorative orbs */}
+        {/* Decorative elements */}
         <div className={styles.orbA} />
         <div className={styles.orbB} />
         <div className={styles.orbC} />
+        <div className={styles.starField}>
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className={`${styles.star} ${styles[`star${i + 1}`]}`} />
+          ))}
+        </div>
 
         {/* Top nav: greeting + bell + avatar */}
         <div className={styles.heroTopBar}>
           <div className={styles.heroTopLeft}>
             <p className={styles.greetingText}>{greetingText}, 👋</p>
             <h1 className={styles.heroName}>{fullName}</h1>
-            <p className={styles.heroSchool}>SPMB 2026/2027 • PON-PES AL ISTIQOMAH</p>
+            <p className={styles.heroSchool}>Santri Pondok Pesantren Al Istiqomah</p>
           </div>
           <div className={styles.heroTopRight}>
             <NotificationBell />
             <Link href="/siswa/profile" className={styles.topbarAvatar} aria-label="Profil saya">
               {avatarUrl ? (
-                <Image src={avatarUrl} alt={fullName} width={38} height={38}
+                <Image src={avatarUrl} alt={fullName} width={40} height={40}
                   className={styles.avatarImg} referrerPolicy="no-referrer" unoptimized
                 />
               ) : (
@@ -242,14 +250,26 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Santri character image */}
+        {/* Santri character image — right side of hero */}
         <div className={styles.heroCharacter}>
           <Image
-            src="/image/icon santri.png"
+            src="/image/ilustrasi santri.png"
             alt="Santri"
-            width={180}
-            height={200}
+            width={160}
+            height={190}
             className={styles.heroCharacterImg}
+            priority
+          />
+        </div>
+
+        {/* Masjid silhouette background */}
+        <div className={styles.heroMasjid}>
+          <Image
+            src="/image/ilustrasi masjid.png"
+            alt=""
+            width={200}
+            height={120}
+            className={styles.heroMasjidImg}
             priority
           />
         </div>
@@ -259,9 +279,9 @@ export default function DashboardClient({
       <div className={styles.floatZone}>
         {pendaftaran && status ? (
           <div className={styles.statusCard}>
+            {/* Header row */}
             <div className={styles.statusHeader}>
               <div className={styles.statusLeft}>
-                {/* Green checkmark for diterima, else dot */}
                 {status === 'diterima' ? (
                   <div className={styles.statusCheckCircle}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -279,9 +299,11 @@ export default function DashboardClient({
                 </div>
               </div>
               <Link href="/siswa/status" className={styles.detailBtn}>
-                Lihat Detail <span>›</span>
+                Lihat Detail →
               </Link>
             </div>
+
+            {/* Progress */}
             <div className={styles.progressMeta}>
               <span>Progress Seleksi</span>
               <span className={styles.progressPct}>{PROGRESS_VALUE[status]}%</span>
@@ -289,23 +311,39 @@ export default function DashboardClient({
             <div className={styles.progressTrack}>
               <div className={progressClass} />
             </div>
+
             <div className={styles.infoDivider} />
-            {/* Info row: 3 kolom */}
+
+            {/* Info 3 kolom */}
             <div className={styles.infoRow3}>
               <div className={styles.infoCol}>
-                <div className={styles.infoColIcon}>👤</div>
+                <div className={styles.infoColIconWrap}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
                 <p className={styles.infoKey}>Nama Lengkap</p>
                 <p className={styles.infoVal}>{pendaftaran.nama_lengkap}</p>
               </div>
               <div className={styles.infoColDivider} />
               <div className={styles.infoCol}>
-                <div className={styles.infoColIcon}>🛡️</div>
-                <p className={styles.infoKey}>No. Reg</p>
-                <p className={styles.infoValMono}>{pendaftaran.id.slice(0, 8).toUpperCase()}</p>
+                <div className={styles.infoColIconWrap}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <p className={styles.infoKey}>No. Registrasi</p>
+                <p className={styles.infoValMono}>PSB-2026-{pendaftaran.id.slice(0, 4).toUpperCase()}</p>
               </div>
               <div className={styles.infoColDivider} />
               <div className={styles.infoCol}>
-                <div className={styles.infoColIcon}>📅</div>
+                <div className={styles.infoColIconWrap}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
                 <p className={styles.infoKey}>Tanggal Daftar</p>
                 <p className={styles.infoVal}>{formatTanggalShort(pendaftaran.created_at ?? '')}</p>
               </div>
@@ -314,7 +352,13 @@ export default function DashboardClient({
         ) : (
           <div className={styles.emptyCard}>
             <div className={styles.emptyRow}>
-              <div className={styles.emptyIconBox}>📋</div>
+              <div className={styles.emptyIconBox}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+              </div>
               <div>
                 <p className={styles.emptyTitle}>Belum Mendaftar</p>
                 <p className={styles.emptySub}>Lengkapi formulir untuk memulai proses seleksi.</p>
@@ -331,11 +375,11 @@ export default function DashboardClient({
       {/* ══ MAIN CONTENT ═══════════════════════════════════════════════════ */}
       <div className={styles.mainContent}>
 
-        {/* ── Akses Cepat (6 menu, 3x2 grid) ──────────────────────────── */}
+        {/* ── Akses Cepat ──────────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Akses Cepat</p>
-            <Link href="/siswa" className={styles.sectionLink}>Lihat Semua →</Link>
+            <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
           </div>
           <div className={styles.menuGrid6}>
             {MENU_ITEMS.map((item) => (
@@ -343,16 +387,27 @@ export default function DashboardClient({
                 className={`${styles.menuCard} ${styles[item.bgClass]}`}
               >
                 <div className={`${styles.menuIconBox} ${styles[item.iconClass]}`}>
-                  <Image src={item.icon} alt={item.title} width={28} height={28} className={styles.menuIconImg} />
+                  <Image
+                    src={item.icon}
+                    alt={item.title}
+                    width={30}
+                    height={30}
+                    className={styles.menuIconImg}
+                  />
                 </div>
                 <p className={styles.menuTitle}>{item.title}</p>
                 <p className={styles.menuSub}>{item.sub}</p>
+                <div className={styles.menuChevron}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* ── Jadwal Penting (3 kolom horizontal) ──────────────────────── */}
+        {/* ── Jadwal Penting ────────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Jadwal Penting</p>
@@ -360,7 +415,7 @@ export default function DashboardClient({
           </div>
           <div className={styles.jadwalGrid}>
             {JADWAL.map((j) => (
-              <div key={j.label} className={styles.jadwalItem}>
+              <div key={j.label} className={`${styles.jadwalItem} ${styles[`jadwalBorder_${j.dotClass}`]}`}>
                 <div className={styles.jadwalItemTop}>
                   <span className={styles.jadwalItemIcon}>{j.icon}</span>
                   <span className={`${styles.jadwalDotSmall} ${styles[j.dotClass]}`} />
@@ -392,19 +447,29 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* ── Banner Promo ──────────────────────────────────────────────── */}
+        {/* ── Promo Banner ─────────────────────────────────────────────── */}
         <div className={styles.promoBanner}>
-          <div className={styles.promoBannerLeft}>
-            <div className={styles.promoBannerImg}>
-              {/* Graduation icon using emoji / you can replace with actual image */}
-              <span style={{ fontSize: '3rem' }}>🎓</span>
-            </div>
-          </div>
+          {/* Background decorative orbs */}
+          <div className={styles.promoBannerOrb1} />
+          <div className={styles.promoBannerOrb2} />
+
           <div className={styles.promoBannerContent}>
             <p className={styles.promoBannerTitle}>Persiapkan dirimu menjadi santri berprestasi!</p>
             <p className={styles.promoBannerSub}>Raih masa depan gemilang bersama Pondok Pesantren Al Istiqomah</p>
-            <button className={styles.promoBannerBtn}>Selengkapnya ›</button>
+            <button className={styles.promoBannerBtn}>Selengkapnya →</button>
           </div>
+
+          {/* Santri illustration right side */}
+          <div className={styles.promoBannerIllustration}>
+            <Image
+              src="/image/ilustrasi santri.png"
+              alt="Santri berprestasi"
+              width={130}
+              height={130}
+              className={styles.promoBannerIllImg}
+            />
+          </div>
+
           {/* Dot indicators */}
           <div className={styles.promoDots}>
             <span className={`${styles.promoDot} ${styles.promoDotActive}`} />
@@ -449,41 +514,50 @@ export default function DashboardClient({
       {/* ══ BOTTOM NAV ═══════════════════════════════════════════════════════ */}
       <nav className={styles.bottomNav}>
         <Link href="/siswa" className={`${styles.navItem} ${styles.navItemActive}`}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-          </svg>
+          <div className={styles.navIconWrap}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+          </div>
           <span>Beranda</span>
         </Link>
         <Link href="/siswa/pendaftaran" className={styles.navItem}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
+          <div className={styles.navIconWrap}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
           <span>Daftar</span>
         </Link>
         <Link href="/siswa/pembayaran" className={styles.navItem}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-            <line x1="1" y1="10" x2="23" y2="10"/>
-          </svg>
+          <div className={styles.navIconWrap}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+          </div>
           <span>Bayar</span>
         </Link>
         <Link href="/siswa/status" className={styles.navItem}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
+          <div className={styles.navIconWrap}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
           <span>Status</span>
         </Link>
         <Link href="/siswa/profile" className={styles.navItem}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
+          <div className={styles.navIconWrap}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
           <span>Profil</span>
         </Link>
       </nav>
