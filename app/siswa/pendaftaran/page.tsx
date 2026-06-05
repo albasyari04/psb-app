@@ -330,7 +330,6 @@ export default function PendaftaranPage() {
             <Link href="/siswa/dashboard" className="sf-back-btn">←</Link>
             <div>
               <h1 className="sf-header-title">Formulir Pendaftaran</h1>
-              <p className="sf-header-sub">Tahun Ajaran 2025/2026 · Pon-Pes Al Istiqomah</p>
             </div>
           </div>
 
