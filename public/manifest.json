@@ -1,11 +1,11 @@
 {
-  "name": "PSB App - Penerimaan Siswa Baru",
-  "short_name": "PSB",
-  "description": "Sistem Penerimaan Siswa Baru Online",
+  "name": "PSMB - Pon-Pes Al Istiqomah",
+  "short_name": "PSMB",
+  "description": "Penerimaan Santri Baru Pon-Pes Al Istiqomah",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1e40af",
-  "theme_color": "#1e40af",
+  "background_color": "#0d4f3c",
+  "theme_color": "#0d4f3c",
   "orientation": "portrait",
   "icons": [
     {
@@ -29,6 +29,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/splash.png",
+      "sizes": "720x1560",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
