@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
 import type { Pendaftaran } from '@/types'
@@ -68,6 +68,49 @@ const TIPE_CONFIG: Record<string, {
   Peringatan: { badge: styles.badgePeringatan, icon: '🟡', accent: styles.accentPeringatan, pill: styles.pillPeringatan },
 }
 
+// ── Promo Carousel Slides ─────────────────────────────────────────────────────
+interface PromoSlide {
+  id: number
+  emoji: string
+  title: string
+  sub: string
+  btnLabel: string
+  btnHref: string
+  gradient: string
+}
+
+const PROMO_SLIDES: PromoSlide[] = [
+  {
+    id: 0,
+    emoji: '🌟',
+    title: 'Persiapkan dirimu menjadi santri berprestasi!',
+    sub: 'Raih masa depan gemilang bersama Pondok Pesantren Al Istiqomah',
+    btnLabel: 'Selengkapnya →',
+    btnHref: '/siswa/peraturan',
+    gradient: 'linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #3b82f6 100%)',
+  },
+  {
+    id: 1,
+    emoji: '📋',
+    title: 'Wajib menjaga adab & akhlak mulia setiap saat',
+    sub: 'Santri diharapkan menjaga sopan santun kepada ustadz, teman, dan lingkungan pondok',
+    btnLabel: 'Lihat Peraturan →',
+    btnHref: '/siswa/peraturan',
+    gradient: 'linear-gradient(135deg, #065f46 0%, #059669 55%, #10b981 100%)',
+  },
+  {
+    id: 2,
+    emoji: '🕌',
+    title: 'Shalat berjamaah adalah kewajiban seluruh santri',
+    sub: 'Lima waktu shalat berjamaah di masjid pondok wajib diikuti oleh semua santri mukim',
+    btnLabel: 'Info Lebih Lanjut →',
+    btnHref: '/siswa/peraturan',
+    gradient: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 55%, #8b5cf6 100%)',
+  },
+]
+
+const CAROUSEL_INTERVAL = 4000 // 4 detik
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getGreeting(hour: number): string {
   if (hour >= 4  && hour < 11) return 'Selamat pagi'
@@ -81,6 +124,94 @@ function formatTanggalShort(iso: string): string {
       day: '2-digit', month: 'short', year: 'numeric',
     })
   } catch { return iso }
+}
+
+// ── PromoBannerCarousel ───────────────────────────────────────────────────────
+function PromoBannerCarousel() {
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const goTo = useCallback((idx: number) => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setActiveIdx(idx)
+      setIsTransitioning(false)
+    }, 200)
+  }, [isTransitioning])
+
+  const goNext = useCallback(() => {
+    goTo((activeIdx + 1) % PROMO_SLIDES.length)
+  }, [activeIdx, goTo])
+
+  // Auto-play
+  useEffect(() => {
+    timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [goNext])
+
+  // Reset timer saat user klik dot
+  function handleDotClick(idx: number) {
+    if (timerRef.current) clearInterval(timerRef.current)
+    goTo(idx)
+    timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
+  }
+
+  const slide = PROMO_SLIDES[activeIdx]
+
+  return (
+    <div
+      className={styles.promoBanner}
+      style={{ background: slide.gradient, transition: 'background 0.5s ease' }}
+    >
+      {/* Background decorative orbs */}
+      <div className={styles.promoBannerOrb1} />
+      <div className={styles.promoBannerOrb2} />
+
+      {/* Slide content */}
+      <div
+        className={styles.promoBannerContent}
+        style={{
+          opacity: isTransitioning ? 0 : 1,
+          transform: isTransitioning ? 'translateY(6px)' : 'translateY(0)',
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
+        }}
+      >
+        <p className={styles.promoBannerEmoji}>{slide.emoji}</p>
+        <p className={styles.promoBannerTitle}>{slide.title}</p>
+        <p className={styles.promoBannerSub}>{slide.sub}</p>
+        <Link href={slide.btnHref} className={styles.promoBannerBtn}>
+          {slide.btnLabel}
+        </Link>
+      </div>
+
+      {/* Santri illustration right side */}
+      <div className={styles.promoBannerIllustration}>
+        <Image
+          src="/image/ilustrasi santri.png"
+          alt="Santri berprestasi"
+          width={130}
+          height={130}
+          className={styles.promoBannerIllImg}
+        />
+      </div>
+
+      {/* Dot indicators */}
+      <div className={styles.promoDots}>
+        {PROMO_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            className={`${styles.promoDot} ${i === activeIdx ? styles.promoDotActive : ''}`}
+            onClick={() => handleDotClick(i)}
+            aria-label={`Slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // ── AnnouncementCard ──────────────────────────────────────────────────────────
@@ -447,36 +578,8 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* ── Promo Banner ─────────────────────────────────────────────── */}
-        <div className={styles.promoBanner}>
-          {/* Background decorative orbs */}
-          <div className={styles.promoBannerOrb1} />
-          <div className={styles.promoBannerOrb2} />
-
-          <div className={styles.promoBannerContent}>
-            <p className={styles.promoBannerTitle}>Persiapkan dirimu menjadi santri berprestasi!</p>
-            <p className={styles.promoBannerSub}>Raih masa depan gemilang bersama Pondok Pesantren Al Istiqomah</p>
-            <button className={styles.promoBannerBtn}>Selengkapnya →</button>
-          </div>
-
-          {/* Santri illustration right side */}
-          <div className={styles.promoBannerIllustration}>
-            <Image
-              src="/image/ilustrasi santri.png"
-              alt="Santri berprestasi"
-              width={130}
-              height={130}
-              className={styles.promoBannerIllImg}
-            />
-          </div>
-
-          {/* Dot indicators */}
-          <div className={styles.promoDots}>
-            <span className={`${styles.promoDot} ${styles.promoDotActive}`} />
-            <span className={styles.promoDot} />
-            <span className={styles.promoDot} />
-          </div>
-        </div>
+        {/* ── Promo Banner Carousel ─────────────────────────────────────── */}
+        <PromoBannerCarousel />
 
         {/* ── Pengumuman Terbaru ────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
