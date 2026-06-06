@@ -280,14 +280,6 @@ export default function PeraturanPage() {
     setExpandedSection(prev => prev === id ? null : id)
   }
 
-  // Tab icon map for image icons
-  const TAB_ICONS: Record<string, string> = {
-    umum:     '/image/peraturan_umum.png',
-    ibadah:   '/image/peraturan_umum.png',
-    akademik: '/image/peraturan_umum.png',
-    asrama:   '/image/peraturan_umum.png',
-  }
-
   return (
     <div className={styles.shell}>
 
