@@ -71,45 +71,33 @@ const TIPE_CONFIG: Record<string, {
 // ── Promo Carousel Slides ─────────────────────────────────────────────────────
 interface PromoSlide {
   id: number
-  emoji: string
-  title: string
-  sub: string
-  btnLabel: string
+  image: string
+  alt: string
   btnHref: string
-  gradient: string
 }
 
 const PROMO_SLIDES: PromoSlide[] = [
   {
     id: 0,
-    emoji: '🌟',
-    title: 'Persiapkan dirimu menjadi santri berprestasi!',
-    sub: 'Raih masa depan gemilang bersama Pondok Pesantren Al Istiqomah',
-    btnLabel: 'Selengkapnya →',
+    image: '/image/banner.png',
+    alt: 'Banner Peraturan Pondok',
     btnHref: '/siswa/peraturan',
-    gradient: 'linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #3b82f6 100%)',
   },
   {
     id: 1,
-    emoji: '📋',
-    title: 'Wajib menjaga adab & akhlak mulia setiap saat',
-    sub: 'Santri diharapkan menjaga sopan santun kepada ustadz, teman, dan lingkungan pondok',
-    btnLabel: 'Lihat Peraturan →',
+    image: '/image/banner1.png',
+    alt: 'Banner Wujudkan Lingkungan Nyaman',
     btnHref: '/siswa/peraturan',
-    gradient: 'linear-gradient(135deg, #065f46 0%, #059669 55%, #10b981 100%)',
   },
   {
     id: 2,
-    emoji: '🕌',
-    title: 'Shalat berjamaah adalah kewajiban seluruh santri',
-    sub: 'Lima waktu shalat berjamaah di masjid pondok wajib diikuti oleh semua santri mukim',
-    btnLabel: 'Info Lebih Lanjut →',
+    image: '/image/peraturan banner.png',
+    alt: 'Banner Taat Aturan',
     btnHref: '/siswa/peraturan',
-    gradient: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 55%, #8b5cf6 100%)',
   },
 ]
 
-const CAROUSEL_INTERVAL = 4000 // 4 detik
+const CAROUSEL_INTERVAL = 5000 // 5 detik
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getGreeting(hour: number): string {
@@ -138,7 +126,7 @@ function PromoBannerCarousel() {
     setTimeout(() => {
       setActiveIdx(idx)
       setIsTransitioning(false)
-    }, 200)
+    }, 300)
   }, [isTransitioning])
 
   const goNext = useCallback(() => {
@@ -163,40 +151,39 @@ function PromoBannerCarousel() {
   const slide = PROMO_SLIDES[activeIdx]
 
   return (
-    <div
-      className={styles.promoBanner}
-      style={{ background: slide.gradient, transition: 'background 0.5s ease' }}
-    >
-      {/* Background decorative orbs */}
-      <div className={styles.promoBannerOrb1} />
-      <div className={styles.promoBannerOrb2} />
-
-      {/* Slide content */}
+    <div className={styles.promoBanner}>
+      {/* Gambar banner — full cover, ganti per slide */}
       <div
-        className={styles.promoBannerContent}
+        className={styles.promoBannerImgWrap}
         style={{
           opacity: isTransitioning ? 0 : 1,
-          transform: isTransitioning ? 'translateY(6px)' : 'translateY(0)',
-          transition: 'opacity 0.2s ease, transform 0.2s ease',
+          transform: isTransitioning ? 'scale(1.02)' : 'scale(1)',
+          transition: 'opacity 0.3s ease, transform 0.3s ease',
         }}
       >
-        <p className={styles.promoBannerEmoji}>{slide.emoji}</p>
-        <p className={styles.promoBannerTitle}>{slide.title}</p>
-        <p className={styles.promoBannerSub}>{slide.sub}</p>
-        <Link href={slide.btnHref} className={styles.promoBannerBtn}>
-          {slide.btnLabel}
-        </Link>
+        <Image
+          src={slide.image}
+          alt={slide.alt}
+          fill
+          className={styles.promoBannerImg}
+          priority={slide.id === 0}
+        />
       </div>
 
-      {/* Santri illustration right side */}
-      <div className={styles.promoBannerIllustration}>
-        <Image
-          src="/image/ilustrasi santri.png"
-          alt="Santri berprestasi"
-          width={130}
-          height={130}
-          className={styles.promoBannerIllImg}
-        />
+      {/* Overlay gelap tipis supaya tombol terbaca */}
+      <div className={styles.promoBannerOverlay} />
+
+      {/* Tombol Lihat Selengkapnya — pojok kiri bawah */}
+      <div
+        className={styles.promoBannerFooter}
+        style={{
+          opacity: isTransitioning ? 0 : 1,
+          transition: 'opacity 0.3s ease',
+        }}
+      >
+        <Link href={slide.btnHref} className={styles.promoBannerBtn}>
+          Lihat Selengkapnya →
+        </Link>
       </div>
 
       {/* Dot indicators */}

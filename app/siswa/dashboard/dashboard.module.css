@@ -540,107 +540,106 @@
 /* ── Promo Banner Carousel ───────────────────────────────────── */
 .promoBanner {
   border-radius: 1.5rem;
-  padding: 1.25rem 1.25rem 2.5rem;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  min-height: 148px;
-  /* background diatur inline via React (per slide) */
+  min-height: 170px;
+  background: #1e3a8a;
 }
-.promoBannerOrb1 {
+
+/* Wrapper gambar — fill absolute */
+.promoBannerImgWrap {
   position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 160px;
-  height: 160px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 50%;
-  pointer-events: none;
+  inset: 0;
+  z-index: 1;
 }
-.promoBannerOrb2 {
+.promoBannerImg {
+  object-fit: cover;
+  object-position: center;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 1.5rem;
+}
+
+/* Overlay gelap di bagian bawah supaya tombol kontras */
+.promoBannerOverlay {
   position: absolute;
-  bottom: -40px;
-  left: -40px;
-  width: 130px;
-  height: 130px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 50%;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.05) 0%,
+    rgba(0,0,0,0.0)  40%,
+    rgba(0,0,0,0.45) 100%
+  );
+  border-radius: 1.5rem;
   pointer-events: none;
 }
 
+/* Footer row berisi tombol */
+.promoBannerFooter {
+  position: absolute;
+  bottom: 2rem;
+  left: 1.25rem;
+  z-index: 3;
+}
+
+/* Orb dekoratif (dipertahankan tapi kecil) */
+.promoBannerOrb1 {
+  display: none;
+}
+.promoBannerOrb2 {
+  display: none;
+}
+
 .promoBannerContent {
-  flex: 1;
-  z-index: 2;
-  /* opacity & transform diatur inline via React untuk fade transition */
+  display: none;
 }
-.promoBannerEmoji {
-  font-size: 1.4rem;
-  margin: 0 0 0.25rem;
-  line-height: 1;
-}
-.promoBannerTitle {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: white;
-  line-height: 1.3;
-  margin: 0 0 0.3rem;
-  /* beri ruang agar tidak tumpang tindih ilustrasi */
-  max-width: calc(100% - 110px);
-}
-.promoBannerSub {
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.75);
-  font-weight: 500;
-  line-height: 1.45;
-  margin: 0 0 0.85rem;
-  max-width: calc(100% - 110px);
-}
+.promoBannerEmoji { display: none; }
+.promoBannerTitle { display: none; }
+.promoBannerSub   { display: none; }
+.promoBannerIllustration { display: none; }
+.promoBannerIllImg { display: none; }
+
 .promoBannerBtn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   background: white;
-  color: #2563eb;
+  color: #1e40af;
   font-size: 0.78rem;
   font-weight: 700;
   border: none;
   border-radius: 999px;
-  padding: 0.42rem 1.05rem;
+  padding: 0.45rem 1.1rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   font-family: inherit;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.22);
   text-decoration: none;
+  white-space: nowrap;
 }
-.promoBannerBtn:hover { background: #f0f7ff; transform: scale(1.03); }
-
-.promoBannerIllustration {
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0;
-  z-index: 2;
-}
-.promoBannerIllImg {
-  object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+.promoBannerBtn:hover {
+  background: #eff6ff;
+  transform: scale(1.04);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.28);
 }
 
-/* Dot indicators — sekarang pakai <button> */
+/* Dot indicators */
 .promoDots {
   position: absolute;
-  bottom: 0.8rem;
+  bottom: 0.75rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 0.32rem;
-  z-index: 3;
+  z-index: 4;
 }
 .promoDot {
   height: 6px;
   width: 6px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.38);
+  background: rgba(255,255,255,0.45);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -649,7 +648,7 @@
               opacity 0.35s ease;
   flex-shrink: 0;
 }
-.promoDot:hover { background: rgba(255,255,255,0.6); }
+.promoDot:hover { background: rgba(255,255,255,0.7); }
 .promoDotActive {
   background: white;
   width: 20px;
