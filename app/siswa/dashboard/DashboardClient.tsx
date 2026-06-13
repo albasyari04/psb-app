@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
 import type { Pendaftaran } from '@/types'
@@ -91,49 +91,6 @@ const TIPE_CONFIG: Record<string, {
   Peringatan: { badge: styles.badgePeringatan, icon: '🟡', accent: styles.accentPeringatan, pill: styles.pillPeringatan },
 }
 
-// ── Promo Top Slider (Wujudkan Impianmu style) ────────────────────────────────
-interface PromoTopSlide {
-  id: number
-  eyebrow: string
-  title: string
-  highlight: string
-  sub: string
-  btnLabel: string
-  btnHref: string
-  image: string
-  imageAlt: string
-}
-
-const PROMO_TOP_SLIDES: PromoTopSlide[] = [
-  {
-    id: 0,
-    eyebrow: 'Berprestasi, Berakhlak, Berilmu',
-    title: 'Wujudkan Impianmu\nBersama ',
-    highlight: 'Al Istiqomah',
-    sub: 'Belajar • Berkarya • Berkontribusi',
-    btnLabel: 'Lihat Program →',
-    btnHref: '/siswa/program',
-    image: '/image/buku.png',
-    imageAlt: 'Ilustrasi buku dan tas santri',
-  },
-  {
-    id: 1,
-    eyebrow: 'PSMB Al Istiqomah',
-    title: 'Mujahidah: Urungkan\nNiatmu, Niscaya ',
-    highlight: 'Allah Berikan',
-    sub: 'Kemudahan Jalannya.',
-    btnLabel: 'Lihat Selengkapnya →',
-    btnHref: '/siswa/peraturan',
-    image: '/image/ilustrasi santri.png',
-    imageAlt: 'Ilustrasi santri membaca',
-  },
-]
-
-const CAROUSEL_INTERVAL = 5000
-
-// ── Banner Carousel (bottom) ──────────────────────────────────────────────────
-
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getGreeting(hour: number): string {
   if (hour >= 4  && hour < 11) return 'Selamat Pagi'
@@ -155,93 +112,21 @@ function formatTanggalShort(iso: string): string {
   } catch { return iso }
 }
 
-// ── PromoTopCarousel ──────────────────────────────────────────────────────────
-function PromoTopCarousel() {
-  const [activeIdx, setActiveIdx]       = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const goTo = useCallback((idx: number) => {
-    if (isTransitioning) return
-    setIsTransitioning(true)
-    setTimeout(() => {
-      setActiveIdx(idx)
-      setIsTransitioning(false)
-    }, 280)
-  }, [isTransitioning])
-
-  const goNext = useCallback(() => {
-    goTo((activeIdx + 1) % PROMO_TOP_SLIDES.length)
-  }, [activeIdx, goTo])
-
-  useEffect(() => {
-    timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [goNext])
-
-  function handleDotClick(idx: number) {
-    if (timerRef.current) clearInterval(timerRef.current)
-    goTo(idx)
-    timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
-  }
-
-  const slide = PROMO_TOP_SLIDES[activeIdx]
-
+// ── PendaftaranBanner (static, tanpa auto-slide) ──────────────────────────────
+function PendaftaranBanner() {
   return (
-    <div className={styles.promoSliderCard}>
-      <div
-        className={styles.promoSliderInner}
-        style={{
-          opacity: isTransitioning ? 0 : 1,
-          transform: isTransitioning ? 'translateX(-6px)' : 'translateX(0)',
-          transition: 'opacity 0.28s ease, transform 0.28s ease',
-        }}
-      >
-        {/* bg decorative circles */}
-        <div className={styles.promoSliderBg}>
-          <div className={styles.promoSliderBgCircle1} />
-          <div className={styles.promoSliderBgCircle2} />
-        </div>
-
-        {/* Text content */}
-        <div className={styles.promoSliderContent}>
-          <span className={styles.promoSliderEyebrow}>{slide.eyebrow}</span>
-          <h2 className={styles.promoSliderTitle}>
-            {slide.title}
-            <span className={styles.promoSliderTitleHighlight}>{slide.highlight}</span>
-          </h2>
-          <p className={styles.promoSliderSub}>{slide.sub}</p>
-          <Link href={slide.btnHref} className={styles.promoSliderBtn}>
-            {slide.btnLabel}
-          </Link>
-        </div>
-
-        {/* Illustration */}
-        <div className={styles.promoSliderImageWrap}>
-          <Image
-            src={slide.image}
-            alt={slide.imageAlt}
-            fill
-            className={styles.promoSliderImg}
-            priority={slide.id === 0}
-          />
-        </div>
-      </div>
-
-      {/* Dots */}
-      <div className={styles.promoSliderDots}>
-        {PROMO_TOP_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            className={`${styles.promoSliderDot} ${i === activeIdx ? styles.promoSliderDotActive : ''}`}
-            onClick={() => handleDotClick(i)}
-            aria-label={`Slide ${i + 1}`}
-          />
-        ))}
-      </div>
+    <div className={styles.pendaftaranBannerWrap}>
+      <Image
+        src="/icons/banner.jpeg"
+        alt="Penerimaan Santri Baru Tahun Ajaran 2026/2027"
+        fill
+        className={styles.pendaftaranBannerImg}
+        priority
+      />
     </div>
   )
 }
+
 
 // ── StaticBanner ──────────────────────────────────────────────────────────────
 function StaticBanner() {
@@ -403,6 +288,20 @@ export default function DashboardClient({
 
       {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
       <div className={styles.hero}>
+
+        {/* Background masjid */}
+        <div className={styles.heroBgImage}>
+          <Image
+            src="/image/masjid.png"
+            alt=""
+            fill
+            className={styles.heroBgImg}
+            priority
+          />
+        </div>
+        {/* Overlay gelap agar teks tetap terbaca */}
+        <div className={styles.heroBgOverlay} />
+
         <div className={styles.orbA} />
         <div className={styles.orbB} />
         <div className={styles.orbC} />
@@ -465,8 +364,8 @@ export default function DashboardClient({
       {/* ══ FLOAT ZONE ════════════════════════════════════════════════════════ */}
       <div className={styles.floatZone}>
 
-        {/* Promo top slider */}
-        <PromoTopCarousel />
+        {/* Banner Pendaftaran Santri Baru — static, tanpa auto-slide */}
+        <PendaftaranBanner />
 
         {/* Quick access — 4 icons */}
         <div className={styles.quickSection}>

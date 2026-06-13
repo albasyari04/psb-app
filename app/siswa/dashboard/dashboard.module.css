@@ -19,9 +19,35 @@
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0c2461 0%, #1a3a8f 40%, #2563eb 80%, #3b82f6 100%);
+  /* fallback color jika gambar belum load */
+  background: #0c1a4a;
   padding: 3rem 1.25rem 6.5rem;
   min-height: 210px;
+}
+
+/* Background image masjid */
+.heroBgImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.heroBgImg {
+  object-fit: cover;
+  object-position: center bottom;
+  width: 100% !important;
+  height: 100% !important;
+}
+/* Overlay biru gelap supaya teks & elemen tetap terbaca */
+.heroBgOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    135deg,
+    rgba(8, 20, 70, 0.82) 0%,
+    rgba(15, 40, 100, 0.72) 50%,
+    rgba(10, 30, 80, 0.65) 100%
+  );
 }
 
 /* Decorative orbs */
@@ -31,13 +57,14 @@
   filter: blur(55px);
   opacity: 0.22;
   pointer-events: none;
+  z-index: 2;
 }
 .orbA { width: 280px; height: 280px; background: #93c5fd; top: -100px; right: -80px; }
 .orbB { width: 180px; height: 180px; background: #818cf8; bottom: -60px; left: -60px; }
 .orbC { width: 120px; height: 120px; background: #34d399; top: 20%; right: 30%; }
 
 /* Star sparkles */
-.starField { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.starField { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .star {
   position: absolute;
   background: white;
@@ -61,7 +88,7 @@
 /* Hero top bar */
 .heroTopBar {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -146,7 +173,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 2;
   opacity: 0.15;
 }
 .heroMasjidImg { object-fit: contain; }
@@ -162,6 +189,26 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+/* ── Pendaftaran Banner (static) ─────────────────────────────── */
+.bannerSection {
+  padding: 0 1rem;
+  margin-top: 0.85rem;
+}
+.pendaftaranBannerWrap {
+  position: relative;
+  width: 100%;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+  background: #0f4c2a;
+  box-shadow: 0 4px 20px rgba(14,30,100,0.12);
+}
+.pendaftaranBannerImg {
+  object-fit: cover;
+  object-position: center;
+  border-radius: 1.25rem;
 }
 
 /* ── Promo Slider Card (top) ─────────────────────────────────── */
