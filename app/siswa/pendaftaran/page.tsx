@@ -1,6 +1,6 @@
 'use client'
 // app/siswa/pendaftaran/page.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -31,8 +31,6 @@ interface PendaftaranData {
   status: 'menunggu' | 'diproses' | 'diterima' | 'ditolak'
 }
 
-// FIX: Hapus 'email' dari FormState — email tidak ada di tabel pendaftaran
-// Email siswa sudah tersimpan di tabel profiles dan bisa diambil dari session
 interface FormState {
   nama_lengkap: string
   nik: string
@@ -70,7 +68,6 @@ const STEPS = [
   { label: 'Konfirmasi',      icon: '✅' },
 ]
 
-// FIX: Hapus 'email' dari INIT
 const INIT: FormState = {
   nama_lengkap: '', nik: '', nisn: '',
   tempat_lahir: '', tanggal_lahir: '',
@@ -81,6 +78,76 @@ const INIT: FormState = {
   nama_ayah: '', nama_ibu: '',
   pekerjaan_ayah: 'Petani', pekerjaan_ibu: 'Tidak Bekerja',
   no_hp_ortu: '',
+}
+
+// ── localStorage helpers ───────────────────────────────────────────────────────
+// Key di-suffix dengan userId agar draft tidak tercampur antar akun
+const getDraftKey = (userId: string) => `pendaftaran_draft_${userId}`
+const getStepKey  = (userId: string) => `pendaftaran_step_${userId}`
+
+function saveDraft(userId: string, form: FormState, step: number) {
+  try {
+    localStorage.setItem(getDraftKey(userId), JSON.stringify(form))
+    localStorage.setItem(getStepKey(userId),  String(step))
+  } catch { /* kuota penuh atau private mode — abaikan */ }
+}
+
+function loadDraft(userId: string): { form: FormState; step: number } | null {
+  try {
+    const raw  = localStorage.getItem(getDraftKey(userId))
+    const rawS = localStorage.getItem(getStepKey(userId))
+    if (!raw) return null
+    return {
+      form: JSON.parse(raw) as FormState,
+      step: rawS ? Math.max(1, Math.min(parseInt(rawS, 10), STEPS.length)) : 1,
+    }
+  } catch {
+    return null
+  }
+}
+
+function clearDraft(userId: string) {
+  try {
+    localStorage.removeItem(getDraftKey(userId))
+    localStorage.removeItem(getStepKey(userId))
+  } catch { /* abaikan */ }
+}
+
+// ── Validasi hanya saat final submit ──────────────────────────────────────────
+function validateAll(form: FormState): string | null {
+  // Step 1
+  if (!form.nama_lengkap.trim()) return 'Nama lengkap wajib diisi'
+  if (!form.nik.trim())          return 'NIK wajib diisi'
+  if (!form.nisn.trim())         return 'NISN wajib diisi'
+  if (!form.tempat_lahir.trim()) return 'Tempat lahir wajib diisi'
+  if (!form.tanggal_lahir)       return 'Tanggal lahir wajib diisi'
+  // Step 2
+  if (!form.asal_sekolah.trim()) return 'Nama asal sekolah wajib diisi'
+  if (!form.npsn.trim())         return 'NPSN wajib diisi'
+  // Step 3
+  if (!form.alamat.trim())           return 'Alamat wajib diisi'
+  if (!form.alamat_kota.trim())      return 'Kota wajib diisi'
+  if (!form.alamat_kecamatan.trim()) return 'Kecamatan wajib diisi'
+  if (!form.alamat_rt_rw.trim())     return 'RT/RW wajib diisi'
+  if (!form.no_hp.trim())            return 'No. HP wajib diisi'
+  // Step 4
+  if (!form.nama_ayah.trim())  return 'Nama ayah wajib diisi'
+  if (!form.nama_ibu.trim())   return 'Nama ibu wajib diisi'
+  if (!form.pekerjaan_ayah)    return 'Pekerjaan ayah wajib dipilih'
+  if (!form.pekerjaan_ibu)     return 'Pekerjaan ibu wajib dipilih'
+  if (!form.no_hp_ortu.trim()) return 'No. HP orang tua wajib diisi'
+  return null
+}
+
+// ── Hitung field yang sudah diisi per step (untuk indikator) ──────────────────
+function getStepCompletion(form: FormState): Record<number, boolean> {
+  return {
+    1: !!(form.nama_lengkap && form.nik && form.nisn && form.tempat_lahir && form.tanggal_lahir),
+    2: !!(form.asal_sekolah && form.npsn),
+    3: !!(form.alamat && form.alamat_kota && form.alamat_kecamatan && form.alamat_rt_rw && form.no_hp),
+    4: !!(form.nama_ayah && form.nama_ibu && form.pekerjaan_ayah && form.pekerjaan_ibu && form.no_hp_ortu),
+    5: true,
+  }
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -139,13 +206,18 @@ export default function PendaftaranPage() {
   const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
 
-  const [step,       setStep]      = useState(1)
-  const [loading,    setLoading]   = useState(false)
-  const [fetching,   setFetching]  = useState(true)
-  const [existing,   setExisting]  = useState<PendaftaranData | null>(null)
-  const [form,       setForm]      = useState<FormState>(INIT)
-  const [errorMsg,   setErrorMsg]  = useState<string | null>(null)
-  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [step,        setStep]       = useState(1)
+  const [loading,     setLoading]    = useState(false)
+  const [fetching,    setFetching]   = useState(true)
+  const [existing,    setExisting]   = useState<PendaftaranData | null>(null)
+  const [form,        setForm]       = useState<FormState>(INIT)
+  const [errorMsg,    setErrorMsg]   = useState<string | null>(null)
+  const [successMsg,  setSuccessMsg] = useState<string | null>(null)
+  const [draftLoaded, setDraftLoaded] = useState(false) // flag agar auto-save tidak override sebelum load
+  const [draftBanner, setDraftBanner] = useState(false) // tampilkan banner "draft dimuat"
+
+  // ── Ref untuk track apakah form sudah di-init dari server/draft ───────────
+  const initializedRef = useRef(false)
 
   // ── Fetch data existing via API Route ──────────────────────────────────────
   useEffect(() => {
@@ -160,11 +232,12 @@ export default function PendaftaranPage() {
       try {
         const res  = await fetch('/api/pendaftaran')
         const json = await res.json()
+
         if (json.data) {
+          // Ada data di server → pakai data server, buang draft lokal
           const d = json.data as PendaftaranData
           setExisting(d)
-          // FIX: Spread hanya field yang ada di FormState (tanpa email)
-          setForm({
+          const serverForm: FormState = {
             nama_lengkap:     d.nama_lengkap     ?? '',
             nik:              d.nik               ?? '',
             nisn:             d.nisn              ?? '',
@@ -184,73 +257,79 @@ export default function PendaftaranPage() {
             pekerjaan_ayah:   d.pekerjaan_ayah    ?? 'Petani',
             pekerjaan_ibu:    d.pekerjaan_ibu     ?? 'Tidak Bekerja',
             no_hp_ortu:       d.no_hp_ortu        ?? '',
-          })
+          }
+          setForm(serverForm)
+          // Bersihkan draft karena sudah ada data server
+          clearDraft(session.user.id!)
+        } else {
+          // Belum ada data di server → cek apakah ada draft lokal
+          const draft = loadDraft(session.user.id!)
+          if (draft) {
+            setForm(draft.form)
+            setStep(draft.step)
+            setDraftBanner(true)
+          }
         }
       } catch (err) {
         console.error('Fetch existing error:', err)
+        // Gagal fetch server → tetap coba load draft
+        if (session?.user?.id) {
+          const draft = loadDraft(session.user.id)
+          if (draft) {
+            setForm(draft.form)
+            setStep(draft.step)
+            setDraftBanner(true)
+          }
+        }
       } finally {
         setFetching(false)
+        setDraftLoaded(true)
+        initializedRef.current = true
       }
     }
 
     fetchExisting()
   }, [session, sessionStatus])
 
+  // ── Auto-save draft ke localStorage setiap kali form/step berubah ──────────
+  // Hanya aktif jika: user belum punya data server (existing === null) DAN draft sudah selesai di-load
+  useEffect(() => {
+    if (!draftLoaded)           return  // tunggu sampai load selesai
+    if (!session?.user?.id)     return
+    if (existing)               return  // sudah ada data server, tidak perlu draft
+    if (!initializedRef.current) return
+
+    saveDraft(session.user.id, form, step)
+  }, [form, step, draftLoaded, existing, session])
+
   const isEditable = !existing || existing.status === 'menunggu'
   const set = (key: keyof FormState, val: string) =>
     setForm(f => ({ ...f, [key]: val }))
 
-  // ── Validasi sebelum lanjut step ──────────────────────────────────────────
-  // FIX: Hapus validasi email karena bukan bagian dari form pendaftaran
-  const validateStep = (currentStep: number): string | null => {
-    if (currentStep === 1) {
-      if (!form.nama_lengkap.trim()) return 'Nama lengkap wajib diisi'
-      if (!form.nik.trim())          return 'NIK wajib diisi'
-      if (!form.nisn.trim())         return 'NISN wajib diisi'
-      if (!form.tempat_lahir.trim()) return 'Tempat lahir wajib diisi'
-      if (!form.tanggal_lahir)       return 'Tanggal lahir wajib diisi'
-    }
-    if (currentStep === 2) {
-      if (!form.asal_sekolah.trim()) return 'Nama asal sekolah wajib diisi'
-      if (!form.npsn.trim())         return 'NPSN wajib diisi'
-    }
-    if (currentStep === 3) {
-      if (!form.alamat.trim())           return 'Alamat wajib diisi'
-      if (!form.alamat_kota.trim())      return 'Kota wajib diisi'
-      if (!form.alamat_kecamatan.trim()) return 'Kecamatan wajib diisi'
-      if (!form.alamat_rt_rw.trim())     return 'RT/RW wajib diisi'
-      if (!form.no_hp.trim())            return 'No. HP wajib diisi'
-    }
-    if (currentStep === 4) {
-      if (!form.nama_ayah.trim())  return 'Nama ayah wajib diisi'
-      if (!form.nama_ibu.trim())   return 'Nama ibu wajib diisi'
-      if (!form.pekerjaan_ayah)    return 'Pekerjaan ayah wajib dipilih'
-      if (!form.pekerjaan_ibu)     return 'Pekerjaan ibu wajib dipilih'
-      if (!form.no_hp_ortu.trim()) return 'No. HP orang tua wajib diisi'
-    }
-    return null
-  }
-
+  // ── Pindah step TANPA validasi wajib — user bebas lanjut meski belum lengkap ──
   const handleNextStep = () => {
-    const err = validateStep(step)
-    if (err) { setErrorMsg(err); return }
     setErrorMsg(null)
     setStep(s => s + 1)
   }
 
-  // ── Submit via API Route ───────────────────────────────────────────────────
-  // FIX: payload tidak lagi menyertakan 'email'
-  // karena kolom email tidak ada di tabel pendaftaran
+  // ── Submit: validasi lengkap baru di sini ─────────────────────────────────
   const handleSubmit = async () => {
     if (!isEditable || loading) return
 
-    const err = validateStep(step)
-    if (err) { setErrorMsg(err); return }
+    const err = validateAll(form)
+    if (err) {
+      setErrorMsg(err)
+      // Arahkan user ke step yang bermasalah
+      if (['Nama lengkap', 'NIK', 'NISN', 'Tempat lahir', 'Tanggal lahir'].some(k => err.includes(k.toLowerCase()) || err.toLowerCase().includes(k.toLowerCase()))) setStep(1)
+      else if (err.includes('sekolah') || err.includes('NPSN')) setStep(2)
+      else if (err.includes('Alamat') || err.includes('Kota') || err.includes('Kecamatan') || err.includes('RT/RW') || err.includes('No. HP wajib')) setStep(3)
+      else if (err.includes('ayah') || err.includes('ibu') || err.includes('Orang tua') || err.includes('HP orang')) setStep(4)
+      return
+    }
 
     setLoading(true)
     setErrorMsg(null)
 
-    // FIX: Hanya kirim field yang benar-benar ada di tabel pendaftaran
     const payload: FormState = { ...form }
 
     try {
@@ -277,6 +356,9 @@ export default function PendaftaranPage() {
         return
       }
 
+      // Berhasil → hapus draft lokal
+      if (session?.user?.id) clearDraft(session.user.id)
+
       setSuccessMsg('Pendaftaran berhasil dikirim!')
       setTimeout(() => router.push('/siswa/status'), 1000)
 
@@ -287,6 +369,8 @@ export default function PendaftaranPage() {
       setLoading(false)
     }
   }
+
+  const stepCompletion = getStepCompletion(form)
 
   // ── Loading state ─────────────────────────────────────────────────────────
   if (sessionStatus === 'loading' || fetching) {
@@ -335,13 +419,16 @@ export default function PendaftaranPage() {
 
           <div className="sf-steps">
             {STEPS.map((s, i) => {
-              const idx   = i + 1
-              const state = idx < step ? 'done' : idx === step ? 'active' : 'pending'
+              const idx      = i + 1
+              const isDone   = idx < step || (idx !== step && stepCompletion[idx])
+              const isActive = idx === step
+              const state    = isDone ? 'done' : isActive ? 'active' : 'pending'
               return (
                 <div key={s.label} className="sf-step-item">
                   <button
                     className="sf-step-btn"
-                    onClick={() => idx < step && setStep(idx)}
+                    // Bisa klik step mana saja (bukan hanya step sebelumnya)
+                    onClick={() => setStep(idx)}
                     type="button"
                   >
                     <div className={`sf-step-circle ${state}`}>
@@ -358,6 +445,30 @@ export default function PendaftaranPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Banner: draft dimuat ── */}
+      {draftBanner && (
+        <div
+          className="sf-alert"
+          style={{
+            background: '#EEF2FF',
+            borderColor: '#6366F1',
+            color: '#4338CA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>💾 Draft tersimpan sebelumnya telah dimuat. Lanjutkan mengisi formulir.</span>
+          <button
+            type="button"
+            onClick={() => setDraftBanner(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#4338CA' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ── Warning: tidak bisa edit ── */}
       {!isEditable && (
@@ -473,7 +584,6 @@ export default function PendaftaranPage() {
               placeholder="08xxxxxxxxxx"
               disabled={!isEditable}
             />
-            {/* FIX: Email ditampilkan read-only dari session (bukan input form) */}
             <div className="sf-field">
               <label className="sf-label">Email</label>
               <input
@@ -512,6 +622,26 @@ export default function PendaftaranPage() {
         {step === 5 && (
           <div className="sf-card">
             <p className="sf-card-title">📋 Ringkasan Pendaftaran</p>
+
+            {/* Peringatan jika ada step yang belum lengkap */}
+            {Object.entries(stepCompletion).some(([k, v]) => Number(k) < 5 && !v) && (
+              <div
+                className="sf-alert sf-alert-error"
+                style={{ marginBottom: '1rem' }}
+              >
+                <span>⚠️</span>
+                <span>
+                  Beberapa field belum diisi:{' '}
+                  {[
+                    !stepCompletion[1] && 'Data Diri',
+                    !stepCompletion[2] && 'Asal Sekolah',
+                    !stepCompletion[3] && 'Alamat & Kontak',
+                    !stepCompletion[4] && 'Data Orang Tua',
+                  ].filter(Boolean).join(', ')}
+                  . Klik nama step di atas untuk melengkapi.
+                </span>
+              </div>
+            )}
 
             {/* Data Diri */}
             <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
@@ -553,7 +683,6 @@ export default function PendaftaranPage() {
                 { key: 'Kecamatan',      val: form.alamat_kecamatan },
                 { key: 'RT/RW',          val: form.alamat_rt_rw },
                 { key: 'No. HP / WA',    val: form.no_hp },
-                // FIX: Email diambil dari session, bukan dari form state
                 { key: 'Email',          val: session?.user?.email ?? '-' },
               ].map(({ key, val }) => (
                 <div key={key} className="sf-summary-row">

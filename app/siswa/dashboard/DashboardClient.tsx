@@ -44,19 +44,42 @@ const PROGRESS_CLASS: Record<string, string> = {
   ditolak:  styles.progress100red,
 }
 
-const MENU_ITEMS = [
-  { href: '/siswa/pendaftaran', icon: '/image/icon formulir.jpg',   title: 'Formulir',   sub: 'Isi & edit data diri',  bgClass: 'menuBgBlue',   iconClass: 'iconBgBlue'   },
-  { href: '/siswa/berkas',      icon: '/image/icon berkas.jpg',     title: 'Berkas',     sub: 'Upload dokumen',        bgClass: 'menuBgAmber',  iconClass: 'iconBgAmber'  },
-  { href: '/siswa/status',      icon: '/image/icon status.webp',    title: 'Status',     sub: 'Pantau seleksi',        bgClass: 'menuBgGreen',  iconClass: 'iconBgGreen'  },
-  { href: '/siswa/pembayaran',  icon: '/image/icon pembayaran.avif',title: 'Bayar',      sub: 'Biaya pendaftaran',     bgClass: 'menuBgViolet', iconClass: 'iconBgViolet' },
-  { href: '/siswa/pengumuman',  icon: '/image/pengumuman.png',      title: 'Pengumuman', sub: 'Info terbaru',          bgClass: 'menuBgRed',    iconClass: 'iconBgRed'    },
-  { href: '/siswa/bantuan',     icon: '/image/bantuan.jpg',         title: 'Bantuan',    sub: 'Pusat bantuan',         bgClass: 'menuBgCyan',   iconClass: 'iconBgCyan'   },
+// 4 Quick Access items (like the design: Formulir, Berkas, Status, Bayar)
+const QUICK_ITEMS = [
+  {
+    href: '/siswa/pendaftaran',
+    icon: '/image/icon formulir.jpg',
+    title: 'Formulir',
+    sub: 'Isi & edit data diri',
+    colorClass: 'quickIconWrap_blue',
+  },
+  {
+    href: '/siswa/berkas',
+    icon: '/image/icon berkas.jpg',
+    title: 'Berkas',
+    sub: 'Upload dokumen',
+    colorClass: 'quickIconWrap_amber',
+  },
+  {
+    href: '/siswa/status',
+    icon: '/image/icon status.webp',
+    title: 'Status',
+    sub: 'Pantau seleksi',
+    colorClass: 'quickIconWrap_green',
+  },
+  {
+    href: '/siswa/pembayaran',
+    icon: '/image/icon pembayaran.avif',
+    title: 'Bayar',
+    sub: 'Biaya pendaftaran',
+    colorClass: 'quickIconWrap_violet',
+  },
 ] as const
 
 const JADWAL = [
-  { label: 'Batas Pendaftaran', date: '28 Feb 2026',   dotClass: 'dotRed',   icon: '📅', statusLabel: 'Selesai',      statusClass: 'jadwalDone'    },
-  { label: 'Pengumuman Hasil',  date: '15 Maret 2026', dotClass: 'dotBlue',  icon: '📢', statusLabel: 'Selesai',      statusClass: 'jadwalDone'    },
-  { label: 'Daftar Ulang',      date: '1–15 Apr 2026', dotClass: 'dotGreen', icon: '🚩', statusLabel: 'Berlangsung',  statusClass: 'jadwalOngoing' },
+  { label: 'Batas Pendaftaran', date: '28 Feb 2026',   dotClass: 'dotRed',   icon: '📅', statusLabel: 'Selesai',     statusClass: 'jadwalDone'    },
+  { label: 'Pengumuman Hasil',  date: '15 Maret 2026', dotClass: 'dotBlue',  icon: '📢', statusLabel: 'Selesai',     statusClass: 'jadwalDone'    },
+  { label: 'Daftar Ulang',      date: '1–15 Apr 2026', dotClass: 'dotGreen', icon: '🚩', statusLabel: 'Berlangsung', statusClass: 'jadwalOngoing' },
 ] as const
 
 const TIPE_CONFIG: Record<string, {
@@ -68,43 +91,61 @@ const TIPE_CONFIG: Record<string, {
   Peringatan: { badge: styles.badgePeringatan, icon: '🟡', accent: styles.accentPeringatan, pill: styles.pillPeringatan },
 }
 
-// ── Promo Carousel Slides ─────────────────────────────────────────────────────
-interface PromoSlide {
+// ── Promo Top Slider (Wujudkan Impianmu style) ────────────────────────────────
+interface PromoTopSlide {
   id: number
-  image: string
-  alt: string
+  eyebrow: string
+  title: string
+  highlight: string
+  sub: string
+  btnLabel: string
   btnHref: string
+  image: string
+  imageAlt: string
 }
 
-const PROMO_SLIDES: PromoSlide[] = [
+const PROMO_TOP_SLIDES: PromoTopSlide[] = [
   {
     id: 0,
-    image: '/image/banner.png',
-    alt: 'Banner Peraturan Pondok',
-    btnHref: '/siswa/peraturan',
+    eyebrow: 'Berprestasi, Berakhlak, Berilmu',
+    title: 'Wujudkan Impianmu\nBersama ',
+    highlight: 'Al Istiqomah',
+    sub: 'Belajar • Berkarya • Berkontribusi',
+    btnLabel: 'Lihat Program →',
+    btnHref: '/siswa/program',
+    image: '/image/buku.png',
+    imageAlt: 'Ilustrasi buku dan tas santri',
   },
   {
     id: 1,
-    image: '/image/banner1.png',
-    alt: 'Banner Wujudkan Lingkungan Nyaman',
+    eyebrow: 'PSMB Al Istiqomah',
+    title: 'Mujahidah: Urungkan\nNiatmu, Niscaya ',
+    highlight: 'Allah Berikan',
+    sub: 'Kemudahan Jalannya.',
+    btnLabel: 'Lihat Selengkapnya →',
     btnHref: '/siswa/peraturan',
-  },
-  {
-    id: 2,
-    image: '/image/peraturan banner.png',
-    alt: 'Banner Taat Aturan',
-    btnHref: '/siswa/peraturan',
+    image: '/image/ilustrasi santri.png',
+    imageAlt: 'Ilustrasi santri membaca',
   },
 ]
 
-const CAROUSEL_INTERVAL = 5000 // 5 detik
+const CAROUSEL_INTERVAL = 5000
+
+// ── Banner Carousel (bottom) ──────────────────────────────────────────────────
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getGreeting(hour: number): string {
-  if (hour >= 4  && hour < 11) return 'Selamat pagi'
+  if (hour >= 4  && hour < 11) return 'Selamat Pagi'
   if (hour >= 11 && hour < 15) return 'Selamat Siang'
   if (hour >= 15 && hour < 18) return 'Selamat Sore'
   return 'Selamat Malam'
+}
+function getGreetingEmoji(hour: number): string {
+  if (hour >= 4  && hour < 11) return '🌤️'
+  if (hour >= 11 && hour < 15) return '☀️'
+  if (hour >= 15 && hour < 18) return '🌤️'
+  return '🌙'
 }
 function formatTanggalShort(iso: string): string {
   try {
@@ -114,9 +155,9 @@ function formatTanggalShort(iso: string): string {
   } catch { return iso }
 }
 
-// ── PromoBannerCarousel ───────────────────────────────────────────────────────
-function PromoBannerCarousel() {
-  const [activeIdx, setActiveIdx] = useState(0)
+// ── PromoTopCarousel ──────────────────────────────────────────────────────────
+function PromoTopCarousel() {
+  const [activeIdx, setActiveIdx]       = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -126,76 +167,100 @@ function PromoBannerCarousel() {
     setTimeout(() => {
       setActiveIdx(idx)
       setIsTransitioning(false)
-    }, 300)
+    }, 280)
   }, [isTransitioning])
 
   const goNext = useCallback(() => {
-    goTo((activeIdx + 1) % PROMO_SLIDES.length)
+    goTo((activeIdx + 1) % PROMO_TOP_SLIDES.length)
   }, [activeIdx, goTo])
 
-  // Auto-play
   useEffect(() => {
     timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [goNext])
 
-  // Reset timer saat user klik dot
   function handleDotClick(idx: number) {
     if (timerRef.current) clearInterval(timerRef.current)
     goTo(idx)
     timerRef.current = setInterval(goNext, CAROUSEL_INTERVAL)
   }
 
-  const slide = PROMO_SLIDES[activeIdx]
+  const slide = PROMO_TOP_SLIDES[activeIdx]
 
   return (
-    <div className={styles.promoBanner}>
-      {/* Gambar banner — full cover, ganti per slide */}
+    <div className={styles.promoSliderCard}>
       <div
-        className={styles.promoBannerImgWrap}
+        className={styles.promoSliderInner}
         style={{
           opacity: isTransitioning ? 0 : 1,
-          transform: isTransitioning ? 'scale(1.02)' : 'scale(1)',
-          transition: 'opacity 0.3s ease, transform 0.3s ease',
+          transform: isTransitioning ? 'translateX(-6px)' : 'translateX(0)',
+          transition: 'opacity 0.28s ease, transform 0.28s ease',
         }}
       >
-        <Image
-          src={slide.image}
-          alt={slide.alt}
-          fill
-          className={styles.promoBannerImg}
-          priority={slide.id === 0}
-        />
+        {/* bg decorative circles */}
+        <div className={styles.promoSliderBg}>
+          <div className={styles.promoSliderBgCircle1} />
+          <div className={styles.promoSliderBgCircle2} />
+        </div>
+
+        {/* Text content */}
+        <div className={styles.promoSliderContent}>
+          <span className={styles.promoSliderEyebrow}>{slide.eyebrow}</span>
+          <h2 className={styles.promoSliderTitle}>
+            {slide.title}
+            <span className={styles.promoSliderTitleHighlight}>{slide.highlight}</span>
+          </h2>
+          <p className={styles.promoSliderSub}>{slide.sub}</p>
+          <Link href={slide.btnHref} className={styles.promoSliderBtn}>
+            {slide.btnLabel}
+          </Link>
+        </div>
+
+        {/* Illustration */}
+        <div className={styles.promoSliderImageWrap}>
+          <Image
+            src={slide.image}
+            alt={slide.imageAlt}
+            fill
+            className={styles.promoSliderImg}
+            priority={slide.id === 0}
+          />
+        </div>
       </div>
 
-      {/* Overlay gelap tipis supaya tombol terbaca */}
-      <div className={styles.promoBannerOverlay} />
-
-      {/* Tombol Lihat Selengkapnya — pojok kiri bawah */}
-      <div
-        className={styles.promoBannerFooter}
-        style={{
-          opacity: isTransitioning ? 0 : 1,
-          transition: 'opacity 0.3s ease',
-        }}
-      >
-        <Link href={slide.btnHref} className={styles.promoBannerBtn}>
-          Lihat Selengkapnya →
-        </Link>
-      </div>
-
-      {/* Dot indicators */}
-      <div className={styles.promoDots}>
-        {PROMO_SLIDES.map((_, i) => (
+      {/* Dots */}
+      <div className={styles.promoSliderDots}>
+        {PROMO_TOP_SLIDES.map((_, i) => (
           <button
             key={i}
-            className={`${styles.promoDot} ${i === activeIdx ? styles.promoDotActive : ''}`}
+            className={`${styles.promoSliderDot} ${i === activeIdx ? styles.promoSliderDotActive : ''}`}
             onClick={() => handleDotClick(i)}
             aria-label={`Slide ${i + 1}`}
           />
         ))}
+      </div>
+    </div>
+  )
+}
+
+// ── StaticBanner ──────────────────────────────────────────────────────────────
+function StaticBanner() {
+  return (
+    <div className={styles.promoBanner}>
+      <div className={styles.promoBannerImgWrap}>
+        <Image
+          src="/image/banner1.png"
+          alt="Banner Wujudkan Lingkungan Nyaman"
+          fill
+          className={styles.promoBannerImg}
+          priority
+        />
+      </div>
+      <div className={styles.promoBannerOverlay} />
+      <div className={styles.promoBannerFooter}>
+        <Link href="/siswa/peraturan" className={styles.promoBannerBtn}>
+          Lihat Selengkapnya →
+        </Link>
       </div>
     </div>
   )
@@ -299,24 +364,24 @@ function AnnouncementModal({
   )
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function DashboardClient({
   fullName, avatarInitial, avatarUrl, pendaftaran, status,
 }: Props) {
-  const [now, setNow] = useState<Date>(() => new Date())
+  const [now, setNow]                   = useState<Date>(() => new Date())
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
-  const [annLoading, setAnnLoading] = useState(true)
-  const [selectedAnn, setSelectedAnn] = useState<Announcement | null>(null)
+  const [annLoading, setAnnLoading]     = useState(true)
+  const [selectedAnn, setSelectedAnn]   = useState<Announcement | null>(null)
 
   useEffect(() => {
-    const timerInterval = setInterval(() => setNow(new Date()), 60_000)
-    return () => clearInterval(timerInterval)
+    const t = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(t)
   }, [])
 
   useEffect(() => {
     async function fetchAnnouncements() {
       try {
-        const res = await fetch('/api/siswa/announcements?limit=5')
+        const res  = await fetch('/api/siswa/announcements?limit=5')
         const json = await res.json()
         if (res.ok) setAnnouncements(json.data ?? [])
       } catch (e) {
@@ -330,35 +395,39 @@ export default function DashboardClient({
 
   const hour          = now.getHours()
   const greetingText  = getGreeting(hour)
+  const greetingEmoji = getGreetingEmoji(hour)
   const progressClass = status ? (PROGRESS_CLASS[status] ?? styles.progress25) : styles.progress25
 
   return (
     <div className={styles.shell}>
 
-      {/* ══ HERO HEADER ══════════════════════════════════════════════════════ */}
+      {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
       <div className={styles.hero}>
-        {/* Decorative elements */}
         <div className={styles.orbA} />
         <div className={styles.orbB} />
         <div className={styles.orbC} />
         <div className={styles.starField}>
           {[...Array(8)].map((_, i) => (
-            <span key={i} className={`${styles.star} ${styles[`star${i + 1}`]}`} />
+            <span key={i} className={`${styles.star} ${styles[`star${i + 1}` as keyof typeof styles]}`} />
           ))}
         </div>
 
-        {/* Top nav: greeting + bell + avatar */}
+        {/* Top bar */}
         <div className={styles.heroTopBar}>
           <div className={styles.heroTopLeft}>
-            <p className={styles.greetingText}>{greetingText}, 👋</p>
+            <div className={styles.greetingBadge}>
+              <span>{greetingEmoji}</span>
+              <span>{greetingText}</span>
+            </div>
             <h1 className={styles.heroName}>{fullName}</h1>
             <p className={styles.heroSchool}>Santri Pondok Pesantren Al Istiqomah</p>
           </div>
+
           <div className={styles.heroTopRight}>
             <NotificationBell />
             <Link href="/siswa/profile" className={styles.topbarAvatar} aria-label="Profil saya">
               {avatarUrl ? (
-                <Image src={avatarUrl} alt={fullName} width={40} height={40}
+                <Image src={avatarUrl} alt={fullName} width={42} height={42}
                   className={styles.avatarImg} referrerPolicy="no-referrer" unoptimized
                 />
               ) : (
@@ -368,19 +437,19 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Santri character image — right side of hero */}
+        {/* Character */}
         <div className={styles.heroCharacter}>
           <Image
             src="/image/ilustrasi santri.png"
             alt="Santri"
-            width={160}
-            height={190}
+            width={155}
+            height={185}
             className={styles.heroCharacterImg}
             priority
           />
         </div>
 
-        {/* Masjid silhouette background */}
+        {/* Masjid silhouette */}
         <div className={styles.heroMasjid}>
           <Image
             src="/image/ilustrasi masjid.png"
@@ -393,11 +462,40 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* ══ STATUS CARD (float over hero) ══════════════════════════════════ */}
+      {/* ══ FLOAT ZONE ════════════════════════════════════════════════════════ */}
       <div className={styles.floatZone}>
+
+        {/* Promo top slider */}
+        <PromoTopCarousel />
+
+        {/* Quick access — 4 icons */}
+        <div className={styles.quickSection}>
+          <div className={styles.sectionRow}>
+            <p className={styles.sectionTitle}>Akses Cepat</p>
+            <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
+          </div>
+          <div className={styles.quickGrid}>
+            {QUICK_ITEMS.map((item) => (
+              <Link key={item.title} href={item.href} className={styles.quickCard}>
+                <div className={`${styles.quickIconWrap} ${styles[item.colorClass as keyof typeof styles]}`}>
+                  <Image
+                    src={item.icon}
+                    alt={item.title}
+                    width={28}
+                    height={28}
+                    className={styles.quickIconImg}
+                  />
+                </div>
+                <span className={styles.quickLabel}>{item.title}</span>
+                <span className={styles.quickSub}>{item.sub}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Status / Empty card */}
         {pendaftaran && status ? (
           <div className={styles.statusCard}>
-            {/* Header row */}
             <div className={styles.statusHeader}>
               <div className={styles.statusLeft}>
                 {status === 'diterima' ? (
@@ -407,11 +505,11 @@ export default function DashboardClient({
                     </svg>
                   </div>
                 ) : (
-                  <div className={`${styles.statusDot} ${styles[`statusDot_${status}`]}`} />
+                  <div className={`${styles.statusDot} ${styles[`statusDot_${status}` as keyof typeof styles]}`} />
                 )}
                 <div>
                   <p className={styles.statusLabelSm}>STATUS PENDAFTARAN</p>
-                  <p className={`${styles.statusLabelLg} ${styles[`statusLg_${status}`]}`}>
+                  <p className={`${styles.statusLabelLg} ${styles[`statusLg_${status}` as keyof typeof styles]}`}>
                     {STATUS_LABEL[status]}
                   </p>
                 </div>
@@ -421,7 +519,6 @@ export default function DashboardClient({
               </Link>
             </div>
 
-            {/* Progress */}
             <div className={styles.progressMeta}>
               <span>Progress Seleksi</span>
               <span className={styles.progressPct}>{PROGRESS_VALUE[status]}%</span>
@@ -432,7 +529,6 @@ export default function DashboardClient({
 
             <div className={styles.infoDivider} />
 
-            {/* Info 3 kolom */}
             <div className={styles.infoRow3}>
               <div className={styles.infoCol}>
                 <div className={styles.infoColIconWrap}>
@@ -490,42 +586,10 @@ export default function DashboardClient({
         )}
       </div>
 
-      {/* ══ MAIN CONTENT ═══════════════════════════════════════════════════ */}
+      {/* ══ MAIN CONTENT ══════════════════════════════════════════════════════ */}
       <div className={styles.mainContent}>
 
-        {/* ── Akses Cepat ──────────────────────────────────────────────── */}
-        <div className={styles.sectionWrap}>
-          <div className={styles.sectionRow}>
-            <p className={styles.sectionTitle}>Akses Cepat</p>
-            <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
-          </div>
-          <div className={styles.menuGrid6}>
-            {MENU_ITEMS.map((item) => (
-              <Link key={item.title} href={item.href}
-                className={`${styles.menuCard} ${styles[item.bgClass]}`}
-              >
-                <div className={`${styles.menuIconBox} ${styles[item.iconClass]}`}>
-                  <Image
-                    src={item.icon}
-                    alt={item.title}
-                    width={30}
-                    height={30}
-                    className={styles.menuIconImg}
-                  />
-                </div>
-                <p className={styles.menuTitle}>{item.title}</p>
-                <p className={styles.menuSub}>{item.sub}</p>
-                <div className={styles.menuChevron}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Jadwal Penting ────────────────────────────────────────────── */}
+        {/* ── Jadwal Penting ─────────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Jadwal Penting</p>
@@ -533,16 +597,23 @@ export default function DashboardClient({
           </div>
           <div className={styles.jadwalGrid}>
             {JADWAL.map((j) => (
-              <div key={j.label} className={`${styles.jadwalItem} ${styles[`jadwalBorder_${j.dotClass}`]}`}>
+              <div
+                key={j.label}
+                className={`${styles.jadwalItem} ${styles[`jadwalBorder_${j.dotClass}` as keyof typeof styles]}`}
+              >
                 <div className={styles.jadwalItemTop}>
                   <span className={styles.jadwalItemIcon}>{j.icon}</span>
-                  <span className={`${styles.jadwalDotSmall} ${styles[j.dotClass]}`} />
+                  <span className={`${styles.jadwalDotSmall} ${styles[j.dotClass as keyof typeof styles]}`} />
                 </div>
-                <p className={`${styles.jadwalItemLabel} ${styles[j.dotClass === 'dotRed' ? 'jadwalLabelRed' : j.dotClass === 'dotBlue' ? 'jadwalLabelBlue' : 'jadwalLabelGreen']}`}>
+                <p className={`${styles.jadwalItemLabel} ${
+                  j.dotClass === 'dotRed'   ? styles.jadwalLabelRed   :
+                  j.dotClass === 'dotBlue'  ? styles.jadwalLabelBlue  :
+                                              styles.jadwalLabelGreen
+                }`}>
                   {j.label}
                 </p>
                 <p className={styles.jadwalItemDate}>{j.date}</p>
-                <div className={`${styles.jadwalStatus} ${styles[j.statusClass]}`}>
+                <div className={`${styles.jadwalStatus} ${styles[j.statusClass as keyof typeof styles]}`}>
                   {j.statusClass === 'jadwalDone' ? (
                     <>
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -565,10 +636,10 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* ── Promo Banner Carousel ─────────────────────────────────────── */}
-        <PromoBannerCarousel />
+        {/* ── Banner Carousel ─────────────────────────────────────────────── */}
+        <StaticBanner />
 
-        {/* ── Pengumuman Terbaru ────────────────────────────────────────── */}
+        {/* ── Pengumuman Terbaru ──────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Pengumuman Terbaru</p>
@@ -601,7 +672,7 @@ export default function DashboardClient({
 
       </div>
 
-      {/* ══ BOTTOM NAV ═══════════════════════════════════════════════════════ */}
+      {/* ══ BOTTOM NAV ════════════════════════════════════════════════════════ */}
       <nav className={styles.bottomNav}>
         <Link href="/siswa" className={`${styles.navItem} ${styles.navItemActive}`}>
           <div className={styles.navIconWrap}>
@@ -622,21 +693,19 @@ export default function DashboardClient({
           </div>
           <span>Daftar</span>
         </Link>
-        <Link href="/siswa/pembayaran" className={styles.navItem}>
+        <Link href="/siswa/berkas" className={styles.navItem}>
           <div className={styles.navIconWrap}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-              <line x1="1" y1="10" x2="23" y2="10"/>
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          <span>Bayar</span>
+          <span>Berkas</span>
         </Link>
         <Link href="/siswa/status" className={styles.navItem}>
           <div className={styles.navIconWrap}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
+              <polyline points="9 11 12 14 22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
           </div>
           <span>Status</span>
@@ -652,7 +721,7 @@ export default function DashboardClient({
         </Link>
       </nav>
 
-      {/* ══ ANNOUNCEMENT MODAL ══════════════════════════════════════════════ */}
+      {/* ══ ANNOUNCEMENT MODAL ════════════════════════════════════════════════ */}
       {selectedAnn && (
         <AnnouncementModal
           item={selectedAnn}
