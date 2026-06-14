@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Jadwal {
@@ -13,7 +14,11 @@ interface Jadwal {
   status: 'Akan Datang' | 'Berlangsung' | 'Selesai'
   warna: string
   urutan: number
+  lokasi?: string
+  icon_url?: string
 }
+
+type FilterType = 'Semua' | 'Berlangsung' | 'Akan Datang' | 'Selesai'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatTanggal(iso: string): string {
@@ -24,23 +29,54 @@ function formatTanggal(iso: string): string {
   } catch { return iso }
 }
 
-function getStatusStyle(status: string): { bg: string; text: string; dot: string } {
-  if (status === 'Berlangsung') return { bg: '#eff6ff', text: '#2563eb', dot: '#3b82f6' }
-  if (status === 'Selesai')     return { bg: '#f0fdf4', text: '#16a34a', dot: '#22c55e' }
-  return                               { bg: '#faf5ff', text: '#7c3aed', dot: '#a855f7' }
+function getStatusConfig(status: string) {
+  if (status === 'Berlangsung') return {
+    bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE',
+    chipBg: '#DBEAFE', chipText: '#1D4ED8',
+    dot: '#3B82F6', iconBg: '#1D4ED8',
+  }
+  if (status === 'Selesai') return {
+    bg: '#F0FDF4', text: '#16A34A', border: '#BBF7D0',
+    chipBg: '#DCFCE7', chipText: '#15803D',
+    dot: '#22C55E', iconBg: '#16A34A',
+  }
+  // Akan Datang
+  return {
+    bg: '#FAF5FF', text: '#7C3AED', border: '#DDD6FE',
+    chipBg: '#EDE9FE', chipText: '#6D28D9',
+    dot: '#8B5CF6', iconBg: '#7C3AED',
+  }
 }
 
-function getStatusIcon(status: string): string {
-  if (status === 'Berlangsung') return '⏳'
-  if (status === 'Selesai')     return '✅'
-  return '🔔'
+// Icon SVG per status
+function StatusIconSVG({ status }: { status: string }) {
+  if (status === 'Berlangsung') return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  )
+  if (status === 'Selesai') return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  )
+  // Akan Datang — bell
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  )
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function JadwalPage() {
   const [jadwalList, setJadwalList] = useState<Jadwal[]>([])
   const [loading, setLoading]       = useState(true)
-  const [filter, setFilter]         = useState<'Semua' | 'Akan Datang' | 'Berlangsung' | 'Selesai'>('Semua')
+  const [filter, setFilter]         = useState<FilterType>('Semua')
+  const [jadwalIconErr, setJadwalIconErr] = useState(false)
+  const [bannerErr, setBannerErr]   = useState(false)
 
   useEffect(() => {
     async function fetchJadwal() {
@@ -61,320 +97,413 @@ export default function JadwalPage() {
     ? jadwalList
     : jadwalList.filter((j) => j.status === filter)
 
-  const tabs: Array<typeof filter> = ['Semua', 'Berlangsung', 'Akan Datang', 'Selesai']
+  const tabs: FilterType[] = ['Semua', 'Berlangsung', 'Akan Datang', 'Selesai']
+
+  const counts = {
+    total:       jadwalList.length,
+    berlangsung: jadwalList.filter(j => j.status === 'Berlangsung').length,
+    selesai:     jadwalList.filter(j => j.status === 'Selesai').length,
+  }
 
   return (
     <div style={{
       minHeight: '100dvh',
-      backgroundColor: '#f8fafc',
-      fontFamily: "'Inter', sans-serif",
-      maxWidth: 480,
+      backgroundColor: '#F5F3FF',
+      fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      maxWidth: 430,
       margin: '0 auto',
       position: 'relative',
+      overflowX: 'hidden',
     }}>
 
-      {/* ── Header ── */}
+      {/* ─── HERO BANNER ─── */}
       <div style={{
-        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-        padding: '52px 20px 28px',
+        background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #6D28D9 100%)',
+        padding: '52px 20px 24px',
         position: 'relative',
         overflow: 'hidden',
+        /* Lurus — tidak ada border radius bawah */
       }}>
-        {/* Decorative blobs */}
-        <div style={{
-          position: 'absolute', top: -30, right: -30,
-          width: 120, height: 120,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.08)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -20, left: '30%',
-          width: 80, height: 80,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)',
-        }} />
+        {/* Decorative circles */}
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+        <div style={{ position: 'absolute', bottom: 10, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
 
-        {/* Back button */}
-        <Link href="/siswa" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          color: 'rgba(255,255,255,0.85)',
-          fontSize: 14, textDecoration: 'none',
-          marginBottom: 16,
-        }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Kembali
-        </Link>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 44, height: 44,
-            borderRadius: 12,
-            background: 'rgba(255,255,255,0.15)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22,
-          }}>
-            📅
-          </div>
-          <div>
-            <h1 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+        {/* Row: Title + Icon 3D */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, position: 'relative', zIndex: 1 }}>
+          <div style={{ flex: 1, paddingTop: 8 }}>
+            <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 800, margin: '0 0 6px', letterSpacing: -0.5 }}>
               Jadwal Penting
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, margin: '4px 0 0' }}>
-              SPMB 2026/2027 • PON-PES AL ISTIQOMAH
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, margin: 0 }}>
+              PSMB 2025/2026 - PON PES AL ISTIQOMAH
             </p>
+          </div>
+
+          {/* Icon 3D jadwal — lebih besar, tanpa background/border */}
+          <div style={{ width: 130, height: 120, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            {jadwalIconErr ? (
+              <span style={{ fontSize: 80 }}>📅</span>
+            ) : (
+              <Image
+                src="/icons/jadwal icon.png"
+                alt="Jadwal"
+                width={125}
+                height={115}
+                style={{ objectFit: 'contain', filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.35))' }}
+                onError={() => setJadwalIconErr(true)}
+              />
+            )}
           </div>
         </div>
 
-        {/* Stats chips */}
+        {/* Stats boxes — kotak putih transparan, angka besar, persis desain */}
         {!loading && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, position: 'relative', zIndex: 1 }}>
             {[
-              { label: 'Total',        count: jadwalList.length,                                    color: 'rgba(255,255,255,0.2)' },
-              { label: 'Berlangsung',  count: jadwalList.filter(j => j.status === 'Berlangsung').length, color: 'rgba(59,130,246,0.35)' },
-              { label: 'Akan Datang', count: jadwalList.filter(j => j.status === 'Akan Datang').length,  color: 'rgba(168,85,247,0.35)' },
-              { label: 'Selesai',      count: jadwalList.filter(j => j.status === 'Selesai').length,      color: 'rgba(34,197,94,0.35)' },
+              { count: counts.total,        label: 'Telah',        numColor: '#fff',     bg: 'rgba(255,255,255,0.18)' },
+              { count: counts.berlangsung,  label: 'Berlangsung',  numColor: '#fff',     bg: 'rgba(255,255,255,0.18)' },
+              { count: counts.selesai,      label: 'Selesai',      numColor: '#4ADE80',  bg: 'rgba(255,255,255,0.18)' },
             ].map((s) => (
               <div key={s.label} style={{
-                background: s.color,
-                borderRadius: 20, padding: '4px 12px',
-                display: 'flex', gap: 6, alignItems: 'center',
+                flex: 1,
+                background: s.bg,
+                borderRadius: 14,
+                padding: '12px 8px',
+                textAlign: 'center',
+                backdropFilter: 'blur(6px)',
+                border: '1px solid rgba(255,255,255,0.15)',
               }}>
-                <span style={{ color: '#fff', fontSize: 11, fontWeight: 600 }}>{s.count}</span>
-                <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11 }}>{s.label}</span>
+                <div style={{ color: s.numColor, fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{s.count}</div>
+                <div style={{ color: 'rgba(255,255,255,0.82)', fontSize: 11, marginTop: 5, fontWeight: 500 }}>{s.label}</div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* ── Filter Tabs ── */}
+      {/* ─── FILTER TABS ─── persis desain: pill aktif ungu, sisanya teks biasa */}
       <div style={{
-        padding: '0 16px',
         background: '#fff',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        position: 'sticky', top: 0, zIndex: 10,
+        position: 'sticky',
+        top: 0,
+        zIndex: 20,
+        padding: '12px 16px',
       }}>
-        <div style={{
-          display: 'flex', gap: 4,
-          overflowX: 'auto',
-          paddingBottom: 0,
-          scrollbarWidth: 'none',
-        }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              style={{
-                padding: '12px 14px',
-                fontSize: 13,
-                fontWeight: filter === tab ? 600 : 400,
-                color: filter === tab ? '#4f46e5' : '#64748b',
-                background: 'none',
-                border: 'none',
-                borderBottom: filter === tab ? '2.5px solid #4f46e5' : '2.5px solid transparent',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s',
-              }}
-            >
-              {tab}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {tabs.map((tab) => {
+            const isActive = filter === tab
+            return (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                style={{
+                  padding: '8px 18px',
+                  fontSize: 13,
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? '#fff' : '#64748B',
+                  background: isActive ? '#5B21B6' : 'none',
+                  borderTop: 'none',
+                  borderRight: 'none',
+                  borderLeft: 'none',
+                  borderBottom: 'none',
+                  borderRadius: isActive ? 20 : 20,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s',
+                  flexShrink: 0,
+                }}
+              >
+                {tab}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* ── Content ── */}
-      <div style={{ padding: '16px 16px 100px' }}>
+      {/* ─── CONTENT ─── */}
+      <div style={{ padding: '16px 16px 120px' }}>
+
+        {/* Section header */}
+        {!loading && filtered.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{
+              width: 34, height: 34,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#1E293B' }}>
+              Jadwal Kegiatan
+            </h2>
+          </div>
+        )}
 
         {loading ? (
           /* Skeleton */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[1, 2, 3, 4].map((i) => (
+            {[1,2,3].map((i) => (
               <div key={i} style={{
-                background: '#fff',
-                borderRadius: 16,
-                padding: '18px 16px',
+                background: '#fff', borderRadius: 16, padding: '16px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                 animation: 'pulse 1.5s ease-in-out infinite',
+                display: 'flex', gap: 14, alignItems: 'center',
               }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f1f5f9', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ width: '60%', height: 14, borderRadius: 6, background: '#f1f5f9', marginBottom: 8 }} />
-                    <div style={{ width: '40%', height: 12, borderRadius: 6, background: '#f1f5f9' }} />
-                  </div>
-                  <div style={{ width: 72, height: 24, borderRadius: 20, background: '#f1f5f9' }} />
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: '#F1F5F9', flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ width: '55%', height: 14, borderRadius: 6, background: '#F1F5F9', marginBottom: 10 }} />
+                  <div style={{ width: '75%', height: 11, borderRadius: 6, background: '#F1F5F9', marginBottom: 6 }} />
+                  <div style={{ width: '40%', height: 11, borderRadius: 6, background: '#F1F5F9' }} />
                 </div>
+                <div style={{ width: 76, height: 26, borderRadius: 20, background: '#F1F5F9' }} />
               </div>
             ))}
           </div>
+
         ) : filtered.length === 0 ? (
-          /* Empty state */
+          /* Empty */
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            paddingTop: 60, gap: 12,
+            paddingTop: 60, gap: 14,
           }}>
-            <div style={{ fontSize: 48 }}>📭</div>
-            <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
+            <div style={{ fontSize: 52 }}>📭</div>
+            <p style={{ color: '#64748B', fontSize: 14, margin: 0, textAlign: 'center' }}>
               {filter === 'Semua' ? 'Belum ada jadwal tersedia' : `Tidak ada jadwal "${filter}"`}
             </p>
           </div>
+
         ) : (
-          /* Timeline */
-          <div style={{ position: 'relative' }}>
-            {/* Vertical line */}
+          /* Cards */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
+            {/* Vertical timeline line */}
             <div style={{
               position: 'absolute',
-              left: 31,
-              top: 22,
-              bottom: 22,
+              left: 27,
+              top: 52,
+              bottom: 52,
               width: 2,
-              background: 'linear-gradient(to bottom, #e2e8f0, transparent)',
+              background: 'linear-gradient(to bottom, #C4B5FD, #DDD6FE, transparent)',
               zIndex: 0,
             }} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', zIndex: 1 }}>
-              {filtered.map((j, idx) => {
-                const s           = getStatusStyle(j.status)
-                const icon        = getStatusIcon(j.status)
-                const tanggalStr  = j.tanggal_mulai && j.tanggal_selesai
-                  ? `${formatTanggal(j.tanggal_mulai)} – ${formatTanggal(j.tanggal_selesai)}`
-                  : formatTanggal(j.tanggal)
-                const isLast = idx === filtered.length - 1
+            {filtered.map((j) => {
+              const cfg = getStatusConfig(j.status)
+              const tanggalStr = j.tanggal_mulai && j.tanggal_selesai
+                ? `${formatTanggal(j.tanggal_mulai)} – ${formatTanggal(j.tanggal_selesai)}`
+                : formatTanggal(j.tanggal)
 
-                return (
-                  <div key={j.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              return (
+                <div key={j.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
 
-                    {/* Timeline dot */}
-                    <div style={{
-                      width: 44, height: 44,
-                      borderRadius: 12,
-                      background: s.bg,
-                      border: `2px solid ${s.dot}20`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 20, flexShrink: 0,
-                      position: 'relative', zIndex: 1,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    }}>
-                      {icon}
-                      {/* Connector dot */}
-                      {!isLast && (
-                        <div style={{
-                          position: 'absolute',
-                          bottom: -13, left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: 6, height: 6,
-                          borderRadius: '50%',
-                          background: s.dot,
-                        }} />
-                      )}
+                  {/* Status icon circle */}
+                  <div style={{
+                    width: 54, height: 54,
+                    borderRadius: 16,
+                    background: cfg.iconBg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: `0 4px 12px ${cfg.iconBg}60`,
+                  }}>
+                    <StatusIconSVG status={j.status} />
+                  </div>
+
+                  {/* Card */}
+                  <div style={{
+                    flex: 1,
+                    background: '#fff',
+                    borderRadius: 16,
+                    padding: '14px 14px 12px',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+                    borderLeft: `3px solid ${j.warna || cfg.dot}`,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}>
+                    {/* Row: title + status badge */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                      <p style={{
+                        margin: 0, fontWeight: 700, fontSize: 14,
+                        color: '#1E293B', lineHeight: 1.3, flex: 1,
+                      }}>
+                        {j.label}
+                      </p>
+                      <span style={{
+                        padding: '4px 10px', borderRadius: 20,
+                        fontSize: 11, fontWeight: 600,
+                        background: cfg.chipBg, color: cfg.chipText,
+                        flexShrink: 0, whiteSpace: 'nowrap',
+                      }}>
+                        {j.status}
+                      </span>
                     </div>
 
-                    {/* Card */}
-                    <div style={{
-                      flex: 1,
-                      background: '#fff',
-                      borderRadius: 16,
-                      padding: '14px 16px',
-                      boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                      borderLeft: `3px solid ${j.warna}`,
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                        <p style={{
-                          margin: 0,
-                          fontWeight: 700,
-                          fontSize: 14,
-                          color: '#1e293b',
-                          lineHeight: 1.3,
-                          flex: 1,
-                        }}>
-                          {j.label}
-                        </p>
-                        <span style={{
-                          padding: '3px 10px',
-                          borderRadius: 20,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          background: s.bg,
-                          color: s.text,
-                          flexShrink: 0,
-                        }}>
-                          {j.status}
-                        </span>
-                      </div>
+                    {/* Tanggal */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: j.lokasi ? 5 : 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      <span style={{ color: '#64748B', fontSize: 12 }}>{tanggalStr}</span>
+                    </div>
 
-                      <div style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        marginTop: 8,
-                      }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                          <line x1="16" y1="2" x2="16" y2="6"/>
-                          <line x1="8" y1="2" x2="8" y2="6"/>
-                          <line x1="3" y1="10" x2="21" y2="10"/>
+                    {/* Lokasi */}
+                    {j.lokasi && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
                         </svg>
-                        <span style={{ color: '#64748b', fontSize: 12 }}>{tanggalStr}</span>
+                        <span style={{ color: '#64748B', fontSize: 12 }}>{j.lokasi}</span>
                       </div>
+                    )}
 
-                      {/* Color chip */}
-                      <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 5,
-                        marginTop: 8,
-                        padding: '3px 8px',
-                        borderRadius: 6,
-                        background: `${j.warna}15`,
-                      }}>
-                        <div style={{
-                          width: 8, height: 8,
-                          borderRadius: '50%',
-                          background: j.warna,
-                        }} />
-                        <span style={{ fontSize: 11, color: j.warna, fontWeight: 600 }}>
-                          {j.status}
-                        </span>
-                      </div>
+                    {/* Status chip bottom */}
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '3px 10px', borderRadius: 20,
+                      background: cfg.chipBg,
+                    }}>
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.dot }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: cfg.chipText }}>{j.status}</span>
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ─── BOTTOM BANNER "Jangan Lewatkan" ─── */}
+        {!loading && (
+          <div style={{
+            marginTop: 24,
+            borderRadius: 20,
+            overflow: 'hidden',
+            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0',
+            boxShadow: '0 8px 24px rgba(79,70,229,0.35)',
+            position: 'relative',
+            minHeight: 100,
+          }}>
+            {/* Banner image */}
+            {!bannerErr ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/icons/jadwal banner1.png"
+                alt="Jangan lewatkan jadwal penting"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                onError={() => setBannerErr(true)}
+              />
+            ) : (
+              /* Fallback jika banner gagal load */
+              <>
+                {/* Decorative */}
+                <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                <div style={{ position: 'absolute', bottom: -10, left: '40%', width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+
+                {/* Left illustration */}
+                <div style={{ padding: '18px 0 18px 16px', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontSize: 44 }}>📋</div>
+                  <div style={{ fontSize: 24, marginTop: -12, marginLeft: 20 }}>🔔</div>
+                </div>
+
+                {/* Text */}
+                <div style={{ padding: '18px 8px', flex: 1, position: 'relative', zIndex: 1 }}>
+                  <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, margin: '0 0 4px', lineHeight: 1.3 }}>
+                    Jangan lewatkan jadwal penting!
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0, lineHeight: 1.4 }}>
+                    Pastikan kamu tidak ketinggalan informasi penting dari setiap tahapan.
+                  </p>
+                </div>
+
+                {/* Arrow button */}
+                <div style={{ padding: '18px 16px 18px 0', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+                  <div style={{
+                    width: 36, height: 36,
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
 
-      {/* ── Bottom Nav ── */}
+      {/* ─── BOTTOM NAV ─── */}
       <nav style={{
         position: 'fixed', bottom: 0, left: '50%',
         transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 480,
+        width: '100%', maxWidth: 430,
         background: '#fff',
-        borderTop: '1px solid #f1f5f9',
+        borderTop: '1px solid #F1F5F9',
         display: 'flex',
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
         zIndex: 100,
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
-        {[
-          { href: '/siswa',           label: 'Beranda', active: false, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> },
-          { href: '/siswa/pendaftaran', label: 'Daftar', active: false, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-          { href: '/siswa/pembayaran',  label: 'Bayar',  active: false, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
-          { href: '/siswa/status',      label: 'Status', active: false, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
-          { href: '/siswa/profile',     label: 'Profil', active: false, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-        ].map((nav) => (
-          <Link key={nav.href} href={nav.href} style={{
-            flex: 1,
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '10px 0 14px',
-            gap: 3,
-            color: nav.active ? '#4f46e5' : '#94a3b8',
-            textDecoration: 'none',
-            fontSize: 10,
-            fontWeight: nav.active ? 600 : 400,
-          }}>
-            {nav.icon}
-            <span>{nav.label}</span>
-          </Link>
-        ))}
+        {([
+          { href: '/siswa',              label: 'Beranda', active: false },
+          { href: '/siswa/pendaftaran',  label: 'Daftar',  active: false },
+          { href: '/siswa/pembayaran',   label: 'Bayar',   active: false },
+          { href: '/siswa/status',       label: 'Status',  active: false },
+          { href: '/siswa/profile',      label: 'Profil',  active: false },
+        ] as { href: string; label: string; active: boolean }[]).map((nav) => {
+          const color = nav.active ? '#4F46E5' : '#94A3B8'
+          return (
+            <Link key={nav.href} href={nav.href} style={{
+              flex: 1,
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              padding: '10px 0 14px', gap: 3,
+              color, textDecoration: 'none',
+              fontSize: 10, fontWeight: nav.active ? 600 : 400,
+            }}>
+              {nav.label === 'Beranda' && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill={nav.active ? '#4F46E5' : 'none'} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              )}
+              {nav.label === 'Daftar' && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+              )}
+              {nav.label === 'Bayar' && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+              )}
+              {nav.label === 'Status' && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+              )}
+              {nav.label === 'Profil' && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              )}
+              <span>{nav.label}</span>
+            </Link>
+          )
+        })}
       </nav>
 
       <style>{`
