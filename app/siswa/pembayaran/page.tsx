@@ -285,12 +285,14 @@ const CAROUSEL_SLIDES = [
     image: '/icons/pembayaran baner.jpg',
     title: 'Bayar mudah,\namen & terpercaya',
     subtitle: 'Pembayaran Penerimaan Santri Baru lebih mudah dengan sistem yang aman dan terverifikasi.',
+    gradient: 'linear-gradient(135deg, #4F46E5 0%, #818CF8 100%)',
   },
   {
     id: 2,
     image: '/icons/pembayaran baner.jpg',
     title: 'Proses Cepat\n& Terverifikasi',
     subtitle: 'Admin akan memverifikasi pembayaran Anda dalam 1x24 jam kerja.',
+    gradient: 'linear-gradient(135deg, #3730A3 0%, #6D28D9 100%)',
   },
 ]
 
