@@ -335,30 +335,6 @@ export default function DashboardClient({
             </Link>
           </div>
         </div>
-
-        {/* Character */}
-        <div className={styles.heroCharacter}>
-          <Image
-            src="/image/ilustrasi santri.png"
-            alt="Santri"
-            width={155}
-            height={185}
-            className={styles.heroCharacterImg}
-            priority
-          />
-        </div>
-
-        {/* Masjid silhouette */}
-        <div className={styles.heroMasjid}>
-          <Image
-            src="/image/ilustrasi masjid.png"
-            alt=""
-            width={200}
-            height={120}
-            className={styles.heroMasjidImg}
-            priority
-          />
-        </div>
       </div>
 
       {/* ══ FLOAT ZONE ════════════════════════════════════════════════════════ */}
