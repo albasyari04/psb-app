@@ -117,7 +117,7 @@ function PendaftaranBanner() {
   return (
     <div className={styles.pendaftaranBannerWrap}>
       <Image
-        src="/icons/banner.jpeg"
+        src="/icons/penerimaan santri baru.png"
         alt="Penerimaan Santri Baru Tahun Ajaran 2026/2027"
         fill
         className={styles.pendaftaranBannerImg}
