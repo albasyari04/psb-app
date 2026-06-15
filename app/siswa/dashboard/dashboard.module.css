@@ -647,12 +647,22 @@
   justify-content: space-between;
   margin-bottom: 0.3rem;
 }
-.jadwalItemIcon { font-size: 1.3rem; }
-.jadwalDotSmall {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.jadwalItemIcon{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.8);
+  overflow:hidden;
+}
+
+.jadwalItemIcon img{
+  object-fit:contain;
 }
 .dotRed   { background: #ef4444; }
 .dotBlue  { background: #3b82f6; }

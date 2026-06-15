@@ -77,9 +77,30 @@ const QUICK_ITEMS = [
 ] as const
 
 const JADWAL = [
-  { label: 'Batas Pendaftaran', date: '28 Feb 2026',   dotClass: 'dotRed',   icon: '📅', statusLabel: 'Selesai',     statusClass: 'jadwalDone'    },
-  { label: 'Pengumuman Hasil',  date: '15 Maret 2026', dotClass: 'dotBlue',  icon: '📢', statusLabel: 'Selesai',     statusClass: 'jadwalDone'    },
-  { label: 'Daftar Ulang',      date: '1–15 Apr 2026', dotClass: 'dotGreen', icon: '🚩', statusLabel: 'Berlangsung', statusClass: 'jadwalOngoing' },
+  {
+    label: 'Batas Pendaftaran',
+    date: '28 Feb 2026',
+    dotClass: 'dotRed',
+    icon: '/image/pendaftar.jpg',
+    statusLabel: 'Selesai',
+    statusClass: 'jadwalDone'
+  },
+  {
+    label: 'Pengumuman Hasil',
+    date: '15 Maret 2026',
+    dotClass: 'dotBlue',
+    icon: '/image/pengumuman.png',
+    statusLabel: 'Selesai',
+    statusClass: 'jadwalDone'
+  },
+  {
+    label: 'Daftar Ulang',
+    date: '1–15 Apr 2026',
+    dotClass: 'dotGreen',
+    icon: '/image/pendaftar.gif',
+    statusLabel: 'Berlangsung',
+    statusClass: 'jadwalOngoing'
+  },
 ] as const
 
 const TIPE_CONFIG: Record<string, {
@@ -168,7 +189,7 @@ function AnnouncementCard({
     >
       <div className={styles.annIconWrap}>
         <Image
-          src="/image/laporan.jpg"
+          src="/image/pengumuman.png"
           alt=""
           width={36}
           height={36}
@@ -477,7 +498,14 @@ export default function DashboardClient({
                 className={`${styles.jadwalItem} ${styles[`jadwalBorder_${j.dotClass}` as keyof typeof styles]}`}
               >
                 <div className={styles.jadwalItemTop}>
-                  <span className={styles.jadwalItemIcon}>{j.icon}</span>
+                  <div className={styles.jadwalItemIcon}>
+                    <Image
+                      src={j.icon}
+                      alt={j.label}
+                      width={32}
+                      height={32}
+                    />
+                  </div>
                   <span className={`${styles.jadwalDotSmall} ${styles[j.dotClass as keyof typeof styles]}`} />
                 </div>
                 <p className={`${styles.jadwalItemLabel} ${
