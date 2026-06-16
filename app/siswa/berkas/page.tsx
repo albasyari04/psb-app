@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 // ── Document Types ─────────────────────────────────────────────────────────
 const DOCUMENT_TYPES = [
@@ -110,9 +111,7 @@ const DOCUMENT_TYPES = [
       </svg>
     ),
   },
-] as const
-
-type DocId = (typeof DOCUMENT_TYPES)[number]['id']
+]
 
 // ── Component ──────────────────────────────────────────────────────────────
 export default function BerkasPage() {
@@ -126,7 +125,7 @@ export default function BerkasPage() {
     setTimeout(() => setToast(null), 3500)
   }
 
-  function handleFileSelect(docId: string, file: File | null, maxMB: number, accept: string) {
+  function handleFileSelect(docId: string, file: File | null, maxMB: number) {
     if (!file) { setFiles(prev => ({ ...prev, [docId]: null })); return }
     if (file.size > maxMB * 1024 * 1024) { showToast(`Ukuran file maksimal ${maxMB}MB`, false); return }
     const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
@@ -178,10 +177,12 @@ export default function BerkasPage() {
             </p>
           </div>
           <div className="up-hero-img">
-            <img
+            <Image
               src="/icons/berkas-admin.png"
               alt="Upload Berkas"
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              width={180}
+              height={180}
+              style={{ width: '200%', height: '75%', objectFit: 'contain' }}
             />
           </div>
         </div>
@@ -297,7 +298,7 @@ export default function BerkasPage() {
                   ref={el => { if (el) fileInputsRef.current[doc.id] = el }}
                   type="file"
                   accept={doc.accept}
-                  onChange={e => handleFileSelect(doc.id, e.target.files?.[0] ?? null, doc.maxMB, doc.accept)}
+                  onChange={e => handleFileSelect(doc.id, e.target.files?.[0] ?? null, doc.maxMB)}
                   style={{ display: 'none' }}
                 />
               </div>
