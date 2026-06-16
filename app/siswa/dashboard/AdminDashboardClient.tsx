@@ -202,6 +202,7 @@ const QUICK_MENU = [
   { id: 'laporan',    label: 'Laporan',    Icon: IconLaporan,    href: '/admin/laporan',    bgLight: '#fef3c7' },
   { id: 'pengumuman', label: 'Pengumuman', Icon: IconPengumuman, href: '/admin/pengumuman', bgLight: '#fce7f3' },
   { id: 'notifikasi', label: 'Notifikasi', Icon: IconNotifikasi, href: '/admin/notifikasi', bgLight: '#dbeafe' },
+  { id: 'pengaturan', label: 'Pengaturan', Icon: IconPengaturan, href: '/admin/pengaturan', bgLight: '#f3f4f6' },
   { id: 'jadwal',     label: 'Jadwal',     Icon: IconJadwal,     href: '/admin/jadwal',     bgLight: '#f3f4f6' },
 ]
 

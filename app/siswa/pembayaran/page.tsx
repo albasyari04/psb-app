@@ -12,35 +12,37 @@ const REKENING_INFO = [
   {
     id: 'bri',
     label: 'Bank BRI',
-    number: '561301044986539',
+    number: '5613 0104 4986 539',
+    numberRaw: '561301044986539',
     name: 'Ahmad Agus Munif',
     primaryColor: '#003087',
     accentColor: '#0052CC',
     bgGradient: 'linear-gradient(135deg, #EEF4FF 0%, #DBEAFE 100%)',
     borderColor: '#BFDBFE',
+    logoSrc: '/icons/bri-logo.png', // fallback to SVG if not exist
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="5" width="20" height="14" rx="3" fill="#003087"/>
-        <rect x="2" y="9" width="20" height="3" fill="#0052CC"/>
-        <rect x="5" y="14" width="4" height="2" rx="1" fill="#fff" opacity="0.8"/>
-        <rect x="11" y="14" width="6" height="2" rx="1" fill="#fff" opacity="0.5"/>
+      <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="10" fill="#003087"/>
+        <rect x="6" y="12" width="28" height="18" rx="3" fill="#fff" opacity="0.15"/>
+        <text x="20" y="25" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="800" fontFamily="sans-serif">BRI</text>
       </svg>
     ),
   },
   {
     id: 'dana',
     label: 'DANA',
-    number: '087814559628',
+    number: '0878 1455 9628',
+    numberRaw: '087814559628',
     name: 'Ahmad Agus Munif',
     primaryColor: '#118EEA',
     accentColor: '#0A75C7',
     bgGradient: 'linear-gradient(135deg, #EBF6FF 0%, #DBEAFE 100%)',
     borderColor: '#BAE6FD',
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="10" fill="#118EEA"/>
-        <path d="M8 12C8 9.79 9.79 8 12 8s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z" fill="#fff" opacity="0.9"/>
-        <circle cx="12" cy="12" r="2" fill="#118EEA"/>
+      <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="10" fill="#118EEA"/>
+        <circle cx="20" cy="20" r="10" fill="#fff" opacity="0.25"/>
+        <text x="20" y="24" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="800" fontFamily="sans-serif">DANA</text>
       </svg>
     ),
   },
@@ -68,7 +70,7 @@ const DATA_BIAYA: BiayaItem[] = [
   { no: 5,  jenis: 'Uang Kos Makan (2x sehari) - Putra',   jumlah: 'Rp. 300.000,-/Bulan',    nominal: 300000,  kategori: 'Putra' },
   { no: 6,  jenis: 'Sahriyah Asrama + Madrasah (Putra)',   jumlah: 'Rp. 180.000,-/3 Bulan',  nominal: 180000,  kategori: 'Putra' },
   { no: 7,  jenis: 'Uang Bangunan (Putra)',                 jumlah: 'Rp. 250.000,-/Tahun',    nominal: 250000,  kategori: 'Putra' },
-  { no: 8,  jenis: 'Pendaftaran Asrama + Madrasah (Putri)',  jumlah: 'Rp. 100.000,-',         nominal: 100000,  kategori: 'Putri' },
+  { no: 8,  jenis: 'Pendaftaran Asrama + Madrasah (Putri)', jumlah: 'Rp. 100.000,-',          nominal: 100000,  kategori: 'Putri' },
   { no: 9,  jenis: 'KTS, Buku Pegangan Santri (Putri)',     jumlah: 'Rp. 70.000,-',           nominal: 70000,   kategori: 'Putri' },
   { no: 10, jenis: 'Raport (Putri)',                        jumlah: 'Rp. 70.000,-',           nominal: 70000,   kategori: 'Putri' },
   { no: 11, jenis: 'Seragam Madrasah (3 baju) - Putri',    jumlah: 'Rp. 300.000,-',          nominal: 300000,  kategori: 'Putri' },
@@ -128,24 +130,6 @@ function IconShield() {
   )
 }
 
-function IconInfo() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
-      <path d="M12 8v1M12 11v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function IconBell() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
 function IconCopy() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -195,7 +179,7 @@ function IconEye() {
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
   const handle = () => {
-    navigator.clipboard.writeText(text.replace(/-/g, ''))
+    navigator.clipboard.writeText(text.replace(/\s/g, ''))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -207,7 +191,7 @@ function CopyButton({ text }: { text: string }) {
         alignItems: 'center',
         gap: 5,
         fontSize: 11,
-        padding: '5px 12px',
+        padding: '6px 14px',
         borderRadius: 20,
         border: `1.5px solid ${copied ? '#BBF7D0' : '#E2E8F0'}`,
         background: copied ? '#F0FDF4' : '#F8FAFC',
@@ -236,165 +220,93 @@ function RekeningCard({ item }: { item: typeof REKENING_INFO[0] }) {
         padding: '16px',
         flex: 1,
         minWidth: 0,
-        boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+        transition: 'transform .2s, box-shadow .2s',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      {/* Header: logo + label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <div
           style={{
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             borderRadius: 12,
             background: '#fff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+            flexShrink: 0,
           }}
         >
           {item.icon}
         </div>
-        <span style={{ fontWeight: 800, fontSize: 13, color: item.primaryColor, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+        <span style={{
+          fontWeight: 800,
+          fontSize: 13,
+          color: item.primaryColor,
+          fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           {item.label}
         </span>
       </div>
+
+      {/* Account number */}
       <p style={{
         fontWeight: 800,
-        fontSize: 14,
+        fontSize: 15,
         color: '#1E293B',
-        letterSpacing: 0.5,
-        margin: '0 0 3px',
-        wordBreak: 'break-all',
+        letterSpacing: 0.8,
+        margin: '0 0 2px',
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
       }}>
         {item.number}
       </p>
-      <p style={{ fontSize: 10, color: '#64748B', margin: '0 0 12px', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
-        a/n {item.name}
+      <p style={{
+        fontSize: 10,
+        color: '#64748B',
+        margin: '0 0 12px',
+        fontWeight: 600,
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+      }}>
+        a.n {item.name}
       </p>
-      <CopyButton text={item.number} />
+
+      <CopyButton text={item.numberRaw} />
     </div>
   )
 }
 
-// ─── Banner Carousel ───────────────────────────────────────────────────────────
+// ─── Hero Banner (image only, no text) ────────────────────────────────────────
 
-const CAROUSEL_SLIDES = [
-  {
-    id: 1,
-    image: '/icons/pembayaran baner.jpg',
-    title: 'Bayar mudah,\namen & terpercaya',
-    subtitle: 'Pembayaran Penerimaan Santri Baru lebih mudah dengan sistem yang aman dan terverifikasi.',
-    gradient: 'linear-gradient(135deg, #4F46E5 0%, #818CF8 100%)',
-  },
-  {
-    id: 2,
-    image: '/icons/pembayaran baner.jpg',
-    title: 'Proses Cepat\n& Terverifikasi',
-    subtitle: 'Admin akan memverifikasi pembayaran Anda dalam 1x24 jam kerja.',
-    gradient: 'linear-gradient(135deg, #3730A3 0%, #6D28D9 100%)',
-  },
-]
-
-function BannerCarousel() {
-  const [active, setActive] = useState(0)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const resetTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setActive((p) => (p + 1) % CAROUSEL_SLIDES.length)
-    }, 4000)
-  }, [])
-
-  useEffect(() => {
-    resetTimer()
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [resetTimer])
-
-  const go = (i: number) => { setActive(i); resetTimer() }
-  const slide = CAROUSEL_SLIDES[active]
-
+function HeroBanner() {
   return (
-    <div style={{ margin: '0 16px 20px', position: 'relative' }}>
+    <div style={{ marginBottom: 24 }}>
       <div
         style={{
           borderRadius: 22,
           overflow: 'hidden',
-          height: 148,
+          height: 170,
           position: 'relative',
-          background: slide.gradient ?? 'linear-gradient(135deg, #3730A3 0%, #6D28D9 100%)',
-          boxShadow: '0 8px 32px rgba(99,102,241,0.25)',
+          boxShadow: '0 12px 36px rgba(79,70,229,0.30)',
         }}
       >
-        {/* Background image if available */}
-        {slide.image && (
-          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%' }}>
-            <Image
-              src={slide.image}
-              alt="banner"
-              fill
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
-            />
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(to right, rgba(55,48,163,0.95) 0%, rgba(55,48,163,0.3) 100%)',
-            }} />
-          </div>
-        )}
+        {/* Background: icon pembayaran.png sebagai latar penuh */}
+        <img
+          src="/icons/pembayaran-banner.png"
+          alt="Banner Pembayaran"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center',
+          }}
+        />
 
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -30, right: slide.image ? '44%' : -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-
-        {/* Content */}
-        <div style={{ position: 'absolute', inset: 0, padding: '20px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', width: slide.image ? '55%' : '100%' }}>
-          <h3 style={{
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 15,
-            margin: '0 0 8px',
-            lineHeight: 1.3,
-            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-            whiteSpace: 'pre-line',
-          }}>
-            {slide.title}
-          </h3>
-          <p style={{
-            color: 'rgba(255,255,255,0.75)',
-            fontSize: 10,
-            margin: 0,
-            lineHeight: 1.6,
-            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-          }}>
-            {slide.subtitle}
-          </p>
-        </div>
-
-        {/* Wallet icon for last slide */}
-        {!slide.image && (
-          <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 56 }}>
-            💳
-          </div>
-        )}
-      </div>
-
-      {/* Dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
-        {CAROUSEL_SLIDES.map((_, i) => (
-          <div
-            key={i}
-            onClick={() => go(i)}
-            style={{
-              width: i === active ? 20 : 6,
-              height: 6,
-              borderRadius: 99,
-              background: i === active ? '#6366F1' : '#CBD5E1',
-              cursor: 'pointer',
-              transition: 'all .3s ease',
-            }}
-          />
-        ))}
+        {/* Overlay ringan agar terlihat lebih menarik */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg, rgba(55,48,163,0.35) 0%, rgba(109,40,217,0.18) 60%, rgba(109,40,217,0.05) 100%)',
+        }} />
       </div>
     </div>
   )
@@ -402,8 +314,42 @@ function BannerCarousel() {
 
 // ─── Info Pembayaran Card ──────────────────────────────────────────────────────
 
-function InfoPembayaranCard({ session }: { session: { user: { name?: string | null; nomor_pendaftaran?: string } } | null }) {
-  const nama = session?.user?.name ?? 'Ahmad Agus Munif'
+function InfoPembayaranItem({
+  icon, label, value, valueStyle,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  valueStyle?: React.CSSProperties
+}) {
+  return (
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+        background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 1px 4px rgba(99,102,241,0.10)',
+      }}>
+        {icon}
+      </div>
+      <div>
+        <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          {label}
+        </p>
+        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', ...valueStyle }}>
+          {value}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function InfoPembayaranCard({
+  session,
+}: {
+  session: { user: { name?: string | null; nomor_pendaftaran?: string } } | null
+}) {
+  const nama = session?.user?.name ?? 'M. Naufal Al Basyari'
   const nomorPendaftaran = 'PSB250612-001'
   const totalBiaya = 2500000
   const batasPembayaran = '30 Juni 2025'
@@ -415,16 +361,18 @@ function InfoPembayaranCard({ session }: { session: { user: { name?: string | nu
     return diff > 0 ? diff : 0
   })()
 
+  const isUrgent = hariLagi <= 7
+
   return (
     <div style={{
       background: '#fff',
       borderRadius: 20,
       border: '1.5px solid #F1F5F9',
       padding: '18px 16px',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
       marginBottom: 20,
     }}>
-      {/* Row 1 */}
+      {/* Grid 2 column info */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 12px' }}>
         <InfoPembayaranItem
           icon={
@@ -477,9 +425,9 @@ function InfoPembayaranCard({ session }: { session: { user: { name?: string | nu
 
       {/* Batas & countdown */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 10,
+            width: 34, height: 34, borderRadius: 10,
             background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
@@ -489,40 +437,35 @@ function InfoPembayaranCard({ session }: { session: { user: { name?: string | nu
             </svg>
           </div>
           <div>
-            <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>Batas Pembayaran</p>
-            <p style={{ fontSize: 13, color: '#1E293B', fontWeight: 700, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>{batasPembayaran}</p>
+            <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+              Batas Pembayaran
+            </p>
+            <p style={{ fontSize: 13, color: '#1E293B', fontWeight: 700, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+              {batasPembayaran}
+            </p>
           </div>
         </div>
+
+        {/* Countdown pill */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          background: hariLagi > 7 ? '#F0FDF4' : '#FFF7ED',
-          border: `1.5px solid ${hariLagi > 7 ? '#BBF7D0' : '#FED7AA'}`,
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: isUrgent ? '#FFF7ED' : '#F0FDF4',
+          border: `1.5px solid ${isUrgent ? '#FED7AA' : '#BBF7D0'}`,
           borderRadius: 20,
-          padding: '5px 12px',
+          padding: '6px 14px',
         }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: hariLagi > 7 ? '#22C55E' : '#F97316', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: hariLagi > 7 ? '#15803D' : '#C2410C', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke={isUrgent ? '#F97316' : '#22C55E'} strokeWidth="2"/>
+            <path d="M12 7v5l3 3" stroke={isUrgent ? '#F97316' : '#22C55E'} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <span style={{
+            fontSize: 12, fontWeight: 700,
+            color: isUrgent ? '#C2410C' : '#15803D',
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             {hariLagi} Hari Lagi
           </span>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function InfoPembayaranItem({ icon, label, value, valueStyle }: { icon: React.ReactNode; label: string; value: string; valueStyle?: React.CSSProperties }) {
-  return (
-    <div style={{ display: 'flex', gap: 8 }}>
-      <div style={{
-        width: 30, height: 30, borderRadius: 9, flexShrink: 0,
-        background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {icon}
-      </div>
-      <div>
-        <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>{label}</p>
-        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', ...valueStyle }}>{value}</p>
       </div>
     </div>
   )
@@ -577,25 +520,9 @@ function CaraPembayaran() {
       border: '1.5px solid #F1F5F9',
       padding: '16px',
       marginBottom: 20,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 8,
-          background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M9 11l3 3L22 4" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="#6366F1" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </div>
-        <p style={{ fontSize: 13, fontWeight: 800, color: '#1E293B', margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
-          Cara Pembayaran
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' }}>
             {/* Connector line */}
@@ -603,41 +530,37 @@ function CaraPembayaran() {
               <div style={{
                 position: 'absolute',
                 top: 18,
-                left: '60%',
-                right: '-40%',
+                left: '58%',
+                right: '-42%',
                 height: 2,
-                background: 'linear-gradient(to right, #6366F1, #C7D2FE)',
+                background: 'linear-gradient(to right, #6366F1 0%, #C7D2FE 100%)',
                 zIndex: 0,
-              }}>
-                <div style={{ position: 'absolute', right: -4, top: -4, width: 10, height: 10 }}>
-                  <svg width="10" height="10" viewBox="0 0 10 10">
-                    <path d="M2 5h6M6 2l3 3-3 3" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
+              }} />
             )}
 
-            {/* Step number + icon */}
+            {/* Step circle */}
             <div style={{ position: 'relative', zIndex: 1, marginBottom: 8 }}>
               <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                width: 38, height: 38, borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff',
-                boxShadow: '0 4px 12px rgba(99,102,241,0.35)',
+                boxShadow: '0 4px 14px rgba(99,102,241,0.40)',
               }}>
                 {step.icon}
               </div>
-              {/* Step number badge */}
+              {/* Number badge */}
               <div style={{
-                position: 'absolute',
-                bottom: -2, right: -2,
-                width: 14, height: 14, borderRadius: '50%',
+                position: 'absolute', bottom: -3, right: -3,
+                width: 16, height: 16, borderRadius: '50%',
                 background: '#fff',
-                border: '1.5px solid #6366F1',
+                border: '2px solid #6366F1',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 1px 4px rgba(99,102,241,0.2)',
               }}>
-                <span style={{ fontSize: 7, fontWeight: 800, color: '#6366F1', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>{i + 1}</span>
+                <span style={{ fontSize: 8, fontWeight: 800, color: '#6366F1', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+                  {i + 1}
+                </span>
               </div>
             </div>
 
@@ -646,7 +569,7 @@ function CaraPembayaran() {
               color: '#475569',
               margin: 0,
               textAlign: 'center',
-              lineHeight: 1.5,
+              lineHeight: 1.55,
               fontWeight: 600,
               whiteSpace: 'pre-line',
               fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
@@ -672,22 +595,30 @@ function SecurityBanner() {
       marginBottom: 24,
       display: 'flex',
       alignItems: 'center',
-      gap: 12,
+      gap: 14,
       cursor: 'pointer',
+      transition: 'box-shadow .2s',
+      boxShadow: '0 2px 8px rgba(99,102,241,0.08)',
     }}>
       <div style={{
-        width: 42, height: 42, borderRadius: 14, flexShrink: 0,
+        width: 44, height: 44, borderRadius: 14, flexShrink: 0,
         background: 'linear-gradient(135deg, #EEF2FF, #E0E7FF)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 2px 8px rgba(99,102,241,0.15)',
+        boxShadow: '0 2px 8px rgba(99,102,241,0.18)',
       }}>
         <IconShield />
       </div>
       <div style={{ flex: 1 }}>
-        <p style={{ fontSize: 12, fontWeight: 800, color: '#4338CA', margin: '0 0 3px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+        <p style={{
+          fontSize: 12, fontWeight: 800, color: '#4338CA',
+          margin: '0 0 4px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Transaksi Anda Aman
         </p>
-        <p style={{ fontSize: 10, color: '#6366F1', margin: 0, lineHeight: 1.5, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+        <p style={{
+          fontSize: 10, color: '#6366F1', margin: 0,
+          lineHeight: 1.55, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Semua pembayaran dienkripsi dan diverifikasi secara ketat untuk menjaga keamanan data dan transaksi Anda.
         </p>
       </div>
@@ -746,7 +677,7 @@ function PilihPembayaranModal({
     <div
       style={{
         position: 'fixed', inset: 0,
-        background: 'rgba(15,23,42,0.8)',
+        background: 'rgba(15,23,42,0.80)',
         backdropFilter: 'blur(8px)',
         zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -764,18 +695,17 @@ function PilihPembayaranModal({
           maxHeight: '88vh',
           overflowY: 'auto',
           position: 'relative',
-          boxShadow: '0 32px 64px rgba(0,0,0,0.2)',
+          boxShadow: '0 32px 64px rgba(0,0,0,0.20)',
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            position: 'sticky', top: 0,
-            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-            padding: '20px 20px 16px',
-            borderRadius: '28px 28px 0 0',
-          }}
-        >
+        <div style={{
+          position: 'sticky', top: 0,
+          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+          padding: '20px 20px 16px',
+          borderRadius: '28px 28px 0 0',
+          zIndex: 1,
+        }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div>
               <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
@@ -802,22 +732,23 @@ function PilihPembayaranModal({
           {/* Mode Toggle */}
           <div style={{
             display: 'flex', gap: 6,
-            background: 'rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.10)',
             borderRadius: 14, padding: 4,
           }}>
             {['Bayar Satu Item', 'Bayar Banyak Item'].map((label, i) => {
-              const active = i === 0 ? !isMultipleMode : isMultipleMode
+              const isActive = i === 0 ? !isMultipleMode : isMultipleMode
               return (
                 <button
                   key={label}
                   onClick={() => { setIsMultipleMode(i === 1); setSelectedItems([]) }}
                   style={{
                     flex: 1, padding: '8px 12px', borderRadius: 10,
-                    background: active ? '#fff' : 'transparent',
-                    color: active ? '#4F46E5' : 'rgba(255,255,255,0.8)',
+                    background: isActive ? '#fff' : 'transparent',
+                    color: isActive ? '#4F46E5' : 'rgba(255,255,255,0.8)',
                     border: 'none', fontWeight: 700, fontSize: 11, cursor: 'pointer',
-                    transition: 'all .2s', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-                    boxShadow: active ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all .2s',
+                    fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+                    boxShadow: isActive ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
                   }}
                 >
                   {label}
@@ -828,7 +759,11 @@ function PilihPembayaranModal({
         </div>
 
         {/* Filter Kategori */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9', display: 'flex', gap: 6, overflowX: 'auto' }}>
+        <div style={{
+          padding: '12px 16px',
+          borderBottom: '1px solid #F1F5F9',
+          display: 'flex', gap: 6, overflowX: 'auto',
+        }}>
           {kategoriList.map((kat) => (
             <button
               key={kat}
@@ -864,14 +799,12 @@ function PilihPembayaranModal({
                 }}
               >
                 {isMultipleMode && (
-                  <div
-                    style={{
-                      width: 22, height: 22, borderRadius: 7,
-                      border: `2px solid ${isSelected ? '#6366F1' : '#CBD5E1'}`,
-                      background: isSelected ? '#6366F1' : '#fff',
-                      marginRight: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}
-                  >
+                  <div style={{
+                    width: 22, height: 22, borderRadius: 7,
+                    border: `2px solid ${isSelected ? '#6366F1' : '#CBD5E1'}`,
+                    background: isSelected ? '#6366F1' : '#fff',
+                    marginRight: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
                     {isSelected && (
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
                         <polyline points="20 6 9 17 4 12" />
@@ -884,30 +817,30 @@ function PilihPembayaranModal({
                     {item.jenis}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: '#6366F1', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700,
+                      color: isSelected ? '#6366F1' : '#475569',
+                      fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+                    }}>
                       {item.jumlah}
                     </span>
                     <span style={{
-                      fontSize: 9, padding: '2px 8px', borderRadius: 12,
-                      background: (kategoriColors[item.kategori] ?? '#6366F1') + '18',
-                      color: kategoriColors[item.kategori] ?? '#6366F1',
-                      fontWeight: 700, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+                      fontSize: 9, fontWeight: 700,
+                      color: kategoriColors[item.kategori] ?? '#64748B',
+                      background: kategoriColors[item.kategori]? `${kategoriColors[item.kategori]}15`: '#F8FAFC',
+                      padding: '2px 8px', borderRadius: 20,
+                      fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
                     }}>
                       {item.kategori}
                     </span>
                   </div>
                 </div>
-                {!isMultipleMode && (
-                  <div style={{ color: '#94A3B8', marginLeft: 8, flexShrink: 0 }}>
-                    <IconChevronRight />
-                  </div>
-                )}
               </div>
             )
           })}
         </div>
 
-        {/* Footer untuk mode multiple */}
+        {/* Multi-select footer */}
         {isMultipleMode && selectedItems.length > 0 && (
           <div style={{
             position: 'sticky', bottom: 0, background: '#fff',
@@ -1000,14 +933,14 @@ function UploadBuktiModal({
         }}
       >
         {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 14, marginBottom: 20 }}>
           <div style={{ width: 44, height: 4, background: '#E2E8F0', borderRadius: 99 }} />
         </div>
 
         {/* Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 12,
+            width: 38, height: 38, borderRadius: 12,
             background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
           }}>
@@ -1075,11 +1008,12 @@ function UploadBuktiModal({
           ) : (
             <>
               <div style={{
-                width: 52, height: 52, borderRadius: 16, margin: '0 auto 10px',
+                width: 56, height: 56, borderRadius: 18, margin: '0 auto 10px',
                 background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(99,102,241,0.12)',
               }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="17 8 12 3 7 8" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <line x1="12" y1="3" x2="12" y2="15" stroke="#6366F1" strokeWidth="2" strokeLinecap="round"/>
@@ -1110,8 +1044,10 @@ function UploadBuktiModal({
             fontSize: 12, color: '#1E293B', resize: 'none', outline: 'none',
             fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
             boxSizing: 'border-box', marginBottom: 16, background: '#FAFBFC',
-            lineHeight: 1.6,
+            lineHeight: 1.6, transition: 'border-color .2s',
           }}
+          onFocus={(e) => { e.target.style.borderColor = '#6366F1' }}
+          onBlur={(e) => { e.target.style.borderColor = '#E2E8F0' }}
         />
 
         {/* Submit button */}
@@ -1121,7 +1057,9 @@ function UploadBuktiModal({
           style={{
             width: '100%', padding: '16px',
             borderRadius: 16,
-            background: !file || loading || !selectedItem ? '#E2E8F0' : 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            background: !file || loading || !selectedItem
+              ? '#E2E8F0'
+              : 'linear-gradient(135deg, #6366F1, #8B5CF6)',
             color: !file || loading || !selectedItem ? '#94A3B8' : '#fff',
             fontWeight: 700, fontSize: 14, border: 'none',
             cursor: !file || loading || !selectedItem ? 'not-allowed' : 'pointer',
@@ -1133,7 +1071,13 @@ function UploadBuktiModal({
         >
           {loading ? (
             <>
-              <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+              <div style={{
+                width: 16, height: 16,
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderTopColor: '#fff',
+                borderRadius: '50%',
+                animation: 'spin .8s linear infinite',
+              }} />
               Mengirim...
             </>
           ) : (
@@ -1160,10 +1104,17 @@ function UploadBuktiModal({
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p style={{ fontSize: 9, color: '#94A3B8', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+      <p style={{
+        fontSize: 9, color: '#94A3B8', fontWeight: 700, margin: '0 0 2px',
+        textTransform: 'uppercase', letterSpacing: 0.5,
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+      }}>
         {label}
       </p>
-      <p style={{ fontSize: 12, color: '#334155', fontWeight: 600, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+      <p style={{
+        fontSize: 12, color: '#334155', fontWeight: 600, margin: 0,
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+      }}>
         {value}
       </p>
     </div>
@@ -1171,7 +1122,9 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 }
 
 function PembayaranCard({ item }: { item: Pembayaran }) {
-  const s = STATUS_MAP[item.status] ?? { label: item.status, bg: '#F1F5F9', text: '#475569', dot: '#94A3B8', icon: '📄' }
+  const s = STATUS_MAP[item.status] ?? {
+    label: item.status, bg: '#F1F5F9', text: '#475569', dot: '#94A3B8', icon: '📄',
+  }
 
   return (
     <div style={{
@@ -1190,43 +1143,68 @@ function PembayaranCard({ item }: { item: Pembayaran }) {
         borderRadius: '4px 0 0 4px',
       }} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, paddingLeft: 8 }}>
+      {/* Header row */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        marginBottom: 12, paddingLeft: 10,
+      }}>
         <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
-          <p style={{ fontWeight: 700, fontSize: 13, color: '#1E293B', margin: '0 0 3px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <p style={{
+            fontWeight: 700, fontSize: 13, color: '#1E293B',
+            margin: '0 0 3px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             {item.jenis_pembayaran}
           </p>
-          <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <p style={{
+            fontSize: 10, color: '#94A3B8', margin: 0, fontWeight: 600,
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             {item.metode_pembayaran ?? '—'}
           </p>
         </div>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 4,
+          display: 'flex', alignItems: 'center', gap: 5,
           background: s.bg, borderRadius: 20, padding: '4px 10px', flexShrink: 0,
           border: `1.5px solid ${s.dot}30`,
         }}>
           <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.dot, flexShrink: 0 }} />
-          <span style={{ fontSize: 10, fontWeight: 700, color: s.text, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <span style={{
+            fontSize: 10, fontWeight: 700, color: s.text,
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             {s.label}
           </span>
         </div>
       </div>
 
+      {/* Nominal */}
       {item.nominal > 0 && (
         <div style={{
           background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
-          borderRadius: 14, padding: '10px 14px', marginBottom: 12, marginLeft: 8,
+          borderRadius: 14, padding: '10px 14px', marginBottom: 12, marginLeft: 10,
           border: '1.5px solid #E0E7FF',
         }}>
-          <p style={{ fontSize: 9, color: '#6366F1', fontWeight: 700, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <p style={{
+            fontSize: 9, color: '#6366F1', fontWeight: 700, margin: '0 0 2px',
+            textTransform: 'uppercase', letterSpacing: 0.5,
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             Nominal
           </p>
-          <p style={{ fontSize: 20, fontWeight: 800, color: '#4338CA', margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+          <p style={{
+            fontSize: 20, fontWeight: 800, color: '#4338CA', margin: 0,
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             {formatRupiah(item.nominal)}
           </p>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px', fontSize: 12, paddingLeft: 8 }}>
+      {/* Info grid */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px',
+        fontSize: 12, paddingLeft: 10,
+      }}>
         <InfoItem label="Tanggal Bayar" value={formatTanggal(item.tanggal_bayar)} />
         <InfoItem label="No. Referensi" value={item.no_referensi ?? '—'} />
         {item.status === 'dikonfirmasi' && item.confirmed_at && (
@@ -1239,6 +1217,7 @@ function PembayaranCard({ item }: { item: Pembayaran }) {
         )}
       </div>
 
+      {/* Bukti link */}
       {item.bukti_url && (
         <a
           href={item.bukti_url}
@@ -1246,7 +1225,7 @@ function PembayaranCard({ item }: { item: Pembayaran }) {
           rel="noopener noreferrer"
           style={{
             display: 'flex', alignItems: 'center', gap: 7,
-            marginTop: 12, marginLeft: 8,
+            marginTop: 12, marginLeft: 10,
             padding: '10px 14px', borderRadius: 12,
             background: '#F8FAFC', border: '1.5px solid #E2E8F0',
             textDecoration: 'none', color: '#6366F1', fontSize: 12, fontWeight: 700,
@@ -1312,7 +1291,12 @@ export default function SiswaPembayaranPage() {
     setShowUploadModal(true)
   }
 
-  const handleSubmitBukti = async (file: File, catatan: string, nominal: number, jenisPembayaran: string) => {
+  const handleSubmitBukti = async (
+    file: File,
+    catatan: string,
+    nominal: number,
+    jenisPembayaran: string,
+  ) => {
     if (!session?.user?.id) return
     try {
       setUploadLoading(true)
@@ -1323,9 +1307,11 @@ export default function SiswaPembayaranPage() {
         body: JSON.stringify({
           user_id: session.user.id,
           nama_siswa: session.user.name,
-          nominal, jenis_pembayaran: jenisPembayaran,
+          nominal,
+          jenis_pembayaran: jenisPembayaran,
           metode_pembayaran: 'Transfer Bank',
-          bukti_url: buktiUrl, status: 'menunggu',
+          bukti_url: buktiUrl,
+          status: 'menunggu',
           catatan: catatan || null,
           tanggal_bayar: new Date().toISOString().split('T')[0],
         }),
@@ -1334,7 +1320,8 @@ export default function SiswaPembayaranPage() {
         const errJson = await res.json()
         throw new Error(errJson.error || 'Gagal mengirim data pembayaran')
       }
-      setShowUploadModal(false); setSelectedItem(null)
+      setShowUploadModal(false)
+      setSelectedItem(null)
       showToast(`Bukti pembayaran untuk ${jenisPembayaran} berhasil dikirim!`, 'success')
       fetchData()
     } catch (e: unknown) {
@@ -1344,14 +1331,55 @@ export default function SiswaPembayaranPage() {
     }
   }
 
+  // ── Loading state ──────────────────────────────────────────────────────────
   if (status === 'loading' || loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC', gap: 12 }}>
-        <div style={{ width: 44, height: 44, border: '4px solid #E2E8F0', borderTopColor: '#6366F1', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
-        <p style={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        background: '#F4F6FA', gap: 16,
+      }}>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
+        {/* Spinner ring — sama seperti halaman pendaftaran */}
+        <div style={{ position: 'relative', width: 56, height: 56 }}>
+          {/* Track */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            borderRadius: '50%',
+            border: '3px solid #E0E7FF',
+          }} />
+          {/* Spinning arc */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: '#6366F1',
+            borderRightColor: '#8B5CF6',
+            animation: 'spin .8s linear infinite',
+          }} />
+          {/* Center icon */}
+          <div style={{
+            position: 'absolute', inset: 6,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7l-9-5z"
+                fill="rgba(255,255,255,0.25)" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <p style={{
+          color: '#94A3B8', fontSize: 13, fontWeight: 600,
+          fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Memuat data pembayaran...
         </p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
@@ -1366,17 +1394,18 @@ export default function SiswaPembayaranPage() {
       paddingBottom: 100,
       fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
     }}>
-      {/* Google Fonts */}
+      {/* ── Global styles & fonts ─────────────────────────────────────────── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         @keyframes fadeInDown {
-          from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+          from { opacity: 0; transform: translateX(-50%) translateY(-14px); }
           to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       `}</style>
 
-      {/* Toast */}
+      {/* ── Toast ─────────────────────────────────────────────────────────── */}
       {toast && (
         <div style={{
           position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
@@ -1396,186 +1425,240 @@ export default function SiswaPembayaranPage() {
         </div>
       )}
 
-      {/* ── Hero Header ── */}
+      {/* ── Hero Header ───────────────────────────────────────────────────── */}
       <div style={{
-        background: 'linear-gradient(135deg, #4338CA 0%, #6D28D9 60%, #7C3AED 100%)',
-        padding: '52px 20px 28px',
+        background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 50%, #6D28D9 100%)',
+        padding: '52px 20px 32px',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -50, right: -50, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', bottom: -20, left: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
-        <div style={{ position: 'absolute', top: 30, right: 80, width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+        {/* Dekorasi lingkaran */}
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+        <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+        <div style={{ position: 'absolute', top: 40, left: 160, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+
+        {/* Ilustrasi icon-pembayaran.png — pojok kanan bawah */}
+        <img
+          src="/icons/icon-pembayaran.png"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            height: '100%',
+            maxHeight: 180,
+            width: 'auto',
+            objectFit: 'contain',
+            objectPosition: 'right bottom',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            opacity: 0.95,
+          }}
+        />
 
         {/* Title row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Icon */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          position: 'relative', marginBottom: 18,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            {/* Icon avatar */}
             <div style={{
-              width: 48, height: 48, borderRadius: 16,
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(4px)',
+              width: 50, height: 50, borderRadius: 16,
+              background: 'rgba(255,255,255,0.18)',
+              backdropFilter: 'blur(6px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1.5px solid rgba(255,255,255,0.2)',
+              border: '1.5px solid rgba(255,255,255,0.25)',
               overflow: 'hidden',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
             }}>
-              <Image
+              <img
                 src="/image/pembayaran santri.png"
                 alt="Pembayaran"
-                width={36}
-                height={36}
-                style={{ objectFit: 'contain' }}
+                style={{ width: 38, height: 38, objectFit: 'contain' }}
               />
             </div>
             <div>
-              <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 20, margin: 0 }}>Pembayaran</h1>
-              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: 0, fontWeight: 500 }}>
+              <h1 style={{
+                color: '#fff', fontWeight: 800, fontSize: 22,
+                margin: 0, letterSpacing: -0.3,
+                fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+              }}>
+                Pembayaran
+              </h1>
+              <p style={{
+                color: 'rgba(255,255,255,0.65)', fontSize: 11,
+                margin: 0, fontWeight: 500,
+                fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+              }}>
                 Penerimaan Santri Baru 2025/2026
               </p>
             </div>
-          </div>
-
-          {/* Action buttons */}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              background: 'rgba(255,255,255,0.15)',
-              border: '1.5px solid rgba(255,255,255,0.25)',
-              borderRadius: 20, padding: '7px 12px',
-              color: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              backdropFilter: 'blur(4px)',
-              fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-            }}>
-              <IconInfo />
-              Informasi
-            </button>
-            <button style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              background: 'rgba(255,255,255,0.15)',
-              border: '1.5px solid rgba(255,255,255,0.25)',
-              borderRadius: 20, padding: '7px 12px',
-              color: 'rgba(255,255,255,0.9)', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              backdropFilter: 'blur(4px)',
-              fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-            }}>
-              <IconBell />
-              Pengingat
-            </button>
           </div>
         </div>
 
         {/* Status chips */}
         <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', gap: 7,
             background: 'rgba(255,255,255,0.12)',
             borderRadius: 20, padding: '6px 14px',
             backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.14)',
           }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
               {dikonfirmasiCount} dikonfirmasi
             </span>
           </div>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', gap: 7,
             background: 'rgba(255,255,255,0.12)',
             borderRadius: 20, padding: '6px 14px',
             backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.14)',
           }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FBBF24' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FBBF24', boxShadow: '0 0 6px #FBBF24' }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
               {menungguCount} menunggu
             </span>
           </div>
         </div>
       </div>
 
-      {/* ── Content ── */}
-      <div style={{ padding: '20px 16px', maxWidth: 500, margin: '0 auto' }}>
+      {/* ── Content ───────────────────────────────────────────────────────── */}
+      <div style={{ padding: '22px 16px', maxWidth: 520, margin: '0 auto' }}>
 
-        {/* Banner Carousel */}
-        <BannerCarousel />
+        {/* ── Banner Carousel ── */}
+        <HeroBanner />
 
-        {/* TUJUAN TRANSFER */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 10px' }}>
+        {/* ── TUJUAN TRANSFER ── */}
+        <p style={{
+          fontSize: 10, fontWeight: 800, color: '#94A3B8',
+          textTransform: 'uppercase', letterSpacing: 1.3, margin: '0 0 10px',
+          fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Tujuan Transfer
         </p>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 22 }}>
           {REKENING_INFO.map((r) => <RekeningCard key={r.id} item={r} />)}
         </div>
 
-        {/* INFORMASI PEMBAYARAN */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 10px' }}>
+        {/* ── INFORMASI PEMBAYARAN ── */}
+        <p style={{
+          fontSize: 10, fontWeight: 800, color: '#94A3B8',
+          textTransform: 'uppercase', letterSpacing: 1.3, margin: '0 0 10px',
+          fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Informasi Pembayaran
         </p>
         <InfoPembayaranCard session={session as { user: { name?: string | null; nomor_pendaftaran?: string } } | null} />
 
-        {/* CARA PEMBAYARAN */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 10px' }}>
+        {/* ── CARA PEMBAYARAN ── */}
+        <p style={{
+          fontSize: 10, fontWeight: 800, color: '#94A3B8',
+          textTransform: 'uppercase', letterSpacing: 1.3, margin: '0 0 10px',
+          fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        }}>
           Cara Pembayaran
         </p>
         <CaraPembayaran />
 
-        {/* SECURITY */}
+        {/* ── SECURITY BANNER ── */}
         <SecurityBanner />
 
-        {/* CTA */}
+        {/* ── CTA BUTTON ── */}
         <button
           onClick={() => setShowPilihModal(true)}
           style={{
             width: '100%', padding: '17px',
             borderRadius: 18,
-            background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
             color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', cursor: 'pointer',
-            boxShadow: '0 8px 28px rgba(99,102,241,0.42)',
+            boxShadow: '0 10px 30px rgba(79,70,229,0.45)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             marginBottom: 28,
             fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
             transition: 'all .2s',
+            letterSpacing: 0.2,
           }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 14px 36px rgba(79,70,229,0.55)' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 10px 30px rgba(79,70,229,0.45)' }}
         >
           <IconUpload />
           + Bayar / Upload Bukti
         </button>
 
-        {/* RIWAYAT */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.2, margin: 0 }}>
+        {/* ── RIWAYAT PEMBAYARAN ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 12,
+        }}>
+          <p style={{
+            fontSize: 10, fontWeight: 800, color: '#94A3B8',
+            textTransform: 'uppercase', letterSpacing: 1.3, margin: 0,
+            fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+          }}>
             Riwayat Pembayaran
           </p>
           {data.length > 0 && (
-            <span style={{ fontSize: 11, color: '#6366F1', fontWeight: 800 }}>
+            <span style={{
+              fontSize: 11, color: '#6366F1', fontWeight: 800,
+              background: '#EEF2FF', borderRadius: 20, padding: '3px 10px',
+              fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+            }}>
               {data.length} transaksi
             </span>
           )}
         </div>
 
+        {/* Riwayat content */}
         {error ? (
-          <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 18 }}>
-            <p style={{ color: '#EF4444', fontWeight: 600, fontSize: 13 }}>⚠️ {error}</p>
-            <button onClick={fetchData} style={{ marginTop: 12, padding: '9px 22px', borderRadius: 12, background: '#6366F1', color: '#fff', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+          <div style={{
+            textAlign: 'center', padding: '32px 16px',
+            background: '#fff', borderRadius: 18,
+            border: '1.5px solid #FEE2E2',
+          }}>
+            <p style={{ color: '#EF4444', fontWeight: 600, fontSize: 13, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+              ⚠️ {error}
+            </p>
+            <button
+              onClick={fetchData}
+              style={{
+                marginTop: 12, padding: '9px 22px', borderRadius: 12,
+                background: '#6366F1', color: '#fff', border: 'none',
+                fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+              }}
+            >
               Coba Lagi
             </button>
           </div>
         ) : data.length === 0 ? (
           <div style={{
-            background: '#fff', borderRadius: 20, padding: '44px 20px',
+            background: '#fff', borderRadius: 20, padding: '48px 20px',
             textAlign: 'center', border: '2px dashed #E2E8F0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
           }}>
             <div style={{
-              width: 64, height: 64, borderRadius: 20, margin: '0 auto 14px',
+              width: 70, height: 70, borderRadius: 22, margin: '0 auto 16px',
               background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 32,
+              boxShadow: '0 4px 16px rgba(99,102,241,0.12)',
             }}>
               🧾
             </div>
-            <p style={{ fontWeight: 800, color: '#1E293B', fontSize: 14, margin: '0 0 6px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+            <p style={{
+              fontWeight: 800, color: '#1E293B', fontSize: 14,
+              margin: '0 0 6px', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+            }}>
               Belum Ada Riwayat
             </p>
-            <p style={{ color: '#94A3B8', fontSize: 12, margin: 0, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' }}>
+            <p style={{
+              color: '#94A3B8', fontSize: 12, margin: 0,
+              fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+            }}>
               Klik tombol &quot;Bayar / Upload Bukti&quot; untuk memulai
             </p>
           </div>
@@ -1586,7 +1669,7 @@ export default function SiswaPembayaranPage() {
         )}
       </div>
 
-      {/* Modals */}
+      {/* ── Modals ────────────────────────────────────────────────────────── */}
       {showPilihModal && (
         <PilihPembayaranModal
           onClose={() => setShowPilihModal(false)}
