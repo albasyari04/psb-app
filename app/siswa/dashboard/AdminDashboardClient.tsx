@@ -191,6 +191,15 @@ const IconPengaturan = () => (
   </svg>
 )
 
+const IconBerkas = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <polyline points="14 2 14 8 20 8" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="8" y1="13" x2="16" y2="13" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="8" y1="17" x2="12" y2="17" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+)
+
 const IconJadwal = () => (
   <Image src="/icons/jadwal icon.png" alt="Jadwal" width={50} height={50} />
 )
@@ -200,6 +209,7 @@ const QUICK_MENU = [
   { id: 'pendaftar',  label: 'Pendaftar',  Icon: IconPendaftar,  href: '/admin/pendaftar',  bgLight: '#ede9fe' },
   { id: 'verifikasi', label: 'Verifikasi', Icon: IconVerifikasi, href: '/admin/verifikasi', bgLight: '#d1fae5' },
   { id: 'laporan',    label: 'Laporan',    Icon: IconLaporan,    href: '/admin/laporan',    bgLight: '#fef3c7' },
+  { id: 'berkas',     label: 'Berkas',     Icon: IconBerkas,     href: '/admin/berkas',     bgLight: '#ccfbf1' },
   { id: 'pengumuman', label: 'Pengumuman', Icon: IconPengumuman, href: '/admin/pengumuman', bgLight: '#fce7f3' },
   { id: 'notifikasi', label: 'Notifikasi', Icon: IconNotifikasi, href: '/admin/notifikasi', bgLight: '#dbeafe' },
   { id: 'pengaturan', label: 'Pengaturan', Icon: IconPengaturan, href: '/admin/pengaturan', bgLight: '#f3f4f6' },
