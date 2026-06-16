@@ -179,7 +179,7 @@ export default function BerkasPage() {
           </div>
           <div className="up-hero-img">
             <img
-              src="/icons/upload-berkas.png"
+              src="/icons/berkas-admin.png"
               alt="Upload Berkas"
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />

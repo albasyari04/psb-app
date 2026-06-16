@@ -46,40 +46,22 @@ function extractNameFromMeta(rawUserMetaData: unknown): string {
   if (!rawUserMetaData || typeof rawUserMetaData !== 'object') {
     return 'Nama tidak tersedia'
   }
-  
+
   const meta = rawUserMetaData as Record<string, unknown>
-  
-  // Coba ambil name dari berbagai kemungkinan field
+
   if (meta.name && typeof meta.name === 'string') {
     return meta.name
   }
-  
+
   if (meta.full_name && typeof meta.full_name === 'string') {
     return meta.full_name
   }
-  
+
   if (meta.display_name && typeof meta.display_name === 'string') {
     return meta.display_name
   }
-  
-  return 'Nama tidak tersedia'
-}
 
-/**
- * Mengekstrak email dari raw_user_meta_data
- */
-function extractEmailFromMeta(rawUserMetaData: unknown, fallbackEmail: string): string {
-  if (!rawUserMetaData || typeof rawUserMetaData !== 'object') {
-    return fallbackEmail || '-'
-  }
-  
-  const meta = rawUserMetaData as Record<string, unknown>
-  
-  if (meta.email && typeof meta.email === 'string') {
-    return meta.email
-  }
-  
-  return fallbackEmail || '-'
+  return 'Nama tidak tersedia'
 }
 
 /**
@@ -87,72 +69,84 @@ function extractEmailFromMeta(rawUserMetaData: unknown, fallbackEmail: string): 
  */
 function extractUserData(userData: unknown): UserData | null {
   if (!userData || typeof userData !== 'object') return null
-  
+
   const data = userData as Record<string, unknown>
-  
+
   // Cek apakah ada field 'error' (berarti parsing gagal)
   if ('error' in data && data.error === true) {
     console.warn('[admin/berkas] User data parsing error:', data)
     return null
   }
-  
-  // FIX: Ambil data dari raw_user_meta_data
+
+  // Ambil data dari raw_user_meta_data
   const rawMeta = data.raw_user_meta_data
   const email = String(data.email || data.id || '-')
-  
+
   return {
     id: String(data.id || ''),
     name: extractNameFromMeta(rawMeta),
-    email: email
+    email,
   }
+}
+
+/**
+ * Menghapus baris duplikat berdasarkan user_id.
+ *
+ * Safety net untuk data lama: kalau di tabel siswa_berkas masih ada
+ * >1 baris untuk user_id yang sama, admin tidak akan melihat satu
+ * siswa muncul dua kali. Data diurutkan DESC by updated_at sebelum
+ * fungsi ini dipanggil, sehingga kemunculan PERTAMA = data paling baru.
+ */
+function dedupeByUserId(items: SiswaBerkasWithUser[]): SiswaBerkasWithUser[] {
+  const seen = new Set<string>()
+  const result: SiswaBerkasWithUser[] = []
+
+  for (const item of items) {
+    if (seen.has(item.user_id)) continue
+    seen.add(item.user_id)
+    result.push(item)
+  }
+
+  return result
 }
 
 /**
  * Memformat response dari Supabase menjadi SiswaBerkasWithUser[]
  */
 function formatBerkasData(data: unknown): SiswaBerkasWithUser[] {
-  if (!Array.isArray(data)) {
+  if (!Array.isArray(data) || data.length === 0) {
     return []
   }
-  
-  if (data.length === 0) {
-    return []
-  }
-  
-  return data.map((item: unknown) => {
-    if (!item || typeof item !== 'object') {
-      return null
-    }
-    
-    const rawItem = item as Record<string, unknown>
-    
-    // Ekstrak data user
-    const userField = rawItem.users
-    const users = userField ? extractUserData(userField) : null
-    
-    // Buat object dengan semua properti
-    const formatted: RawSiswaBerkas = {
-      id: String(rawItem.id || ''),
-      user_id: String(rawItem.user_id || ''),
-      kk: rawItem.kk ? String(rawItem.kk) : null,
-      akte_lahir: rawItem.akte_lahir ? String(rawItem.akte_lahir) : null,
-      ijazah_smp: rawItem.ijazah_smp ? String(rawItem.ijazah_smp) : null,
-      raport_smp: rawItem.raport_smp ? String(rawItem.raport_smp) : null,
-      skhun: rawItem.skhun ? String(rawItem.skhun) : null,
-      sertifikat: rawItem.sertifikat ? String(rawItem.sertifikat) : null,
-      status: (rawItem.status as BerkasStatus) || 'pending',
-      catatan: rawItem.catatan ? String(rawItem.catatan) : null,
-      updated_at: String(rawItem.updated_at || new Date().toISOString()),
-      verified_at: rawItem.verified_at ? String(rawItem.verified_at) : null,
-      verified_by: rawItem.verified_by ? String(rawItem.verified_by) : null,
-      created_at: String(rawItem.created_at || new Date().toISOString()),
-    }
-    
-    return {
-      ...formatted,
-      users
-    }
-  }).filter((item): item is SiswaBerkasWithUser => item !== null)
+
+  return data
+    .map((item: unknown) => {
+      if (!item || typeof item !== 'object') return null
+
+      const rawItem = item as Record<string, unknown>
+
+      const userField = rawItem.users
+      const users = userField ? extractUserData(userField) : null
+
+      const formatted: RawSiswaBerkas = {
+        id: String(rawItem.id || ''),
+        user_id: String(rawItem.user_id || ''),
+        kk: rawItem.kk ? String(rawItem.kk) : null,
+        akte_lahir: rawItem.akte_lahir ? String(rawItem.akte_lahir) : null,
+        ijazah_smp: rawItem.ijazah_smp ? String(rawItem.ijazah_smp) : null,
+        raport_smp: rawItem.raport_smp ? String(rawItem.raport_smp) : null,
+        skhun: rawItem.skhun ? String(rawItem.skhun) : null,
+        sertifikat: rawItem.sertifikat ? String(rawItem.sertifikat) : null,
+        status: (rawItem.status as BerkasStatus) || 'pending',
+        catatan: rawItem.catatan ? String(rawItem.catatan) : null,
+        updated_at: String(rawItem.updated_at || new Date().toISOString()),
+        verified_at: rawItem.verified_at ? String(rawItem.verified_at) : null,
+        verified_by: rawItem.verified_by ? String(rawItem.verified_by) : null,
+        created_at: String(rawItem.created_at || new Date().toISOString()),
+      }
+
+      return { ...formatted, users }
+    })
+    .filter((item): item is SiswaBerkasWithUser => item !== null)
 }
 
 // ── GET: Ambil semua berkas siswa (admin only) ─────────────────────────────
@@ -163,7 +157,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Pastikan hanya admin yang bisa akses
   if (session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -171,8 +164,7 @@ export async function GET() {
   try {
     const admin = getSupabaseAdmin()
 
-    // ── APPROACH 1: Query dengan join (preferred) ──
-    // FIX: Gunakan raw_user_meta_data, bukan name langsung
+    // Query dengan join ke auth.users untuk ambil nama & email
     const { data, error } = await admin
       .from('siswa_berkas')
       .select(`
@@ -187,11 +179,15 @@ export async function GET() {
 
     if (error) {
       console.error('[admin/berkas] Fetch error:', error)
-      
-      // ── APPROACH 2: Fallback tanpa join ──
-      if (error.code === 'PGRST202' || error.message?.includes('foreign key') || error.code === '42703') {
+
+      // Fallback tanpa join jika relasi tidak tersedia
+      if (
+        error.code === 'PGRST202' ||
+        error.code === '42703' ||
+        error.message?.includes('foreign key')
+      ) {
         console.log('[admin/berkas] Falling back to query without join')
-        
+
         const { data: fallbackData, error: fallbackError } = await admin
           .from('siswa_berkas')
           .select('*')
@@ -201,24 +197,21 @@ export async function GET() {
           console.error('[admin/berkas] Fallback error:', fallbackError)
           throw fallbackError
         }
-        
-        const formattedData = formatBerkasData(fallbackData)
+
+        const formattedData = dedupeByUserId(formatBerkasData(fallbackData))
         return NextResponse.json({ data: formattedData })
       }
+
       throw error
     }
 
-    // Format data dari query utama
-    const formattedData = formatBerkasData(data)
+    const formattedData = dedupeByUserId(formatBerkasData(data))
     return NextResponse.json({ data: formattedData })
-    
   } catch (err) {
     console.error('[admin/berkas] Unhandled error:', err)
-    const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data'
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    )
+    const errorMessage =
+      err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -243,35 +236,45 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (!user_id || !status) {
-      return NextResponse.json({ error: 'user_id dan status wajib diisi' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'user_id dan status wajib diisi' },
+        { status: 400 }
+      )
     }
 
     const admin = getSupabaseAdmin()
     const now = new Date().toISOString()
 
-    // Cek apakah data ada
-    const { data: existingData, error: checkError } = await admin
-      .from('siswa_berkas')
-      .select('user_id')
-      .eq('user_id', user_id)
-      .maybeSingle()
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('[admin/berkas] Check error:', checkError)
-      throw checkError
+    const payload = {
+      status,
+      catatan: catatan ?? null,
+      verified_at: status === 'diverifikasi' ? now : null,
+      verified_by: status === 'diverifikasi' ? session.user.id : null,
+      updated_at: now,
     }
 
-    // Jika data tidak ada, buat record baru
-    if (!existingData) {
+    // UPDATE langsung semua baris milik user_id ini sekaligus.
+    // Menghindari masalah maybeSingle() yang melempar error saat ada
+    // >1 baris cocok, yang dulu menyebabkan INSERT baris baru sehingga
+    // status lama ('pending') tidak pernah ter-update.
+    const { data: updatedRows, error: updateError } = await admin
+      .from('siswa_berkas')
+      .update(payload)
+      .eq('user_id', user_id)
+      .select('id')
+
+    if (updateError) {
+      console.error('[admin/berkas] Update error:', updateError)
+      throw updateError
+    }
+
+    // Jika tidak ada baris yang ter-update, buat baris baru
+    if (!updatedRows || updatedRows.length === 0) {
       const { error: insertError } = await admin
         .from('siswa_berkas')
         .insert({
           user_id,
-          status,
-          catatan: catatan ?? null,
-          verified_at: status === 'diverifikasi' ? now : null,
-          verified_by: status === 'diverifikasi' ? session.user.id : null,
-          updated_at: now,
+          ...payload,
           created_at: now,
         })
 
@@ -280,41 +283,23 @@ export async function PATCH(req: NextRequest) {
         throw insertError
       }
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: `Status berkas diperbarui: ${status}`,
-        created: true
+        created: true,
       })
     }
 
-    // Update data yang ada
-    const { error: updateError } = await admin
-      .from('siswa_berkas')
-      .update({
-        status,
-        catatan: catatan ?? null,
-        verified_at: status === 'diverifikasi' ? now : null,
-        verified_by: status === 'diverifikasi' ? session.user.id : null,
-        updated_at: now,
-      })
-      .eq('user_id', user_id)
-
-    if (updateError) {
-      console.error('[admin/berkas] Update error:', updateError)
-      throw updateError
-    }
-
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: `Status berkas diperbarui: ${status}`,
-      updated: true
+      updated: true,
+      rows_updated: updatedRows.length,
     })
   } catch (err) {
     console.error('[admin/berkas] Unhandled update error:', err)
-    const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan saat update'
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    )
+    const errorMessage =
+      err instanceof Error ? err.message : 'Terjadi kesalahan saat update'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
