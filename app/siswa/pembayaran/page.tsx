@@ -269,7 +269,7 @@ function RekeningCard({ item }: { item: typeof REKENING_INFO[0] }) {
         fontWeight: 600,
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
       }}>
-        a.n {item.name}
+        
       </p>
 
       <CopyButton text={item.numberRaw} />
@@ -292,14 +292,13 @@ function HeroBanner() {
         }}
       >
         {/* Background: icon pembayaran.png sebagai latar penuh */}
-        <img
+        <Image
           src="/icons/pembayaran-banner.png"
           alt="Banner Pembayaran"
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center',
-          }}
+          layout="fill"
+          objectFit="cover"
+          objectPosition="center"
+          priority
         />
 
         {/* Overlay ringan agar terlihat lebih menarik */}
@@ -1437,19 +1436,14 @@ export default function SiswaPembayaranPage() {
         <div style={{ position: 'absolute', top: 40, left: 160, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
         {/* Ilustrasi icon-pembayaran.png — pojok kanan bawah */}
-        <img
+        <Image
           src="/icons/icon-pembayaran.png"
           alt=""
           aria-hidden="true"
+          layout="fill"
+          objectFit="contain"
+          objectPosition="right bottom"
           style={{
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-            height: '100%',
-            maxHeight: 180,
-            width: 'auto',
-            objectFit: 'contain',
-            objectPosition: 'right bottom',
             pointerEvents: 'none',
             userSelect: 'none',
             opacity: 0.95,
@@ -1472,10 +1466,12 @@ export default function SiswaPembayaranPage() {
               overflow: 'hidden',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
             }}>
-              <img
+              <Image
                 src="/image/pembayaran santri.png"
                 alt="Pembayaran"
-                style={{ width: 38, height: 38, objectFit: 'contain' }}
+                width={38}
+                height={38}
+                style={{ objectFit: 'contain' }}
               />
             </div>
             <div>
