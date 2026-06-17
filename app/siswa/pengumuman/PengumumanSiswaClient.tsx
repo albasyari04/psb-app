@@ -630,7 +630,7 @@ export default function PengumumanSiswaClient() {
               <span style={{ fontSize: 70 }}>📣</span>
             ) : (
               <Image
-                src="/icons/icon pengumuman.png"
+                src="/icons/pengumuman-icon.png"
                 alt="Megaphone"
                 width={100}
                 height={100}

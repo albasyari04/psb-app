@@ -89,7 +89,7 @@ const JADWAL = [
     label: 'Pengumuman Hasil',
     date: '15 Maret 2026',
     dotClass: 'dotBlue',
-    icon: '/image/pengumuman.png',
+    icon: '/icons/pengumuman-icon.png',
     statusLabel: 'Selesai',
     statusClass: 'jadwalDone'
   },
@@ -189,7 +189,7 @@ function AnnouncementCard({
     >
       <div className={styles.annIconWrap}>
         <Image
-          src="/image/pengumuman.png"
+          src="/icons/pengumuman-icon.png"
           alt=""
           width={36}
           height={36}
