@@ -265,6 +265,22 @@ export async function PATCH(req: NextRequest) {
 
     if (updateError) {
       console.error('[admin/berkas] Update error:', updateError)
+
+      // PGRST204 = kolom yang dikirim tidak ditemukan di schema cache PostgREST.
+      // Biasanya karena migrasi ALTER TABLE belum dijalankan lengkap, atau
+      // schema cache Supabase belum direload setelah migrasi (NOTIFY pgrst, 'reload schema').
+      if (updateError.code === 'PGRST204') {
+        return NextResponse.json(
+          {
+            error:
+              'Kolom database tidak ditemukan (schema cache belum sinkron). ' +
+              'Jalankan migrasi ALTER TABLE siswa_berkas yang sesuai lalu reload schema cache di Supabase.',
+            detail: updateError.message,
+          },
+          { status: 500 }
+        )
+      }
+
       throw updateError
     }
 

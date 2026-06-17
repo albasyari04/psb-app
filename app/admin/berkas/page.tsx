@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-// Hapus import Image karena tidak digunakan
-// import Image from 'next/image'
+import Image from 'next/image'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type BerkasStatus = 'pending' | 'diverifikasi' | 'ditolak'
@@ -108,7 +107,6 @@ function DetailModal({
 
   return (
     <>
-      {/* Overlay */}
       <div 
         onClick={onClose} 
         style={{
@@ -121,7 +119,6 @@ function DetailModal({
         }} 
       />
 
-      {/* Preview lightbox */}
       {preview && (
         <div
           onClick={() => setPreview(null)}
@@ -197,7 +194,6 @@ function DetailModal({
         </div>
       )}
 
-      {/* Modal content - sama seperti sebelumnya */}
       <div style={{
         position: 'fixed', 
         inset: 0, 
@@ -218,7 +214,6 @@ function DetailModal({
           pointerEvents: 'all',
           boxShadow: '0 24px 80px rgba(0,0,0,0.18)',
         }}>
-          {/* Header */}
           <div style={{
             padding: '20px 24px 16px',
             borderBottom: '1.5px solid #F3F4F6',
@@ -270,13 +265,11 @@ function DetailModal({
           </div>
 
           <div style={{ padding: '20px 24px' }}>
-            {/* Status saat ini */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Status saat ini:</span>
               <StatusBadge status={item.status ?? 'pending'} />
             </div>
 
-            {/* Dokumen yang diunggah */}
             <p style={{ fontSize: 13, fontWeight: 800, color: '#111827', margin: '0 0 10px' }}>
               Dokumen Diunggah ({uploaded.length}/{DOC_KEYS.length})
             </p>
@@ -337,7 +330,6 @@ function DetailModal({
               ))}
             </div>
 
-            {/* Dokumen belum diunggah */}
             {missing.length > 0 && (
               <>
                 <p style={{ fontSize: 12, fontWeight: 700, color: '#9CA3AF', margin: '0 0 8px' }}>
@@ -359,7 +351,6 @@ function DetailModal({
               </>
             )}
 
-            {/* Catatan admin */}
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 6 }}>
                 Catatan Admin (opsional)
@@ -387,7 +378,6 @@ function DetailModal({
               />
             </div>
 
-            {/* Action buttons */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={() => submit('ditolak')}
@@ -519,17 +509,15 @@ export default function AdminBerkasPage() {
   }
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", minHeight: '100vh', background: '#F8FAF9' }}>
+    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100vh', background: '#F5F7FA' }}>
       <style>{adminCss}</style>
 
-      {/* Toast */}
       {toast && (
         <div className={`ab-toast ${toast.ok ? 'ab-toast-ok' : 'ab-toast-err'}`}>
           {toast.ok ? '✓' : '✕'} {toast.msg}
         </div>
       )}
 
-      {/* Detail Modal */}
       {selected && (
         <DetailModal
           item={selected}
@@ -538,48 +526,55 @@ export default function AdminBerkasPage() {
         />
       )}
 
-      {/* Header */}
+      {/* Header dengan Banner dan Gambar di kanan tanpa background - Ukuran besar */}
       <div className="ab-header">
-        <div className="ab-header-inner">
-          <div>
-            <h1 className="ab-title">Berkas Santri</h1>
-            <p className="ab-subtitle">Kelola dan verifikasi dokumen yang dikirim santri</p>
+        <div className="ab-header-banner">
+          <div className="ab-header-content">
+            <div className="ab-header-left">
+              <div>
+                <h1 className="ab-title">Berkas Santri</h1>
+                <p className="ab-subtitle">Kelola dan verifikasi dokumen yang dikirim santri</p>
+              </div>
+            </div>
+            <div className="ab-header-right">
+              <Image 
+                src="/icons/berkas-admin.png" 
+                alt="Berkas Admin" 
+                width={120} 
+                height={120}
+                className="ab-header-img"
+                priority
+              />
+            </div>
           </div>
-          <button onClick={fetchData} className="ab-refresh-btn" title="Refresh data">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10"/>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-            </svg>
-            Refresh
-          </button>
         </div>
       </div>
 
       <div className="ab-body">
-        {/* Stats Cards */}
+        {/* Stats Cards - Sederhana seperti desain */}
         <div className="ab-stats">
-          {[
-            { label: 'Total Pengirim', value: stats.total,    color: '#3B82F6', bg: '#EFF6FF', icon: '📁' },
-            { label: 'Menunggu',       value: stats.pending,   color: '#F59E0B', bg: '#FFFBEB', icon: '⏳' },
-            { label: 'Diverifikasi',   value: stats.verified,  color: '#16A34A', bg: '#F0FDF4', icon: '✅' },
-            { label: 'Ditolak',        value: stats.rejected,  color: '#DC2626', bg: '#FEF2F2', icon: '❌' },
-          ].map(s => (
-            <div key={s.label} className="ab-stat-card" style={{ borderTop: `3px solid ${s.color}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 22 }}>{s.icon}</span>
-                <span style={{
-                  fontSize: 26, fontWeight: 900, color: s.color, lineHeight: 1,
-                }}>{s.value}</span>
-              </div>
-              <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6B7280', fontWeight: 600 }}>{s.label}</p>
-            </div>
-          ))}
+          <div className="ab-stat-card">
+            <div className="ab-stat-label-top">Total Pengirim</div>
+            <div className="ab-stat-value-large">{stats.total}</div>
+          </div>
+          <div className="ab-stat-card">
+            <div className="ab-stat-label-top">Menunggu</div>
+            <div className="ab-stat-value-large" style={{ color: '#F59E0B' }}>{stats.pending}</div>
+          </div>
+          <div className="ab-stat-card">
+            <div className="ab-stat-label-top">Diverifikasi</div>
+            <div className="ab-stat-value-large" style={{ color: '#10B981' }}>{stats.verified}</div>
+          </div>
+          <div className="ab-stat-card">
+            <div className="ab-stat-label-top">Ditolak</div>
+            <div className="ab-stat-value-large" style={{ color: '#EF4444' }}>{stats.rejected}</div>
+          </div>
         </div>
 
         {/* Filter Bar */}
         <div className="ab-filter-bar">
           <div className="ab-search-wrap">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.2" strokeLinecap="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input
@@ -609,7 +604,7 @@ export default function AdminBerkasPage() {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table / List - Seperti desain */}
         {loading ? (
           <div className="ab-loading">
             <div className="ab-spinner" />
@@ -631,14 +626,6 @@ export default function AdminBerkasPage() {
           </div>
         ) : (
           <div className="ab-card">
-            <div className="ab-table-head">
-              <div className="ab-th" style={{ flex: 2 }}>Santri</div>
-              <div className="ab-th" style={{ flex: 1, textAlign: 'center' }}>Dokumen</div>
-              <div className="ab-th" style={{ flex: 1, textAlign: 'center' }}>Status</div>
-              <div className="ab-th" style={{ flex: 1.2 }}>Dikirim</div>
-              <div className="ab-th" style={{ flex: 1, textAlign: 'center' }}>Aksi</div>
-            </div>
-
             {filtered.map((item, i) => {
               const docCount = countDocs(item)
               const status = (item.status ?? 'pending') as BerkasStatus
@@ -647,74 +634,35 @@ export default function AdminBerkasPage() {
                 <div
                   key={item.user_id}
                   className="ab-row"
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid #F3F4F6' : 'none' }}
+                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid #E5E7EB' : 'none' }}
                 >
-                  <div style={{ flex: 2, display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 38, height: 38, borderRadius: 10,
-                      background: 'linear-gradient(135deg,#16A34A,#86EFAC)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#fff', fontWeight: 800, fontSize: 13, flexShrink: 0,
-                    }}>
-                      {initials(item.users?.name ?? 'U')}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.users?.name ?? 'Nama tidak tersedia'}
-                      </p>
-                      <p style={{ margin: 0, fontSize: 11.5, color: '#9CA3AF', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.users?.email ?? '-'}
-                      </p>
+                  <div className="ab-row-left">
+                    <div className="ab-row-info">
+                      <div className="ab-row-name">{item.users?.name ?? 'Nama tidak tersedia'}</div>
+                      <div className="ab-row-email">{item.users?.email ?? '-'}</div>
                     </div>
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <span style={{
-                        fontSize: 18, fontWeight: 900,
-                        color: docCount === 6 ? '#16A34A' : docCount >= 3 ? '#F59E0B' : '#EF4444',
-                      }}>{docCount}</span>
-                      <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600 }}>dari 6 dok</span>
-                      <div style={{ width: 48, height: 4, background: '#E5E7EB', borderRadius: 99, overflow: 'hidden' }}>
-                        <div style={{
-                          height: '100%', borderRadius: 99,
-                          width: `${(docCount / 6) * 100}%`,
-                          background: docCount === 6 ? '#16A34A' : docCount >= 3 ? '#F59E0B' : '#EF4444',
-                          transition: 'width .3s',
-                        }} />
-                      </div>
+                  <div className="ab-row-center">
+                    <div className="ab-docs-info">
+                      <span className="ab-docs-number">{docCount}</span>
+                      <span className="ab-docs-label">dari 6 dok</span>
                     </div>
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div className="ab-row-status">
                     <StatusBadge status={status} />
                   </div>
 
-                  <div style={{ flex: 1.2, display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: 12, color: '#6B7280', fontWeight: 500 }}>
-                      {formatDate(item.updated_at)}
-                    </span>
+                  <div className="ab-row-date">
+                    {formatDate(item.updated_at)}
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <div className="ab-row-action">
                     <button
                       onClick={() => setSelected(item)}
-                      style={{
-                        background: 'linear-gradient(135deg,#16A34A,#4ADE80)',
-                        border: 'none', borderRadius: 10,
-                        padding: '8px 16px', color: '#fff',
-                        fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                        fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5,
-                        boxShadow: '0 2px 8px rgba(22,163,74,0.25)',
-                        transition: 'all .2s',
-                      }}
-                      onMouseOver={e => (e.currentTarget.style.transform = 'translateY(-1px)')}
-                      onMouseOut={e => (e.currentTarget.style.transform = 'translateY(0)')}
+                      className="ab-detail-btn"
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
                       Detail
                     </button>
                   </div>
@@ -725,7 +673,7 @@ export default function AdminBerkasPage() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <p style={{ textAlign: 'center', fontSize: 12, color: '#9CA3AF', margin: '8px 0 0' }}>
+          <p className="ab-footer-info">
             Menampilkan {filtered.length} dari {stats.total} data
           </p>
         )}
@@ -736,155 +684,455 @@ export default function AdminBerkasPage() {
 
 // CSS
 const adminCss = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-
 * { box-sizing: border-box; }
 
 .ab-toast {
-  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-  z-index: 9999; padding: 11px 24px; border-radius: 30px;
-  font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; padding: 12px 28px; border-radius: 30px;
+  font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
   animation: abIn .3s cubic-bezier(.16,1,.3,1) both;
   white-space: nowrap; pointer-events: none;
 }
 @keyframes abIn {
-  from { opacity:0; transform: translateX(-50%) translateY(-10px); }
+  from { opacity:0; transform: translateX(-50%) translateY(-12px); }
   to   { opacity:1; transform: translateX(-50%) translateY(0); }
 }
-.ab-toast-ok  { background:#ECFDF5; color:#065F46; border:1px solid #BBF7D0; }
+.ab-toast-ok  { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
 .ab-toast-err { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
 
+/* ── Header ── */
 .ab-header {
-  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
-  padding: 0;
+  background: linear-gradient(135deg, #065F46 0%, #0D9488 100%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-.ab-header-inner {
-  max-width: 1100px; margin: 0 auto;
-  padding: 28px 24px 24px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 12;
+.ab-header::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  right: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.ab-header-banner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+.ab-header-content {
+  padding: 20px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ab-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ab-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.ab-header-img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.2));
+  transition: transform 0.3s ease;
+}
+.ab-header-img:hover {
+  transform: scale(1.08) rotate(-3deg);
 }
 .ab-title {
-  font-size: 22px; font-weight: 900; color: #fff; margin: 0 0 4px;
-  letter-spacing: -.4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 2px;
+  letter-spacing: -0.3px;
 }
 .ab-subtitle {
-  font-size: 13px; color: rgba(255,255,255,0.72); margin: 0; font-weight: 500;
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+  font-weight: 500;
 }
-.ab-refresh-btn {
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2);
-  border-radius: 10px; padding: 9px 16px;
-  color: #fff; font-size: 13px; font-weight: 700;
-  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: all .2s; flex-shrink: 0;
-}
-.ab-refresh-btn:hover { background: rgba(255,255,255,0.2); }
 
+/* ── Body ── */
 .ab-body {
-  max-width: 1100px; margin: 0 auto;
-  padding: 24px 24px 48px;
-  display: flex; flex-direction: column; gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+/* ── Stats ── */
 .ab-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
 .ab-stat-card {
-  background: #fff; border-radius: 14px; padding: 16px 18px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  text-align: center;
+  border: 1px solid #F0F0F0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.ab-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.ab-stat-label-top {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.ab-stat-value-large {
+  font-size: 28px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1.2;
 }
 
+/* ── Filter Bar ── */
 .ab-filter-bar {
-  background: #fff; border-radius: 16px; padding: 14px 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  display: flex; flex-direction: column; gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #F0F0F0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .ab-search-wrap {
-  display: flex; align-items: center; gap: 8px;
-  background: #F9FAFB; border: 1.5px solid #E5E7EB;
-  border-radius: 10px; padding: 9px 12px;
-  transition: border-color .2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: border-color 0.2s;
 }
-.ab-search-wrap:focus-within { border-color: #16A34A; }
+.ab-search-wrap:focus-within {
+  border-color: #0D9488;
+}
 .ab-search-input {
-  flex: 1; border: none; background: transparent;
-  font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
-  color: #374151; outline: none;
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: #111827;
+  outline: none;
 }
-.ab-search-input::placeholder { color: #9CA3AF; }
+.ab-search-input::placeholder {
+  color: #9CA3AF;
+}
 .ab-search-clear {
-  background: none; border: none; cursor: pointer;
-  color: #9CA3AF; font-size: 13px; padding: 0;
-  display: flex; align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  font-size: 13px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
 }
 .ab-filter-tabs {
-  display: flex; gap: 6px; flex-wrap: wrap;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 .ab-filter-tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: 10px;
-  border: 1.5px solid #E5E7EB; background: #F9FAFB;
-  font-size: 12.5px; font-weight: 600; color: #6B7280;
-  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #E5E7EB;
+  background: #F9FAFB;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
 }
-.ab-filter-tab:hover { border-color: #86EFAC; color: #16A34A; }
+.ab-filter-tab:hover {
+  border-color: #99F6E4;
+  color: #0D9488;
+}
 .ab-filter-tab-active {
-  background: #F0FDF4; border-color: #86EFAC; color: #16A34A; font-weight: 800;
+  background: #F0FDFA;
+  border-color: #5EEAD4;
+  color: #065F46;
+  font-weight: 700;
 }
 .ab-tab-count {
-  background: #E5E7EB; color: #6B7280;
-  font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 20px;
+  background: #E5E7EB;
+  color: #6B7280;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
 }
 .ab-filter-tab-active .ab-tab-count {
-  background: #DCFCE7; color: #16A34A;
+  background: #99F6E4;
+  color: #065F46;
 }
 
+/* ── Card / Row ── */
 .ab-card {
-  background: #fff; border-radius: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #F0F0F0;
   overflow: hidden;
 }
-.ab-table-head {
-  display: flex; align-items: center;
-  padding: 12px 20px;
-  background: #F9FAFB; border-bottom: 1.5px solid #F3F4F6;
-}
-.ab-th {
-  font-size: 11px; font-weight: 800; color: #9CA3AF;
-  text-transform: uppercase; letter-spacing: .06em;
-}
 .ab-row {
-  display: flex; align-items: center;
-  padding: 14px 20px; gap: 12px;
-  transition: background .15s;
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  gap: 12px;
+  transition: background 0.15s;
 }
-.ab-row:hover { background: #FAFFFE; }
+.ab-row:hover {
+  background: #FAFFFE;
+}
+.ab-row-left {
+  flex: 2;
+  min-width: 0;
+}
+.ab-row-info {
+  min-width: 0;
+}
+.ab-row-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ab-row-email {
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.ab-row-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ab-docs-info {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.ab-docs-number {
+  font-size: 18px;
+  font-weight: 900;
+  color: #111827;
+}
+.ab-docs-label {
+  font-size: 10px;
+  color: #9CA3AF;
+  font-weight: 600;
+}
+.ab-row-status {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.ab-row-date {
+  flex: 1.2;
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 500;
+}
+.ab-row-action {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.ab-detail-btn {
+  background: linear-gradient(135deg, #0D9488, #14B8A6);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+}
+.ab-detail-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+}
 
+.ab-footer-info {
+  text-align: center;
+  font-size: 12px;
+  color: #9CA3AF;
+  margin: 4px 0 0;
+}
+
+/* ── Loading / Empty / Error ── */
 .ab-loading, .ab-empty, .ab-error {
-  background: #fff; border-radius: 16px; padding: 60px 24px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  text-align: center; color: #6B7280; font-size: 13px; font-weight: 600;
+  background: #fff;
+  border-radius: 12px;
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #F0F0F0;
+  text-align: center;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 600;
 }
 .ab-spinner {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: 3px solid #DCFCE7; border-top-color: #16A34A;
-  animation: abSpin .7s linear infinite;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3.5px solid #D1FAE5;
+  border-top-color: #0D9488;
+  animation: abSpin 0.7s linear infinite;
 }
-@keyframes abSpin { to { transform: rotate(360deg); } }
+@keyframes abSpin {
+  to { transform: rotate(360deg); }
+}
 .ab-retry-btn {
-  margin-top: 4px; padding: 9px 20px; border-radius: 10px;
-  background: #FEF2F2; border: 1.5px solid #FECACA;
-  color: #DC2626; font-size: 13px; font-weight: 700;
-  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  margin-top: 4px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1.5px solid #FECACA;
+  color: #DC2626;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
 }
 
+/* ── Responsive ── */
+@media (max-width: 992px) {
+  .ab-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 @media (max-width: 768px) {
-  .ab-stats { grid-template-columns: repeat(2, 1fr); }
-  .ab-table-head { display: none; }
-  .ab-row { flex-wrap: wrap; padding: 14px 16px; }
-  .ab-header-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ab-header-content {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 16px 0 14px;
+  }
+  .ab-header-img {
+    width: 80px;
+    height: 80px;
+  }
+  .ab-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .ab-stat-card {
+    padding: 14px 16px;
+  }
+  .ab-stat-value-large {
+    font-size: 22px;
+  }
+  .ab-row {
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    gap: 8px;
+  }
+  .ab-row-left {
+    flex: 1;
+    min-width: 120px;
+  }
+  .ab-row-center {
+    flex: 0 0 auto;
+  }
+  .ab-row-status {
+    flex: 0 0 auto;
+  }
+  .ab-row-date {
+    flex: 0 0 auto;
+    font-size: 11px;
+  }
+  .ab-row-action {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .ab-title {
+    font-size: 19px;
+  }
+}
+@media (max-width: 480px) {
+  .ab-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .ab-stat-card {
+    padding: 12px;
+  }
+  .ab-stat-value-large {
+    font-size: 20px;
+  }
+  .ab-stat-label-top {
+    font-size: 11px;
+  }
+  .ab-row {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .ab-row-name {
+    font-size: 13px;
+  }
+  .ab-row-email {
+    font-size: 11px;
+  }
+  .ab-detail-btn {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+  .ab-filter-bar {
+    padding: 10px 12px;
+  }
+  .ab-filter-tab {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .ab-header-img {
+    width: 64px;
+    height: 64px;
+  }
 }
 `

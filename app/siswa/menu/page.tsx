@@ -10,26 +10,23 @@ const ALL_MENUS = [
     items: [
       {
         href:    '/siswa/pendaftaran',
-        icon:    '/image/icon formulir.jpg',
+        icon:    '/icons/formulir icon.png',
         title:   'Formulir',
         sub:     'Isi & edit data diri',
-        iconBg:  '#dbeafe',
         isImage: true,
       },
       {
         href:    '/siswa/berkas',
-        icon:    '/image/icon berkas.jpg',
+        icon:    '/icons/berkas icon.png',
         title:   'Berkas',
         sub:     'Upload dokumen persyaratan',
-        iconBg:  '#fef3c7',
         isImage: true,
       },
       {
         href:    '/siswa/status',
-        icon:    '/image/icon status.webp',
+        icon:    '/icons/status icon.png',
         title:   'Status',
         sub:     'Pantau seleksi pendaftaran',
-        iconBg:  '#dcfce7',
         isImage: true,
       },
     ],
@@ -39,10 +36,9 @@ const ALL_MENUS = [
     items: [
       {
         href:    '/siswa/pembayaran',
-        icon:    '/image/icon dompet.png',
+        icon:    '/icons/pembayaran icon.png',
         title:   'Pembayaran',
         sub:     'Biaya pendaftaran santri',
-        iconBg:  '#ede9fe',
         isImage: true,
       },
     ],
@@ -52,26 +48,23 @@ const ALL_MENUS = [
     items: [
       {
         href:    '/siswa/pengumuman',
-        icon:    '/image/icon pengumuman.png',
+        icon:    '/icons/pengumuman icon.png',
         title:   'Pengumuman',
         sub:     'Info & berita terbaru',
-        iconBg:  '#ffe4e6',
         isImage: true,
       },
       {
         href:    '/siswa/jadwal',
-        icon:    '/image/jadwal.jpg',
+        icon:    '/icons/jadwal icon.png',
         title:   'Jadwal',
         sub:     'Jadwal kegiatan santri',
-        iconBg:  '#e0f2fe',
         isImage: true,
       },
       {
         href:    '/siswa/laporan',
-        icon:    '/image/laporan.jpg',
+        icon:    '/icons/laporan icon.png',
         title:   'Laporan',
         sub:     'Laporan pendaftaran',
-        iconBg:  '#fef9c3',
         isImage: true,
       },
     ],
@@ -81,10 +74,9 @@ const ALL_MENUS = [
     items: [
       {
         href:    '/siswa/profile',
-        icon:    '/image/icon santri.png',
+        icon:    '/icons/profil icon.png',
         title:   'Profil',
         sub:     'Data & pengaturan akun',
-        iconBg:  '#f1f5f9',
         isImage: true,
       },
       {
@@ -92,7 +84,6 @@ const ALL_MENUS = [
         icon:    '/image/bantuan.jpg',
         title:   'Bantuan',
         sub:     'Pusat bantuan & FAQ',
-        iconBg:  '#cffafe',
         isImage: true,
       },
     ],
@@ -110,40 +101,23 @@ export default async function MenuPage() {
       <div style={s.header}>
         <div style={s.orbA} />
         <div style={s.orbB} />
-
-        {/* Masjid silhouette */}
-        <div style={s.masjidWrap}>
-          <Image
-            src="/image/ilustrasi masjid.png"
-            alt=""
-            width={180}
-            height={110}
-            style={s.masjidImg}
-            priority
-          />
-        </div>
-
-        {/* Bell icon top right */}
-        <div style={s.bellWrap}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-        </div>
+        <div style={s.orbC} />
 
         <div style={s.headerInner}>
-          {/* Back button */}
-          <Link href="/siswa/dashboard" style={s.backBtn} aria-label="Kembali">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </Link>
-
-          {/* Texts */}
-          <div>
-            <p style={s.headerGreet}>Halo, {fullName} 👋</p>
-            <h1 style={s.headerTitle}>Semua Menu</h1>
-            <p style={s.headerSub}>Kelola semua aktivitas santri dengan mudah</p>
+          {/* Text and Icon - tanpa back button */}
+          <div style={s.headerContent}>
+            <div style={s.headerLeft}>
+              <h1 style={s.headerTitle}>Semua Menu</h1>
+              <p style={s.headerSub}>Pilih menu berikut dengan mudah!</p>
+            </div>
+            <Image
+              src="/icons/menu icon.png"
+              alt="Menu Icon"
+              width={80}
+              height={80}
+              style={s.headerIcon}
+              priority
+            />
           </div>
         </div>
       </div>
@@ -161,13 +135,13 @@ export default async function MenuPage() {
               {group.items.map((item, idx) => (
                 <div key={item.href}>
                   <Link href={item.href} style={s.row}>
-                    {/* Icon box */}
-                    <div style={{ ...s.iconBox, background: item.iconBg }}>
+                    {/* Icon - tanpa background/wrapper */}
+                    <div style={s.iconWrapper}>
                       <Image
                         src={item.icon}
                         alt={item.title}
-                        width={26}
-                        height={26}
+                        width={32}
+                        height={32}
                         style={s.iconImg}
                       />
                     </div>
@@ -198,9 +172,9 @@ export default async function MenuPage() {
 
       {/* ── BOTTOM NAV ─────────────────────────────────────────────── */}
       <nav style={s.bottomNav}>
-        <Link href="/siswa/dashboard" style={s.navItemActive}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        <Link href="/siswa/dashboard" style={s.navItem}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
           </svg>
           <span>Beranda</span>
         </Link>
@@ -213,8 +187,8 @@ export default async function MenuPage() {
           </svg>
           <span>Daftar</span>
         </Link>
-        <Link href="/siswa/pembayaran" style={s.navItem}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Link href="/siswa/pembayaran" style={s.navItemActive}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
             <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
             <line x1="1" y1="10" x2="23" y2="10"/>
           </svg>
@@ -251,13 +225,13 @@ const navBase: React.CSSProperties = {
   fontSize:       '0.63rem',
   fontWeight:     600,
   padding:        '0 0.5rem',
-  fontFamily:     "'Plus Jakarta Sans', sans-serif",
+  fontFamily:     "'Inter', 'Plus Jakarta Sans', sans-serif",
 }
 
 const s: Record<string, React.CSSProperties> = {
   shell: {
-    fontFamily:     "'Plus Jakarta Sans', sans-serif",
-    background:     '#f0f4ff',
+    fontFamily:     "'Inter', 'Plus Jakarta Sans', sans-serif",
+    background:     '#f8faff',
     minHeight:      '100vh',
     paddingBottom:  '5.5rem',
   },
@@ -266,124 +240,113 @@ const s: Record<string, React.CSSProperties> = {
   header: {
     position:   'relative',
     overflow:   'hidden',
-    background: 'linear-gradient(135deg, #0f2c8f 0%, #1e40af 35%, #2563eb 65%, #1d4ed8 100%)',
-    padding:    '3rem 1.25rem 2.5rem',
+    background: 'linear-gradient(145deg, #0a1e6b 0%, #1a3a9a 35%, #2563eb 70%, #3b82f6 100%)',
+    padding:    '2.5rem 1.25rem 3rem',
+    boxShadow:  '0 4px 20px rgba(37, 99, 235, 0.15)',
   },
   orbA: {
     position:      'absolute',
     borderRadius:  '50%',
-    filter:        'blur(55px)',
-    opacity:       0.2,
-    width:         220,
-    height:        220,
+    filter:        'blur(80px)',
+    opacity:       0.25,
+    width:         300,
+    height:        300,
     background:    '#93c5fd',
-    top:           -70,
-    right:         -60,
+    top:           -120,
+    right:         -80,
     pointerEvents: 'none',
   },
   orbB: {
     position:      'absolute',
     borderRadius:  '50%',
-    filter:        'blur(50px)',
+    filter:        'blur(70px)',
     opacity:       0.15,
-    width:         160,
-    height:        160,
+    width:         200,
+    height:        200,
     background:    '#818cf8',
-    bottom:        -50,
-    left:          -40,
+    bottom:        -60,
+    left:          -50,
     pointerEvents: 'none',
   },
-  masjidWrap: {
+  orbC: {
     position:      'absolute',
-    right:         0,
-    bottom:        0,
-    opacity:       0.18,
+    borderRadius:  '50%',
+    filter:        'blur(50px)',
+    opacity:       0.1,
+    width:         150,
+    height:        150,
+    background:    '#a78bfa',
+    top:           40,
+    left:          '30%',
     pointerEvents: 'none',
-    zIndex:        1,
-  },
-  masjidImg: {
-    objectFit: 'contain' as const,
-  },
-  bellWrap: {
-    position:        'absolute',
-    top:             '3rem',
-    right:           '1.25rem',
-    zIndex:          3,
-    width:           38,
-    height:          38,
-    background:      'rgba(255,255,255,0.15)',
-    borderRadius:    '50%',
-    display:         'flex',
-    alignItems:      'center',
-    justifyContent:  'center',
-    backdropFilter:  'blur(4px)',
   },
   headerInner: {
     position:   'relative',
     zIndex:     2,
     display:    'flex',
-    alignItems: 'flex-start',
-    gap:        '0.875rem',
-    marginTop:  '0.25rem',
+    alignItems: 'center',
+    paddingLeft: '0.25rem',
   },
-  backBtn: {
-    display:         'flex',
-    alignItems:      'center',
-    justifyContent:  'center',
-    width:           36,
-    height:          36,
-    background:      'rgba(255,255,255,0.15)',
-    borderRadius:    '50%',
-    flexShrink:      0,
-    backdropFilter:  'blur(4px)',
-    marginTop:       '0.2rem',
-    textDecoration:  'none',
+  headerContent: {
+    flex:           1,
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'space-between',
+    gap:            '1rem',
+    minWidth:       0,
   },
-  headerGreet: {
-    margin:      0,
-    fontSize:    '0.82rem',
-    color:       'rgba(255,255,255,0.75)',
-    fontWeight:  500,
-    fontFamily:  "'Plus Jakarta Sans', sans-serif",
+  headerLeft: {
+    flex:           1,
+    minWidth:       0,
   },
   headerTitle: {
     margin:         '0.2rem 0 0',
-    fontSize:       '1.75rem',
+    fontSize:       '1.8rem',
     fontWeight:     800,
     color:          'white',
     letterSpacing:  '-0.03em',
     lineHeight:     1.1,
-    fontFamily:     "'Plus Jakarta Sans', sans-serif",
+    fontFamily:     "'Inter', 'Plus Jakarta Sans', sans-serif",
+    textShadow:     '0 2px 4px rgba(0,0,0,0.1)',
   },
   headerSub: {
     margin:     '0.35rem 0 0',
-    fontSize:   '0.72rem',
-    color:      'rgba(255,255,255,0.6)',
+    fontSize:   '0.75rem',
+    color:      'rgba(255,255,255,0.7)',
     fontWeight: 400,
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
+    letterSpacing: '0.01em',
+  },
+  headerIcon: {
+    width:      80,
+    height:     80,
+    objectFit:  'contain' as const,
+    flexShrink: 0,
+    filter:     'brightness(0) invert(1)',
   },
 
   /* ── Content ── */
   content: {
-    padding:       '1.25rem 1rem',
+    padding:       '1.5rem 1rem',
     display:       'flex',
     flexDirection: 'column',
-    gap:           '1.25rem',
+    gap:           '1.5rem',
+    marginTop:     '-0.5rem',
   },
   group: {
     display:       'flex',
     flexDirection: 'column',
-    gap:           '0.5rem',
+    gap:           '0.6rem',
   },
   groupLabel: {
     margin:          0,
-    fontSize:        '0.72rem',
+    fontSize:        '0.7rem',
     fontWeight:      700,
     color:           '#94a3b8',
-    letterSpacing:   '0.07em',
+    letterSpacing:   '0.08em',
     textTransform:   'uppercase' as const,
-    paddingLeft:     '0.25rem',
-    fontFamily:      "'Plus Jakarta Sans', sans-serif",
+    paddingLeft:     '0.35rem',
+    fontFamily:      "'Inter', 'Plus Jakarta Sans', sans-serif",
   },
 
   /* List card container */
@@ -391,8 +354,9 @@ const s: Record<string, React.CSSProperties> = {
     background:   'white',
     borderRadius: '1.25rem',
     overflow:     'hidden',
-    boxShadow:    '0 2px 12px rgba(14,30,100,0.07), 0 1px 3px rgba(14,30,100,0.04)',
-    border:       '1px solid rgba(226,232,240,0.8)',
+    boxShadow:    '0 4px 20px rgba(14,30,100,0.06), 0 1px 6px rgba(14,30,100,0.03)',
+    border:       '1px solid rgba(226,232,240,0.6)',
+    transition:   'all 0.2s ease',
   },
 
   /* Each row */
@@ -400,25 +364,26 @@ const s: Record<string, React.CSSProperties> = {
     display:        'flex',
     alignItems:     'center',
     gap:            '0.875rem',
-    padding:        '0.95rem 1rem',
+    padding:        '1rem 1.25rem',
     textDecoration: 'none',
     background:     'white',
-    transition:     'background 0.15s',
+    transition:     'all 0.15s ease',
+    cursor:         'pointer',
   },
 
-  /* Icon box */
-  iconBox: {
-    width:           44,
-    height:          44,
-    borderRadius:    '0.75rem',
+  /* Icon wrapper - tanpa background/border/shadow */
+  iconWrapper: {
     display:         'flex',
     alignItems:      'center',
     justifyContent:  'center',
     flexShrink:      0,
+    width:           36,
+    height:          36,
   },
   iconImg: {
     objectFit:    'contain' as const,
-    borderRadius: '0.4rem',
+    width:        32,
+    height:       32,
   },
 
   /* Row text */
@@ -431,24 +396,25 @@ const s: Record<string, React.CSSProperties> = {
   },
   rowTitle: {
     margin:     0,
-    fontSize:   '0.9rem',
+    fontSize:   '0.92rem',
     fontWeight: 700,
-    color:      '#0f172a',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    color:      '#0a1e3c',
+    fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
+    letterSpacing: '-0.01em',
   },
   rowSub: {
     margin:     0,
     fontSize:   '0.72rem',
     fontWeight: 500,
     color:      '#94a3b8',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
   },
 
   /* Divider between rows */
   divider: {
     height:     1,
-    background: '#f1f5f9',
-    marginLeft: '4.5rem', // align with text, skip icon area
+    background: 'linear-gradient(to right, #f1f5f9 20%, #e2e8f0 50%, #f1f5f9 80%)',
+    marginLeft: '4.5rem',
   },
 
   /* ── Bottom nav ── */
@@ -458,20 +424,23 @@ const s: Record<string, React.CSSProperties> = {
     left:            0,
     right:           0,
     zIndex:          100,
-    background:      'white',
-    borderTop:       '1px solid #e8eef8',
+    background:      'rgba(255,255,255,0.92)',
+    backdropFilter:  'blur(20px)',
+    borderTop:       '1px solid rgba(226,232,240,0.5)',
     display:         'flex',
     alignItems:      'center',
     justifyContent:  'space-around',
-    padding:         '0.6rem 0 0.85rem',
-    boxShadow:       '0 -4px 20px rgba(30,58,138,0.07)',
+    padding:         '0.5rem 0 0.85rem',
+    boxShadow:       '0 -8px 32px rgba(30,58,138,0.06)',
   },
   navItem: {
     ...navBase,
     color: '#94a3b8',
+    transition: 'all 0.2s ease',
   },
   navItemActive: {
     ...navBase,
     color: '#2563eb',
+    position: 'relative',
   },
 }

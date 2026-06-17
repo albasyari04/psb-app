@@ -48,31 +48,31 @@ const PROGRESS_CLASS: Record<string, string> = {
 const QUICK_ITEMS = [
   {
     href: '/siswa/pendaftaran',
-    icon: '/image/icon formulir.jpg',
+    icon: '/icons/formulir icon.png',
     title: 'Formulir',
     sub: 'Isi & edit data diri',
     colorClass: 'quickIconWrap_blue',
   },
   {
     href: '/siswa/berkas',
-    icon: '/image/icon berkas.jpg',
+    icon: '/icons/berkas icon.png',
     title: 'Berkas',
     sub: 'Upload dokumen',
-    colorClass: 'quickIconWrap_amber',
+    colorClass: 'quickIconWrap_blue',
   },
   {
     href: '/siswa/status',
-    icon: '/image/icon status.webp',
+    icon: '/icons/status icon.png',
     title: 'Status',
     sub: 'Pantau seleksi',
-    colorClass: 'quickIconWrap_green',
+    colorClass: 'quickIconWrap_blue',
   },
   {
     href: '/siswa/pembayaran',
-    icon: '/image/icon pembayaran.avif',
+    icon: '/icons/pembayaran icon.png',
     title: 'Bayar',
     sub: 'Biaya pendaftaran',
-    colorClass: 'quickIconWrap_violet',
+    colorClass: 'quickIconWrap_blue',
   },
 ] as const
 
