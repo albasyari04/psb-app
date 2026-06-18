@@ -16,11 +16,14 @@ interface Props {
 }
 
 interface JadwalItem {
-  id?: string
+  id: string
+  label: string
+  tanggal: string
+  tanggal_mulai: string | null
+  tanggal_selesai: string | null
+  status: string
+  warna: string
   urutan?: number
-  waktu: string
-  kegiatan: string
-  lokasi: string
 }
 
 interface PembayaranItem {
@@ -36,9 +39,12 @@ interface PembayaranData {
 }
 
 interface LaporanItem {
-  label: string
-  status: string
-  percent: number
+  id: string
+  judul: string
+  tipe: 'bulanan' | 'tahunan' | 'khusus' | string
+  deskripsi: string | null
+  file_url: string | null
+  created_at: string | null
 }
 
 interface Announcement {
@@ -126,6 +132,12 @@ const TIPE_CONFIG: Record<string, { pill: string }> = {
   Peringatan: { pill: styles.pillPeringatan },
 }
 
+const LAPORAN_TIPE_CONFIG: Record<string, { label: string; badge: string }> = {
+  bulanan: { label: 'Bulanan', badge: styles.laporanBadgeBulanan },
+  tahunan: { label: 'Tahunan', badge: styles.laporanBadgeTahunan },
+  khusus:  { label: 'Khusus',  badge: styles.laporanBadgeKhusus },
+}
+
 /* ════════════════════════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════════════════════════ */
@@ -138,6 +150,23 @@ function formatTanggalShort(iso: string): string {
   } catch {
     return iso
   }
+}
+function formatTanggalRange(start: string, end: string | null): string {
+  if (!end || end === start) return formatTanggalShort(start)
+  return `${formatTanggalShort(start)} – ${formatTanggalShort(end)}`
+}
+function hexToRgba(hex: string, alpha: number): string {
+  const fallback = `rgba(22, 163, 74, ${alpha})` // var(--green) fallback
+  if (!hex) return fallback
+  const clean = hex.replace('#', '').trim()
+  if (clean.length !== 3 && clean.length !== 6) return fallback
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean
+  const num = parseInt(full, 16)
+  if (Number.isNaN(num)) return fallback
+  const r = (num >> 16) & 255
+  const g = (num >> 8) & 255
+  const b = num & 255
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n) + '…' : s
@@ -193,54 +222,6 @@ function IconPersonOutline() {
     </svg>
   )
 }
-function IconChevronDown(props: { style?: React.CSSProperties }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={props.style}
-    >
-      <polyline points="9 6 15 12 9 18" />
-    </svg>
-  )
-}
-
-/* ════════════════════════════════════════════════════════════════
-   CIRCULAR PROGRESS — untuk widget Laporan Terbaru
-   ════════════════════════════════════════════════════════════════ */
-function CircularProgress({ percent, size = 42, stroke = 4 }: { percent: number; size?: number; stroke?: number }) {
-  const radius = (size - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  const safePercent = Math.max(0, Math.min(100, percent))
-  const offset = circumference - (safePercent / 100) * circumference
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8f5ee" strokeWidth={stroke} />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="#16a34a"
-        strokeWidth={stroke}
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text x="50%" y="50%" textAnchor="middle" dy="0.32em" className={styles.progressRingText}>
-        {safePercent}%
-      </text>
-    </svg>
-  )
-}
-
 /* ════════════════════════════════════════════════════════════════
    HERO BANNER — carousel statis dengan auto-rotate
    ════════════════════════════════════════════════════════════════ */
@@ -289,13 +270,13 @@ function HeroBanner() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   JADWAL HARI INI
+   JADWAL TERDEKAT
    ════════════════════════════════════════════════════════════════ */
 function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: boolean }) {
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>Jadwal Hari Ini</p>
+        <p className={styles.miniCardTitle}>Jadwal Terdekat</p>
         <Link href="/siswa/jadwal" className={styles.miniCardLink}>Lihat Jadwal</Link>
       </div>
 
@@ -304,19 +285,30 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
           {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 8}%` }} />)}
         </div>
       ) : items.length === 0 ? (
-        <p className={styles.timelineEmpty}>Belum ada jadwal hari ini.</p>
+        <p className={styles.timelineEmpty}>Belum ada jadwal.</p>
       ) : (
         <ol className={styles.timeline}>
           {items.map((it, idx) => (
             <li key={it.id ?? idx} className={styles.timelineItem}>
               <div className={styles.timelineDotCol}>
-                <span className={styles.timelineDot} />
+                <span className={styles.timelineDot} style={{ background: it.warna || undefined }} />
                 {idx < items.length - 1 && <span className={styles.timelineLine} />}
               </div>
               <div className={styles.timelineContent}>
-                <span className={styles.timelineTime}>{it.waktu}</span>
-                <p className={styles.timelineLabel}>{it.kegiatan}</p>
-                <p className={styles.timelineLoc}>{it.lokasi}</p>
+                <p className={styles.timelineLabel}>{it.label}</p>
+                <span className={styles.timelineTime}>
+                  {it.tanggal_mulai
+                    ? formatTanggalRange(it.tanggal_mulai, it.tanggal_selesai)
+                    : formatTanggalShort(it.tanggal)}
+                </span>
+                {it.status && (
+                  <span
+                    className={styles.jadwalStatusBadge}
+                    style={{ color: it.warna || 'var(--green)', background: hexToRgba(it.warna, 0.14) }}
+                  >
+                    {it.status}
+                  </span>
+                )}
               </div>
             </li>
           ))}
@@ -389,25 +381,28 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
 
       {loading ? (
         <div className={styles.miniSkeleton}>
-          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
+          {[1, 2, 3].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
         </div>
+      ) : data.length === 0 ? (
+        <p className={styles.laporanMiniEmpty}>Belum ada laporan.</p>
       ) : (
-        <div className={styles.reportList}>
-          {data.map((item) => (
-            <div key={item.label} className={styles.reportItem}>
-              <div className={styles.reportText}>
-                <p className={styles.reportLabel}>{item.label}</p>
-                <p className={styles.reportStatus}>{item.status}</p>
-              </div>
-              <CircularProgress percent={item.percent} />
-            </div>
-          ))}
+        <div className={styles.laporanMiniList}>
+          {data.map((item) => {
+            const cfg = LAPORAN_TIPE_CONFIG[item.tipe] ?? { label: item.tipe, badge: styles.laporanBadgeKhusus }
+            return (
+              <Link key={item.id} href={`/siswa/laporan/${item.id}`} className={styles.laporanMiniItem}>
+                <p className={styles.laporanMiniTitle}>{item.judul}</p>
+                <div className={styles.laporanMiniMeta}>
+                  <span className={styles.laporanMiniDate}>
+                    {item.created_at ? formatTanggalShort(item.created_at) : '-'}
+                  </span>
+                  <span className={`${styles.laporanMiniBadge} ${cfg.badge}`}>{cfg.label}</span>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
-
-      <Link href="/siswa/laporan" className={styles.reportFullLink}>
-        Laporan lengkap <IconChevronDown style={{ transform: 'rotate(-90deg)' }} />
-      </Link>
     </div>
   )
 }
@@ -505,6 +500,7 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
    ════════════════════════════════════════════════════════════════ */
 function CtaBanner() {
   return (
+    <div className={styles.bannerKataWrap}>
       <Image
         src="/icons/banner-kata.png"
         alt="Banner Motivasi Santri"
@@ -513,6 +509,7 @@ function CtaBanner() {
         className={styles.bannerKataImage}
         priority
       />
+    </div>
   )
 }
 /* ════════════════════════════════════════════════════════════════
@@ -532,21 +529,26 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   const [annLoading, setAnnLoading] = useState(true)
   const [selectedAnn, setSelectedAnn] = useState<Announcement | null>(null)
 
-  // ── Jadwal hari ini (dari /api/siswa/jadwal yang sudah ada) ──────────────
+  // ── Jadwal terdekat (dari /api/siswa/jadwal, sumber: tabel `jadwal` admin) ──
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch('/api/siswa/jadwal')
         const json = await res.json()
         if (res.ok) {
-          // NOTE: nama kolom di tabel `jadwal` diasumsikan waktu/kegiatan/lokasi.
-          // Sesuaikan mapping di bawah jika nama kolom asli Anda berbeda.
+          // FIX: tabel `jadwal` punya kolom label/tanggal/tanggal_mulai/
+          // tanggal_selesai/status/warna/urutan (lihat app/api/admin/jadwal),
+          // BUKAN waktu/kegiatan/lokasi seperti sebelumnya — itu sebabnya
+          // jadwal yang dibuat admin tidak pernah tampil di Beranda.
           const mapped: JadwalItem[] = (json.data ?? []).slice(0, 5).map((row: Record<string, unknown>) => ({
-            id: row.id as string | undefined,
+            id: row.id as string,
+            label: (row.label ?? '') as string,
+            tanggal: (row.tanggal ?? '') as string,
+            tanggal_mulai: (row.tanggal_mulai ?? null) as string | null,
+            tanggal_selesai: (row.tanggal_selesai ?? null) as string | null,
+            status: (row.status ?? '') as string,
+            warna: (row.warna ?? '#16a34a') as string,
             urutan: row.urutan as number | undefined,
-            waktu: (row.waktu ?? row.jam ?? '') as string,
-            kegiatan: (row.kegiatan ?? row.nama_kegiatan ?? row.nama ?? '') as string,
-            lokasi: (row.lokasi ?? row.tempat ?? '') as string,
           }))
           setJadwal(mapped)
         }
@@ -651,21 +653,21 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           </div>
           <div className={styles.quickGrid}>
             {QUICK_ITEMS.map(({ href, label, sub, icon }) => (
-  <Link key={label} href={href} className={styles.quickCard}>
-    <div className={styles.quickIconWrap}>
-      <Image
-        src={icon}
-        alt={label}
-        width={52}
-        height={52}
-        className={styles.quickIconImage}
-      />
-    </div>
+              <Link key={label} href={href} className={styles.quickCard}>
+                <div className={styles.quickIconWrap}>
+                  <Image
+                    src={icon}
+                    alt={label}
+                    width={52}
+                    height={52}
+                    className={styles.quickIconImage}
+                  />
+                </div>
 
-    <span className={styles.quickLabel}>{label}</span>
-    <span className={styles.quickSub}>{sub}</span>
-  </Link>
-))}
+                <span className={styles.quickLabel}>{label}</span>
+                <span className={styles.quickSub}>{sub}</span>
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -725,8 +727,6 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         </div>
         {/* ── CTA Banner Doa Harian ───────────────────────────────────────── */}
         <CtaBanner />
-
-     
 
       </div>
 
