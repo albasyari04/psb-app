@@ -28,8 +28,6 @@ export default async function DashboardPage() {
       fullName={fullName}
       avatarInitial={avatarInitial}
       avatarUrl={avatarUrl}
-      pendaftaran={pendaftaran}
-      status={status}
     />
   )
 }
