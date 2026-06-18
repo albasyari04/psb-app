@@ -1,19 +1,44 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import Link  from 'next/link'
-import type { Pendaftaran } from '@/types'
+import Link from 'next/link'
 import styles from './dashboard.module.css'
-import NotificationBell from '@/components/notifications/NotificationBell'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+
+/* ════════════════════════════════════════════════════════════════
+   TYPES
+   ════════════════════════════════════════════════════════════════ */
 interface Props {
-  fullName:      string
+  fullName: string
   avatarInitial: string
-  avatarUrl:     string | null
-  pendaftaran:   Pendaftaran | null
-  status:        Pendaftaran['status'] | null
+  avatarUrl: string | null
+}
+
+interface JadwalItem {
+  id?: string
+  urutan?: number
+  waktu: string
+  kegiatan: string
+  lokasi: string
+}
+
+interface PembayaranItem {
+  id: string
+  judul: string
+  jumlah: number
+  status: 'lunas' | 'belum_lunas' | string
+}
+
+interface PembayaranData {
+  total: number
+  items: PembayaranItem[]
+}
+
+interface LaporanItem {
+  label: string
+  status: string
+  percent: number
 }
 
 interface Announcement {
@@ -27,202 +52,409 @@ interface Announcement {
   created_at: string
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-const PROGRESS_VALUE: Record<string, number> = {
-  menunggu: 25, diproses: 60, diterima: 100, ditolak: 100,
-}
-const STATUS_LABEL: Record<string, string> = {
-  menunggu: 'Menunggu Review',
-  diproses: 'Sedang Diproses',
-  diterima: 'Diterima! 🎉',
-  ditolak:  'Tidak Diterima',
-}
-const PROGRESS_CLASS: Record<string, string> = {
-  menunggu: styles.progress25,
-  diproses: styles.progress60,
-  diterima: styles.progress100,
-  ditolak:  styles.progress100red,
-}
+/* ════════════════════════════════════════════════════════════════
+   CONSTANTS
+   ════════════════════════════════════════════════════════════════ */
+const HERO_SLIDES = [
+  {
+    eyebrow: 'Rutinan Ahad Legi',
+    titleBold: 'Ngaji Hikam,',
+    titleLight: 'lelenggahan sareng Guru',
+    href: '/siswa/tentang',
+    image: '/image/ngaji.jpeg',
+  },
+  {
+    eyebrow: 'Rutinan Akhir Tahun',
+    titleBold: 'Ziarah Wali Songo,',
+    titleLight: 'Lan Madosi Barokah Poro Guru',
+    href: '/siswa/kegiatan',
+    image: '/image/ziarah.jpeg', // TODO: Ganti dengan path gambar yang sesuai
+  },
+  {
+    eyebrow: 'Rawuh ipun Guru Ploso',
+    titleBold: 'Ngaji Bersama',
+    titleLight: 'Masyayikh Ploso',
+    href: '/siswa/prestasi',
+    image: '/image/ngaji1.jpeg', // TODO: Ganti dengan path gambar yang sesuai
+  },
+] as const
 
-// 4 Quick Access items (like the design: Formulir, Berkas, Status, Bayar)
+
 const QUICK_ITEMS = [
   {
-    href: '/siswa/pendaftaran',
-    icon: '/icons/formulir icon.png',
-    title: 'Formulir',
-    sub: 'Isi & edit data diri',
-    colorClass: 'quickIconWrap_blue',
+    href: '/siswa/jadwal',
+    label: 'Jadwal',
+    sub: 'Lihat kegiatan & jadwal harian',
+    icon: '/icons/jadwal icon.png',
   },
   {
     href: '/siswa/berkas',
+    label: 'Berkas',
+    sub: 'Isi Berkas yang di butuhkan',
     icon: '/icons/berkas icon.png',
-    title: 'Berkas',
-    sub: 'Upload dokumen',
-    colorClass: 'quickIconWrap_blue',
-  },
-  {
-    href: '/siswa/status',
-    icon: '/icons/status icon.png',
-    title: 'Status',
-    sub: 'Pantau seleksi',
-    colorClass: 'quickIconWrap_blue',
   },
   {
     href: '/siswa/pembayaran',
+    label: 'Pembayaran',
+    sub: 'Cek tagihan & lakukan bayar',
     icon: '/icons/pembayaran icon.png',
-    title: 'Bayar',
-    sub: 'Biaya pendaftaran',
-    colorClass: 'quickIconWrap_blue',
   },
-] as const
+  {
+    href: '/siswa/laporan',
+    label: 'Laporan',
+    sub: 'Lihat laporan perkembangan',
+    icon: '/icons/laporan icon.png',
+  },
+  {
+    href: '/siswa/pengumuman',
+    label: 'Pengumuman',
+    sub: 'Info terbaru dari pesantren',
+    icon: '/icons/pengumuman icon.png',
+  },
+  {
+    href: '/siswa/formulir',
+    label: 'Formulir',
+    sub: 'Isi formulir data diri',
+    icon: '/icons/formulir icon.png',
+  },
+]
 
-const JADWAL = [
-  {
-    label: 'Batas Pendaftaran',
-    date: '28 Feb 2026',
-    dotClass: 'dotRed',
-    icon: '/image/pendaftar.jpg',
-    statusLabel: 'Selesai',
-    statusClass: 'jadwalDone'
-  },
-  {
-    label: 'Pengumuman Hasil',
-    date: '15 Maret 2026',
-    dotClass: 'dotBlue',
-    icon: '/icons/pengumuman-icon.png',
-    statusLabel: 'Selesai',
-    statusClass: 'jadwalDone'
-  },
-  {
-    label: 'Daftar Ulang',
-    date: '1–15 Apr 2026',
-    dotClass: 'dotGreen',
-    icon: '/image/pendaftar.gif',
-    statusLabel: 'Berlangsung',
-    statusClass: 'jadwalOngoing'
-  },
-] as const
-
-const TIPE_CONFIG: Record<string, {
-  badge: string; icon: string; accent: string; pill: string;
-}> = {
-  Penting:    { badge: styles.badgePenting,    icon: '🔴', accent: styles.accentPenting,    pill: styles.pillPenting    },
-  Informasi:  { badge: styles.badgeInformasi,  icon: '🔵', accent: styles.accentInformasi,  pill: styles.pillInformasi  },
-  Info:       { badge: styles.badgeInfo,       icon: '🟢', accent: styles.accentInfo,       pill: styles.pillInfo       },
-  Peringatan: { badge: styles.badgePeringatan, icon: '🟡', accent: styles.accentPeringatan, pill: styles.pillPeringatan },
+const TIPE_CONFIG: Record<string, { pill: string }> = {
+  Penting:    { pill: styles.pillPenting },
+  Informasi:  { pill: styles.pillInformasi },
+  Info:       { pill: styles.pillInfo },
+  Peringatan: { pill: styles.pillPeringatan },
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function getGreeting(hour: number): string {
-  if (hour >= 4  && hour < 11) return 'Selamat Pagi'
-  if (hour >= 11 && hour < 15) return 'Selamat Siang'
-  if (hour >= 15 && hour < 18) return 'Selamat Sore'
-  return 'Selamat Malam'
-}
-function getGreetingEmoji(hour: number): string {
-  if (hour >= 4  && hour < 11) return '🌤️'
-  if (hour >= 11 && hour < 15) return '☀️'
-  if (hour >= 15 && hour < 18) return '🌤️'
-  return '🌙'
+/* ════════════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════════════ */
+function formatRupiah(n: number): string {
+  return new Intl.NumberFormat('id-ID').format(n)
 }
 function formatTanggalShort(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('id-ID', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    })
-  } catch { return iso }
+    return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+  } catch {
+    return iso
+  }
+}
+function truncate(s: string, n: number): string {
+  return s.length > n ? s.slice(0, n) + '…' : s
 }
 
-// ── PendaftaranBanner (static, tanpa auto-slide) ──────────────────────────────
-function PendaftaranBanner() {
+
+function IconCardSmall() {
   return (
-    <div className={styles.pendaftaranBannerWrap}>
-      <Image
-        src="/icons/penerimaan santri baru.png"
-        alt="Penerimaan Santri Baru Tahun Ajaran 2026/2027"
-        fill
-        className={styles.pendaftaranBannerImg}
-        priority
-      />
-    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+    </svg>
+  )
+}
+function IconCheckSmall() {
+  return (
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
   )
 }
 
-
-// ── StaticBanner ──────────────────────────────────────────────────────────────
-function StaticBanner() {
+function IconHomeFilled() {
   return (
-    <div className={styles.promoBanner}>
-      <div className={styles.promoBannerImgWrap}>
-        <Image
-          src="/image/banner1.png"
-          alt="Banner Wujudkan Lingkungan Nyaman"
-          fill
-          className={styles.promoBannerImg}
-          priority
-        />
-      </div>
-      <div className={styles.promoBannerOverlay} />
-      <div className={styles.promoBannerFooter}>
-        <Link href="/siswa/peraturan" className={styles.promoBannerBtn}>
-          Lihat Selengkapnya →
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+  )
+}
+function IconWalletOutline() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+      <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+    </svg>
+  )
+}
+function IconDocumentOutline() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" />
+    </svg>
+  )
+}
+function IconPersonOutline() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
+function IconChevronDown(props: { style?: React.CSSProperties }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={props.style}
+    >
+      <polyline points="9 6 15 12 9 18" />
+    </svg>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CIRCULAR PROGRESS — untuk widget Laporan Terbaru
+   ════════════════════════════════════════════════════════════════ */
+function CircularProgress({ percent, size = 42, stroke = 4 }: { percent: number; size?: number; stroke?: number }) {
+  const radius = (size - stroke) / 2
+  const circumference = 2 * Math.PI * radius
+  const safePercent = Math.max(0, Math.min(100, percent))
+  const offset = circumference - (safePercent / 100) * circumference
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8f5ee" strokeWidth={stroke} />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="#16a34a"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+      <text x="50%" y="50%" textAnchor="middle" dy="0.32em" className={styles.progressRingText}>
+        {safePercent}%
+      </text>
+    </svg>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HERO BANNER — carousel statis dengan auto-rotate
+   ════════════════════════════════════════════════════════════════ */
+function HeroBanner() {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(() => setIndex((i) => (i + 1) % HERO_SLIDES.length), 6000)
+    return () => clearInterval(t)
+  }, [])
+
+  const slide = HERO_SLIDES[index]
+
+  return (
+    <div className={styles.heroBannerWrap}>
+      <div className={styles.heroBannerBgPattern} />
+
+      <div className={styles.heroBannerContent}>
+        <span className={styles.heroBannerEyebrow}>{slide.eyebrow}</span>
+        <h2 className={styles.heroBannerTitle}>
+          <span className={styles.heroTitleBold}>{slide.titleBold}</span>
+          <span className={styles.heroTitleLight}>{slide.titleLight}</span>
+        </h2>
+        <Link href={slide.href} className={styles.heroBannerBtn}>
+          Selengkapnya <span aria-hidden>→</span>
         </Link>
       </div>
+
+      <div className={styles.heroBannerImageWrap}>
+        <Image src={slide.image} alt={slide.eyebrow} fill className={styles.heroBannerImg} priority key={index} />
+      </div>
+
+      <div className={styles.heroBannerDots}>
+        {HERO_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Slide ${i + 1}`}
+            className={`${styles.heroBannerDot} ${i === index ? styles.heroBannerDotActive : ''}`}
+            onClick={() => setIndex(i)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
-// ── AnnouncementCard ──────────────────────────────────────────────────────────
-function AnnouncementCard({
-  item,
-  onClick,
-}: {
-  item: Announcement
-  onClick: (a: Announcement) => void
-}) {
+/* ════════════════════════════════════════════════════════════════
+   JADWAL HARI INI
+   ════════════════════════════════════════════════════════════════ */
+function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: boolean }) {
+  return (
+    <div className={styles.miniCard}>
+      <div className={styles.miniCardHeader}>
+        <p className={styles.miniCardTitle}>Jadwal Hari Ini</p>
+        <Link href="/siswa/jadwal" className={styles.miniCardLink}>Lihat Jadwal</Link>
+      </div>
+
+      {loading ? (
+        <div className={styles.miniSkeleton}>
+          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 8}%` }} />)}
+        </div>
+      ) : items.length === 0 ? (
+        <p className={styles.timelineEmpty}>Belum ada jadwal hari ini.</p>
+      ) : (
+        <ol className={styles.timeline}>
+          {items.map((it, idx) => (
+            <li key={it.id ?? idx} className={styles.timelineItem}>
+              <div className={styles.timelineDotCol}>
+                <span className={styles.timelineDot} />
+                {idx < items.length - 1 && <span className={styles.timelineLine} />}
+              </div>
+              <div className={styles.timelineContent}>
+                <span className={styles.timelineTime}>{it.waktu}</span>
+                <p className={styles.timelineLabel}>{it.kegiatan}</p>
+                <p className={styles.timelineLoc}>{it.lokasi}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PEMBAYARAN
+   ════════════════════════════════════════════════════════════════ */
+function PembayaranCard({ data, loading }: { data: PembayaranData; loading: boolean }) {
+  return (
+    <div className={styles.miniCard}>
+      <div className={styles.miniCardHeader}>
+        <p className={styles.miniCardTitle}>Pembayaran</p>
+        <Link href="/siswa/pembayaran" className={styles.miniCardLink}>Lihat Semua</Link>
+      </div>
+
+      {loading ? (
+        <div className={styles.miniSkeleton}>
+          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
+        </div>
+      ) : (
+        <>
+          <p className={styles.payCaption}>Tagihan Bulan Ini</p>
+          <div className={styles.payAmountRow}>
+            <span className={styles.payAmount}>Rp {formatRupiah(data.total)}</span>
+            <div className={styles.payIconWrap}>
+              <div className={styles.payIconBg}><IconCardSmall /></div>
+              <div className={styles.payIconBadge}><IconCheckSmall /></div>
+            </div>
+          </div>
+          <Link href="/siswa/pembayaran/bayar" className={styles.payBtn}>Bayar Sekarang</Link>
+
+          {data.items.length === 0 ? (
+            <p className={styles.payEmpty}>Tidak ada tagihan tertunda.</p>
+          ) : (
+            <div className={styles.payList}>
+              {data.items.map((item) => (
+                <div key={item.id} className={styles.payItem}>
+                  <div className={styles.payItemText}>
+                    <p className={styles.payItemTitle}>{item.judul}</p>
+                    <p className={styles.payItemAmount}>Rp {formatRupiah(item.jumlah)}</p>
+                  </div>
+                  <span className={`${styles.payBadge} ${item.status === 'lunas' ? styles.payBadgeLunas : styles.payBadgeBelumLunas}`}>
+                    {item.status === 'lunas' ? 'Lunas' : 'Belum Lunas'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LAPORAN TERBARU
+   ════════════════════════════════════════════════════════════════ */
+function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean }) {
+  return (
+    <div className={styles.miniCard}>
+      <div className={styles.miniCardHeader}>
+        <p className={styles.miniCardTitle}>Laporan Terbaru</p>
+        <Link href="/siswa/laporan" className={styles.miniCardLink}>Lihat Semua</Link>
+      </div>
+
+      {loading ? (
+        <div className={styles.miniSkeleton}>
+          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
+        </div>
+      ) : (
+        <div className={styles.reportList}>
+          {data.map((item) => (
+            <div key={item.label} className={styles.reportItem}>
+              <div className={styles.reportText}>
+                <p className={styles.reportLabel}>{item.label}</p>
+                <p className={styles.reportStatus}>{item.status}</p>
+              </div>
+              <CircularProgress percent={item.percent} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Link href="/siswa/laporan" className={styles.reportFullLink}>
+        Laporan lengkap <IconChevronDown style={{ transform: 'rotate(-90deg)' }} />
+      </Link>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PENGUMUMAN
+   ════════════════════════════════════════════════════════════════ */
+function isImageUrl(url: string) {
+  return /\.(png|jpe?g|webp|gif)$/i.test(url)
+}
+
+function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: Announcement) => void }) {
   const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
   return (
-    <button
-      className={`${styles.announcementCard} ${cfg.accent}`}
-      onClick={() => onClick(item)}
-      aria-label={`Buka pengumuman: ${item.judul}`}
-    >
-      <div className={styles.annIconWrap}>
+    <button type="button" className={styles.annCard} onClick={() => onClick(item)} aria-label={`Buka pengumuman: ${item.judul}`}>
+      <div className={styles.annThumb}>
+        {item.lampiran_url && isImageUrl(item.lampiran_url) ? (
         <Image
-          src="/icons/pengumuman-icon.png"
+          src={item.lampiran_url}
           alt=""
-          width={36}
-          height={36}
-          className={styles.annIcon}
+          fill
+          className={styles.annThumbImg}
         />
+        ) : (
+        <Image
+          src="/icons/pengumuman icon.png"
+          alt="Pengumuman"
+          fill
+          className={styles.annThumbImg}
+        />
+        )}
       </div>
-      <div className={styles.annCardLeft}>
-        <span className={`${styles.annTypePill} ${cfg.pill}`}>
-          {item.tipe.toUpperCase()}
-        </span>
-        <p className={styles.annCardTitle}>{item.judul}</p>
-        <p className={styles.annCardPreview}>
-          {item.konten.length > 70 ? item.konten.slice(0, 70) + '…' : item.konten}
-        </p>
-      </div>
-      <div className={styles.annCardMeta}>
-        <span className={styles.annCardDate}>{formatTanggalShort(item.tanggal)}</span>
-        <svg className={styles.annChevron} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 18 15 12 9 6"/>
-        </svg>
+      <div className={styles.annBody}>
+        <div className={styles.annTopRow}>
+          <p className={styles.annTitle}>{item.judul}</p>
+          <span className={styles.annDate}>{formatTanggalShort(item.tanggal)}</span>
+        </div>
+        <p className={styles.annPreview}>{truncate(item.konten, 90)}</p>
+        <div className={styles.annBadgeRow}>
+          <span className={`${styles.annBadge} ${cfg.pill}`}>{item.tipe}</span>
+        </div>
       </div>
     </button>
   )
 }
 
-// ── AnnouncementModal ─────────────────────────────────────────────────────────
-function AnnouncementModal({
-  item,
-  onClose,
-}: {
-  item: Announcement
-  onClose: () => void
-}) {
+function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () => void }) {
   const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
 
   function handleBackdrop(e: React.MouseEvent<HTMLDivElement>) {
@@ -234,21 +466,19 @@ function AnnouncementModal({
       <div className={styles.modalSheet}>
         <div className={styles.modalHandle} />
         <div className={styles.modalHeader}>
-          <span className={`${styles.annTypePill} ${cfg.pill}`}>
-            {cfg.icon} {item.tipe}
-          </span>
+          <span className={`${styles.annBadge} ${cfg.pill}`}>{item.tipe}</span>
           <button className={styles.modalClose} onClick={onClose} aria-label="Tutup">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <h2 className={styles.modalTitle}>{item.judul}</h2>
         <div className={styles.modalDateRow}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           <span>{formatTanggalShort(item.tanggal)}</span>
         </div>
@@ -257,8 +487,8 @@ function AnnouncementModal({
         {item.lampiran_url && (
           <a href={item.lampiran_url} target="_blank" rel="noopener noreferrer" className={styles.modalAttachment}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
             <span>{item.lampiran_nama || 'Buka Lampiran'}</span>
             <span className={styles.modalAttachmentArrow}>↗</span>
@@ -270,277 +500,181 @@ function AnnouncementModal({
   )
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
-export default function DashboardClient({
-  fullName, avatarInitial, avatarUrl, pendaftaran, status,
-}: Props) {
-  const [now, setNow]                   = useState<Date>(() => new Date())
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
-  const [annLoading, setAnnLoading]     = useState(true)
-  const [selectedAnn, setSelectedAnn]   = useState<Announcement | null>(null)
+/* ════════════════════════════════════════════════════════════════
+   CTA BANNER — Doa Harian
+   ════════════════════════════════════════════════════════════════ */
+function CtaBanner() {
+  return (
+      <Image
+        src="/icons/banner-kata.png"
+        alt="Banner Motivasi Santri"
+        width={1200}
+        height={350}
+        className={styles.bannerKataImage}
+        priority
+      />
+  )
+}
+/* ════════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ════════════════════════════════════════════════════════════════ */
+export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: Props) {
+  const [jadwal, setJadwal] = useState<JadwalItem[]>([])
+  const [jadwalLoading, setJadwalLoading] = useState(true)
 
+  const [pembayaran, setPembayaran] = useState<PembayaranData>({ total: 0, items: [] })
+  const [pembayaranLoading, setPembayaranLoading] = useState(true)
+
+  const [laporan, setLaporan] = useState<LaporanItem[]>([])
+  const [laporanLoading, setLaporanLoading] = useState(true)
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [annLoading, setAnnLoading] = useState(true)
+  const [selectedAnn, setSelectedAnn] = useState<Announcement | null>(null)
+
+  // ── Jadwal hari ini (dari /api/siswa/jadwal yang sudah ada) ──────────────
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 60_000)
-    return () => clearInterval(t)
+    async function load() {
+      try {
+        const res = await fetch('/api/siswa/jadwal')
+        const json = await res.json()
+        if (res.ok) {
+          // NOTE: nama kolom di tabel `jadwal` diasumsikan waktu/kegiatan/lokasi.
+          // Sesuaikan mapping di bawah jika nama kolom asli Anda berbeda.
+          const mapped: JadwalItem[] = (json.data ?? []).slice(0, 5).map((row: Record<string, unknown>) => ({
+            id: row.id as string | undefined,
+            urutan: row.urutan as number | undefined,
+            waktu: (row.waktu ?? row.jam ?? '') as string,
+            kegiatan: (row.kegiatan ?? row.nama_kegiatan ?? row.nama ?? '') as string,
+            lokasi: (row.lokasi ?? row.tempat ?? '') as string,
+          }))
+          setJadwal(mapped)
+        }
+      } catch (e) {
+        console.error('Gagal memuat jadwal:', e)
+      } finally {
+        setJadwalLoading(false)
+      }
+    }
+    load()
   }, [])
 
+  // ── Ringkasan pembayaran (endpoint baru, lihat catatan di akhir) ─────────
   useEffect(() => {
-    async function fetchAnnouncements() {
+    async function load() {
       try {
-        const res  = await fetch('/api/siswa/announcements?limit=5')
+        const res = await fetch('/api/siswa/pembayaran/ringkasan')
+        const json = await res.json()
+        if (res.ok) setPembayaran(json.data ?? { total: 0, items: [] })
+      } catch (e) {
+        console.error('Gagal memuat ringkasan pembayaran:', e)
+      } finally {
+        setPembayaranLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  // ── Ringkasan laporan (endpoint baru, lihat catatan di akhir) ────────────
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/siswa/laporan/ringkasan')
+        const json = await res.json()
+        if (res.ok) setLaporan(json.data ?? [])
+      } catch (e) {
+        console.error('Gagal memuat ringkasan laporan:', e)
+      } finally {
+        setLaporanLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  // ── Pengumuman terbaru (dari /api/siswa/announcements yang sudah ada) ───
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/siswa/announcements?limit=3')
         const json = await res.json()
         if (res.ok) setAnnouncements(json.data ?? [])
       } catch (e) {
-        console.error('Failed to fetch announcements', e)
+        console.error('Gagal memuat pengumuman:', e)
       } finally {
         setAnnLoading(false)
       }
     }
-    fetchAnnouncements()
+    load()
   }, [])
-
-  const hour          = now.getHours()
-  const greetingText  = getGreeting(hour)
-  const greetingEmoji = getGreetingEmoji(hour)
-  const progressClass = status ? (PROGRESS_CLASS[status] ?? styles.progress25) : styles.progress25
 
   return (
     <div className={styles.shell}>
 
-      {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
-      <div className={styles.hero}>
-
-        {/* Background masjid */}
-        <div className={styles.heroBgImage}>
-          <Image
-            src="/image/masjid.png"
-            alt=""
-            fill
-            className={styles.heroBgImg}
-            priority
-          />
-        </div>
-        {/* Overlay gelap agar teks tetap terbaca */}
-        <div className={styles.heroBgOverlay} />
-
-        <div className={styles.orbA} />
-        <div className={styles.orbB} />
-        <div className={styles.orbC} />
-        <div className={styles.starField}>
-          {[...Array(8)].map((_, i) => (
-            <span key={i} className={`${styles.star} ${styles[`star${i + 1}` as keyof typeof styles]}`} />
-          ))}
-        </div>
-
-        {/* Top bar */}
-        <div className={styles.heroTopBar}>
-          <div className={styles.heroTopLeft}>
-            <div className={styles.greetingBadge}>
-              <span>{greetingEmoji}</span>
-              <span>{greetingText}</span>
-            </div>
-            <h1 className={styles.heroName}>{fullName}</h1>
-            <p className={styles.heroSchool}>Santri Pondok Pesantren Al Istiqomah</p>
+      {/* ══ TOP HEADER ══════════════════════════════════════════════════ */}
+      <header className={styles.topHeader}>
+        <div className={styles.topHeaderLeft}>
+          <div className={styles.avatarWrap}>
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt={fullName}
+                width={52}
+                height={52}
+                className={styles.avatarImg}
+                referrerPolicy="no-referrer"
+                unoptimized
+              />
+            ) : (
+              <span className={styles.avatarInitialText}>{avatarInitial}</span>
+            )}
           </div>
-
-          <div className={styles.heroTopRight}>
-            <NotificationBell />
-            <Link href="/siswa/profile" className={styles.topbarAvatar} aria-label="Profil saya">
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={fullName} width={42} height={42}
-                  className={styles.avatarImg} referrerPolicy="no-referrer" unoptimized
-                />
-              ) : (
-                <span className={styles.avatarInitialText}>{avatarInitial}</span>
-              )}
-            </Link>
+          <div className={styles.greetWrap}>
+            <p className={styles.greetText}>Assalamu&apos;alaikum,</p>
+            <h1 className={styles.greetName}>{fullName}</h1>
+            <p className={styles.greetSchool}>Santri Pondok Pesantren Al-I&apos;tiqomah</p>
           </div>
         </div>
-      </div>
 
-      {/* ══ FLOAT ZONE ════════════════════════════════════════════════════════ */}
-      <div className={styles.floatZone}>
+      </header>
 
-        {/* Banner Pendaftaran Santri Baru — static, tanpa auto-slide */}
-        <PendaftaranBanner />
+      {/* ══ PAGE BODY ═══════════════════════════════════════════════════ */}
+      <div className={styles.pageBody}>
 
-        {/* Quick access — 4 icons */}
-        <div className={styles.quickSection}>
+        {/* ── Hero Banner ─────────────────────────────────────────────── */}
+        <HeroBanner />
+
+        {/* ── Akses Cepat ──────────────────────────────────────────────── */}
+        <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Akses Cepat</p>
             <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
           </div>
           <div className={styles.quickGrid}>
-            {QUICK_ITEMS.map((item) => (
-              <Link key={item.title} href={item.href} className={styles.quickCard}>
-                <div className={`${styles.quickIconWrap} ${styles[item.colorClass as keyof typeof styles]}`}>
-                  <Image
-                    src={item.icon}
-                    alt={item.title}
-                    width={28}
-                    height={28}
-                    className={styles.quickIconImg}
-                  />
-                </div>
-                <span className={styles.quickLabel}>{item.title}</span>
-                <span className={styles.quickSub}>{item.sub}</span>
-              </Link>
-            ))}
+            {QUICK_ITEMS.map(({ href, label, sub, icon }) => (
+  <Link key={label} href={href} className={styles.quickCard}>
+    <div className={styles.quickIconWrap}>
+      <Image
+        src={icon}
+        alt={label}
+        width={52}
+        height={52}
+        className={styles.quickIconImage}
+      />
+    </div>
+
+    <span className={styles.quickLabel}>{label}</span>
+    <span className={styles.quickSub}>{sub}</span>
+  </Link>
+))}
           </div>
         </div>
 
-        {/* Status / Empty card */}
-        {pendaftaran && status ? (
-          <div className={styles.statusCard}>
-            <div className={styles.statusHeader}>
-              <div className={styles.statusLeft}>
-                {status === 'diterima' ? (
-                  <div className={styles.statusCheckCircle}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
-                ) : (
-                  <div className={`${styles.statusDot} ${styles[`statusDot_${status}` as keyof typeof styles]}`} />
-                )}
-                <div>
-                  <p className={styles.statusLabelSm}>STATUS PENDAFTARAN</p>
-                  <p className={`${styles.statusLabelLg} ${styles[`statusLg_${status}` as keyof typeof styles]}`}>
-                    {STATUS_LABEL[status]}
-                  </p>
-                </div>
-              </div>
-              <Link href="/siswa/status" className={styles.detailBtn}>
-                Lihat Detail →
-              </Link>
-            </div>
-
-            <div className={styles.progressMeta}>
-              <span>Progress Seleksi</span>
-              <span className={styles.progressPct}>{PROGRESS_VALUE[status]}%</span>
-            </div>
-            <div className={styles.progressTrack}>
-              <div className={progressClass} />
-            </div>
-
-            <div className={styles.infoDivider} />
-
-            <div className={styles.infoRow3}>
-              <div className={styles.infoCol}>
-                <div className={styles.infoColIconWrap}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </div>
-                <p className={styles.infoKey}>Nama Lengkap</p>
-                <p className={styles.infoVal}>{pendaftaran.nama_lengkap}</p>
-              </div>
-              <div className={styles.infoColDivider} />
-              <div className={styles.infoCol}>
-                <div className={styles.infoColIconWrap}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                </div>
-                <p className={styles.infoKey}>No. Registrasi</p>
-                <p className={styles.infoValMono}>PSB-2026-{pendaftaran.id.slice(0, 4).toUpperCase()}</p>
-              </div>
-              <div className={styles.infoColDivider} />
-              <div className={styles.infoCol}>
-                <div className={styles.infoColIconWrap}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                </div>
-                <p className={styles.infoKey}>Tanggal Daftar</p>
-                <p className={styles.infoVal}>{formatTanggalShort(pendaftaran.created_at ?? '')}</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.emptyCard}>
-            <div className={styles.emptyRow}>
-              <div className={styles.emptyIconBox}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
-                </svg>
-              </div>
-              <div>
-                <p className={styles.emptyTitle}>Belum Mendaftar</p>
-                <p className={styles.emptySub}>Lengkapi formulir untuk memulai proses seleksi.</p>
-              </div>
-            </div>
-            <Link href="/siswa/pendaftaran" className={styles.ctaBtn}>
-              <span>Mulai Pendaftaran Sekarang</span>
-              <span>→</span>
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* ══ MAIN CONTENT ══════════════════════════════════════════════════════ */}
-      <div className={styles.mainContent}>
-
-        {/* ── Jadwal Penting ─────────────────────────────────────────────── */}
-        <div className={styles.sectionWrap}>
-          <div className={styles.sectionRow}>
-            <p className={styles.sectionTitle}>Jadwal Penting</p>
-            <Link href="/siswa/jadwal" className={styles.sectionLink}>Lihat Semua →</Link>
-          </div>
-          <div className={styles.jadwalGrid}>
-            {JADWAL.map((j) => (
-              <div
-                key={j.label}
-                className={`${styles.jadwalItem} ${styles[`jadwalBorder_${j.dotClass}` as keyof typeof styles]}`}
-              >
-                <div className={styles.jadwalItemTop}>
-                  <div className={styles.jadwalItemIcon}>
-                    <Image
-                      src={j.icon}
-                      alt={j.label}
-                      width={32}
-                      height={32}
-                    />
-                  </div>
-                  <span className={`${styles.jadwalDotSmall} ${styles[j.dotClass as keyof typeof styles]}`} />
-                </div>
-                <p className={`${styles.jadwalItemLabel} ${
-                  j.dotClass === 'dotRed'   ? styles.jadwalLabelRed   :
-                  j.dotClass === 'dotBlue'  ? styles.jadwalLabelBlue  :
-                                              styles.jadwalLabelGreen
-                }`}>
-                  {j.label}
-                </p>
-                <p className={styles.jadwalItemDate}>{j.date}</p>
-                <div className={`${styles.jadwalStatus} ${styles[j.statusClass as keyof typeof styles]}`}>
-                  {j.statusClass === 'jadwalDone' ? (
-                    <>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                      {j.statusLabel}
-                    </>
-                  ) : (
-                    <>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      {j.statusLabel}
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* ── 3 Kartu: Jadwal / Pembayaran / Laporan ─────────────────────── */}
+        <div className={styles.threeColGrid}>
+          <JadwalHariIniCard items={jadwal} loading={jadwalLoading} />
+          <PembayaranCard data={pembayaran} loading={pembayaranLoading} />
+          <LaporanCard data={laporan} loading={laporanLoading} />
         </div>
-
-        {/* ── Banner Carousel ─────────────────────────────────────────────── */}
-        <StaticBanner />
 
         {/* ── Pengumuman Terbaru ──────────────────────────────────────────── */}
         <div className={styles.sectionWrap}>
@@ -550,12 +684,14 @@ export default function DashboardClient({
           </div>
 
           {annLoading ? (
-            <div className={styles.annSkeletonWrap}>
-              {[1, 2, 3].map((i) => (
-                <div key={i} className={styles.annSkeleton}>
-                  <div className={styles.skelPill} />
-                  <div className={styles.skelTitle} />
-                  <div className={styles.skelBody} />
+            <div className={styles.announcementList}>
+              {[1, 2].map((i) => (
+                <div key={i} className={styles.annSkeletonCard}>
+                  <div className={styles.miniSkeleton}>
+                    <div className={styles.skelBar} style={{ width: '60%' }} />
+                    <div className={styles.skelBar} style={{ width: '90%' }} />
+                    <div className={styles.skelBar} style={{ width: '75%' }} />
+                  </div>
                 </div>
               ))}
             </div>
@@ -572,64 +708,51 @@ export default function DashboardClient({
             </div>
           )}
         </div>
+        {/* Banner Peraturan */}
+        <div style={{ padding: '0 16px', marginTop: '16px' }}>
+          <Link href="/siswa/peraturan" style={{ display: 'block', position: 'relative', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
+            <Image
+              src="/image/banner.png"
+              alt="Banner Peraturan"
+              width={1200}
+              height={430}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(20, 20, 20, 0.5)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}>
+              Lihat Selengkapnya →
+            </div>
+          </Link>
+        </div>
+        {/* ── CTA Banner Doa Harian ───────────────────────────────────────── */}
+        <CtaBanner />
+
+     
 
       </div>
 
-      {/* ══ BOTTOM NAV ════════════════════════════════════════════════════════ */}
+      {/* ══ BOTTOM NAV ══════════════════════════════════════════════════ */}
       <nav className={styles.bottomNav}>
         <Link href="/siswa" className={`${styles.navItem} ${styles.navItemActive}`}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-          </div>
+          <div className={styles.navIconWrap}><IconHomeFilled /></div>
           <span>Beranda</span>
         </Link>
-        <Link href="/siswa/pendaftaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <span>Daftar</span>
+        <Link href="/siswa/pembayaran" className={styles.navItem}>
+          <div className={styles.navIconWrap}><IconWalletOutline /></div>
+          <span>Pembayaran</span>
         </Link>
-        <Link href="/siswa/berkas" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <span>Berkas</span>
-        </Link>
-        <Link href="/siswa/status" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 11 12 14 22 4"/>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
-          </div>
-          <span>Status</span>
+        <Link href="/siswa/laporan" className={styles.navItem}>
+          <div className={styles.navIconWrap}><IconDocumentOutline /></div>
+          <span>Laporan</span>
         </Link>
         <Link href="/siswa/profile" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
+          <div className={styles.navIconWrap}><IconPersonOutline /></div>
           <span>Profil</span>
         </Link>
       </nav>
 
-      {/* ══ ANNOUNCEMENT MODAL ════════════════════════════════════════════════ */}
+      {/* ══ ANNOUNCEMENT MODAL ══════════════════════════════════════════ */}
       {selectedAnn && (
-        <AnnouncementModal
-          item={selectedAnn}
-          onClose={() => setSelectedAnn(null)}
-        />
+        <AnnouncementModal item={selectedAnn} onClose={() => setSelectedAnn(null)} />
       )}
     </div>
   )
