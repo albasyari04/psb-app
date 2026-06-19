@@ -8,15 +8,23 @@ import styles from './Notificationbell.module.css'
 
 const MODULE_START_TIME = Date.now()
 
-function formatTime(dateStr: string, nowMs: number): string {
-  const diff  = nowMs - new Date(dateStr).getTime()
-  const mins  = Math.floor(diff / 60_000)
-  const hours = Math.floor(diff / 3_600_000)
-  const days  = Math.floor(diff / 86_400_000)
-  if (mins  < 1)  return 'Baru saja'
-  if (mins  < 60) return `${mins} menit lalu`
-  if (hours < 24) return `${hours} jam lalu`
-  return `${days} hari lalu`
+function formatTime(dateStr: string | null, nowMs: number): string {
+  // Handle null or undefined created_at
+  if (!dateStr) return 'Baru saja'
+  
+  try {
+    const diff = nowMs - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60_000)
+    const hours = Math.floor(diff / 3_600_000)
+    const days = Math.floor(diff / 86_400_000)
+    
+    if (mins < 1) return 'Baru saja'
+    if (mins < 60) return `${mins} menit lalu`
+    if (hours < 24) return `${hours} jam lalu`
+    return `${days} hari lalu`
+  } catch {
+    return 'Baru saja'
+  }
 }
 
 function itemBgClass(isRead: boolean, type: string): string {
@@ -55,14 +63,10 @@ export default function NotificationBell() {
   const [notifs,  setNotifs]    = useState<Notification[]>([])
   const [open,    setOpen]      = useState(false)
   const [loading, setLoading]   = useState(true)
-  // nowMs sebagai state biasa — inisialisasi dari MODULE_START_TIME (bukan Date.now())
-  // Tidak ada impure call, tidak ada ref access saat render
   const [nowMs,   setNowMs]     = useState<number>(MODULE_START_TIME)
 
   const unreadCount = notifs.filter((n) => !n.is_read).length
 
-  // Timer: setNowMs dipanggil HANYA dari setInterval callback (sistem eksternal)
-  // Bukan synchronous di body effect — tidak melanggar react-hooks/set-state-in-effect
   useEffect(() => {
     const id = setInterval(() => {
       setNowMs(Date.now())
@@ -70,7 +74,6 @@ export default function NotificationBell() {
     return () => clearInterval(id)
   }, [])
 
-  // Fetch + Realtime
   useEffect(() => {
     const uid = session?.user?.id
     if (!uid) return
