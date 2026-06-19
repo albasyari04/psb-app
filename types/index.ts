@@ -1,4 +1,3 @@
-// types/index.ts
 import type { Database } from './database.types'
 
 // Re-exporting the generated Json and Database types

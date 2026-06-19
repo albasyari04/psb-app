@@ -1,0 +1,240 @@
+/* ================================================================
+   galeri_module.css — Galeri Kegiatan Santri
+   Tema warna disamakan dengan dashboard_module.css (teal/green)
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+.shell {
+  --teal-1: #0e7c5f;
+  --teal-2: #0a5c46;
+  --teal-3: #073d2f;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --green-lighter: #ecfdf5;
+  --ink: #0f172a;
+  --slate: #475569;
+  --gray: #64748b;
+  --gray-light: #94a3b8;
+  --border: #e9eef2;
+  --bg: #f6f8fa;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: 2rem;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOP HEADER
+   ══════════════════════════════════════════════════════════════ */
+.topHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.1rem 0.9rem;
+  background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
+  border-radius: 0 0 20px 20px;
+  color: #fff;
+}
+
+.backBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s;
+}
+.backBtn:hover { background: rgba(255, 255, 255, 0.26); transform: translateX(-1px); }
+
+.headerTextWrap { display: flex; flex-direction: column; min-width: 0; }
+.headerTitle {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.25;
+}
+.headerSub {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0.15rem 0 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE BODY
+   ══════════════════════════════════════════════════════════════ */
+.pageBody {
+  padding: 1.1rem 1.1rem 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GRID GALERI
+   ══════════════════════════════════════════════════════════════ */
+.galleryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.galleryCard {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.galleryCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+}
+
+.galleryThumbWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--green-lighter);
+  overflow: hidden;
+}
+.galleryThumbImg { object-fit: cover; }
+.galleryThumbFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-1);
+  background: var(--green-lighter);
+}
+
+.galleryCardBody {
+  padding: 0.65rem 0.7rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.galleryCardTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.3;
+}
+.galleryCardDesc {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--gray);
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ══════════════════════════════════════════════════════════════ */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem 1rem;
+  color: var(--gray-light);
+}
+.emptyIcon { font-size: 2.2rem; }
+.emptyText { font-size: 0.85rem; font-weight: 600; margin: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHTBOX
+   ══════════════════════════════════════════════════════════════ */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 26, 20, 0.82);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.lightboxContent {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.lightboxCloseBtn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(7, 26, 20, 0.55);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.lightboxImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--green-lighter);
+}
+.lightboxImg { object-fit: cover; }
+
+.lightboxCaption {
+  padding: 0.9rem 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.lightboxTitle {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+.lightboxDesc {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--slate);
+  margin: 0;
+  line-height: 1.45;
+}

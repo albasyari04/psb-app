@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Providers } from './providers'
+import RegisterServiceWorker from './RegisterServiceWorker'
 
 export const metadata: Metadata = {
   title: 'PSMB - Pon-Pes Al Istiqomah',
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <RegisterServiceWorker />
         <Providers>{children}</Providers>
       </body>
     </html>

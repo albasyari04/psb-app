@@ -1,3 +1,4 @@
+// app/api/siswa/pembayaran/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     // 7. Upload ke Supabase Storage
     const supabase = getSupabaseAdmin()
     const { error: uploadError } = await supabase.storage
-      .from('berkas-siswa') // nama bucket di Supabase Storage
+      .from('berkas-siswa')
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: false,

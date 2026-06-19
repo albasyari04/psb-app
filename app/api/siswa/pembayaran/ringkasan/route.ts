@@ -7,16 +7,15 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 export const runtime = 'nodejs'
 
 /**
- * Ringkasan pembayaran untuk widget "Pembayaran" di Beranda Santri.
+ * GET /api/siswa/pembayaran/ringkasan
  *
- * Sumber data: tabel `pembayaran` (lihat types/database.types.ts).
- * Tabel ini PUNYA kolom: id, user_id, nama_siswa, nominal,
- * jenis_pembayaran, status ('menunggu' | 'dikonfirmasi' | 'ditolak'), dll.
- * (Bukan `tagihan` dengan kolom `judul`/`jumlah` seperti sebelumnya.)
+ * Ringkasan pembayaran untuk:
+ * 1. Widget "Pembayaran" di Beranda Santri (DashboardClient.tsx)
+ * 2. Halaman /siswa/pembayaran/page.tsx
  *
- * Mapping status DB → status UI widget Beranda:
- *   - 'dikonfirmasi'            → 'lunas'
- *   - 'menunggu' | 'ditolak'    → 'belum_lunas'
+ * Mapping status DB → status UI:
+ *   - 'dikonfirmasi'         → 'lunas'
+ *   - 'menunggu' | 'ditolak' → 'belum_lunas'
  */
 export async function GET() {
   try {
@@ -37,8 +36,6 @@ export async function GET() {
 
     const rows = data ?? []
 
-    // Map ke bentuk yang dipakai widget Pembayaran di Beranda Santri
-    // (interface PembayaranItem: { id, judul, jumlah, status }).
     const items = rows.map((row) => ({
       id: row.id,
       judul: row.jenis_pembayaran,
@@ -46,7 +43,7 @@ export async function GET() {
       status: row.status === 'dikonfirmasi' ? 'lunas' : 'belum_lunas',
     }))
 
-    // Total tagihan yang BELUM lunas (belum dikonfirmasi admin)
+    // Total tagihan yang BELUM lunas
     const total = items
       .filter((item) => item.status !== 'lunas')
       .reduce((sum, item) => sum + (item.jumlah ?? 0), 0)
