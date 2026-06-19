@@ -22,7 +22,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
     desc: 'Rombongan santri ziarah ke Masjid Agung & Makam Wali Songo',
   },
   {
-    src: '/image/galeri/rombongan ziarah wali songo1.jpeg',
+    src: '/image/galeri/Rombongan Ziarah Wali Songo1.jpeg',
     title: 'Rombongan Ziarah Wali 9',
     desc: 'Foto bersama rombongan santri putra di depan masjid',
   },
