@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       .from('laporan')
       .select('*')
       .order('created_at', { ascending: false })
+      .eq('user_id', session.user.id) // Filter berdasarkan ID siswa yang login
 
     if (tipe && tipe !== 'semua') {
       query = query.eq('tipe', tipe)

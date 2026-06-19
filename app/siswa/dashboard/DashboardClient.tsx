@@ -502,7 +502,7 @@ function CtaBanner() {
   return (
     <div className={styles.bannerKataWrap}>
       <Image
-        src="/icons/banner-kata.png"
+        src="/icons/kata-banner.png"
         alt="Banner Motivasi Santri"
         width={1200}
         height={350}
@@ -714,7 +714,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         <div style={{ padding: '0 16px', marginTop: '16px' }}>
           <Link href="/siswa/peraturan" style={{ display: 'block', position: 'relative', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
             <Image
-              src="/image/banner.png"
+              src="/icons/hi.jpeg"
               alt="Banner Peraturan"
               width={1200}
               height={430}

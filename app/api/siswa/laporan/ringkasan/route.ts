@@ -8,11 +8,8 @@ export const runtime = 'nodejs'
 
 /**
  * Ringkasan laporan untuk widget "Laporan Terbaru" di Beranda Santri.
- *
- * Mengambil beberapa laporan TERBARU yang dibuat admin lewat
- * /api/admin/laporan (POST). Karena diurutkan by created_at desc,
- * laporan baru yang dibuat admin otomatis tampil di sini -- tidak perlu
- * ada perubahan apa pun di sisi admin.
+ * 
+ * Hanya menampilkan laporan yang ditujukan untuk siswa yang sedang login.
  */
 export async function GET() {
   try {
@@ -23,9 +20,11 @@ export async function GET() {
 
     const supabase = getSupabaseAdmin()
 
+    // ✅ FIX: Filter berdasarkan user_id yang login
     const { data, error } = await supabase
       .from('laporan')
       .select('id, judul, tipe, deskripsi, file_url, created_at')
+      .eq('user_id', session.user.id)  // ← INI YANG DITAMBAHKAN
       .order('created_at', { ascending: false })
       .limit(3)
 

@@ -1,111 +1,121 @@
-// types/index.ts
+// app/api/admin/laporan/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
-export type Role = 'siswa' | 'admin'
+export const runtime = 'nodejs'
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: Role
-  avatar_url?: string
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = getSupabaseAdmin()
+    const { searchParams } = new URL(req.url)
+    const tipe = searchParams.get('tipe')
+    const user_id = searchParams.get('user_id')
+
+    let query = supabase
+      .from('laporan')
+      .select(`
+        *,
+        profiles:user_id (
+          id,
+          name,
+          email,
+          avatar_url
+        ),
+        creator:created_by (
+          id,
+          name,
+          email
+        )
+      `)
+      .order('created_at', { ascending: false })
+
+    if (tipe && tipe !== 'semua') {
+      query = query.eq('tipe', tipe)
+    }
+
+    if (user_id) {
+      query = query.eq('user_id', user_id)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+
+    return NextResponse.json({ data })
+  } catch (error) {
+    console.error('[GET /api/admin/laporan]', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+  }
 }
 
-export interface Pendaftaran {
-  id: string
-  user_id: string
-  nama_lengkap: string | null
-  nisn: string | null
-  nik: string | null
-  tempat_lahir: string | null
-  tanggal_lahir: string | null
-  jenis_kelamin: string | null
-  agama: string | null
-  alamat: string | null
-  alamat_kota: string | null
-  alamat_kecamatan: string | null
-  alamat_rt_rw: string | null
-  no_hp: string | null
-  asal_sekolah: string | null
-  npsn: string | null
-  nama_ayah: string | null
-  nama_ibu: string | null
-  pekerjaan_ayah: string | null
-  pekerjaan_ibu: string | null
-  no_hp_ortu: string | null
-  status: string
-  catatan_admin: string | null
-  created_at: string | null
-  updated_at: string | null
-}
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-export type StatusPembayaran = 'menunggu' | 'dikonfirmasi' | 'ditolak'
-export type JenisPembayaran = 'Formulir' | 'SPP' | 'Seragam' | 'Lainnya'
-export type MetodePembayaran = 'Transfer Bank' | 'Tunai' | 'QRIS'
+    const body = await req.json()
+    const { judul, deskripsi, tipe, user_id, file_url, data_json } = body
 
-export interface Pembayaran {
-  id: string
-  user_id: string
-  pendaftaran_id: string | null
-  nama_siswa: string
-  nominal: number
-  jenis_pembayaran: JenisPembayaran | string
-  metode_pembayaran: MetodePembayaran | string | null
-  no_referensi: string | null
-  bukti_url: string | null
-  status: StatusPembayaran | string
-  catatan: string | null
-  tanggal_bayar: string | null
-  confirmed_at: string | null
-  confirmed_by: string | null
-  created_at: string | null
-  updated_at: string | null
-}
+    if (!judul || !tipe) {
+      return NextResponse.json({ error: 'Judul dan tipe wajib diisi' }, { status: 400 })
+    }
 
-export interface PembayaranFormData {
-  user_id: string
-  nama_siswa: string
-  nominal: number
-  jenis_pembayaran: string
-  metode_pembayaran: string
-  no_referensi: string
-  status: string
-  catatan: string
-  tanggal_bayar: string
-}
+    if (!user_id) {
+      return NextResponse.json({ error: 'Siswa wajib dipilih' }, { status: 400 })
+    }
 
-export interface Session {
-  user: User
-  expires: string
-}
+    const supabase = getSupabaseAdmin()
+    const now = new Date().toISOString()
 
-export interface Notification {
-  id: string
-  user_id: string
-  title: string
-  message: string
-  type: 'success' | 'error' | 'info'
-  is_read: boolean
-  created_at: string
-}
+    const { data, error } = await supabase
+      .from('laporan')
+      .insert({
+        judul,
+        deskripsi: deskripsi || null,
+        tipe,
+        user_id: user_id,
+        file_url: file_url || null,
+        data_json: data_json || null,
+        created_by: session.user.id ?? null,
+        created_at: now,
+        updated_at: now,
+      })
+      .select(`
+        *,
+        profiles:user_id (
+          id,
+          name,
+          email,
+          avatar_url
+        ),
+        creator:created_by (
+          id,
+          name,
+          email
+        )
+      `)
+      .single()
 
-export type LaporanDataJson = Record<string, unknown> | null
+    if (error) {
+      console.error('[laporan POST] Supabase error:', error)
+      return NextResponse.json(
+        { error: `Database error: ${error.message}` },
+        { status: 500 }
+      )
+    }
 
-export interface Laporan {
-  id: string
-  judul: string
-  deskripsi: string | null
-  tipe: 'bulanan' | 'tahunan' | 'khusus'
-  file_url: string | null
-  data_json: LaporanDataJson
-  created_by: string | null
-  created_at: string | null
-  updated_at: string | null
-}
-
-export interface LaporanFormData {
-  judul: string
-  deskripsi: string
-  tipe: string
-  file_url?: string
-  data_json?: LaporanDataJson
+    return NextResponse.json({ data }, { status: 201 })
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('[laporan POST] Unexpected error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }

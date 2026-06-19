@@ -67,7 +67,6 @@ export type Database = {
         }
         Relationships: []
       }
-      // ── NEW: Announcements table ──────────────────────────────────────────────
       announcements: {
         Row: {
           id: string
@@ -289,6 +288,7 @@ export type Database = {
           file_url: string | null
           data_json: Json | null
           created_by: string | null
+          user_id: string | null  // ← TAMBAHKAN INI
           created_at: string | null
           updated_at: string | null
         }
@@ -300,6 +300,7 @@ export type Database = {
           file_url?: string | null
           data_json?: Json | null
           created_by?: string | null
+          user_id?: string | null  // ← TAMBAHKAN INI
           created_at?: string | null
           updated_at?: string | null
         }
@@ -311,6 +312,7 @@ export type Database = {
           file_url?: string | null
           data_json?: Json | null
           created_by?: string | null
+          user_id?: string | null  // ← TAMBAHKAN INI
           updated_at?: string | null
         }
         Relationships: []

@@ -19,13 +19,20 @@ export async function GET(
     const { id } = await params
     const supabase = getSupabaseAdmin()
 
+    // ✅ FIX: Pastikan siswa hanya bisa melihat laporan miliknya sendiri
     const { data, error } = await supabase
       .from('laporan')
       .select('*')
       .eq('id', id)
+      .eq('user_id', session.user.id)  // ← TAMBAHKAN INI
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Laporan tidak ditemukan' }, { status: 404 })
+      }
+      throw error
+    }
 
     return NextResponse.json({ data })
   } catch (error) {

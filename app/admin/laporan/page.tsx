@@ -1,3 +1,4 @@
+// app/admin/laporan/page.tsx
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -10,8 +11,27 @@ interface Laporan {
   judul: string
   deskripsi: string | null
   tipe: string
+  user_id: string | null
   file_url: string | null
   created_at: string | null
+  profiles?: {
+    id: string
+    name: string
+    email: string
+    avatar_url: string | null
+  }
+  creator?: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
+interface Siswa {
+  id: string
+  name: string
+  email: string
+  avatar_url: string | null
 }
 
 interface ChartData {
@@ -185,20 +205,27 @@ function ItemMenu({ laporan, onEdit, onDelete }: {
 // ─────────────────────────────────────────────
 // Modal Create/Edit
 // ─────────────────────────────────────────────
-function LaporanModal({ open, onClose, onSubmit, editing, submitting }: {
+function LaporanModal({ open, onClose, onSubmit, editing, submitting, siswaList }: {
   open: boolean; onClose: () => void
-  onSubmit: (data: { judul: string; deskripsi: string; tipe: string; file_url: string }) => void
-  editing: Laporan | null; submitting: boolean
+  onSubmit: (data: { judul: string; deskripsi: string; tipe: string; user_id: string; file_url: string }) => void
+  editing: Laporan | null; submitting: boolean; siswaList: Siswa[]
 }) {
   const initialForm = editing
-    ? { judul: editing.judul, deskripsi: editing.deskripsi || '', tipe: editing.tipe, file_url: editing.file_url || '' }
-    : { judul: '', deskripsi: '', tipe: 'bulanan', file_url: '' }
+    ? { 
+        judul: editing.judul, 
+        deskripsi: editing.deskripsi || '', 
+        tipe: editing.tipe, 
+        user_id: editing.user_id || '',
+        file_url: editing.file_url || '' 
+      }
+    : { judul: '', deskripsi: '', tipe: 'bulanan', user_id: '', file_url: '' }
   const [form, setForm] = useState(initialForm)
   if (!open) return null
   const inp: React.CSSProperties = { width: '100%', padding: '11px 14px', border: '1.5px solid #e5e7eb',
     borderRadius: 12, fontSize: 14, outline: 'none', boxSizing: 'border-box', color: '#111827', background: '#fafafa' }
   const lbl: React.CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: '#6b7280',
     marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }
+  
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', display: 'flex',
         alignItems: 'flex-end', justifyContent: 'center', zIndex: 999, backdropFilter: 'blur(4px)' }}
@@ -220,8 +247,17 @@ function LaporanModal({ open, onClose, onSubmit, editing, submitting }: {
         <div style={{ padding: '20px 24px 0', display: 'grid', gap: 16 }}>
           <div>
             <label style={lbl}>Judul Laporan <span style={{ color: '#ef4444' }}>*</span></label>
-            <input style={inp} placeholder="Contoh: Laporan Penerimaan Bulan Mei 2026"
+            <input style={inp} placeholder="Contoh: Laporan Pelanggaran Santri"
               value={form.judul} onChange={e => setForm(f => ({ ...f, judul: e.target.value }))} />
+          </div>
+          <div>
+            <label style={lbl}>Siswa <span style={{ color: '#ef4444' }}>*</span></label>
+            <select style={inp} value={form.user_id} onChange={e => setForm(f => ({ ...f, user_id: e.target.value }))}>
+              <option value="">Pilih Siswa</option>
+              {siswaList.map(s => (
+                <option key={s.id} value={s.id}>{s.name} ({s.email})</option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={lbl}>Tipe Laporan <span style={{ color: '#ef4444' }}>*</span></label>
@@ -257,10 +293,10 @@ function LaporanModal({ open, onClose, onSubmit, editing, submitting }: {
                 borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#374151', background: 'white', cursor: 'pointer' }}>
               Batal
             </button>
-            <button type="button" disabled={submitting || !form.judul} onClick={() => onSubmit(form)} style={{
+            <button type="button" disabled={submitting || !form.judul || !form.user_id} onClick={() => onSubmit(form)} style={{
                 flex: 2, padding: '13px', border: 'none', borderRadius: 14, fontSize: 14, fontWeight: 700,
-                color: 'white', cursor: submitting || !form.judul ? 'not-allowed' : 'pointer',
-                background: submitting || !form.judul ? '#a78bfa' : '#7c3aed',
+                color: 'white', cursor: submitting || !form.judul || !form.user_id ? 'not-allowed' : 'pointer',
+                background: submitting || !form.judul || !form.user_id ? '#a78bfa' : '#7c3aed',
                 boxShadow: '0 4px 14px rgba(124,58,237,0.3)' }}>
               {submitting ? 'Menyimpan...' : editing ? 'Simpan Perubahan' : 'Simpan Laporan'}
             </button>
@@ -298,23 +334,38 @@ function SkeletonCard() {
 // ─────────────────────────────────────────────
 export default function LaporanPage() {
   const [laporanList, setLaporanList] = useState<Laporan[]>([])
+  const [siswaList, setSiswaList] = useState<Siswa[]>([])
   const [loading, setLoading]         = useState(true)
   const [filterTipe, setFilterTipe]   = useState('semua')
+  const [filterSiswa, setFilterSiswa] = useState('semua')
   const [showModal, setShowModal]     = useState(false)
   const [editingLaporan, setEditing]  = useState<Laporan | null>(null)
   const [chartData, setChartData]     = useState<ChartData[]>([])
   const [submitting, setSubmitting]   = useState(false)
 
+  const fetchSiswa = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/siswa')
+      const data = await res.json()
+      if (data.data) setSiswaList(data.data)
+    } catch (e) { console.error(e) }
+  }, [])
+
   const fetchLaporan = useCallback(async () => {
     setLoading(true)
     try {
-      const url = filterTipe !== 'semua' ? `/api/admin/laporan?tipe=${filterTipe}` : '/api/admin/laporan'
+      let url = '/api/admin/laporan?'
+      const params = new URLSearchParams()
+      if (filterTipe !== 'semua') params.append('tipe', filterTipe)
+      if (filterSiswa !== 'semua') params.append('user_id', filterSiswa)
+      url += params.toString()
+      
       const res = await fetch(url)
       const data = await res.json()
       if (data.data) setLaporanList(data.data)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
-  }, [filterTipe])
+  }, [filterTipe, filterSiswa])
 
   const fetchChart = useCallback(async () => {
     try {
@@ -329,9 +380,13 @@ export default function LaporanPage() {
     }
   }, [])
 
-  useEffect(() => { fetchLaporan(); fetchChart() }, [fetchLaporan, fetchChart])
+  useEffect(() => { 
+    fetchSiswa()
+    fetchLaporan() 
+    fetchChart() 
+  }, [fetchSiswa, fetchLaporan, fetchChart])
 
-  const handleSubmit = async (form: { judul: string; deskripsi: string; tipe: string; file_url: string }) => {
+  const handleSubmit = async (form: { judul: string; deskripsi: string; tipe: string; user_id: string; file_url: string }) => {
     setSubmitting(true)
     try {
       const url    = editingLaporan ? `/api/admin/laporan/${editingLaporan.id}` : '/api/admin/laporan'
@@ -404,31 +459,23 @@ export default function LaporanPage() {
 
       {/* ── HERO HEADER ───────────────────────────────────── */}
       <div style={{ background: '#f4f2fb', padding: '32px 20px 24px', position: 'relative', overflow: 'hidden' }}>
-        {/* Ilustrasi laporan di pojok kanan */}
         <div style={{ position: 'absolute', right: 14, top: 14, width: 110, height: 110,
             opacity: 0.9, pointerEvents: 'none' }}>
           <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="55" cy="102" rx="36" ry="5" fill="#c4b5fd" opacity="0.25"/>
-            {/* Main document */}
             <rect x="18" y="8" width="60" height="78" rx="10" fill="#7c3aed"/>
             <rect x="18" y="8" width="60" height="78" rx="10" fill="url(#docGrad)"/>
-            {/* Dog-ear */}
             <path d="M62 8 L78 24 L62 24 Z" fill="#6d28d9"/>
             <path d="M62 8 L78 24 H62 Z" fill="rgba(0,0,0,0.12)"/>
-            {/* White content area */}
             <rect x="26" y="28" width="44" height="50" rx="5" fill="white" opacity="0.95"/>
-            {/* Bar chart inside */}
             <rect x="31" y="57" width="7" height="14" rx="2" fill="#7c3aed" opacity="0.7"/>
             <rect x="42" y="50" width="7" height="21" rx="2" fill="#7c3aed"/>
             <rect x="53" y="54" width="7" height="17" rx="2" fill="#7c3aed" opacity="0.6"/>
             <rect x="64" y="47" width="7" height="24" rx="2" fill="#10b981" opacity="0.8"/>
-            {/* Baseline */}
             <line x1="31" y1="72" x2="71" y2="72" stroke="#e5e7eb" strokeWidth="1"/>
-            {/* Pie circle overlay */}
             <circle cx="43" cy="42" r="11" fill="#ede9fe" stroke="white" strokeWidth="1.5"/>
             <path d="M43 42 L43 31 A11 11 0 0 1 54 42 Z" fill="#7c3aed"/>
             <path d="M43 42 L54 42 A11 11 0 0 1 36.2 51.5 Z" fill="#a78bfa"/>
-            {/* Lines */}
             <rect x="57" y="36" width="10" height="2" rx="1" fill="#e5e7eb"/>
             <rect x="57" y="40" width="7" height="2" rx="1" fill="#e5e7eb"/>
             <rect x="57" y="44" width="9" height="2" rx="1" fill="#e5e7eb"/>
@@ -447,7 +494,7 @@ export default function LaporanPage() {
             Laporan
           </h1>
           <p style={{ margin: '10px 0 0', fontSize: 13, color: '#7c6fa0', lineHeight: 1.5, maxWidth: 230 }}>
-            Kelola laporan PSB, buat laporan baru, edit, atau hapus laporan yang sudah ada.
+            Kelola laporan per siswa, buat laporan baru, edit, atau hapus laporan yang sudah ada.
           </p>
         </div>
       </div>
@@ -480,33 +527,57 @@ export default function LaporanPage() {
         {/* ── Filter Tabs + Buat Laporan ──────────────────── */}
         <div style={{ background: 'white', borderRadius: 20, padding: '14px 16px',
             boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
-              {filters.map(f => (
-                <button key={f.key} onClick={() => setFilterTipe(f.key)} style={{
-                    padding: '7px 14px', borderRadius: 50, fontSize: 12, fontWeight: 700,
-                    border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-                    background: filterTipe === f.key ? '#7c3aed' : '#f1f5f9',
-                    color: filterTipe === f.key ? 'white' : '#64748b' }}>
-                  {f.label}
-                  {f.count > 0 && (
-                    <span style={{ marginLeft: 5, fontSize: 10, opacity: 0.8 }}>({f.count})</span>
-                  )}
-                </button>
-              ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
+                {filters.map(f => (
+                  <button key={f.key} onClick={() => setFilterTipe(f.key)} style={{
+                      padding: '7px 14px', borderRadius: 50, fontSize: 12, fontWeight: 700,
+                      border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                      background: filterTipe === f.key ? '#7c3aed' : '#f1f5f9',
+                      color: filterTipe === f.key ? 'white' : '#64748b' }}>
+                    {f.label}
+                    {f.count > 0 && (
+                      <span style={{ marginLeft: 5, fontSize: 10, opacity: 0.8 }}>({f.count})</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <button onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '9px 16px', borderRadius: 50, fontSize: 12, fontWeight: 800,
+                  border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' as const,
+                  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
+                  boxShadow: '0 4px 14px rgba(124,58,237,0.35)' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Buat Laporan Baru
+              </button>
             </div>
-            {/* Buat button */}
-            <button onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 16px', borderRadius: 50, fontSize: 12, fontWeight: 800,
-                border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' as const,
-                background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
-                boxShadow: '0 4px 14px rgba(124,58,237,0.35)' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Buat Laporan Baru
-            </button>
+            {/* Filter Siswa */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Filter Siswa:</label>
+              <select 
+                value={filterSiswa} 
+                onChange={e => setFilterSiswa(e.target.value)}
+                style={{ padding: '6px 12px', borderRadius: 50, fontSize: 12, border: '1.5px solid #e5e7eb',
+                  background: 'white', color: '#374151', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="semua">Semua Siswa</option>
+                {siswaList.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+              {filterSiswa !== 'semua' && (
+                <button 
+                  onClick={() => setFilterSiswa('semua')}
+                  style={{ padding: '4px 10px', borderRadius: 50, fontSize: 11, border: 'none',
+                    background: '#fee2e2', color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  × Hapus Filter
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -562,7 +633,6 @@ export default function LaporanPage() {
               {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : laporanList.length === 0 ? (
-            /* Empty state */
             <div style={{ textAlign: 'center', padding: '32px 16px' }}>
               <div style={{ width: 72, height: 72, borderRadius: 22, background: '#f5f3ff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
@@ -604,6 +674,18 @@ export default function LaporanPage() {
                           </svg>
                           {formatDate(laporan.created_at)}
                         </span>
+                        {laporan.profiles && (
+                          <>
+                            <span style={{ color: '#e2e8f0' }}>·</span>
+                            <span style={{ fontSize: 10, color: '#6b7280', display: 'flex', alignItems: 'center', gap: 3 }}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                              </svg>
+                              {laporan.profiles.name}
+                            </span>
+                          </>
+                        )}
                         {laporan.file_url && (
                           <>
                             <span style={{ color: '#e2e8f0' }}>·</span>
@@ -626,7 +708,6 @@ export default function LaporanPage() {
                 )
               })}
 
-              {/* Tombol tambah di bawah */}
               <button onClick={handleCreate} style={{ marginTop: 4, padding: '13px', borderRadius: 14,
                   fontSize: 13, fontWeight: 700, border: '1.5px dashed #d1d5db', background: 'white',
                   color: '#7c3aed', cursor: 'pointer', display: 'flex', alignItems: 'center',
@@ -650,6 +731,7 @@ export default function LaporanPage() {
         onSubmit={handleSubmit}
         editing={editingLaporan}
         submitting={submitting}
+        siswaList={siswaList}
       />
     </div>
   )

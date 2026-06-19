@@ -21,7 +21,20 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('laporan')
-      .select('*')
+      .select(`
+        *,
+        profiles:user_id (
+          id,
+          name,
+          email,
+          avatar_url
+        ),
+        creator:created_by (
+          id,
+          name,
+          email
+        )
+      `)
       .eq('id', id)
       .single()
 
@@ -46,13 +59,28 @@ export async function PUT(
 
     const { id } = await params
     const body = await req.json()
-    const { judul, deskripsi, tipe, file_url, data_json } = body
+    const { judul, deskripsi, tipe, user_id, file_url, data_json } = body
 
     if (!judul || !tipe) {
       return NextResponse.json({ error: 'Judul dan tipe wajib diisi' }, { status: 400 })
     }
 
+    if (!user_id) {
+      return NextResponse.json({ error: 'Siswa wajib dipilih' }, { status: 400 })
+    }
+
     const supabase = getSupabaseAdmin()
+
+    // Verifikasi user_id ada
+    const { data: profileCheck, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user_id)
+      .single()
+
+    if (profileError || !profileCheck) {
+      return NextResponse.json({ error: 'ID Siswa tidak valid' }, { status: 400 })
+    }
 
     const { data, error } = await supabase
       .from('laporan')
@@ -60,12 +88,26 @@ export async function PUT(
         judul,
         deskripsi: deskripsi || null,
         tipe,
+        user_id: user_id,
         file_url: file_url || null,
         data_json: data_json || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        profiles:user_id (
+          id,
+          name,
+          email,
+          avatar_url
+        ),
+        creator:created_by (
+          id,
+          name,
+          email
+        )
+      `)
       .single()
 
     if (error) throw error
