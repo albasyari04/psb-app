@@ -1,23 +1,5 @@
 'use client'
 
-/**
- * app/siswa/galeri/GaleriClient.tsx
- *
- * Galeri Kegiatan Pondok Pesantren — grid foto sederhana + caption.
- *
- * CARA MENAMBAH / MENGUBAH FOTO:
- * Edit array GALLERY_ITEMS di bawah. Setiap item butuh:
- *   - src   : path gambar relatif ke folder public/ (mis. '/image/ziarah.jpeg')
- *   - title : judul singkat kegiatan
- *   - desc  : deskripsi 1 baris (opsional, boleh dikosongkan jadi '')
- *
- * PENTING (sesuai konvensi project Anda):
- *   - Semua file foto disimpan di public/image/
- *   - Nama file pakai underscore, BUKAN spasi (spasi bikin gambar gagal load)
- *   - Jika nama file foto Anda berbeda dari yang dicontohkan di bawah,
- *     sesuaikan langsung di kolom `src`.
- */
-
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'

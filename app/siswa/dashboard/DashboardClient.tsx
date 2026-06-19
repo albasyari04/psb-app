@@ -84,21 +84,21 @@ const HERO_SLIDES = [
     titleBold: 'Ngaji Hikam,',
     titleLight: 'lelenggahan sareng Guru',
     href: '/siswa/galeri',
-    image: '/image/ngaji.jpeg',
+    image: '/image/galeri/ngaji.jpeg',
   },
   {
     eyebrow: 'Rutinan Akhir Tahun',
     titleBold: 'Ziarah Wali Songo,',
     titleLight: 'Lan Madosi Barokah Poro Guru',
     href: '/siswa/galeri',
-    image: '/image/ziarah.jpeg',
+    image: '/image/galeri/ziarah.jpeg',
   },
   {
     eyebrow: 'Rawuh ipun Guru Ploso',
     titleBold: 'Ngaji Bersama',
     titleLight: 'Masyayikh Ploso',
     href: '/siswa/galeri',
-    image: '/image/ngaji1.jpeg',
+    image: '/image/galeri/ngaji1.jpeg',
   },
 ] as const
 
