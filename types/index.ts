@@ -50,3 +50,6 @@ export type Pengumuman = Database['public']['Tables']['announcements']['Row']
 export type Laporan = Database['public']['Tables']['laporan']['Row'] & {
   profiles?: Profil
 }
+
+/** Represents a notification */
+export type Notification = Database['public']['Tables']['notifications']['Row']
