@@ -1,121 +1,29 @@
-// app/api/admin/laporan/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import type { Database } from './database.types'
 
-export const runtime = 'nodejs'
+// Re-exporting the generated Json and Database types
+export type { Json, Database } from './database.types'
 
-export async function GET(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supabase = getSupabaseAdmin()
-    const { searchParams } = new URL(req.url)
-    const tipe = searchParams.get('tipe')
-    const user_id = searchParams.get('user_id')
-
-    let query = supabase
-      .from('laporan')
-      .select(`
-        *,
-        profiles:user_id (
-          id,
-          name,
-          email,
-          avatar_url
-        ),
-        creator:created_by (
-          id,
-          name,
-          email
-        )
-      `)
-      .order('created_at', { ascending: false })
-
-    if (tipe && tipe !== 'semua') {
-      query = query.eq('tipe', tipe)
-    }
-
-    if (user_id) {
-      query = query.eq('user_id', user_id)
-    }
-
-    const { data, error } = await query
-    if (error) throw error
-
-    return NextResponse.json({ data })
-  } catch (error) {
-    console.error('[GET /api/admin/laporan]', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
-  }
+// Defining a specific type for Pembayaran by extracting it from the auto-generated types.
+// This makes it easier to use throughout the app and provides better type safety
+// with specific string literal types for fields like 'status'.
+export type Pembayaran = Omit<
+  Database['public']['Tables']['pembayaran']['Row'],
+  'jenis_pembayaran' | 'metode_pembayaran' | 'status'
+> & {
+  jenis_pembayaran: 'Formulir' | 'SPP' | 'Seragam' | 'Lainnya'
+  metode_pembayaran: 'Transfer Bank' | 'Tunai' | 'QRIS' | null
+  status: 'menunggu' | 'dikonfirmasi' | 'ditolak'
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await req.json()
-    const { judul, deskripsi, tipe, user_id, file_url, data_json } = body
-
-    if (!judul || !tipe) {
-      return NextResponse.json({ error: 'Judul dan tipe wajib diisi' }, { status: 400 })
-    }
-
-    if (!user_id) {
-      return NextResponse.json({ error: 'Siswa wajib dipilih' }, { status: 400 })
-    }
-
-    const supabase = getSupabaseAdmin()
-    const now = new Date().toISOString()
-
-    const { data, error } = await supabase
-      .from('laporan')
-      .insert({
-        judul,
-        deskripsi: deskripsi || null,
-        tipe,
-        user_id: user_id,
-        file_url: file_url || null,
-        data_json: data_json || null,
-        created_by: session.user.id ?? null,
-        created_at: now,
-        updated_at: now,
-      })
-      .select(`
-        *,
-        profiles:user_id (
-          id,
-          name,
-          email,
-          avatar_url
-        ),
-        creator:created_by (
-          id,
-          name,
-          email
-        )
-      `)
-      .single()
-
-    if (error) {
-      console.error('[laporan POST] Supabase error:', error)
-      return NextResponse.json(
-        { error: `Database error: ${error.message}` },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ data }, { status: 201 })
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error)
-    console.error('[laporan POST] Unexpected error:', msg)
-    return NextResponse.json({ error: msg }, { status: 500 })
-  }
+// Defining the type for the form data used to create or edit a payment.
+export interface PembayaranFormData {
+  user_id: string
+  nama_siswa: string
+  nominal: number
+  jenis_pembayaran: 'Formulir' | 'SPP' | 'Seragam' | 'Lainnya'
+  metode_pembayaran: 'Transfer Bank' | 'Tunai' | 'QRIS'
+  no_referensi: string
+  status: 'menunggu' | 'dikonfirmasi' | 'ditolak'
+  catatan: string
+  tanggal_bayar: string
 }
