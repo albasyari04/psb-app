@@ -3810,3 +3810,125 @@ h1, h2, h3, h4, h5 {
 .adm-bar-fill[data-w="98"]  { width: 98%; }
 .adm-bar-fill[data-w="99"]  { width: 99%; }
 .adm-bar-fill[data-w="100"] { width: 100%; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE
+   Diaktifkan lewat attribute [data-theme="dark"] di <html>, diset oleh
+   SettingsContext. Override variabel inti + komponen yang paling sering
+   dipakai (body, app-shell, card, navbar, teks).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme='dark'] {
+  --bg:            #15131f;
+  --card:          #1e1b2e;
+  --text:          #f1f0f5;
+  --muted:         #94a3b8;
+  --border:        #2e2a40;
+  --admin-bg:      #15131f;
+  --siswa-bg:      #15131f;
+}
+
+/* ── Body & shell ─────────────────────────────────────────────────────── */
+[data-theme='dark'] html,
+[data-theme='dark'] body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme='dark'] .app-shell {
+  background: var(--bg);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .admin-dashboard-bg {
+  background: var(--bg);
+}
+
+/* ── Generic card ─────────────────────────────────────────────────────── */
+[data-theme='dark'] .adm-card {
+  background: #1e1b2e;
+  border-color: rgba(139, 92, 246, 0.18);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .adm-card-title {
+  color: #f1f0f5;
+}
+
+[data-theme='dark'] .adm-card-sub {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .adm-bar-label {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .adm-bar-track {
+  background: #2e2a40;
+}
+
+[data-theme='dark'] .adm-bar-val {
+  color: #f1f0f5;
+}
+
+[data-theme='dark'] .adm-list-name {
+  color: #f1f0f5;
+}
+
+[data-theme='dark'] .adm-list-row:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+[data-theme='dark'] .adm-see-all {
+  background: rgba(124, 58, 237, 0.15);
+  color: #c4b5fd;
+}
+
+/* ── Bottom nav (glassmorphism) ───────────────────────────────────────── */
+[data-theme='dark'] .navBg,
+[data-theme='dark'] [class*='navBg'] {
+  background: rgba(30, 27, 46, 0.85);
+  border-top-color: rgba(124, 58, 237, 0.2);
+}
+
+/* NOTE: Override untuk halaman /admin/pengaturan TIDAK ditulis di sini.
+   CSS Module (pengaturan.module.css) menghasilkan nama class yang di-hash
+   saat build, sehingga selector global di file ini tidak bisa menarget
+   class-class tersebut secara langsung. Override dark mode untuk halaman
+   itu sekarang ditulis DI DALAM pengaturan.module.css sendiri, memakai
+   selector :global([data-theme='dark']) .card { ... } dst. */
+
+/* ── Form elements / inputs (fallback umum) ──────────────────────────── */
+[data-theme='dark'] input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea {
+  background: #1e1b2e;
+  color: #f1f0f5;
+  border-color: #2e2a40;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FONT SIZE SCALING
+   Diaktifkan lewat attribute [data-font-size] + CSS variable
+   --app-font-size-base, diset oleh SettingsContext.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html {
+  font-size: var(--app-font-size-base, 16px);
+}
+
+/* Body teks ikut scale relatif terhadap root font-size di atas.
+   Elemen yang pakai px tetap (icon, badge) sengaja tidak di-scale
+   supaya layout tidak pecah. */
+[data-font-size='small'] body {
+  font-size: 0.9rem;
+}
+
+[data-font-size='medium'] body {
+  font-size: 1rem;
+}
+
+[data-font-size='large'] body {
+  font-size: 1.1rem;
+}

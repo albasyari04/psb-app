@@ -2,23 +2,24 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSettings } from '@/contexts/SettingsContext'
 import styles from './AdminBottomNav.module.css'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface NavItem {
-  href:    string
-  label:   string
-  key:     string
-  badge?:  number | null
+  href:      string
+  labelKey:  'nav_beranda' | 'nav_pendaftar' | 'nav_pembayaran' | 'nav_laporan' | 'nav_profil'
+  key:       string
+  badge?:    number | null
   icon: (active: boolean) => React.ReactNode
 }
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 const navItems: NavItem[] = [
   {
-    href:  '/admin/dashboard',
-    label: 'Beranda',
-    key:   'beranda',
+    href:     '/admin/dashboard',
+    labelKey: 'nav_beranda',
+    key:      'beranda',
     icon: (active) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
         <path
@@ -38,9 +39,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href:  '/admin/pendaftar',
-    label: 'Pendaftar',
-    key:   'pendaftar',
+    href:     '/admin/pendaftar',
+    labelKey: 'nav_pendaftar',
+    key:      'pendaftar',
     icon: (active) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
         <path
@@ -63,9 +64,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href:  '/admin/pembayaran',
-    label: 'Pembayaran',
-    key:   'pembayaran',
+    href:     '/admin/pembayaran',
+    labelKey: 'nav_pembayaran',
+    key:      'pembayaran',
     icon: (active) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
         <rect
@@ -85,9 +86,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href:  '/admin/laporan',
-    label: 'Laporan',
-    key:   'laporan',
+    href:     '/admin/laporan',
+    labelKey: 'nav_laporan',
+    key:      'laporan',
     icon: (active) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
         <rect
@@ -105,9 +106,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href:  '/admin/profile',
-    label: 'Profil',
-    key:   'profil',
+    href:     '/admin/profile',
+    labelKey: 'nav_profil',
+    key:      'profil',
     icon: (active) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
         <circle
@@ -135,6 +136,7 @@ interface AdminBottomNavProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AdminBottomNav({ badges = {} }: AdminBottomNavProps) {
   const pathname = usePathname()
+  const { t } = useSettings()
 
   return (
     <>
@@ -152,6 +154,7 @@ export default function AdminBottomNav({ badges = {} }: AdminBottomNavProps) {
               (item.key !== 'beranda' && pathname.startsWith(item.href))
 
             const badgeCount = badges[item.key] ?? item.badge ?? null
+            const label = t(item.labelKey)
 
             return (
               <Link
@@ -159,7 +162,7 @@ export default function AdminBottomNav({ badges = {} }: AdminBottomNavProps) {
                 href={item.href}
                 className={styles.navItem}
                 aria-current={isActive ? 'page' : undefined}
-                aria-label={`${item.label}${badgeCount ? `, ${badgeCount} notifikasi` : ''}`}
+                aria-label={`${label}${badgeCount ? `, ${badgeCount} notifikasi` : ''}`}
               >
                 {/* Icon + active top bar */}
                 <span className={`${styles.iconWrap} ${isActive ? styles.iconWrapActive : ''}`}>
@@ -179,7 +182,7 @@ export default function AdminBottomNav({ badges = {} }: AdminBottomNavProps) {
 
                 {/* Label */}
                 <span className={`${styles.navLabel} ${isActive ? styles.navLabelActive : styles.navLabelInactive}`}>
-                  {item.label}
+                  {label}
                 </span>
               </Link>
             )

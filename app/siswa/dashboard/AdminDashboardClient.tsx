@@ -6,6 +6,56 @@ import Link from 'next/link'
 import type { Pendaftaran } from '@/types'
 import type { TrenBulan } from '@/types/tren'
 import type { AktivitasItem } from '@/app/api/admin/aktivitas/route'
+import { useSettings } from '@/contexts/SettingsContext'
+
+// ── Theme palette (light/dark) ──────────────────────────────────────────────
+// Dashboard ini memakai inline style, BUKAN className, jadi dark mode tidak
+// bisa dipasang lewat CSS. Warna-warna yang sensitif tema (background card,
+// teks utama, divider, skeleton) diambil dari palette ini berdasarkan
+// `theme` dari SettingsContext. Warna brand/status (violet, hijau, merah,
+// amber) dibiarkan tetap karena sudah cukup kontras di kedua mode.
+const PALETTE = {
+  light: {
+    pageBg:        '#F8FAFC',
+    topbarBg:      '#fff',
+    cardBg:        '#FFFFFF',
+    textPrimary:   '#111827',
+    textSecondary: '#6b7280',
+    textMuted:     '#9ca3af',
+    textFaint:     '#D1D5DB',
+    divider:       '#F3F4F6',
+    dividerSoft:   '#F9FAFB',
+    skeletonBg:    '#f3f4f6',
+    skeletonBg2:   '#f9fafb',
+    bellBg:        '#f9fafb',
+    bellBorder:    '#f0f0f7',
+    bellIcon:      '#374151',
+    quickLabel:    '#374151',
+    navBg:         'rgba(255,255,255,0.98)',
+    navBorder:     '#F3F4F6',
+    navInactive:   '#9ca3af',
+  },
+  dark: {
+    pageBg:        '#15131f',
+    topbarBg:      '#1e1b2e',
+    cardBg:        '#1e1b2e',
+    textPrimary:   '#f1f0f5',
+    textSecondary: '#b3aec4',
+    textMuted:     '#8b86a3',
+    textFaint:     '#6b6680',
+    divider:       '#2e2a40',
+    dividerSoft:   '#262236',
+    skeletonBg:    '#2a2640',
+    skeletonBg2:   '#231f35',
+    bellBg:        '#241f38',
+    bellBorder:    '#332c4d',
+    bellIcon:      '#d8d4e8',
+    quickLabel:    '#d8d4e8',
+    navBg:         'rgba(30,27,46,0.98)',
+    navBorder:     '#2e2a40',
+    navInactive:   '#6b6680',
+  },
+} as const
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Stats {
@@ -151,31 +201,16 @@ const NavPengaturan = ({ active }: { active: boolean }) => (
 
 // ── Quick Menu SVG Icons ───────────────────────────────────────────────────────
 const IconPendaftar = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="9" cy="7" r="4" stroke="#6d28d9" strokeWidth="2"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
+  <Image src="/icons/formulir icon.png" alt="Pendaftar" width={48} height={48} />
 )
 const IconVerifikasi = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <polyline points="22 4 12 14.01 9 11.01" stroke="#10b981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
+  <Image src="/icons/status icon.png" alt="Verifikasi" width={48} height={48} />
 )
 const IconLaporan = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <line x1="18" y1="20" x2="18" y2="10" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
-    <line x1="12" y1="20" x2="12" y2="4"  stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
-    <line x1="6"  y1="20" x2="6"  y2="14" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round"/>
-  </svg>
+  <Image src="/icons/laporan icon.png" alt="Laporan" width={48} height={48} />
 )
 const IconPengumuman = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M19 3L5 8v8l14 5V3Z" stroke="#ec4899" strokeWidth="2" strokeLinejoin="round" fill="#fce7f3"/>
-    <path d="M5 8H3a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2" stroke="#ec4899" strokeWidth="2" strokeLinecap="round"/>
-    <line x1="5" y1="16" x2="5" y2="21" stroke="#ec4899" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
+  <Image src="/icons/pengumuman icon.png" alt="Pengumuman" width={48} height={48} />
 )
 const IconNotifikasi = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -184,36 +219,27 @@ const IconNotifikasi = () => (
   </svg>
 )
 const IconPengaturan = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="3" stroke="#6b7280" strokeWidth="2"/>
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-      stroke="#6b7280" strokeWidth="2"/>
-  </svg>
+  <Image src="/icons/profil icon.png" alt="Pengaturan" width={48} height={48} />
 )
 
 const IconBerkas = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <polyline points="14 2 14 8 20 8" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="8" y1="13" x2="16" y2="13" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round"/>
-    <line x1="8" y1="17" x2="12" y2="17" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
+  <Image src="/icons/berkas icon.png" alt="Berkas" width={48} height={48} />
 )
 
 const IconJadwal = () => (
-  <Image src="/icons/jadwal icon.png" alt="Jadwal" width={50} height={50} />
+  <Image src="/icons/jadwal icon.png" alt="Jadwal" width={48} height={48} />
 )
 
 // ── Menu Cepat Admin Items ────────────────────────────────────────────────────
 const QUICK_MENU = [
-  { id: 'pendaftar',  label: 'Pendaftar',  Icon: IconPendaftar,  href: '/admin/pendaftar',  bgLight: '#ede9fe' },
-  { id: 'verifikasi', label: 'Verifikasi', Icon: IconVerifikasi, href: '/admin/verifikasi', bgLight: '#d1fae5' },
-  { id: 'laporan',    label: 'Laporan',    Icon: IconLaporan,    href: '/admin/laporan',    bgLight: '#fef3c7' },
-  { id: 'berkas',     label: 'Berkas',     Icon: IconBerkas,     href: '/admin/berkas',     bgLight: '#ccfbf1' },
-  { id: 'pengumuman', label: 'Pengumuman', Icon: IconPengumuman, href: '/admin/pengumuman', bgLight: '#fce7f3' },
-  { id: 'notifikasi', label: 'Notifikasi', Icon: IconNotifikasi, href: '/admin/notifikasi', bgLight: '#dbeafe' },
-  { id: 'pengaturan', label: 'Pengaturan', Icon: IconPengaturan, href: '/admin/pengaturan', bgLight: '#f3f4f6' },
-  { id: 'jadwal',     label: 'Jadwal',     Icon: IconJadwal,     href: '/admin/jadwal',     bgLight: '#f3f4f6' },
+  { id: 'pendaftar',  label: 'Pendaftar',  Icon: IconPendaftar,  href: '/admin/pendaftar'  },
+  { id: 'verifikasi', label: 'Verifikasi', Icon: IconVerifikasi, href: '/admin/verifikasi' },
+  { id: 'laporan',    label: 'Laporan',    Icon: IconLaporan,    href: '/admin/laporan'    },
+  { id: 'berkas',     label: 'Berkas',     Icon: IconBerkas,     href: '/admin/berkas'     },
+  { id: 'pengumuman', label: 'Pengumuman', Icon: IconPengumuman, href: '/admin/pengumuman' },
+  { id: 'notifikasi', label: 'Notifikasi', Icon: IconNotifikasi, href: '/admin/notifikasi' },
+  { id: 'pengaturan', label: 'Pengaturan', Icon: IconPengaturan, href: '/admin/pengaturan' },
+  { id: 'jadwal',     label: 'Jadwal',     Icon: IconJadwal,     href: '/admin/jadwal'     },
 ]
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
@@ -221,6 +247,9 @@ export default function AdminDashboardClient({
   fullName, avatarInitial, avatarUrl,
   isAdmin = false, stats = null, trendData,
 }: Props) {
+  const { theme } = useSettings()
+  const p = PALETTE[theme]
+
   const [now, setNow]                 = useState<Date>(() => new Date())
   const [activities, setActivities]   = useState<AktivitasItem[]>([])
   const [actLoading, setActLoading]   = useState(true)
@@ -292,7 +321,7 @@ export default function AdminDashboardClient({
     x: (i / (chartData.length - 1)) * CW,
     y: CH - (d.pendaftar / maxV) * (CH - 6),
   }))
-  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  const linePath = pts.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ')
   const areaPath = `${linePath}L${CW},${CH}L0,${CH}Z`
 
   // ── Donut chart ─────────────────────────────────────────────────────────────
@@ -326,7 +355,7 @@ export default function AdminDashboardClient({
   return (
     <div style={{
       fontFamily: "'Plus Jakarta Sans','Inter',system-ui,-apple-system,sans-serif",
-      background: '#F8FAFC',
+      background: p.pageBg,
       minHeight: '100dvh',
       maxWidth: 430,
       margin: '0 auto',
@@ -335,7 +364,7 @@ export default function AdminDashboardClient({
 
       {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
       <div style={{
-        background: '#fff',
+        background: p.topbarBg,
         padding: '44px 20px 16px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
@@ -357,23 +386,23 @@ export default function AdminDashboardClient({
             }
           </Link>
           <div>
-            <p style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500, margin: 0 }}>{greeting}</p>
-            <p style={{ fontSize: 19, fontWeight: 800, color: '#111827', margin: '1px 0 0', lineHeight: 1.2, letterSpacing: '-0.5px' }}>
+            <p style={{ fontSize: 11, color: p.textMuted, fontWeight: 500, margin: 0 }}>{greeting}</p>
+            <p style={{ fontSize: 19, fontWeight: 800, color: p.textPrimary, margin: '1px 0 0', lineHeight: 1.2, letterSpacing: '-0.5px' }}>
               {fullName}
             </p>
-            <p style={{ fontSize: 11, color: '#9ca3af', margin: '2px 0 0', fontWeight: 500 }}>Admin Penerimaan Santri</p>
+            <p style={{ fontSize: 11, color: p.textMuted, margin: '2px 0 0', fontWeight: 500 }}>Admin Penerimaan Santri</p>
           </div>
         </div>
 
         {/* Bell icon */}
         <Link href="/admin/notifikasi" style={{
           width: 44, height: 44, borderRadius: '50%',
-          background: '#f9fafb', border: '1.5px solid #f0f0f7',
+          background: p.bellBg, border: `1.5px solid ${p.bellBorder}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           textDecoration: 'none', flexShrink: 0, position: 'relative',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         }}>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={p.bellIcon} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
@@ -381,7 +410,7 @@ export default function AdminDashboardClient({
             <div style={{
               position: 'absolute', top: 7, right: 8,
               width: 9, height: 9, borderRadius: '50%',
-              background: '#6D3DF5', border: '2px solid #fff',
+              background: '#6D3DF5', border: `2px solid ${p.topbarBg}`,
             }}/>
           )}
         </Link>
@@ -514,7 +543,7 @@ export default function AdminDashboardClient({
             },
           ] as const).map((c, i) => (
             <div key={i} style={{
-              background: '#FFFFFF',
+              background: p.cardBg,
               borderRadius: 16,
               padding: '12px 10px 10px',
               boxShadow: cardShadow,
@@ -530,12 +559,12 @@ export default function AdminDashboardClient({
               </div>
 
               {/* Label */}
-              <p style={{ fontSize: 9, color: '#9CA3AF', fontWeight: 600, margin: '0 0 2px', letterSpacing: 0.1, lineHeight: 1.3 }}>
+              <p style={{ fontSize: 9, color: p.textMuted, fontWeight: 600, margin: '0 0 2px', letterSpacing: 0.1, lineHeight: 1.3 }}>
                 {c.label}
               </p>
 
               {/* Big number */}
-              <p style={{ fontSize: 22, fontWeight: 800, color: '#111827', lineHeight: 1, margin: 0, letterSpacing: '-0.8px' }}>
+              <p style={{ fontSize: 22, fontWeight: 800, color: p.textPrimary, lineHeight: 1, margin: 0, letterSpacing: '-0.8px' }}>
                 {c.value}
               </p>
 
@@ -549,7 +578,7 @@ export default function AdminDashboardClient({
               </span>
 
               {/* Sub text */}
-              <p style={{ fontSize: 8.5, color: '#D1D5DB', margin: '1px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
+              <p style={{ fontSize: 8.5, color: p.textFaint, margin: '1px 0 0', fontWeight: 500, lineHeight: 1.3 }}>
                 Dari bulan lalu
               </p>
             </div>
@@ -560,12 +589,12 @@ export default function AdminDashboardClient({
       {/* ══ MENU CEPAT ════════════════════════════════════════════════════════ */}
       <div style={{ padding: '14px 16px 0' }}>
         <div style={{
-          background: '#FFFFFF', borderRadius: 24,
+          background: p.cardBg, borderRadius: 24,
           padding: '18px 16px 20px',
           boxShadow: cardShadow,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0, letterSpacing: '-0.2px' }}>Menu Cepat</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: p.textPrimary, margin: 0, letterSpacing: '-0.2px' }}>Menu Cepat</p>
             <Link href="/admin/all-menu" style={{ fontSize: 11, color: '#6D3DF5', textDecoration: 'none', fontWeight: 600 }}>
               Lihat Semua
             </Link>
@@ -578,14 +607,12 @@ export default function AdminDashboardClient({
                   gap: 8, padding: '10px 4px 8px',
                 }}>
                   <div style={{
-                    width: 56, height: 56, borderRadius: 18,
-                    background: item.bgLight,
+                    width: 56, height: 56,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: `0 4px 12px ${item.bgLight}cc`,
                   }}>
                     <item.Icon />
                   </div>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: '#374151', margin: 0, textAlign: 'center' }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: p.quickLabel, margin: 0, textAlign: 'center' }}>
                     {item.label}
                   </p>
                 </div>
@@ -599,13 +626,13 @@ export default function AdminDashboardClient({
       <div style={{ padding: '14px 16px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
 
         {/* Pendaftaran per Bulan */}
-        <div style={{ background: '#FFFFFF', borderRadius: 20, padding: '14px', boxShadow: cardShadow }}>
+        <div style={{ background: p.cardBg, borderRadius: 20, padding: '14px', boxShadow: cardShadow }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1.3 }}>Pendaftaran per Bulan</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: p.textPrimary, margin: 0, lineHeight: 1.3 }}>Pendaftaran per Bulan</p>
             <Link href="/admin/laporan" style={{ fontSize: 9.5, color: '#6D3DF5', textDecoration: 'none', fontWeight: 700, flexShrink: 0 }}>Lihat</Link>
           </div>
-          <p style={{ fontSize: 28, fontWeight: 800, color: '#111827', margin: '4px 0 0', lineHeight: 1 }}>{s.total}</p>
-          <p style={{ fontSize: 9.5, color: '#9ca3af', margin: '2px 0 6px' }}>Mendaftar</p>
+          <p style={{ fontSize: 28, fontWeight: 800, color: p.textPrimary, margin: '4px 0 0', lineHeight: 1 }}>{s.total}</p>
+          <p style={{ fontSize: 9.5, color: p.textMuted, margin: '2px 0 6px' }}>Mendaftar</p>
           <span style={{
             display: 'inline-flex', alignItems: 'center',
             background: '#d1fae5', color: '#059669',
@@ -620,19 +647,19 @@ export default function AdminDashboardClient({
             </defs>
             <path d={areaPath} fill="url(#lg1)"/>
             <path d={linePath} fill="none" stroke="#6D3DF5" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
-            {pts.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y}
+            {pts.map((p2, i) => (
+              <circle key={i} cx={p2.x} cy={p2.y}
                 r={i === pts.length - 1 ? 4 : 2.5}
                 fill={i === pts.length - 1 ? '#6D3DF5' : '#a78bfa'}
-                stroke="white" strokeWidth="1.5"/>
+                stroke={p.cardBg} strokeWidth="1.5"/>
             ))}
           </svg>
         </div>
 
         {/* Asal Daerah */}
-        <div style={{ background: '#FFFFFF', borderRadius: 20, padding: '14px', boxShadow: cardShadow }}>
+        <div style={{ background: p.cardBg, borderRadius: 20, padding: '14px', boxShadow: cardShadow }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#111827', margin: 0 }}>Asal Daerah</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: p.textPrimary, margin: 0 }}>Asal Daerah</p>
             <Link href="/admin/laporan" style={{ fontSize: 9.5, color: '#6D3DF5', textDecoration: 'none', fontWeight: 700 }}>Lihat</Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
@@ -640,9 +667,9 @@ export default function AdminDashboardClient({
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: d.color, flexShrink: 0 }}/>
-                  <p style={{ fontSize: 8.5, color: '#6b7280', margin: 0 }}>{d.name}</p>
+                  <p style={{ fontSize: 8.5, color: p.textSecondary, margin: 0 }}>{d.name}</p>
                 </div>
-                <p style={{ fontSize: 8.5, fontWeight: 700, color: '#374151', margin: 0 }}>{d.pct}%</p>
+                <p style={{ fontSize: 8.5, fontWeight: 700, color: p.quickLabel, margin: 0 }}>{d.pct}%</p>
               </div>
             ))}
           </div>
@@ -659,8 +686,8 @@ export default function AdminDashboardClient({
                 ))}
               </svg>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#111827', lineHeight: 1, margin: 0 }}>{s.total}</p>
-                <p style={{ fontSize: 7, color: '#9ca3af', margin: '1px 0 0' }}>Total</p>
+                <p style={{ fontSize: 14, fontWeight: 900, color: p.textPrimary, lineHeight: 1, margin: 0 }}>{s.total}</p>
+                <p style={{ fontSize: 7, color: p.textMuted, margin: '1px 0 0' }}>Total</p>
               </div>
             </div>
           </div>
@@ -669,30 +696,30 @@ export default function AdminDashboardClient({
 
       {/* ══ AKTIVITAS TERBARU ════════════════════════════════════════════════ */}
       <div style={{ padding: '14px 16px 0' }}>
-        <div style={{ background: '#FFFFFF', borderRadius: 20, overflow: 'hidden', boxShadow: cardShadow }}>
+        <div style={{ background: p.cardBg, borderRadius: 20, overflow: 'hidden', boxShadow: cardShadow }}>
           <div style={{ padding: '18px 18px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>Aktivitas Terbaru</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: p.textPrimary, margin: 0 }}>Aktivitas Terbaru</p>
             <Link href="/admin/aktivitas" style={{ fontSize: 11, color: '#6D3DF5', textDecoration: 'none', fontWeight: 700 }}>Lihat Semua</Link>
           </div>
-          <div style={{ height: 1, background: '#F3F4F6' }}/>
+          <div style={{ height: 1, background: p.divider }}/>
 
           {actLoading ? (
             <div style={{ padding: '8px 18px' }}>
               {[...Array(4)].map((_, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '12px 0', borderBottom: i < 3 ? '1px solid #f9fafb' : 'none' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 13, background: '#f3f4f6', flexShrink: 0 }}/>
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '12px 0', borderBottom: i < 3 ? `1px solid ${p.dividerSoft}` : 'none' }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 13, background: p.skeletonBg, flexShrink: 0 }}/>
                   <div style={{ flex: 1 }}>
-                    <div style={{ height: 10, background: '#f3f4f6', borderRadius: 5, marginBottom: 6, width: '45%' }}/>
-                    <div style={{ height: 8,  background: '#f9fafb', borderRadius: 4, width: '70%' }}/>
+                    <div style={{ height: 10, background: p.skeletonBg, borderRadius: 5, marginBottom: 6, width: '45%' }}/>
+                    <div style={{ height: 8,  background: p.skeletonBg2, borderRadius: 4, width: '70%' }}/>
                   </div>
-                  <div style={{ height: 8, background: '#f3f4f6', borderRadius: 4, width: 52 }}/>
+                  <div style={{ height: 8, background: p.skeletonBg, borderRadius: 4, width: 52 }}/>
                 </div>
               ))}
             </div>
           ) : displayActs.length === 0 ? (
             <div style={{ padding: '32px', textAlign: 'center' }}>
               <p style={{ fontSize: 32, margin: '0 0 8px' }}>📭</p>
-              <p style={{ fontSize: 12, color: '#9ca3af', fontWeight: 600, margin: 0 }}>Belum ada aktivitas</p>
+              <p style={{ fontSize: 12, color: p.textMuted, fontWeight: 600, margin: 0 }}>Belum ada aktivitas</p>
             </div>
           ) : (
             displayActs.map((act, i) => {
@@ -702,7 +729,7 @@ export default function AdminDashboardClient({
                 <div key={act.id} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   padding: '13px 18px',
-                  borderBottom: isLast ? 'none' : '1px solid #F9FAFB',
+                  borderBottom: isLast ? 'none' : `1px solid ${p.dividerSoft}`,
                 }}>
                   <div style={{
                     width: 42, height: 42, borderRadius: 13, flexShrink: 0,
@@ -713,14 +740,14 @@ export default function AdminDashboardClient({
                     <AktivitasIcon type={act.type}/>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: p.textPrimary, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {act.name}
                     </p>
-                    <p style={{ fontSize: 11, color: '#6b7280', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: 11, color: p.textSecondary, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {getAktivitasDesc(act.type)}
                     </p>
                   </div>
-                  <p style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0, margin: 0, whiteSpace: 'nowrap' }}>
+                  <p style={{ fontSize: 10, color: p.textMuted, flexShrink: 0, margin: 0, whiteSpace: 'nowrap' }}>
                     {act.time}
                   </p>
                 </div>
@@ -735,7 +762,7 @@ export default function AdminDashboardClient({
 
         {/* ── Pengumuman Card ── */}
         <div style={{
-          background: '#FFFFFF',
+          background: p.cardBg,
           borderRadius: 22,
           padding: '16px 14px 14px',
           boxShadow: cardShadow,
@@ -785,12 +812,12 @@ export default function AdminDashboardClient({
                     stroke="white" strokeOpacity="0.55" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
                 </svg>
               </div>
-              <p style={{ fontSize: 12.5, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.3px' }}>
+              <p style={{ fontSize: 12.5, fontWeight: 800, color: p.textPrimary, margin: 0, letterSpacing: '-0.3px' }}>
                 Pengumuman
               </p>
             </div>
 
-            <p style={{ fontSize: 9, color: '#9CA3AF', lineHeight: 1.55, margin: '0 0 auto', fontWeight: 400 }}>
+            <p style={{ fontSize: 9, color: p.textMuted, lineHeight: 1.55, margin: '0 0 auto', fontWeight: 400 }}>
               Informasi terbaru untuk calon santri
             </p>
 
@@ -812,7 +839,7 @@ export default function AdminDashboardClient({
 
         {/* ── Laporan & Analitik Card ── */}
         <div style={{
-          background: '#FFFFFF',
+          background: p.cardBg,
           borderRadius: 22,
           padding: '16px 14px 14px',
           boxShadow: cardShadow,
@@ -867,12 +894,12 @@ export default function AdminDashboardClient({
                   <circle cx="19" cy="3"   r="1.4" fill="white"/>
                 </svg>
               </div>
-              <p style={{ fontSize: 12.5, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.3px' }}>
+              <p style={{ fontSize: 12.5, fontWeight: 800, color: p.textPrimary, margin: 0, letterSpacing: '-0.3px' }}>
                 Laporan &amp; Analitik
               </p>
             </div>
 
-            <p style={{ fontSize: 9, color: '#9CA3AF', lineHeight: 1.55, margin: '0 0 auto', fontWeight: 400 }}>
+            <p style={{ fontSize: 9, color: p.textMuted, lineHeight: 1.55, margin: '0 0 auto', fontWeight: 400 }}>
               Lihat laporan dan statistik pendaftaran
             </p>
 
@@ -899,9 +926,9 @@ export default function AdminDashboardClient({
       <nav style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430,
-        background: 'rgba(255,255,255,0.98)',
+        background: p.navBg,
         backdropFilter: 'blur(20px)',
-        borderTop: '1px solid #F3F4F6',
+        borderTop: `1px solid ${p.navBorder}`,
         display: 'grid', gridTemplateColumns: 'repeat(5,1fr)',
         padding: '10px 4px 28px',
         zIndex: 100,
@@ -927,7 +954,7 @@ export default function AdminDashboardClient({
               <p style={{
                 fontSize: 9.5, margin: 0,
                 fontWeight: item.active ? 700 : 500,
-                color: item.active ? '#6D3DF5' : '#9ca3af',
+                color: item.active ? '#6D3DF5' : p.navInactive,
               }}>{item.label}</p>
             </div>
           </Link>
