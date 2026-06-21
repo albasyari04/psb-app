@@ -82,16 +82,14 @@ const HERO_SLIDES = [
   {
     eyebrow: 'Rutinan Ahad Legi',
     titleBold: 'Ngaji Hikam,',
-    titleLight: 'lelenggahan sareng Guru',
-    description:
-      'Mendalami kitab Hikam bersama guru untuk memperkuat ilmu, akhlak, dan nilai-nilai keislaman.',
+    titleLight: 'lalenggahan sareng Guru',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji.jpeg',
   },
   {
     eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Kegiatan akhir tahun',
-    titleLight: 'yakni Ziarah Wali 9',
+    titleBold: ' Rutinan akhir tahun',
+    titleLight: 'dengan melakukan Ziarah',
     href: '/siswa/galeri',
     image: '/image/galeri/ziarah.jpeg',
   },
