@@ -1,6 +1,7 @@
 /* ================================================================
    galeri_module.css — Galeri Kegiatan Santri
    Tema warna disamakan dengan dashboard_module.css (teal/green)
+   Direvisi mengikuti mockup galeri_desain.png
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -12,6 +13,8 @@
   --green: #16a34a;
   --green-light: #dcfce7;
   --green-lighter: #ecfdf5;
+  --gold-1: #e8c178;
+  --gold-2: #c9962f;
   --ink: #0f172a;
   --slate: #475569;
   --gray: #64748b;
@@ -31,16 +34,48 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TOP HEADER
+   TOP HEADER — gambar latar + overlay gradient
    ══════════════════════════════════════════════════════════════ */
 .topHeader {
+  position: relative;
+  min-height: 210px;
+  padding: 1.1rem 1.1rem 2.4rem;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
+}
+
+.headerBgImg {
+  object-fit: cover;
+  object-position: center 38%;
+  z-index: 0;
+}
+
+.headerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    rgba(7, 61, 47, 0.96) 0%,
+    rgba(7, 61, 47, 0.88) 32%,
+    rgba(7, 61, 47, 0.62) 62%,
+    rgba(7, 61, 47, 0.4) 100%
+  );
+}
+
+.headerInner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.headerTopRow {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 1.1rem 1.1rem 0.9rem;
-  background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
-  border-radius: 0 0 20px 20px;
-  color: #fff;
 }
 
 .backBtn {
@@ -48,37 +83,196 @@
   height: 38px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   flex-shrink: 0;
   text-decoration: none;
+  backdrop-filter: blur(2px);
   transition: background 0.15s, transform 0.15s;
 }
 .backBtn:hover { background: rgba(255, 255, 255, 0.26); transform: translateX(-1px); }
 
 .headerTextWrap { display: flex; flex-direction: column; min-width: 0; }
 .headerTitle {
-  font-size: 1.18rem;
+  font-size: 1.55rem;
   font-weight: 800;
   letter-spacing: -0.01em;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 .headerSub {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.82);
-  margin: 0.15rem 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0.3rem 0 0;
+  max-width: 240px;
+  line-height: 1.4;
 }
 
 /* ══════════════════════════════════════════════════════════════
    PAGE BODY
    ══════════════════════════════════════════════════════════════ */
 .pageBody {
-  padding: 1.1rem 1.1rem 0;
+  padding: 0 1.1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SEARCH BAR — kartu putih mengambang di atas header
+   ══════════════════════════════════════════════════════════════ */
+.searchBarCard {
+  position: relative;
+  z-index: 3;
+  margin-top: -2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.55rem 0.6rem 0.55rem 0.9rem;
+  box-shadow: 0 10px 28px rgba(7, 61, 47, 0.16);
+}
+
+.searchInputWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.searchInputWrap svg { color: var(--gray-light); flex-shrink: 0; }
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.searchInput::placeholder { color: var(--gray-light); }
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  background: var(--green-lighter);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--teal-1);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.filterBtn:hover { background: var(--green-light); }
+
+/* ══════════════════════════════════════════════════════════════
+   BANNER CAROUSEL
+   ══════════════════════════════════════════════════════════════ */
+.bannerSection { display: flex; flex-direction: column; gap: 0.65rem; }
+
+.bannerCard {
+  position: relative;
+  width: 100%;
+  /* Rasio asli galeri-banner.jpeg = 1600 x 528px. Disamakan persis
+     supaya object-fit: cover TIDAK pernah memotong gambar. Jika Anda
+     ganti dengan banner lain, sesuaikan angka ini dengan rasio asli
+     gambar tersebut (width / height). */
+  aspect-ratio: 1600 / 528;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(7, 61, 47, 0.14);
+}
+.bannerImg { object-fit: cover; }
+
+.bannerDots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.2s, background 0.2s;
+}
+.dotActive {
+  width: 18px;
+  border-radius: 4px;
+  background: var(--teal-1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION HEADER
+   ══════════════════════════════════════════════════════════════ */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.sectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+.sectionIconBox {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: var(--teal-1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sectionTitleWrap { min-width: 0; }
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.3;
+}
+.sectionSubtitle {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--gray);
+  margin: 0.1rem 0 0;
+}
+.seeAllLink {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--teal-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -87,7 +281,7 @@
 .galleryGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
+  gap: 1.1rem 0.85rem;
 }
 
 .galleryCard {
@@ -96,7 +290,7 @@
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   text-align: left;
   cursor: pointer;
@@ -106,7 +300,7 @@
 }
 .galleryCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
 }
 
 .galleryThumbWrap {
@@ -114,6 +308,7 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   background: var(--green-lighter);
+  border-radius: 14px 14px 0 0;
   overflow: hidden;
 }
 .galleryThumbImg { object-fit: cover; }
@@ -127,11 +322,28 @@
   background: var(--green-lighter);
 }
 
+.galleryBadge {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 14px;
+  position: relative;
+  z-index: 3;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-1);
+}
+
 .galleryCardBody {
-  padding: 0.65rem 0.7rem 0.75rem;
+  padding: 0.4rem 0.7rem 0.65rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  border-radius: 0 0 14px 14px;
 }
 .galleryCardTitle {
   font-size: 0.82rem;
@@ -152,6 +364,22 @@
   overflow: hidden;
 }
 
+.galleryCardFooter {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border);
+  color: var(--gray-light);
+}
+.galleryCardFooter svg { flex-shrink: 0; }
+.galleryCardFooterText {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--gray);
+}
+
 /* ══════════════════════════════════════════════════════════════
    EMPTY STATE
    ══════════════════════════════════════════════════════════════ */
@@ -166,6 +394,66 @@
 }
 .emptyIcon { font-size: 2.2rem; }
 .emptyText { font-size: 0.85rem; font-weight: 600; margin: 0; }
+.emptyHint { font-size: 0.74rem; font-weight: 500; margin: 0; color: var(--gray-light); }
+
+/* ══════════════════════════════════════════════════════════════
+   CTA BANNER — Kirim Dokumentasi
+   ══════════════════════════════════════════════════════════════ */
+.ctaBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 60%, var(--teal-3) 100%);
+  border-radius: 18px;
+  padding: 1.1rem 1.1rem;
+  box-shadow: 0 8px 22px rgba(7, 61, 47, 0.18);
+}
+.ctaIconBox {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-1);
+}
+.ctaTextWrap { flex: 1; min-width: 0; }
+.ctaTitle {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+.ctaDesc {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0.2rem 0 0;
+  line-height: 1.4;
+}
+.ctaButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(120deg, var(--gold-1) 0%, var(--gold-2) 100%);
+  color: var(--teal-3);
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(201, 150, 47, 0.35);
+  transition: transform 0.15s;
+}
+.ctaButton:hover { transform: translateY(-1px); }
 
 /* ══════════════════════════════════════════════════════════════
    LIGHTBOX
@@ -237,4 +525,17 @@
   color: var(--slate);
   margin: 0;
   line-height: 1.45;
+}
+.lightboxFooter {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+  color: var(--gray-light);
+}
+.lightboxFooter svg { flex-shrink: 0; }
+.lightboxFooterText {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray);
 }

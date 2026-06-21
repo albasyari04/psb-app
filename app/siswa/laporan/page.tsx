@@ -1,7 +1,7 @@
 // app/siswa/laporan/page.tsx
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo, type JSX } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
@@ -64,6 +64,63 @@ const TIPE_MAP: Record<string, { label: string; color: string; bg: string }> = {
 
 function getTipe(tipe: string) {
   return TIPE_MAP[tipe] ?? { label: tipe, color: '#64748b', bg: '#f1f5f9' }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   KATEGORI DETAIL LAPORAN
+   Setiap laporan dipetakan ke salah satu dari 4 kategori berikut
+   berdasarkan kata kunci pada `judul`, supaya icon & warna pada
+   card sesuai mockup. Jika judul tidak cocok kata kunci apa pun,
+   fallback ke kategori "Pelajaran". `defaultDesc` dipakai bila
+   item.deskripsi kosong.
+   ════════════════════════════════════════════════════════════════ */
+type KategoriKey = 'pelajaran' | 'ibadah' | 'akhlak' | 'kegiatan'
+
+interface KategoriMeta {
+  label: string
+  defaultDesc: string
+  color: string
+  bg: string
+  Icon: () => JSX.Element
+}
+
+const KATEGORI_META: Record<KategoriKey, KategoriMeta> = {
+  pelajaran: {
+    label: 'Pelajaran',
+    defaultDesc: 'Pemahaman materi dan tugas',
+    color: '#0e7c5f',
+    bg: '#dcfce7',
+    Icon: IconBookOpen,
+  },
+  ibadah: {
+    label: 'Ibadah',
+    defaultDesc: 'Kedisiplinan dalam beribadah',
+    color: '#d97706',
+    bg: '#fef3c7',
+    Icon: IconMosqueSmall,
+  },
+  akhlak: {
+    label: 'Akhlak & Sikap',
+    defaultDesc: 'Perilaku dan sikap sehari-hari',
+    color: '#2563eb',
+    bg: '#dbeafe',
+    Icon: IconUsersGroup,
+  },
+  kegiatan: {
+    label: 'Kegiatan',
+    defaultDesc: 'Keaktifan dalam kegiatan pesantren',
+    color: '#7c3aed',
+    bg: '#ede9fe',
+    Icon: IconRunning,
+  },
+}
+
+function getKategoriKey(judul: string): KategoriKey {
+  const j = judul.toLowerCase()
+  if (/(ibadah|sholat|shalat|sholawat|hafalan|tahfidz|ngaji|mengaji)/.test(j)) return 'ibadah'
+  if (/(akhlak|sikap|perilaku|adab)/.test(j)) return 'akhlak'
+  if (/(kegiatan|ekstra|organisasi|santri\s*baru|kepramukaan)/.test(j)) return 'kegiatan'
+  return 'pelajaran'
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -139,6 +196,85 @@ function IconChevronRight() {
   )
 }
 
+function IconBarChart() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="8"/><line x1="18" y1="20" x2="18" y2="11"/>
+    </svg>
+  )
+}
+
+function IconClipboardCheck() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+      <polyline points="8.5 13 10.5 15 15 10.5"/>
+    </svg>
+  )
+}
+
+function IconTrophy() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/>
+      <path d="M7 5H4a1 1 0 0 0-1 1 4 4 0 0 0 4 4"/>
+      <path d="M17 5h3a1 1 0 0 1 1 1 4 4 0 0 1-4 4"/>
+      <line x1="12" y1="14" x2="12" y2="18"/><path d="M9 21h6"/><path d="M9.5 18h5l.5 3h-6z"/>
+    </svg>
+  )
+}
+
+function IconStarBadge() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M12 2.5l2.95 6.4 7.05.75-5.25 4.8 1.5 6.9L12 17.7l-6.25 3.65 1.5-6.9-5.25-4.8 7.05-.75L12 2.5z"/>
+    </svg>
+  )
+}
+
+function IconBookOpen() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+  )
+}
+
+function IconMosqueSmall() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v2.5"/>
+      <path d="M7 9.5a5 5 0 0 1 10 0V12H7V9.5z"/>
+      <path d="M3 21v-6.5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3V21"/>
+      <path d="M10 21v-4.5a2 2 0 0 1 4 0V21"/>
+      <line x1="2" y1="21" x2="22" y2="21"/>
+    </svg>
+  )
+}
+
+function IconUsersGroup() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  )
+}
+
+function IconRunning() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="14.5" cy="4.5" r="1.8"/>
+      <path d="M5 21l3.2-5 2.3-2.2-1-4.3"/>
+      <path d="M6.5 13.5L9.5 12l2-3 3.2 2 3.3-1"/>
+      <path d="M11 12l3 2.5-1 5.5"/>
+    </svg>
+  )
+}
+
 /* ════════════════════════════════════════════════════════════════
    CIRCULAR PROGRESS
    ════════════════════════════════════════════════════════════════ */
@@ -176,18 +312,19 @@ function KataBanner() {
       overflow: 'hidden',
       boxShadow: '0 12px 28px rgba(7,59,44,0.28)',
       width: '100%',
-      aspectRatio: '16/6',
+      // Rasio asli kata-banner-laporan.png = 1838 x 856px.
+      // Disamakan persis supaya object-fit: cover TIDAK memotong gambar.
+      aspectRatio: '1838/856',
       minHeight: '100px',
     }}>
       <Image
         src="/icons/kata-banner-laporan.png"
-        alt="Kata Motivasi Banner"
+        alt="Terus Semangat — Kata Motivasi"
         fill
         style={{
           objectFit: 'cover',
           objectPosition: 'center',
         }}
-        priority
         sizes="(max-width: 480px) 100vw, 480px"
       />
     </div>
@@ -195,74 +332,214 @@ function KataBanner() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   COMPONENT: Student Profile Header
+   COMPONENT: Greeting Banner (memakai gambar icons/laporan-banner.png)
+   Bagian kiri gambar sengaja polos (gradient teal) — di situlah teks
+   salam, nama, kelas/asrama, dan kutipan ayat ditumpuk (overlay).
    ════════════════════════════════════════════════════════════════ */
-function StudentProfile({ name, kelas, asrama }: { name: string; kelas: string; asrama: string }) {
+function GreetingBanner({ name, kelas, asrama }: { name: string; kelas: string; asrama: string }) {
+  return (
+    <div style={{
+      position: 'relative',
+      width: '100%',
+      // Rasio asli laporan-banner.png = 729 x 342px, disamakan persis
+      // supaya object-fit: cover tidak memotong gambar.
+      aspectRatio: '729/342',
+      minHeight: '190px',
+      borderRadius: '1.25rem',
+      overflow: 'hidden',
+      boxShadow: '0 12px 28px rgba(7,59,44,0.28)',
+    }}>
+      <Image
+        src="/icons/laporan-banner.png"
+        alt=""
+        fill
+        style={{ objectFit: 'cover', objectPosition: 'center' }}
+        priority
+        sizes="(max-width: 480px) 100vw, 480px"
+      />
+
+      {/* Teks ditumpuk di area polos sebelah kiri gambar */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '1.4rem 1.3rem',
+        maxWidth: '68%',
+      }}>
+        <p style={{
+          fontSize: '0.78rem',
+          fontWeight: 700,
+          color: '#e8c178',
+          margin: '0 0 0.25rem',
+          letterSpacing: '0.01em',
+        }}>
+          Assalamu&apos;alaikum,
+        </p>
+        <h2 style={{
+          fontSize: '1.25rem',
+          fontWeight: 800,
+          color: '#fff',
+          margin: 0,
+          lineHeight: 1.25,
+          letterSpacing: '-0.01em',
+          textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+        }}>
+          {name}
+        </h2>
+        <p style={{
+          fontSize: '0.74rem',
+          color: 'rgba(255,255,255,0.85)',
+          fontWeight: 600,
+          margin: '0.2rem 0 0.85rem',
+        }}>
+          {kelas ? `${kelas} - ${asrama}` : asrama}
+        </p>
+        <p style={{
+          fontSize: '0.68rem',
+          color: 'rgba(255,255,255,0.92)',
+          fontWeight: 500,
+          margin: 0,
+          lineHeight: 1.55,
+          fontStyle: 'italic',
+        }}>
+          &quot;Dan katakanlah: &apos;Bekerjalah kamu, maka Allah dan Rasul-Nya serta orang-orang mukmin akan melihat pekerjaanmu...&apos;&quot;
+        </p>
+        <p style={{
+          fontSize: '0.62rem',
+          fontWeight: 700,
+          color: '#e8c178',
+          margin: '0.35rem 0 0',
+          letterSpacing: '0.04em',
+        }}>
+          (QS. At-Taubah: 105)
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPONENT: Ringkasan Perkembangan
+   4 statistik ringkas. `rataNilai` dihitung otomatis dari seluruh
+   laporan yang berhasil dimuat. `kehadiran`, `prestasi`, `akhlak`
+   BELUM punya sumber data di model LaporanItem saat ini — masih
+   placeholder, tinggal sambungkan ke field/API yang sesuai
+   (mis. tabel presensi, prestasi, dan penilaian akhlak santri).
+   ════════════════════════════════════════════════════════════════ */
+interface RingkasanStat {
+  key: string
+  label: string
+  value: string
+  sub: string
+  color: string
+  bg: string
+  Icon: () => JSX.Element
+}
+
+function RingkasanPerkembangan({ rataNilai }: { rataNilai: number | null }) {
+  const stats: RingkasanStat[] = [
+    {
+      key: 'nilai',
+      label: 'Rata-rata Nilai',
+      value: rataNilai !== null ? `${rataNilai}%` : '—',
+      sub: rataNilai !== null ? nilaiMeta(rataNilai).text : 'Belum ada data',
+      color: '#0e7c5f',
+      bg: '#dcfce7',
+      Icon: IconBarChart,
+    },
+    {
+      // TODO: sambungkan ke data presensi/kehadiran santri yang sebenarnya
+      key: 'kehadiran',
+      label: 'Kehadiran',
+      value: '95%',
+      sub: 'Sangat Baik',
+      color: '#d97706',
+      bg: '#fef3c7',
+      Icon: IconClipboardCheck,
+    },
+    {
+      // TODO: sambungkan ke data prestasi/pencapaian santri yang sebenarnya
+      key: 'prestasi',
+      label: 'Prestasi',
+      value: '8',
+      sub: 'Pencapaian',
+      color: '#2563eb',
+      bg: '#dbeafe',
+      Icon: IconTrophy,
+    },
+    {
+      // TODO: sambungkan ke data penilaian akhlak santri yang sebenarnya
+      key: 'akhlak',
+      label: 'Akhlak',
+      value: 'A',
+      sub: 'Sangat Baik',
+      color: '#7c3aed',
+      bg: '#ede9fe',
+      Icon: IconStarBadge,
+    },
+  ]
+
   return (
     <div style={{
       background: '#fff',
       borderRadius: '1.25rem',
-      padding: '1.25rem',
+      padding: '1.1rem 1rem',
       border: '1px solid #e9eef2',
       boxShadow: '0 2px 12px rgba(15,23,42,0.04)',
     }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '1rem',
+        gap: '0.5rem',
+        color: '#0f172a',
+        marginBottom: '1rem',
       }}>
-        {/* Avatar */}
-        <div style={{
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #0e7c5f, #0a5c46)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <span style={{
-            fontSize: '1.3rem',
-            fontWeight: 800,
-            color: '#fff',
-            letterSpacing: '-0.01em',
-          }}>
-            {name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-          </span>
-        </div>
-        
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{
-            fontSize: '1rem',
-            fontWeight: 800,
-            color: '#0f172a',
-            margin: 0,
-            letterSpacing: '-0.01em',
-          }}>
-            {name}
-          </h2>
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#64748b',
-            fontWeight: 600,
-            margin: '0.15rem 0 0',
-          }}>
-            {kelas} • {asrama}
-          </p>
-        </div>
-        
-        {/* Quran verse decoration */}
-        <div style={{
-          fontSize: '0.65rem',
-          color: '#0e7c5f',
-          textAlign: 'right',
-          fontWeight: 600,
-          lineHeight: 1.4,
-          maxWidth: '100px',
-          flexShrink: 0,
-        }}>
-        </div>
+        <IconBarChart />
+        <h3 style={{ fontSize: '0.85rem', fontWeight: 700, margin: 0 }}>
+          Ringkasan Perkembangan
+        </h3>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+        {stats.map((s, i) => (
+          <div
+            key={s.key}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              gap: '0.4rem',
+              padding: '0 0.3rem',
+              borderLeft: i === 0 ? 'none' : '1px solid #f1f5f9',
+            }}
+          >
+            <div style={{
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: s.bg,
+              color: s.color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <s.Icon />
+            </div>
+            <p style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
+              {s.label}
+            </p>
+            <p style={{ fontSize: '1.05rem', fontWeight: 800, color: s.color, margin: 0, lineHeight: 1 }}>
+              {s.value}
+            </p>
+            <p style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 600, margin: 0 }}>
+              {s.sub}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -279,8 +556,9 @@ function DetailLaporanCard({
   onClick: (i: LaporanItem) => void 
 }) {
   const nilai = extractNilai(item)
-  const { text, ring } = nilaiMeta(nilai)
-  const tipe = getTipe(item.tipe)
+  const { text } = nilaiMeta(nilai)
+  const kategori = KATEGORI_META[getKategoriKey(item.judul)]
+  const desc = item.deskripsi?.trim() || kategori.defaultDesc
 
   return (
     <button
@@ -309,94 +587,83 @@ function DetailLaporanCard({
         e.currentTarget.style.boxShadow = '0 2px 12px rgba(15,23,42,0.04)'
       }}
     >
-      {/* Progress Circle Mini */}
+      {/* Icon kategori */}
       <div style={{
-        width: 48,
-        height: 48,
+        width: 46,
+        height: 46,
         flexShrink: 0,
-        position: 'relative',
+        borderRadius: '50%',
+        background: kategori.bg,
+        color: kategori.color,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}>
-        <CircleProgress pct={nilai} color={ring} size={48} stroke={5} />
-        <span style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '0.6rem',
-          fontWeight: 800,
-          color: ring,
-        }}>
-          {nilai}%
-        </span>
+        <kategori.Icon />
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '0.15rem',
-        }}>
-          <p style={{
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            color: '#0f172a',
-            margin: 0,
-            lineHeight: 1.3,
-          }}>
-            {item.judul}
-          </p>
-          <span style={{
-            fontSize: '0.6rem',
-            fontWeight: 700,
-            padding: '0.15rem 0.5rem',
-            borderRadius: 999,
-            background: tipe.bg,
-            color: tipe.color,
-            flexShrink: 0,
-            marginLeft: '0.5rem',
-          }}>
-            {tipe.label}
-          </span>
-        </div>
         <p style={{
-          fontSize: '0.6rem',
+          fontSize: '0.85rem',
+          fontWeight: 700,
+          color: '#0f172a',
+          margin: 0,
+          lineHeight: 1.3,
+        }}>
+          {item.judul || kategori.label}
+        </p>
+        <p style={{
+          fontSize: '0.68rem',
           color: '#94a3b8',
           fontWeight: 600,
-          margin: '0 0 0.3rem',
+          margin: '0.1rem 0 0.45rem',
+          lineHeight: 1.3,
         }}>
-          {item.created_at ? formatTanggal(item.created_at) : ''}
+          {desc}
         </p>
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
+          height: 5,
+          borderRadius: 999,
+          background: '#f1f5f9',
+          overflow: 'hidden',
         }}>
           <div style={{
-            flex: 1,
-            height: 4,
+            height: '100%',
+            width: `${nilai}%`,
             borderRadius: 999,
-            background: '#f1f5f9',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              height: '100%',
-              width: `${nilai}%`,
-              borderRadius: 999,
-              background: ring,
-              transition: 'width 1s cubic-bezier(0.4,0,0.2,1)',
-            }} />
-          </div>
-          <span style={{
-            fontSize: '0.6rem',
-            fontWeight: 700,
-            color: ring,
-            flexShrink: 0,
-          }}>
-            {text}
-          </span>
+            background: kategori.color,
+            transition: 'width 1s cubic-bezier(0.4,0,0.2,1)',
+          }} />
         </div>
+      </div>
+
+      {/* Pill persentase + label status */}
+      <div style={{
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.3rem',
+      }}>
+        <span style={{
+          fontSize: '0.68rem',
+          fontWeight: 800,
+          padding: '0.2rem 0.55rem',
+          borderRadius: 999,
+          background: kategori.bg,
+          color: kategori.color,
+          whiteSpace: 'nowrap',
+        }}>
+          {nilai}%
+        </span>
+        <span style={{
+          fontSize: '0.58rem',
+          fontWeight: 700,
+          color: '#94a3b8',
+          whiteSpace: 'nowrap',
+        }}>
+          {text}
+        </span>
       </div>
 
       <IconChevronRight />
@@ -755,6 +1022,13 @@ export default function LaporanPage() {
   const studentKelas = ''
   const studentAsrama = 'Asrama Putra'
 
+  // Rata-rata nilai dari seluruh laporan yang berhasil dimuat (null jika belum ada data)
+  const rataNilai = useMemo(() => {
+    if (items.length === 0) return null
+    const total = items.reduce((sum, item) => sum + extractNilai(item), 0)
+    return Math.round(total / items.length)
+  }, [items])
+
   return (
     <>
       <style>{`
@@ -890,12 +1164,15 @@ export default function LaporanPage() {
           {/* KATA BANNER - Gambar dari icons/kata-banner-laporan.png */}
           <KataBanner />
 
-          {/* STUDENT PROFILE */}
-          <StudentProfile 
+          {/* GREETING BANNER */}
+          <GreetingBanner
             name={studentName}
             kelas={studentKelas}
             asrama={studentAsrama}
           />
+
+          {/* RINGKASAN PERKEMBANGAN */}
+          <RingkasanPerkembangan rataNilai={rataNilai} />
 
           {/* Error */}
           {error && (

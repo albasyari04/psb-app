@@ -213,10 +213,7 @@ const IconPengumuman = () => (
   <Image src="/icons/pengumuman icon.png" alt="Pengumuman" width={48} height={48} />
 )
 const IconNotifikasi = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
+  <Image src="/icons/notifikasi icon.png" alt="Notifikasi" width={48} height={48} />
 )
 const IconPengaturan = () => (
   <Image src="/icons/profil icon.png" alt="Pengaturan" width={48} height={48} />
