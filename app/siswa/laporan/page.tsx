@@ -35,26 +35,24 @@ function formatTanggal(iso: string): string {
   }
 }
 
-function extractNilai(item: LaporanItem): number {
-  if (typeof item.nilai === 'number') return Math.min(100, Math.max(0, item.nilai))
-  if (item.deskripsi) {
-    const m = item.deskripsi.match(/(\d{1,3})\s*%/)
-    if (m) return Math.min(100, parseInt(m[1]))
-    const m2 = item.deskripsi.match(/nilai[:\s]+(\d{1,3})/i)
-    if (m2) return Math.min(100, parseInt(m2[1]))
-  }
-  const seed = item.id
-    ? item.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 30
-    : 0
-  return 70 + seed
+/* Catatan: badge skor "%" + label ("Sangat Baik", dst) telah DIHAPUS
+   dari tampilan kartu Detail Laporan sesuai permintaan — skor performa
+   tidak relevan ditampilkan untuk semua jenis laporan, terutama
+   kategori "Pelanggaran". Helper extractNilai/nilaiMeta yang lama
+   sudah tidak dipakai oleh DetailLaporanCard lagi. */
+
+function extractSeverityLevel(item: LaporanItem): 'ringan' | 'sedang' | 'berat' {
+  const d = (item.judul + ' ' + (item.deskripsi ?? '')).toLowerCase()
+  if (/(berat|keras|dikeluarkan|skors|denda|merusak|dirusak)/.test(d)) return 'berat'
+  if (/(sedang|peringatan\s*ke-?2|teguran\s*tertulis)/.test(d)) return 'sedang'
+  return 'ringan'
 }
 
-function nilaiMeta(n: number): { text: string; color: string; bg: string; ring: string } {
-  if (n >= 90) return { text: 'Sangat Baik', color: '#0e7c5f', bg: '#ecfdf5', ring: '#0e7c5f' }
-  if (n >= 75) return { text: 'Baik', color: '#16a34a', bg: '#dcfce7', ring: '#16a34a' }
-  if (n >= 60) return { text: 'Cukup', color: '#d97706', bg: '#fef3c7', ring: '#d97706' }
-  return { text: 'Perlu Perhatian', color: '#dc2626', bg: '#fee2e2', ring: '#dc2626' }
-}
+const SEVERITY_META = {
+  ringan: { label: 'Tingkat Ringan', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b' },
+  sedang: { label: 'Tingkat Sedang', color: '#ea580c', bg: '#ffedd5', dot: '#f97316' },
+  berat:  { label: 'Tingkat Berat',  color: '#dc2626', bg: '#fee2e2', dot: '#ef4444' },
+} as const
 
 const TIPE_MAP: Record<string, { label: string; color: string; bg: string }> = {
   bulanan: { label: 'Bulanan', color: '#2563eb', bg: '#eff6ff' },
@@ -74,7 +72,7 @@ function getTipe(tipe: string) {
    fallback ke kategori "Pelajaran". `defaultDesc` dipakai bila
    item.deskripsi kosong.
    ════════════════════════════════════════════════════════════════ */
-type KategoriKey = 'pelajaran' | 'ibadah' | 'akhlak' | 'kegiatan'
+type KategoriKey = 'pelajaran' | 'ibadah' | 'akhlak' | 'kegiatan' | 'pelanggaran'
 
 interface KategoriMeta {
   label: string
@@ -113,10 +111,18 @@ const KATEGORI_META: Record<KategoriKey, KategoriMeta> = {
     bg: '#ede9fe',
     Icon: IconRunning,
   },
+  pelanggaran: {
+    label: 'Pelanggaran',
+    defaultDesc: 'Catatan kedisiplinan santri',
+    color: '#dc2626',
+    bg: '#fee2e2',
+    Icon: IconAlertTriangle,
+  },
 }
 
 function getKategoriKey(judul: string): KategoriKey {
   const j = judul.toLowerCase()
+  if (/(pelanggaran|melanggar|denda|sanksi|teguran|peringatan)/.test(j)) return 'pelanggaran'
   if (/(ibadah|sholat|shalat|sholawat|hafalan|tahfidz|ngaji|mengaji)/.test(j)) return 'ibadah'
   if (/(akhlak|sikap|perilaku|adab)/.test(j)) return 'akhlak'
   if (/(kegiatan|ekstra|organisasi|santri\s*baru|kepramukaan)/.test(j)) return 'kegiatan'
@@ -196,38 +202,11 @@ function IconChevronRight() {
   )
 }
 
-function IconBarChart() {
+function IconArrowRightSmall() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="8"/><line x1="18" y1="20" x2="18" y2="11"/>
-    </svg>
-  )
-}
-
-function IconClipboardCheck() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
-      <polyline points="8.5 13 10.5 15 15 10.5"/>
-    </svg>
-  )
-}
-
-function IconTrophy() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/>
-      <path d="M7 5H4a1 1 0 0 0-1 1 4 4 0 0 0 4 4"/>
-      <path d="M17 5h3a1 1 0 0 1 1 1 4 4 0 0 1-4 4"/>
-      <line x1="12" y1="14" x2="12" y2="18"/><path d="M9 21h6"/><path d="M9.5 18h5l.5 3h-6z"/>
-    </svg>
-  )
-}
-
-function IconStarBadge() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      <path d="M12 2.5l2.95 6.4 7.05.75-5.25 4.8 1.5 6.9L12 17.7l-6.25 3.65 1.5-6.9-5.25-4.8 7.05-.75L12 2.5z"/>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="13 6 19 12 13 18"/>
     </svg>
   )
 }
@@ -275,28 +254,12 @@ function IconRunning() {
   )
 }
 
-/* ════════════════════════════════════════════════════════════════
-   CIRCULAR PROGRESS
-   ════════════════════════════════════════════════════════════════ */
-function CircleProgress({ pct, color, size = 72, stroke = 7 }: {
-  pct: number; color: string; size?: number; stroke?: number
-}) {
-  const r = (size - stroke * 2) / 2
-  const circ = 2 * Math.PI * r
-  const dash = (pct / 100) * circ
-  const cx = size / 2
+function IconAlertTriangle() {
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }} aria-hidden>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#f1f5f9" strokeWidth={stroke} />
-      <circle
-        cx={cx} cy={cx} r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={stroke}
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${circ}`}
-        style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1)' }}
-      />
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
     </svg>
   )
 }
@@ -413,9 +376,10 @@ function DetailLaporanCard({
   item: LaporanItem;
   onClick: (i: LaporanItem) => void 
 }) {
-  const nilai = extractNilai(item)
-  const { text } = nilaiMeta(nilai)
-  const kategori = KATEGORI_META[getKategoriKey(item.judul)]
+  const kategoriKey = getKategoriKey(item.judul)
+  const kategori = KATEGORI_META[kategoriKey]
+  const isPelanggaran = kategoriKey === 'pelanggaran'
+  const severity = isPelanggaran ? SEVERITY_META[extractSeverityLevel(item)] : null
   const desc = item.deskripsi?.trim() || kategori.defaultDesc
 
   return (
@@ -426,105 +390,141 @@ function DetailLaporanCard({
         textAlign: 'left',
         cursor: 'pointer',
         background: '#fff',
-        border: '1px solid #e9eef2',
-        borderRadius: '1rem',
-        padding: '1rem',
+        border: '1px solid #edf1f4',
+        borderRadius: '1.1rem',
+        padding: '1rem 1.05rem',
         display: 'flex',
-        alignItems: 'center',
-        gap: '0.85rem',
+        flexDirection: 'column',
+        gap: '0.7rem',
         fontFamily: 'inherit',
-        boxShadow: '0 2px 12px rgba(15,23,42,0.04)',
+        boxShadow: '0 2px 14px rgba(15,23,42,0.045)',
         transition: 'all 0.2s ease',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,23,42,0.09)'
+        e.currentTarget.style.boxShadow = '0 10px 26px rgba(15,23,42,0.09)'
+        e.currentTarget.style.borderColor = '#e2e8f0'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = ''
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(15,23,42,0.04)'
+        e.currentTarget.style.boxShadow = '0 2px 14px rgba(15,23,42,0.045)'
+        e.currentTarget.style.borderColor = '#edf1f4'
       }}
     >
-      {/* Icon kategori */}
-      <div style={{
-        width: 46,
-        height: 46,
-        flexShrink: 0,
-        borderRadius: '50%',
-        background: kategori.bg,
-        color: kategori.color,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <kategori.Icon />
-      </div>
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontSize: '0.85rem',
-          fontWeight: 700,
-          color: '#0f172a',
-          margin: 0,
-          lineHeight: 1.3,
-        }}>
-          {item.judul || kategori.label}
-        </p>
-        <p style={{
-          fontSize: '0.68rem',
-          color: '#94a3b8',
-          fontWeight: 600,
-          margin: '0.1rem 0 0.45rem',
-          lineHeight: 1.3,
-        }}>
-          {desc}
-        </p>
+      {/* Baris atas: icon + judul + tanggal + chevron */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
         <div style={{
-          height: 5,
-          borderRadius: 999,
-          background: '#f1f5f9',
-          overflow: 'hidden',
+          width: 42,
+          height: 42,
+          flexShrink: 0,
+          borderRadius: '0.85rem',
+          background: kategori.bg,
+          color: kategori.color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}>
-          <div style={{
-            height: '100%',
-            width: `${nilai}%`,
-            borderRadius: 999,
-            background: kategori.color,
-            transition: 'width 1s cubic-bezier(0.4,0,0.2,1)',
-          }} />
+          <kategori.Icon />
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontSize: '0.87rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            margin: 0,
+            lineHeight: 1.35,
+          }}>
+            {item.judul || kategori.label}
+          </p>
+          {item.created_at && (
+            <p style={{
+              fontSize: '0.66rem',
+              color: '#94a3b8',
+              fontWeight: 600,
+              margin: '0.2rem 0 0',
+            }}>
+              {formatTanggal(item.created_at)}
+            </p>
+          )}
+        </div>
+
+        <div style={{ flexShrink: 0, color: '#cbd5e1', marginTop: '0.15rem' }}>
+          <IconChevronRight />
         </div>
       </div>
 
-      {/* Pill persentase + label status */}
-      <div style={{
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.3rem',
-      }}>
+      {/* Badge kategori + (khusus pelanggaran) badge tingkat keparahan */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
         <span style={{
-          fontSize: '0.68rem',
-          fontWeight: 800,
-          padding: '0.2rem 0.55rem',
+          fontSize: '0.64rem',
+          fontWeight: 700,
+          padding: '0.22rem 0.6rem',
           borderRadius: 999,
           background: kategori.bg,
           color: kategori.color,
           whiteSpace: 'nowrap',
         }}>
-          {nilai}%
+          {kategori.label}
         </span>
-        <span style={{
-          fontSize: '0.58rem',
-          fontWeight: 700,
-          color: '#94a3b8',
-          whiteSpace: 'nowrap',
-        }}>
-          {text}
-        </span>
+        {severity && (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.32rem',
+            fontSize: '0.64rem',
+            fontWeight: 700,
+            padding: '0.22rem 0.6rem 0.22rem 0.5rem',
+            borderRadius: 999,
+            background: severity.bg,
+            color: severity.color,
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: severity.dot,
+              display: 'inline-block',
+            }} />
+            {severity.label}
+          </span>
+        )}
       </div>
 
-      <IconChevronRight />
+      {/* Deskripsi — dipotong rapi maksimal 2 baris, detail lengkap di modal */}
+      <p style={{
+        fontSize: '0.78rem',
+        color: '#64748b',
+        fontWeight: 500,
+        margin: 0,
+        lineHeight: 1.55,
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      }}>
+        {desc}
+      </p>
+
+      {/* Footer: ajakan lihat detail, pengganti badge skor */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.3rem',
+        paddingTop: '0.15rem',
+      }}>
+        <span style={{
+          fontSize: '0.7rem',
+          fontWeight: 700,
+          color: kategori.color,
+        }}>
+          Lihat detail
+        </span>
+        <span style={{ color: kategori.color, display: 'flex', alignItems: 'center' }}>
+          <IconArrowRightSmall />
+        </span>
+      </div>
     </button>
   )
 }
@@ -583,6 +583,10 @@ function SkeletonCard() {
    ════════════════════════════════════════════════════════════════ */
 function DetailModal({ item, onClose }: { item: LaporanItem; onClose: () => void }) {
   const tipe = getTipe(item.tipe)
+  const kategoriKey = getKategoriKey(item.judul)
+  const kategori = KATEGORI_META[kategoriKey]
+  const isPelanggaran = kategoriKey === 'pelanggaran'
+  const severity = isPelanggaran ? SEVERITY_META[extractSeverityLevel(item)] : null
 
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose()
@@ -637,16 +641,28 @@ function DetailModal({ item, onClose }: { item: LaporanItem; onClose: () => void
           justifyContent: 'space-between',
           marginBottom: '1rem',
         }}>
-          <span style={{
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            padding: '0.22rem 0.65rem',
-            borderRadius: 999,
-            background: tipe.bg,
-            color: tipe.color,
-          }}>
-            {tipe.label}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '0.22rem 0.65rem',
+              borderRadius: 999,
+              background: kategori.bg,
+              color: kategori.color,
+            }}>
+              {kategori.label}
+            </span>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '0.22rem 0.65rem',
+              borderRadius: 999,
+              background: tipe.bg,
+              color: tipe.color,
+            }}>
+              {tipe.label}
+            </span>
+          </div>
           <button
             onClick={onClose}
             aria-label="Tutup"
@@ -661,10 +677,26 @@ function DetailModal({ item, onClose }: { item: LaporanItem; onClose: () => void
               justifyContent: 'center',
               cursor: 'pointer',
               color: '#64748b',
+              flexShrink: 0,
             }}
           >
             <IconClose />
           </button>
+        </div>
+
+        {/* Icon kategori besar */}
+        <div style={{
+          width: 52,
+          height: 52,
+          borderRadius: '1rem',
+          background: kategori.bg,
+          color: kategori.color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '0.9rem',
+        }}>
+          <kategori.Icon />
         </div>
 
         <h2 style={{
@@ -678,16 +710,34 @@ function DetailModal({ item, onClose }: { item: LaporanItem; onClose: () => void
           {item.judul}
         </h2>
 
-        {item.created_at && (
-          <p style={{
-            fontSize: '0.75rem',
-            color: '#94a3b8',
-            fontWeight: 600,
-            margin: '0 0 1.25rem',
-          }}>
-            {formatTanggal(item.created_at)}
-          </p>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          {item.created_at && (
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#94a3b8',
+              fontWeight: 600,
+              margin: 0,
+            }}>
+              {formatTanggal(item.created_at)}
+            </p>
+          )}
+          {severity && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.32rem',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              padding: '0.2rem 0.6rem 0.2rem 0.5rem',
+              borderRadius: 999,
+              background: severity.bg,
+              color: severity.color,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: severity.dot, display: 'inline-block' }} />
+              {severity.label}
+            </span>
+          )}
+        </div>
 
         {/* deskripsi */}
         {item.deskripsi && (

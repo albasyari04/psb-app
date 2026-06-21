@@ -88,7 +88,7 @@ const HERO_SLIDES = [
   },
   {
     eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Sowan ndalem Ploso,',
+    titleBold: 'Sowan Ploso,',
     titleLight: 'K.H Nurul Huda Djazuli',
     href: '/siswa/galeri',
     image: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
