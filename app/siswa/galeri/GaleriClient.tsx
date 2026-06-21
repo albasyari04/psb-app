@@ -93,6 +93,13 @@ const GALLERY_ITEMS: GalleryItem[] = [
     category: 'camera',
     photoCount: 22,
   },
+  {
+    src: '/image/galeri/Harlah PonPes 40 th.jpeg',
+    title: 'Acara Harlah Pondok Pesantren',
+    desc: 'Foto bersama K.H Anwar Zahid dari Bojonegoro, Jawa Timur',
+    category: 'camera',
+    photoCount: 22,
+  },
 ]
 
 /* ════════════════════════════════════════════════════════════════
