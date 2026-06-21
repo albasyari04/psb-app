@@ -265,31 +265,40 @@ function IconAlertTriangle() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   COMPONENT: Kata Banner (Menggunakan gambar dari icons/kata-banner-laporan.png)
+   COMPONENT: Kata Motivasi Banner
    ════════════════════════════════════════════════════════════════ */
 function KataBanner() {
   return (
     <div style={{
-      position: 'relative',
-      borderRadius: '1.25rem',
-      overflow: 'hidden',
-      boxShadow: '0 12px 28px rgba(7,59,44,0.28)',
-      width: '100%',
-      // Rasio asli kata-banner-laporan.png = 1838 x 856px.
-      // Disamakan persis supaya object-fit: cover TIDAK memotong gambar.
-      aspectRatio: '1838/856',
-      minHeight: '100px',
+      background: '#fff',
+      border: '1px solid #edf1f4',
+      borderRadius: '1.1rem',
+      padding: '1rem 1.05rem',
+      boxShadow: '0 2px 14px rgba(15,23,42,0.045)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1rem',
     }}>
-      <Image
-        src="/icons/kata-banner-laporan.png"
-        alt="Terus Semangat — Kata Motivasi"
-        fill
-        style={{
-          objectFit: 'cover',
-          objectPosition: 'center',
-        }}
-        sizes="(max-width: 480px) 100vw, 480px"
-      />
+      <div style={{ flex: 1, paddingRight: '0.5rem' }}>
+        <p style={{
+          fontStyle: 'italic',
+          color: '#6b7280',
+          fontSize: '0.875rem',
+          margin: 0,
+          lineHeight: 1.5,
+        }}>
+          &quot;apapun yang anda lakukan, pasti ada resikonya. Jadi terimalah&quot;
+        </p>
+      </div>
+      <div style={{ flexShrink: 0 }}>
+        <Image
+          src="/icons/santri.png"
+          alt="Santri"
+          width={120}
+          height={120}
+          style={{ borderRadius: '0.5rem', objectFit: 'cover' }}
+        />
+      </div>
     </div>
   )
 }
