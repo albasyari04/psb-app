@@ -83,19 +83,21 @@ const HERO_SLIDES = [
     eyebrow: 'Rutinan Ahad Legi',
     titleBold: 'Ngaji Hikam,',
     titleLight: 'lelenggahan sareng Guru',
+    description:
+      'Mendalami kitab Hikam bersama guru untuk memperkuat ilmu, akhlak, dan nilai-nilai keislaman.',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji.jpeg',
   },
   {
-    eyebrow: 'Rutinan Akhir Tahun',
-    titleBold: 'Ziarah Wali Songo,',
-    titleLight: 'Lan Madosi Barokah Poro Guru',
+    eyebrow: 'Ziarah Wali Songo',
+    titleBold: 'Kegiatan akhir tahun',
+    titleLight: 'yakni Ziarah Wali 9',
     href: '/siswa/galeri',
     image: '/image/galeri/ziarah.jpeg',
   },
   {
     eyebrow: 'Rawuh ipun Guru Ploso',
-    titleBold: 'Ngaji Bersama',
+    titleBold: 'Ngaji Bareng',
     titleLight: 'Masyayikh Ploso',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji1.jpeg',
@@ -602,7 +604,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           <div className={styles.greetWrap}>
             <p className={styles.greetText}>Assalamu&apos;alaikum,</p>
             <h1 className={styles.greetName}>{fullName}</h1>
-            <p className={styles.greetSchool}>Santri Pondok Pesantren Al-I&apos;tiqomah</p>
+            <p className={styles.greetSchool}>Santri Pondok Pesantren Al-Istiqomah</p>
           </div>
         </div>
       </header>
