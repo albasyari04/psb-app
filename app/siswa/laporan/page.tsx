@@ -1,7 +1,7 @@
 // app/siswa/laporan/page.tsx
 'use client'
 
-import { useEffect, useState, useCallback, useMemo, type JSX } from 'react'
+import { useEffect, useState, useCallback, type JSX } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'

@@ -143,12 +143,6 @@ const IconShieldBadge = ({ color = 'white', size = 22 }: { color?: string; size?
   </svg>
 )
 
-const IconStar = ({ color = 'white', size = 18 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <path d="M12 2.5l2.9 6.4 7 .7-5.3 4.7 1.6 6.9L12 17.6l-6.2 3.6 1.6-6.9-5.3-4.7 7-.7L12 2.5z" />
-  </svg>
-)
-
 const IconInfo = ({ color = '#15803d', size = 15 }: { color?: string; size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '0.12rem' }}>
     <circle cx="12" cy="12" r="10" />

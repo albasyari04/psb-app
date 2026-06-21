@@ -88,7 +88,7 @@ const HERO_SLIDES = [
   },
   {
     eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Sowan Ploso,',
+    titleBold: 'Sowan Ploso',
     titleLight: 'K.H Nurul Huda Djazuli',
     href: '/siswa/galeri',
     image: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
@@ -227,12 +227,17 @@ function HeroBanner() {
   return (
     <div className={styles.heroBannerWrap}>
       <div className={styles.heroBannerBgPattern} />
-      <div className={styles.heroBannerContent}>
-        <span className={styles.heroBannerEyebrow}>{slide.eyebrow}</span>
-        <h2 className={styles.heroBannerTitle}>
-          <span className={styles.heroTitleBold}>{slide.titleBold}</span>
-          <span className={styles.heroTitleLight}>{slide.titleLight}</span>
-        </h2>
+      <div
+        className={styles.heroBannerContent}
+        style={{ display: 'flex', flexDirection: 'column' }}
+      >
+        <div style={{ flexGrow: 1 }}>
+          <span className={styles.heroBannerEyebrow}>{slide.eyebrow}</span>
+          <h2 className={styles.heroBannerTitle}>
+            <span className={styles.heroTitleBold}>{slide.titleBold}</span>
+            <span className={styles.heroTitleLight}>{slide.titleLight}</span>
+          </h2>
+        </div>
         <Link href={slide.href} className={styles.heroBannerBtn}>
           Selengkapnya <span aria-hidden>→</span>
         </Link>
