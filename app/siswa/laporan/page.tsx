@@ -292,7 +292,7 @@ function KataBanner() {
       </div>
       <div style={{ flexShrink: 0 }}>
         <Image
-          src="/icons/santri.png"
+          src="/icons/santri1.png"
           alt="Santri"
           width={120}
           height={120}
