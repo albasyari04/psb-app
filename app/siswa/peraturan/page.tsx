@@ -1,3 +1,4 @@
+// page.tsx - VERSI LENGKAP DENGAN PERBAIKAN
 'use client'
 
 import Link from 'next/link'
@@ -49,7 +50,7 @@ interface SanksiLevel {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// Icon set (line icons, konsisten 1.5–2px stroke)
+// Icon set
 // ════════════════════════════════════════════════════════════════════════
 const IconArrowLeft = ({ color = 'currentColor', size = 18 }: { color?: string; size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -75,15 +76,6 @@ const IconGrid = ({ color = 'currentColor', size = 16 }: { color?: string; size?
     <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" />
     <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" />
     <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" />
-  </svg>
-)
-
-const IconDocument = ({ color = 'currentColor', size = 16 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="9" y1="13" x2="15" y2="13" />
-    <line x1="9" y1="17" x2="13" y2="17" />
   </svg>
 )
 
@@ -135,14 +127,6 @@ const IconBookOpen = ({ color = 'currentColor', size = 16 }: { color?: string; s
   </svg>
 )
 
-const IconShieldBadge = ({ color = 'white', size = 22 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2.5l7.5 3.2v5.6c0 5-3.2 8.6-7.5 9.7-4.3-1.1-7.5-4.7-7.5-9.7V5.7L12 2.5z" />
-    <path d="M9 9.2h6v4.6H9z" />
-    <path d="M9 9.2c0-1.7 1.3-3 3-3s3 1.3 3 3" />
-  </svg>
-)
-
 const IconInfo = ({ color = '#15803d', size = 15 }: { color?: string; size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '0.12rem' }}>
     <circle cx="12" cy="12" r="10" />
@@ -150,18 +134,6 @@ const IconInfo = ({ color = '#15803d', size = 15 }: { color?: string; size?: num
     <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 )
-
-function getSmallIcon(id: string, color: string, size = 18) {
-  switch (id) {
-    case 'tata-tertib': return <IconDocument color={color} size={size} />
-    case 'kewajiban': return <IconShieldCheck color={color} size={size} />
-    case 'larangan': return <IconAlertTriangle color={color} size={size} />
-    case 'sanksi': return <IconGavel color={color} size={size} />
-    case 'lain': return <IconScroll color={color} size={size} />
-    case 'wali-santri': return <IconUsers color={color} size={size} />
-    default: return <IconDocument color={color} size={size} />
-  }
-}
 
 // ════════════════════════════════════════════════════════════════════════
 // Data peraturan
@@ -297,7 +269,7 @@ const CATEGORIES: CategoryDef[] = [
     id: 'larangan',
     chipLabel: 'Larangan',
     title: 'Larangan & Pelanggaran',
-    desc: 'Larangan yang tidak boleh dilakukan santri di lingkungan pondok.',
+    desc: 'Pelanggaran yang tidak boleh dilakukan santri di lingkungan pondok.',
     bab: 'BAB III',
     babTitle: 'Larangan',
     pasalCount: 5,
@@ -527,7 +499,7 @@ const SANKSI_LEVELS: SanksiLevel[] = [
     iconBg: '#fef3c7',
     barColor: '#fbbf24',
     barWidth: '33%',
-    pasalRef: 'Pasal 10 ayat 11, 12, 13, 14 \u00b7 Pasal 11 ayat 1, 3, 8 \u00b7 Pasal 12 ayat 1, 4, 5',
+    pasalRef: 'Pasal 10 ayat 11, 12, 13, 14 · Pasal 11 ayat 1, 3, 8 · Pasal 12 ayat 1, 4, 5',
     hukuman: ['Diperingatkan', 'Pernyataan diri tidak mengulangi', 'Disiram dengan air'],
   },
   {
@@ -538,7 +510,7 @@ const SANKSI_LEVELS: SanksiLevel[] = [
     iconBg: '#ffedd5',
     barColor: '#fb923c',
     barWidth: '66%',
-    pasalRef: 'Pasal 8 ayat 1\u20132 \u00b7 Pasal 9 ayat 2 \u00b7 Pasal 10 ayat 8, 10, 15\u201319, 21 \u00b7 Pasal 11 ayat 2, 6, 7 \u00b7 Pasal 12 ayat 2, 3, 7, 8, 9',
+    pasalRef: 'Pasal 8 ayat 1–2 · Pasal 9 ayat 2 · Pasal 10 ayat 8, 10, 15–19, 21 · Pasal 11 ayat 2, 6, 7 · Pasal 12 ayat 2, 3, 7, 8, 9',
     hukuman: ['Nadhofah / bersih-bersih', 'Membaca atau menulis surat pilihan di lapangan', 'Membuat surat perjanjian'],
   },
   {
@@ -549,12 +521,10 @@ const SANKSI_LEVELS: SanksiLevel[] = [
     iconBg: '#ede9fe',
     barColor: '#a78bfa',
     barWidth: '100%',
-    pasalRef: 'Pasal 9 ayat 1, 3 \u00b7 Pasal 10 ayat 1\u20137, 9, 20 \u00b7 Pasal 11 ayat 4, 5, 9 \u00b7 Pasal 12 ayat 6, 10',
+    pasalRef: 'Pasal 9 ayat 1, 3 · Pasal 10 ayat 1–7, 9, 20 · Pasal 11 ayat 4, 5, 9 · Pasal 12 ayat 6, 10',
     hukuman: ['Dicukur', 'Ganti rugi', 'Penyitaan barang tanpa dikembalikan', 'Denda', 'Disowankan kepada pengasuh', 'Dikembalikan kepada wali/orang tua'],
   },
 ]
-
-const CATEGORY_GRID_IDS = ['tata-tertib', 'kewajiban', 'larangan', 'sanksi']
 
 // ════════════════════════════════════════════════════════════════════════
 // Sub-komponen: detail satu kategori
@@ -572,7 +542,20 @@ function CategoryDetail({
     <div className={styles.detailSection}>
       <div className={styles.detailHeader} style={{ borderColor: category.colors.border }}>
         <div className={styles.detailIconWrap} style={{ background: category.colors.iconBg }}>
-          {getSmallIcon(category.id, category.colors.accent, 22)}
+          {category.id === 'tata-tertib' && (
+            <Image
+              src="/icons/tata-tertib-icon.png"
+              alt="Tata Tertib"
+              width={24}
+              height={24}
+              className={styles.detailIconImage}
+            />
+          )}
+          {category.id === 'kewajiban' && <IconShieldCheck color={category.colors.accent} size={22} />}
+          {category.id === 'larangan' && <IconAlertTriangle color={category.colors.accent} size={22} />}
+          {category.id === 'sanksi' && <IconGavel color={category.colors.accent} size={22} />}
+          {category.id === 'lain' && <IconScroll color={category.colors.accent} size={22} />}
+          {category.id === 'wali-santri' && <IconUsers color={category.colors.accent} size={22} />}
         </div>
         <div>
           <p className={styles.detailBabTag} style={{ color: category.colors.accent }}>
@@ -633,14 +616,23 @@ function CategoryDetail({
                 <div className={styles.accordionHeaderLeft}>
                   <div
                     className={styles.accordionNum}
-                    style={{ background: category.colors.iconBg, border: `1.5px solid ${category.colors.border}`, color: category.colors.accent }}
+                    style={{
+                      background: category.colors.iconBg,
+                      border: `1.5px solid ${category.colors.border}`,
+                      color: category.colors.accent
+                    }}
                   >
                     {p.pasal > 0 ? p.pasal : '\u2022'}
                   </div>
                   <div>
                     <p className={styles.accordionTitle}>{p.title}</p>
-                    <span className={styles.accordionTag} style={{ background: category.colors.tagBg, color: category.colors.tagText }}>
-                      {p.pasal > 0 ? `Pasal ${p.pasal}` : 'Umum'} &middot; {p.items.length} ketentuan
+                    <span className={styles.accordionTag}
+                      style={{
+                        background: category.colors.tagBg,
+                        color: category.colors.tagText
+                      }}
+                    >
+                      {p.pasal > 0 ? `Pasal ${p.pasal}` : 'Umum'} · {p.items.length} ketentuan
                     </span>
                   </div>
                 </div>
@@ -656,7 +648,12 @@ function CategoryDetail({
                 <div className={styles.ruleList}>
                   {p.items.map((item, i) => (
                     <div key={i} className={styles.ruleItem}>
-                      <div className={styles.ruleBullet} style={{ background: category.colors.accent }}>
+                      <div 
+                        className={styles.ruleBullet} 
+                        style={{ 
+                          background: category.colors.accent
+                        }}
+                      >
                         {i + 1}
                       </div>
                       <p className={styles.ruleText}>{item}</p>
@@ -716,43 +713,26 @@ export default function PeraturanPage() {
         </a>
       </div>
 
-      {/* ══ HERO (hanya tampil di tab Semua) ═══════════════════════════ */}
+      {/* ══ HERO BANNER ══════════════════════════════════════════════════ */}
       {isSemua && (
-        <div className={styles.heroCard}>
-          <div className={styles.heroOrb1} />
-          <div className={styles.heroOrb2} />
-          <div className={styles.heroContent}>
-            <h2 className={styles.heroTitle}>
-              Membangun Karakter,<br />
-              Melalui Kedisiplinan
-            </h2>
-            <p className={styles.heroDesc}>
-              Kepatuhan terhadap tata tertib pondok merupakan langkah awal dalam
-              membentuk pribadi yang bertanggung jawab, berakhlak mulia, serta siap
-              menjadi teladan bagi masyarakat.
-            </p>
-          </div>
-          <div className={styles.heroImgWrap}>
+        <div className={styles.bannerWrapper}>
+          <div className={styles.bannerCard}>
             <Image
-              src="/image/pondok.jpeg"
-              alt="Pondok Pesantren Al-Istiqomah"
-              width={220}
-              height={280}
-              className={styles.heroImg}
+              src="/icons/peraturan-banner.png"
+              alt="Peraturan Pondok Pesantren Al-Istiqomah"
+              width={440}
+              height={200}
+              className={styles.bannerImage}
               priority
             />
-            <div className={styles.heroBadge}>
-              <IconShieldBadge />
-            </div>
           </div>
         </div>
       )}
 
-      {/* ══ FILTER CHIPS — redesign premium elegant ═════════════════════ */}
+      {/* ══ FILTER CHIPS ═══════════════════════════════════════════════ */}
       <div className={styles.tabsContainer}>
         <div className={styles.tabsWrap}>
           <div className={styles.tabsScroll}>
-
             <button
               className={`${styles.tabBtn} ${isSemua ? styles.tabBtnActive : ''}`}
               onClick={() => selectCategory('semua')}
@@ -763,22 +743,71 @@ export default function PeraturanPage() {
               <span>Semua</span>
             </button>
 
-            {CATEGORIES.map((c) => {
-              const active = activeFilter === c.id
-              return (
-                <button
-                  key={c.id}
-                  className={`${styles.tabBtn} ${active ? styles.tabBtnActive : ''}`}
-                  onClick={() => selectCategory(c.id)}
-                >
-                  <span className={styles.tabIcon}>
-                    {getSmallIcon(c.id, active ? 'white' : '#64748b', 14)}
-                  </span>
-                  <span>{c.chipLabel}</span>
-                </button>
-              )
-            })}
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'tata-tertib' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('tata-tertib')}
+            >
+              <span className={styles.tabIcon}>
+                <Image
+                  src="/icons/tata-tertib-icon.png"
+                  alt="Tata Tertib"
+                  width={16}
+                  height={16}
+                  className={styles.tabIconImage}
+                />
+              </span>
+              <span>Tata Tertib</span>
+            </button>
 
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'kewajiban' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('kewajiban')}
+            >
+              <span className={styles.tabIcon}>
+                <IconShieldCheck color={activeFilter === 'kewajiban' ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Kewajiban</span>
+            </button>
+
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'larangan' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('larangan')}
+            >
+              <span className={styles.tabIcon}>
+                <IconAlertTriangle color={activeFilter === 'larangan' ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Larangan</span>
+            </button>
+
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'sanksi' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('sanksi')}
+            >
+              <span className={styles.tabIcon}>
+                <IconGavel color={activeFilter === 'sanksi' ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Sanksi</span>
+            </button>
+
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'lain' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('lain')}
+            >
+              <span className={styles.tabIcon}>
+                <IconScroll color={activeFilter === 'lain' ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Ketentuan Lain</span>
+            </button>
+
+            <button
+              className={`${styles.tabBtn} ${activeFilter === 'wali-santri' ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('wali-santri')}
+            >
+              <span className={styles.tabIcon}>
+                <IconUsers color={activeFilter === 'wali-santri' ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Wali Santri</span>
+            </button>
           </div>
         </div>
       </div>
@@ -792,39 +821,128 @@ export default function PeraturanPage() {
               <p className={styles.sectionLabelTitle}>Kategori Peraturan</p>
               <p className={styles.sectionLabelSub}>Pilih kategori untuk melihat peraturan lebih detail</p>
             </div>
-
             <div className={styles.categoryGrid}>
-              {CATEGORIES.filter((c) => CATEGORY_GRID_IDS.includes(c.id)).map((cat) => (
-                <button
-                  key={cat.id}
-                  className={styles.categoryCard}
-                  style={{ background: cat.colors.cardBg, borderColor: cat.colors.border }}
-                  onClick={() => selectCategory(cat.id)}
-                >
-                  <div className={styles.categoryIconWrap} style={{ background: 'rgba(255,255,255,0.75)' }}>
-                    {getSmallIcon(cat.id, cat.colors.accent, 19)}
-                  </div>
+              {/* Tata Tertib Umum */}
+              <button
+                className={styles.categoryCard}
+                style={{ 
+                  background: 'linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)', 
+                  borderColor: '#bbf7d0',
+                  padding: '1.2rem 1rem 3.8rem 1.5rem'
+                }}
+                onClick={() => selectCategory('tata-tertib')}
+              >
+                <div className={styles.categoryIconWrap}>
+                  <Image
+                    src="/icons/tata-tertib-icon.png"
+                    alt="Tata Tertib Umum"
+                    width={28}
+                    height={28}
+                    className={styles.categoryIconImage}
+                  />
+                </div>
+                <p className={styles.categoryTitle}>Tata Tertib Umum</p>
+                <p className={styles.categorySub}>Aturan dasar dan umum yang wajib diikuti seluruh santri.</p>
+                <div className={styles.categoryImgWrap}>
+                  <Image
+                    src="/icons/tata-tertib-icon.png"
+                    alt="Tata Tertib Umum"
+                    width={120}
+                    height={105}
+                    className={styles.categoryImg}
+                  />
+                </div>
+                <span className={styles.categoryChevron} style={{ color: '#16a34a', left: '1.5rem' }}>
+                  <IconChevronRight size={14} />
+                </span>
+              </button>
 
-                  <p className={styles.categoryTitle}>{cat.title}</p>
-                  <p className={styles.categorySub}>{cat.desc}</p>
+              {/* Kewajiban & Ketentuan */}
+              <button
+                className={styles.categoryCard}
+                style={{ 
+                  background: 'linear-gradient(160deg, #f0fdf9 0%, #d1fae5 100%)', 
+                  borderColor: '#a7f3d0',
+                  padding: '1.2rem 1rem 3.8rem 1.5rem'
+                }}
+                onClick={() => selectCategory('kewajiban')}
+              >
+                <div className={styles.categoryIconWrap}>
+                  <IconShieldCheck color="#059669" size={24} />
+                </div>
+                <p className={styles.categoryTitle}>Kewajiban & Ketentuan</p>
+                <p className={styles.categorySub}>Kewajiban santri dalam menjalankan kegiatan di pondok.</p>
+                <div className={styles.categoryImgWrap}>
+                  <Image
+                    src="/image/kewajiban.png"
+                    alt="Kewajiban & Ketentuan"
+                    width={120}
+                    height={105}
+                    className={styles.categoryImg}
+                  />
+                </div>
+                <span className={styles.categoryChevron} style={{ color: '#059669', left: '1.5rem' }}>
+                  <IconChevronRight size={14} />
+                </span>
+              </button>
 
-                  {cat.illustration && (
-                    <div className={styles.categoryImgWrap}>
-                      <Image
-                        src={cat.illustration}
-                        alt={cat.title}
-                        width={120}
-                        height={105}
-                        className={styles.categoryImg}
-                      />
-                    </div>
-                  )}
+              {/* Larangan & Pelanggaran */}
+              <button
+                className={styles.categoryCard}
+                style={{ 
+                  background: 'linear-gradient(160deg, #fffbeb 0%, #fef3c7 100%)', 
+                  borderColor: '#fde68a',
+                  padding: '1.2rem 1rem 3.8rem 1.5rem'
+                }}
+                onClick={() => selectCategory('larangan')}
+              >
+                <div className={styles.categoryIconWrap}>
+                  <IconAlertTriangle color="#dc2626" size={24} />
+                </div>
+                <p className={styles.categoryTitle}>Larangan & Pelanggaran</p>
+                <p className={styles.categorySub}>Pelanggaran yang tidak boleh dilakukan santri di lingkungan pondok.</p>
+                <div className={styles.categoryImgWrap}>
+                  <Image
+                    src="/icons/icon penting.png"
+                    alt="Larangan & Pelanggaran"
+                    width={120}
+                    height={105}
+                    className={styles.categoryImg}
+                  />
+                </div>
+                <span className={styles.categoryChevron} style={{ color: '#dc2626', left: '1.5rem' }}>
+                  <IconChevronRight size={14} />
+                </span>
+              </button>
 
-                  <span className={styles.categoryChevron} style={{ color: cat.colors.accent }}>
-                    <IconChevronRight size={14} />
-                  </span>
-                </button>
-              ))}
+              {/* Sanksi & Hukuman */}
+              <button
+                className={styles.categoryCard}
+                style={{ 
+                  background: 'linear-gradient(160deg, #faf5ff 0%, #ede9fe 100%)', 
+                  borderColor: '#ddd6fe',
+                  padding: '1.2rem 1rem 3.8rem 1.5rem'
+                }}
+                onClick={() => selectCategory('sanksi')}
+              >
+                <div className={styles.categoryIconWrap}>
+                  <IconGavel color="#7c3aed" size={24} />
+                </div>
+                <p className={styles.categoryTitle}>Sanksi & Hukuman</p>
+                <p className={styles.categorySub}>Jenis pelanggaran dan sanksi sesuai tingkat pelanggaran.</p>
+                <div className={styles.categoryImgWrap}>
+                  <Image
+                    src="/image/icon hakim.png"
+                    alt="Sanksi & Hukuman"
+                    width={120}
+                    height={105}
+                    className={styles.categoryImg}
+                  />
+                </div>
+                <span className={styles.categoryChevron} style={{ color: '#7c3aed', left: '1.5rem' }}>
+                  <IconChevronRight size={14} />
+                </span>
+              </button>
             </div>
 
             <div className={styles.ringkasanHeader}>
@@ -835,21 +953,95 @@ export default function PeraturanPage() {
             </div>
 
             <div className={styles.ringkasanList}>
-              {CATEGORIES.map((cat) => (
-                <button key={cat.id} className={styles.ringkasanRow} onClick={() => selectCategory(cat.id)}>
-                  <div className={styles.ringkasanIconWrap} style={{ background: cat.colors.iconBg }}>
-                    {getSmallIcon(cat.id, cat.colors.accent, 18)}
-                  </div>
-                  <div className={styles.ringkasanBody}>
-                    <p className={styles.ringkasanTitle}>{cat.bab} &mdash; {cat.babTitle}</p>
-                    <p className={styles.ringkasanDesc}>{cat.desc}</p>
-                  </div>
-                  <span className={styles.ringkasanPill} style={{ background: cat.colors.tagBg, color: cat.colors.tagText }}>
-                    {cat.pasalCount} Pasal
-                  </span>
-                  <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-                </button>
-              ))}
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('tata-tertib')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <Image
+                    src="/icons/tata-tertib-icon.png"
+                    alt="Tata Tertib"
+                    width={24}
+                    height={24}
+                    className={styles.ringkasanIconImage}
+                  />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>BAB I — Ketentuan Umum</p>
+                  <p className={styles.ringkasanDesc}>Aturan dasar dan umum yang berlaku.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#dcfce7', color: '#166534' }}>
+                  2 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
+
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('kewajiban')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <IconShieldCheck color="#059669" size={20} />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>BAB II — Kewajiban Santri</p>
+                  <p className={styles.ringkasanDesc}>Kewajiban santri dalam keseluruhan.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#d1fae5', color: '#065f46' }}>
+                  5 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
+
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('larangan')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <IconAlertTriangle color="#dc2626" size={20} />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>BAB III — Pelanggaran</p>
+                  <p className={styles.ringkasanDesc}>Pelanggaran yang tidak boleh dilakukan.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#fee2e2', color: '#991b1b' }}>
+                  5 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
+
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('sanksi')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <IconGavel color="#7c3aed" size={20} />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>BAB IV — Sanksi & Pelaksanaan</p>
+                  <p className={styles.ringkasanDesc}>Jenis pelanggaran dan sanksi yang diterapkan.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#ede9fe', color: '#5b21b6' }}>
+                  4 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
+
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('lain')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <IconScroll color="#0d9488" size={20} />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>BAB V & VI — Ketentuan Lain</p>
+                  <p className={styles.ringkasanDesc}>Tujuan tata tertib serta aturan tambahan.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#ccfbf1', color: '#115e59' }}>
+                  3 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
+
+              <button className={styles.ringkasanRow} onClick={() => selectCategory('wali-santri')}>
+                <div className={styles.ringkasanIconWrap}>
+                  <IconUsers color="#2563eb" size={20} />
+                </div>
+                <div className={styles.ringkasanBody}>
+                  <p className={styles.ringkasanTitle}>Lampiran — Wali Santri & Lainnya</p>
+                  <p className={styles.ringkasanDesc}>Ketentuan dan etika bersama wali santri.</p>
+                </div>
+                <span className={styles.ringkasanPill} style={{ background: '#dbeafe', color: '#1e40af' }}>
+                  2 Pasal
+                </span>
+                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+              </button>
             </div>
           </>
         )}

@@ -1,23 +1,5 @@
 'use client'
 
-/**
- * app/siswa/dashboard/DashboardClient.tsx
- *
- * PERBAIKAN:
- * 1. Import CSS: './dashboard.module.css' → './dashboard_module.css'
- *    (sesuaikan dengan nama file CSS yang sebenarnya di folder Anda)
- * 2. payBtn href "/siswa/pembayaran/bayar" → sudah benar,
- *    tapi halaman /siswa/pembayaran/bayar/page.tsx BELUM ADA → itulah 404.
- *    Solusi: buat app/siswa/pembayaran/bayar/page.tsx (sudah disediakan).
- * 3. Image layout prop deprecated Next.js 13+ → hapus layout="fill",
- *    gunakan fill prop langsung.
- * 4. Tombol "Selengkapnya" di HERO_SLIDES sebelumnya mengarah ke
- *    '/siswa/tentang', '/siswa/kegiatan', '/siswa/prestasi' yang BELUM ADA
- *    halamannya → itulah penyebab 404 di /siswa/tentang.
- *    Solusi: semua slide sekarang diarahkan ke halaman galeri kegiatan
- *    yang baru dibuat: '/siswa/galeri' (lihat app/siswa/galeri/page.tsx).
- */
-
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
