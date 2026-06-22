@@ -82,7 +82,7 @@ const HERO_SLIDES = [
   {
     eyebrow: 'Rutinan Ahad Legi',
     titleBold: 'Ngaji Hikam,',
-    titleLight:'bersama K.H Thobroni Hanani \nPengasuh Pondok Pesantren Al Istiqomah',
+    titleLight:'bersama K.H Thobroni Hanani',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji.jpeg',
   },
@@ -96,7 +96,7 @@ const HERO_SLIDES = [
   {
     eyebrow: 'Masyayikh Ploso',
     titleBold: 'Halal Bihalal,',
-    titleLight:'Gus Kautsar & Gus Fahim',
+    titleLight:'Gus Kautsar & \nGus Fahim Ploso',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji1.jpeg',
   },
