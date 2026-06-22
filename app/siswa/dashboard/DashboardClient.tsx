@@ -88,15 +88,15 @@ const HERO_SLIDES = [
   },
   {
     eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Sowan Ploso',
-    titleLight: 'K.H Nurul Huda Djazuli',
+    titleBold: 'Sowan ',
+    titleLight: 'Pon-Pes Ploso',
     href: '/siswa/galeri',
     image: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
   },
   {
     eyebrow: 'Masyayikh Ploso',
     titleBold: 'Halal Bihalal,',
-    titleLight: 'bersama Gus Kautsar & Gus Fahim Ploso',
+    titleLight: 'Gus Kautsar & Gus Fahim Ploso',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji1.jpeg',
   },

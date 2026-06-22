@@ -9,7 +9,7 @@ import styles from './peraturan.module.css'
 // Types
 // ════════════════════════════════════════════════════════════════════════
 interface PasalItem {
-  pasal: number          // 0 = tidak bernomor pasal (mis. ketentuan umum lampiran)
+  pasal: number
   title: string
   items: string[]
 }
@@ -164,8 +164,7 @@ function getSmallIcon(id: string, color: string, size = 18) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// Data peraturan — sumber: Tata Tertib Pondok Pesantren Al-Istiqomah,
-// Sumber Harjo, Buay Madang Timur, OKU Timur. Ditetapkan 12 Maret 2026.
+// Data peraturan
 // ════════════════════════════════════════════════════════════════════════
 const CATEGORIES: CategoryDef[] = [
   {
@@ -367,6 +366,7 @@ const CATEGORIES: CategoryDef[] = [
           'Mencaci atau menghina tamu.',
           'Berbohong, mengumpat/berkata jorok (misuh), dan memanggil dengan kata yang tidak pantas.',
           'Membuat gaduh pada saat sholat berjamaah, pengajian, dan waktu istirahat.',
+          'Berpenampilan tidak rapi dan tidak sopan.',
           'Menaruh kitab tidak pada tempatnya.',
           'Mengamalkan segala amalan tanpa seizin kyai.',
         ],
@@ -406,8 +406,6 @@ const CATEGORIES: CategoryDef[] = [
       tagBg: '#ede9fe',
       tagText: '#5b21b6',
     },
-    // Pasal 13 & 14 ditampilkan lewat kartu tingkatan sanksi (SANKSI_LEVELS),
-    // Pasal 15 & 16 ditampilkan sebagai accordion biasa di bawahnya.
     pasal: [
       {
         pasal: 15,
@@ -559,7 +557,7 @@ const SANKSI_LEVELS: SanksiLevel[] = [
 const CATEGORY_GRID_IDS = ['tata-tertib', 'kewajiban', 'larangan', 'sanksi']
 
 // ════════════════════════════════════════════════════════════════════════
-// Sub-komponen: detail satu kategori (header + accordion pasal)
+// Sub-komponen: detail satu kategori
 // ════════════════════════════════════════════════════════════════════════
 function CategoryDetail({
   category,
@@ -724,9 +722,14 @@ export default function PeraturanPage() {
           <div className={styles.heroOrb1} />
           <div className={styles.heroOrb2} />
           <div className={styles.heroContent}>
-            <h2 className={styles.heroTitle}>Taat Aturan,<br />Mulia Akhlak</h2>
+            <h2 className={styles.heroTitle}>
+              Membangun Karakter,<br />
+              Melalui Kedisiplinan
+            </h2>
             <p className={styles.heroDesc}>
-              Setiap santri wajib memahami dan mentaati peraturan pondok sebagai pedoman hidup, belajar, dan berakhlak di lingkungan pesantren.
+              Kepatuhan terhadap tata tertib pondok merupakan langkah awal dalam
+              membentuk pribadi yang bertanggung jawab, berakhlak mulia, serta siap
+              menjadi teladan bagi masyarakat.
             </p>
           </div>
           <div className={styles.heroImgWrap}>
@@ -745,29 +748,38 @@ export default function PeraturanPage() {
         </div>
       )}
 
-      {/* ══ FILTER CHIPS ════════════════════════════════════════════════ */}
-      <div className={styles.tabsWrap}>
-        <div className={styles.tabsScroll}>
-          <button
-            className={`${styles.tabBtn} ${isSemua ? styles.tabBtnActive : ''}`}
-            onClick={() => selectCategory('semua')}
-          >
-            <span className={styles.tabIcon}><IconGrid color={isSemua ? 'white' : '#15803d'} /></span>
-            <span>Semua</span>
-          </button>
-          {CATEGORIES.map((c) => {
-            const active = activeFilter === c.id
-            return (
-              <button
-                key={c.id}
-                className={`${styles.tabBtn} ${active ? styles.tabBtnActive : ''}`}
-                onClick={() => selectCategory(c.id)}
-              >
-                <span className={styles.tabIcon}>{getSmallIcon(c.id, active ? 'white' : c.colors.accent, 15)}</span>
-                <span>{c.chipLabel}</span>
-              </button>
-            )
-          })}
+      {/* ══ FILTER CHIPS — redesign premium elegant ═════════════════════ */}
+      <div className={styles.tabsContainer}>
+        <div className={styles.tabsWrap}>
+          <div className={styles.tabsScroll}>
+
+            <button
+              className={`${styles.tabBtn} ${isSemua ? styles.tabBtnActive : ''}`}
+              onClick={() => selectCategory('semua')}
+            >
+              <span className={styles.tabIcon}>
+                <IconGrid color={isSemua ? 'white' : '#64748b'} size={14} />
+              </span>
+              <span>Semua</span>
+            </button>
+
+            {CATEGORIES.map((c) => {
+              const active = activeFilter === c.id
+              return (
+                <button
+                  key={c.id}
+                  className={`${styles.tabBtn} ${active ? styles.tabBtnActive : ''}`}
+                  onClick={() => selectCategory(c.id)}
+                >
+                  <span className={styles.tabIcon}>
+                    {getSmallIcon(c.id, active ? 'white' : '#64748b', 14)}
+                  </span>
+                  <span>{c.chipLabel}</span>
+                </button>
+              )
+            })}
+
+          </div>
         </div>
       </div>
 
@@ -839,7 +851,6 @@ export default function PeraturanPage() {
                 </button>
               ))}
             </div>
-
           </>
         )}
 
