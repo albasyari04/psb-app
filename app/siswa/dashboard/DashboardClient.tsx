@@ -82,21 +82,21 @@ const HERO_SLIDES = [
   {
     eyebrow: 'Rutinan Ahad Legi',
     titleBold: 'Ngaji Hikam,',
-    titleLight: 'lalenggahan sareng Guru',
+    titleLight:'bersama K.H Thobroni Hanani \nPengasuh Pondok Pesantren Al Istiqomah',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji.jpeg',
   },
   {
     eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Sowan ',
-    titleLight: 'Pon-Pes Ploso',
+    titleBold: 'Sowan Ploso ',
+    titleLight:'K.H Nurul Huda \nDjazuli',
     href: '/siswa/galeri',
     image: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
   },
   {
     eyebrow: 'Masyayikh Ploso',
     titleBold: 'Halal Bihalal,',
-    titleLight: 'Gus Kautsar & Gus Fahim Ploso',
+    titleLight:'Gus Kautsar & Gus Fahim',
     href: '/siswa/galeri',
     image: '/image/galeri/ngaji1.jpeg',
   },
@@ -227,11 +227,8 @@ function HeroBanner() {
   return (
     <div className={styles.heroBannerWrap}>
       <div className={styles.heroBannerBgPattern} />
-      <div
-        className={styles.heroBannerContent}
-        style={{ display: 'flex', flexDirection: 'column' }}
-      >
-        <div style={{ flexGrow: 1 }}>
+      <div className={styles.heroBannerContent}>
+        <div>
           <span className={styles.heroBannerEyebrow}>{slide.eyebrow}</span>
           <h2 className={styles.heroBannerTitle}>
             <span className={styles.heroTitleBold}>{slide.titleBold}</span>
@@ -243,7 +240,6 @@ function HeroBanner() {
         </Link>
       </div>
       <div className={styles.heroBannerImageWrap}>
-        {/* FIX: hapus layout="fill" (deprecated Next.js 13+), gunakan fill prop */}
         <Image src={slide.image} alt={slide.eyebrow} fill className={styles.heroBannerImg} priority key={index} />
       </div>
       <div className={styles.heroBannerDots}>
