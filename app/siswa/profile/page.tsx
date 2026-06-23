@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { useState, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
+// ── Icons ──────────────────────────────────────────────────────────────────────
 function IconEdit() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -33,17 +32,9 @@ function IconMail() {
     </svg>
   )
 }
-function IconGraduate() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M22 10v6M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6 10v5c0 2.2 2.7 4 6 4s6-1.8 6-4v-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
 function IconClipboard() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="2" />
@@ -53,7 +44,7 @@ function IconClipboard() {
 }
 function IconChart() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
@@ -92,10 +83,10 @@ function IconProfile() {
 }
 function IconCamera() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2" />
+        stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2.2" />
     </svg>
   )
 }
@@ -108,32 +99,21 @@ function IconChevron() {
 }
 function IconLogout() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
-
-// ── Verified Badge ─────────────────────────────────────────────────────────────
-function StudentBadge() {
+function IconShield() {
   return (
-    <div style={{
-      width: 36, height: 36, borderRadius: '50%',
-      background: 'rgba(16,185,129,0.15)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      border: '1.5px solid rgba(16,185,129,0.3)',
-      flexShrink: 0,
-    }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M22 10v6M12 2L2 7l10 5 10-5-10-5z" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M6 10v5c0 2.2 2.7 4 6 4s6-1.8 6-4v-5" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </div>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }
-
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ── Main Page ──────────────────────────────────────────────────────────────────
 export default function SiswaProfilePage() {
   const { data: session, update } = useSession()
   const [loggingOut, setLoggingOut] = useState(false)
@@ -185,266 +165,341 @@ export default function SiswaProfilePage() {
   return (
     <>
       <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #F3F4F8; font-family: 'Segoe UI', system-ui, sans-serif; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0F1117; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
 
+        /* ── Root ── */
         .sp-root {
           max-width: 430px; margin: 0 auto;
-          min-height: 100vh; background: #F3F4F8;
-          position: relative; padding-bottom: 80px;
+          min-height: 100vh; background: #0F1117;
+          position: relative; padding-bottom: 90px;
         }
 
         /* ── Header ── */
         .sp-header {
-          background: linear-gradient(135deg, #064E3B 0%, #065F46 40%, #047857 100%);
-          padding: 56px 20px 68px;
+          background: linear-gradient(160deg, #064E3B 0%, #065F46 50%, #0D9488 100%);
+          padding: 52px 20px 80px;
           position: relative; overflow: hidden;
         }
-        .sp-header::before {
+        .sp-header::after {
           content: '';
           position: absolute; inset: 0;
-          background-image: url('/masjid.jpg');
-          background-size: cover; background-position: center top;
-          opacity: 0.1;
+          background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(52,211,153,0.18) 0%, transparent 70%);
+          pointer-events: none;
         }
-        .sp-header-grid {
-          position: absolute; inset: 0;
+        .sp-header-mesh {
+          position: absolute; inset: 0; pointer-events: none;
           background-image:
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-          background-size: 32px 32px;
+            radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 40%),
+            radial-gradient(circle at 80% 10%, rgba(255,255,255,0.06) 0%, transparent 40%);
         }
-        .sp-header-orb {
-          position: absolute; border-radius: 50%;
-          background: rgba(52,211,153,0.15); filter: blur(30px);
+        .sp-header-dots {
+          position: absolute; inset: 0;
+          background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+          background-size: 24px 24px;
+          pointer-events: none;
         }
         .sp-header-top {
-          position: relative; z-index: 1;
+          position: relative; z-index: 2;
           display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 24px;
+          margin-bottom: 28px;
         }
-        .sp-header-title { color: #fff; font-size: 22px; font-weight: 700; }
-        .sp-header-sub { color: rgba(255,255,255,0.65); font-size: 13px; margin-top: 2px; }
+        .sp-header-label {
+          display: inline-flex; align-items: center; gap: 6px;
+          background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 20px; padding: 4px 10px;
+          color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600;
+          letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px;
+        }
+        .sp-header-label-dot { width: 5px; height: 5px; border-radius: 50%; background: #34D399; }
+        .sp-header-title { color: #fff; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .sp-header-sub { color: rgba(167,243,208,0.8); font-size: 13px; margin-top: 2px; font-weight: 400; }
         .sp-header-edit-btn {
-          width: 38px; height: 38px; border-radius: 10px;
-          background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+          width: 42px; height: 42px; border-radius: 12px;
+          background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
           color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
-          backdrop-filter: blur(8px);
-          text-decoration: none; transition: background 0.2s;
+          backdrop-filter: blur(12px); text-decoration: none; transition: all 0.2s;
+          flex-shrink: 0;
         }
-        .sp-header-edit-btn:hover { background: rgba(255,255,255,0.25); }
+        .sp-header-edit-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.05); }
 
-        /* ── Profile card ── */
+        /* ── Hero card ── */
         .sp-hero-card {
-          position: relative; z-index: 1;
-          background: rgba(255,255,255,0.12);
-          border: 1px solid rgba(255,255,255,0.2);
-          border-radius: 20px; padding: 20px;
-          backdrop-filter: blur(12px);
+          position: relative; z-index: 2;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.18);
+          border-radius: 24px; padding: 20px;
+          backdrop-filter: blur(16px);
           display: flex; align-items: center; gap: 16px;
         }
         .sp-avatar-wrap { position: relative; flex-shrink: 0; }
         .sp-avatar-ring {
-          width: 80px; height: 80px; border-radius: 50%;
-          background: linear-gradient(135deg, #6EE7B7, #059669); padding: 3px;
+          width: 84px; height: 84px; border-radius: 50%;
+          background: linear-gradient(135deg, #34D399, #059669, #0D9488);
+          padding: 3px;
         }
-        .sp-avatar {
+        .sp-avatar-inner {
           width: 100%; height: 100%; border-radius: 50%;
-          background: #D1FAE5;
+          background: #064E3B;
           display: flex; align-items: center; justify-content: center;
           overflow: hidden; position: relative;
         }
         .sp-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .sp-avatar-initials { font-size: 28px; font-weight: 700; color: #065F46; }
+        .sp-avatar-initials {
+          font-size: 30px; font-weight: 800; color: #34D399;
+          letter-spacing: -1px;
+        }
         .sp-avatar-overlay {
           position: absolute; inset: 0; border-radius: 50%;
-          background: rgba(6,95,70,0.6);
+          background: rgba(6,78,59,0.7);
           display: flex; align-items: center; justify-content: center;
         }
         .sp-avatar-spinner {
-          width: 24px; height: 24px; border-radius: 50%;
-          border: 3px solid rgba(255,255,255,0.3);
-          border-top-color: #fff;
-          animation: spin 0.8s linear infinite;
+          width: 26px; height: 26px; border-radius: 50%;
+          border: 3px solid rgba(255,255,255,0.25);
+          border-top-color: #34D399;
+          animation: spin 0.75s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .sp-online-dot {
-          position: absolute; bottom: 4px; right: 4px;
-          width: 14px; height: 14px; border-radius: 50%;
-          background: #34D399; border: 2px solid white;
-        }
         .sp-camera-btn {
-          position: absolute; bottom: -2px; right: -2px;
-          width: 26px; height: 26px; border-radius: 50%;
-          background: #059669; border: 2px solid white;
+          position: absolute; bottom: 0; right: 0;
+          width: 28px; height: 28px; border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #0D9488);
+          border: 2.5px solid #0F1117;
           color: white; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          box-shadow: 0 3px 10px rgba(5,150,105,0.5);
+          transition: transform 0.2s;
         }
+        .sp-camera-btn:hover { transform: scale(1.1); }
         .sp-file-input { display: none; }
-        .sp-hero-info { flex: 1; min-width: 0; }
-        .sp-hero-name { color: #fff; font-size: 20px; font-weight: 700; }
-        .sp-hero-email { color: rgba(167,243,208,0.9); font-size: 13px; margin-top: 3px; }
-        .sp-hero-badge {
-          display: inline-flex; align-items: center; gap: 6px;
-          margin-top: 10px; padding: 5px 10px; border-radius: 20px;
-          background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-          color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 600;
-        }
-        .sp-hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #34D399; }
 
-        /* ── Stats strip ── */
+        .sp-hero-info { flex: 1; min-width: 0; }
+        .sp-hero-name {
+          color: #fff; font-size: 19px; font-weight: 700;
+          letter-spacing: -0.3px; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis;
+        }
+        .sp-hero-email {
+          color: rgba(167,243,208,0.75); font-size: 12px;
+          margin-top: 3px; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis;
+        }
+        .sp-hero-badge {
+          display: inline-flex; align-items: center; gap: 5px;
+          margin-top: 10px; padding: 5px 10px; border-radius: 20px;
+          background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.25);
+          color: #6EE7B7; font-size: 10.5px; font-weight: 700;
+          letter-spacing: 0.02em;
+        }
+        .sp-hero-badge-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #34D399;
+          box-shadow: 0 0 6px #34D399;
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        .sp-hero-verified {
+          width: 32px; height: 32px; flex-shrink: 0;
+          border-radius: 50%;
+          background: rgba(52,211,153,0.15);
+          border: 1.5px solid rgba(52,211,153,0.3);
+          display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ── Float zone (stats card) ── */
         .sp-float-zone {
-          padding: 0 16px; margin-top: -52px; position: relative; z-index: 10;
+          padding: 0 16px;
+          margin-top: -56px;
+          position: relative; z-index: 10;
         }
         .sp-stats-card {
-          background: #fff; border-radius: 18px; padding: 16px 20px;
+          background: #1A1F2E;
+          border-radius: 20px;
+          padding: 18px 20px;
           display: flex; align-items: center;
-          box-shadow: 0 4px 24px rgba(5,150,105,0.12);
-          border: 1px solid rgba(5,150,105,0.06);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.06);
         }
         .sp-stat-item {
-          flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+          flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
         }
-        .sp-stat-divider { width: 1px; height: 36px; background: #E5E7EB; }
+        .sp-stat-divider {
+          width: 1px; height: 40px;
+          background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent);
+        }
         .sp-stat-icon {
-          width: 36px; height: 36px; border-radius: 10px;
-          display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+          width: 38px; height: 38px; border-radius: 12px;
+          display: flex; align-items: center; justify-content: center; margin-bottom: 6px;
         }
-        .sp-stat-val { font-size: 13px; font-weight: 700; color: #1F2937; }
-        .sp-stat-label { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+        .sp-stat-val { font-size: 13px; font-weight: 800; color: #F9FAFB; letter-spacing: -0.3px; }
+        .sp-stat-label { font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* ── Upload feedback ── */
+        .sp-upload-feedback {
+          margin: 12px 16px 0;
+          padding: 10px 14px; border-radius: 12px;
+          font-size: 12.5px; font-weight: 600;
+          display: flex; align-items: center; gap: 8px;
+        }
+        .sp-upload-error {
+          background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+          color: #F87171;
+        }
+        .sp-upload-success {
+          background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+          color: #34D399;
+        }
 
         /* ── Body ── */
-        .sp-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .sp-body { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
 
-        .sp-section-title {
-          font-size: 11px; font-weight: 700; color: #059669;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          padding: 0 4px; margin-bottom: 2px;
+        .sp-section-label {
+          font-size: 10px; font-weight: 700; color: #4B5563;
+          letter-spacing: 0.1em; text-transform: uppercase;
+          padding: 16px 4px 8px;
         }
 
+        /* ── Glass card ── */
         .sp-card {
-          background: #fff; border-radius: 18px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-          border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
+          background: #1A1F2E;
+          border-radius: 20px;
+          border: 1px solid rgba(255,255,255,0.06);
+          overflow: hidden;
         }
 
         /* ── Info rows ── */
         .sp-info-row {
           display: flex; align-items: center; gap: 14px;
-          padding: 14px 16px; border-bottom: 1px solid #F3F4F6;
+          padding: 14px 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
         }
         .sp-info-row:last-child { border-bottom: none; }
-        .sp-info-icon {
-          width: 36px; height: 36px; border-radius: 10px;
+        .sp-icon-box {
+          width: 38px; height: 38px; border-radius: 11px;
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .sp-info-icon.green  { background: #D1FAE5; color: #059669; }
-        .sp-info-icon.blue   { background: #DBEAFE; color: #2563EB; }
-        .sp-info-icon.violet { background: #EDE9FE; color: #7C3AED; }
-        .sp-info-icon.teal   { background: #CCFBF1; color: #0D9488; }
-        .sp-info-label { font-size: 12px; color: #9CA3AF; font-weight: 500; }
-        .sp-info-value { font-size: 14px; color: #111827; font-weight: 600; margin-top: 1px; }
-        .sp-info-value-right { margin-left: auto; text-align: right; }
-        .sp-info-badge-role {
-          padding: 3px 12px; border-radius: 20px;
-          background: #D1FAE5; color: #059669;
-          font-size: 12px; font-weight: 700;
+        .sp-icon-green  { background: rgba(5,150,105,0.15); color: #34D399; }
+        .sp-icon-blue   { background: rgba(37,99,235,0.15); color: #60A5FA; }
+        .sp-icon-violet { background: rgba(124,58,237,0.15); color: #A78BFA; }
+        .sp-icon-amber  { background: rgba(217,119,6,0.15); color: #FCD34D; }
+        .sp-icon-teal   { background: rgba(13,148,136,0.15); color: #2DD4BF; }
+        .sp-info-text { flex: 1; min-width: 0; }
+        .sp-info-label { font-size: 11px; color: #6B7280; font-weight: 500; }
+        .sp-info-value {
+          font-size: 14px; color: #F3F4F6; font-weight: 600;
+          margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sp-info-right { margin-left: auto; flex-shrink: 0; }
+        .sp-badge-role {
+          padding: 4px 12px; border-radius: 20px;
+          background: rgba(5,150,105,0.15); border: 1px solid rgba(5,150,105,0.25);
+          color: #34D399; font-size: 11px; font-weight: 700;
         }
 
-        /* ── Menu rows ── */
+        /* ── Photo hint ── */
+        .sp-photo-hint {
+          background: linear-gradient(135deg, rgba(5,150,105,0.08), rgba(13,148,136,0.06));
+          border: 1px solid rgba(52,211,153,0.15);
+          border-radius: 16px; padding: 14px 16px;
+          display: flex; align-items: center; gap: 12px;
+          margin-bottom: 2px;
+        }
+        .sp-photo-hint-icon {
+          width: 42px; height: 42px; border-radius: 12px;
+          background: rgba(5,150,105,0.15); border: 1px solid rgba(52,211,153,0.2);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0; color: #34D399;
+        }
+        .sp-photo-hint-title { font-size: 13px; font-weight: 700; color: #E5E7EB; }
+        .sp-photo-hint-sub { font-size: 11px; color: #6B7280; margin-top: 2px; line-height: 1.5; }
+
+        /* ── Menu rows (navigation) ── */
         .sp-menu-row {
           display: flex; align-items: center; gap: 14px;
-          padding: 14px 16px; border-bottom: 1px solid #F3F4F6;
-          text-decoration: none; cursor: pointer; transition: background 0.15s;
+          padding: 14px 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          text-decoration: none; cursor: pointer;
+          transition: background 0.15s;
         }
         .sp-menu-row:last-child { border-bottom: none; }
-        .sp-menu-row:hover { background: #FAFAFA; }
-        .sp-menu-title { font-size: 14px; font-weight: 600; color: #111827; }
-        .sp-menu-sub { font-size: 12px; color: #9CA3AF; margin-top: 1px; }
-        .sp-menu-chevron { margin-left: auto; color: #D1D5DB; flex-shrink: 0; }
-
-        /* ── Upload hint card ── */
-        .sp-hint-card {
-          background: linear-gradient(135deg, #ECFDF5, #F0FDF4);
-          border: 1px solid #6EE7B7; border-radius: 14px;
-          padding: 14px 16px;
-          display: flex; align-items: center; gap: 12px;
-        }
-        .sp-hint-icon { font-size: 24px; flex-shrink: 0; }
-        .sp-hint-title { font-size: 13px; font-weight: 700; color: #065F46; }
-        .sp-hint-sub { font-size: 11px; color: #6EE7B7; color: #047857; margin-top: 2px; line-height: 1.4; }
+        .sp-menu-row:hover { background: rgba(255,255,255,0.03); }
+        .sp-menu-text { flex: 1; }
+        .sp-menu-title { font-size: 14px; font-weight: 600; color: #F3F4F6; }
+        .sp-menu-sub { font-size: 11px; color: #6B7280; margin-top: 1px; }
+        .sp-menu-chevron { color: #374151; flex-shrink: 0; }
 
         /* ── Logout ── */
         .sp-logout-btn {
           width: 100%; padding: 16px;
-          background: #FFF5F5; border: 1px solid #FECACA;
-          border-radius: 16px; color: #EF4444;
-          font-size: 15px; font-weight: 600;
+          background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+          border-radius: 18px; color: #F87171;
+          font-size: 14px; font-weight: 700;
           display: flex; align-items: center; justify-content: center; gap: 10px;
-          cursor: pointer; transition: background 0.2s;
+          cursor: pointer; transition: all 0.2s; margin-top: 10px;
+          letter-spacing: 0.01em;
         }
-        .sp-logout-btn:hover { background: #FEE2E2; }
-        .sp-logout-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* ── Upload feedback ── */
-        .sp-upload-error {
-          background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px;
-          padding: 8px 14px; font-size: 12px; color: #EF4444;
-          text-align: center; margin: -6px 16px 0;
-        }
-        .sp-upload-success {
-          background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px;
-          padding: 8px 14px; font-size: 12px; color: #059669;
-          text-align: center; margin: -6px 16px 0;
-        }
+        .sp-logout-btn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); }
+        .sp-logout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ── Footer ── */
-        .sp-footer { text-align: center; font-size: 11px; color: #9CA3AF; padding: 8px 0 4px; }
+        .sp-footer {
+          text-align: center; font-size: 11px; color: #374151;
+          padding: 16px 0 4px; letter-spacing: 0.02em;
+        }
 
-        /* ── Bottom Nav ── */
+        /* ── Bottom nav ── */
         .sp-bottom-nav {
           position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
           width: 100%; max-width: 430px;
-          background: #fff; border-top: 1px solid #F3F4F6;
-          display: flex; align-items: center;
-          padding: 8px 0 16px; z-index: 100;
-          box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+          background: #12161F;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          display: flex; align-items: stretch;
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+          z-index: 100;
+          box-shadow: 0 -8px 24px rgba(0,0,0,0.5);
         }
         .sp-nav-item {
           flex: 1; display: flex; flex-direction: column;
-          align-items: center; gap: 4px;
-          text-decoration: none; color: #9CA3AF;
-          font-size: 11px; font-weight: 500; padding: 4px 0;
-          transition: color 0.15s;
+          align-items: center; gap: 3px;
+          text-decoration: none; color: #4B5563;
+          font-size: 10px; font-weight: 600; padding: 10px 0 12px;
+          transition: color 0.15s; letter-spacing: 0.02em;
+          text-transform: uppercase;
         }
-        .sp-nav-item.active { color: #059669; }
+        .sp-nav-item.active { color: #34D399; }
+        .sp-nav-item.active svg { filter: drop-shadow(0 0 4px rgba(52,211,153,0.6)); }
       `}</style>
 
       <div className="sp-root">
 
         {/* ── HEADER ── */}
         <div className="sp-header">
-          <div className="sp-header-grid" />
-          <div className="sp-header-orb" style={{ width: 180, height: 180, top: -60, right: -40 }} />
-          <div className="sp-header-orb" style={{ width: 120, height: 120, bottom: 20, left: -30 }} />
+          <div className="sp-header-mesh" />
+          <div className="sp-header-dots" />
 
           <div className="sp-header-top">
             <div>
+              
               <div className="sp-header-title">Profil Saya</div>
-              <div className="sp-header-sub">Portal Siswa</div>
+              <div className="sp-header-sub">Kelola informasi akun Anda</div>
             </div>
+            {/* ✅ FIX: Link ke halaman edit yang benar */}
             <Link href="/siswa/profile/edit" className="sp-header-edit-btn">
               <IconEdit />
             </Link>
           </div>
 
+          {/* Hero profile card */}
           <div className="sp-hero-card">
             <div className="sp-avatar-wrap">
               <div className="sp-avatar-ring">
-                <div className="sp-avatar">
+                <div className="sp-avatar-inner">
                   {photoSrc ? (
-                    <Image src={photoSrc} alt={user?.name ?? 'Avatar'} width={80} height={80}
+                    <Image src={photoSrc} alt={user?.name ?? 'Avatar'} width={84} height={84}
                       className="sp-avatar-img" unoptimized referrerPolicy="no-referrer" />
                   ) : (
                     <span className="sp-avatar-initials">{initials}</span>
@@ -456,7 +511,6 @@ export default function SiswaProfilePage() {
                   )}
                 </div>
               </div>
-              <div className="sp-online-dot" />
               <button className="sp-camera-btn" onClick={() => fileInputRef.current?.click()}
                 disabled={uploading} aria-label="Ganti foto" type="button">
                 <IconCamera />
@@ -468,125 +522,107 @@ export default function SiswaProfilePage() {
             <div className="sp-hero-info">
               <div className="sp-hero-name">{user?.name ?? 'Nama Siswa'}</div>
               <div className="sp-hero-email">{user?.email ?? 'siswa@psb.com'}</div>
-              <div className="sp-hero-badge">
-                <div className="sp-hero-badge-dot" />
-                Siswa Aktif · PSB 2025/2026
-              </div>
             </div>
 
-            <StudentBadge />
+            <div className="sp-hero-verified">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#34D399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 12l2 2 4-4" stroke="#34D399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
           </div>
         </div>
 
-        {/* Upload feedback */}
-        {uploadError && <div className="sp-upload-error">⚠️ {uploadError}</div>}
-        {uploadSuccess && <div className="sp-upload-success">✅ Foto berhasil diperbarui!</div>}
-
-        {/* ── STATS STRIP ── */}
-        <div className="sp-float-zone">
-          <div className="sp-stats-card">
-            <div className="sp-stat-item">
-              <div className="sp-stat-icon" style={{ background: '#FEF3C7' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="4" width="18" height="18" rx="2" stroke="#D97706" strokeWidth="2" />
-                  <path d="M16 2v4M8 2v4M3 10h18" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
-              <div className="sp-stat-val">2025</div>
-              <div className="sp-stat-label">T.A.</div>
-            </div>
-            <div className="sp-stat-divider" />
-            <div className="sp-stat-item">
-              <div className="sp-stat-icon" style={{ background: '#D1FAE5' }}>
-                <IconGraduate />
-              </div>
-              <div className="sp-stat-val">SMA</div>
-              <div className="sp-stat-label">Jenjang</div>
-            </div>
-            <div className="sp-stat-divider" />
-            <div className="sp-stat-item">
-              <div className="sp-stat-icon" style={{ background: '#DBEAFE' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="7" height="7" rx="1" stroke="#2563EB" strokeWidth="2" />
-                  <rect x="14" y="3" width="7" height="7" rx="1" stroke="#2563EB" strokeWidth="2" />
-                  <rect x="3" y="14" width="7" height="7" rx="1" stroke="#2563EB" strokeWidth="2" />
-                  <rect x="14" y="14" width="7" height="7" rx="1" stroke="#2563EB" strokeWidth="2" />
-                </svg>
-              </div>
-              <div className="sp-stat-val">PSB</div>
-              <div className="sp-stat-label">Program</div>
-            </div>
+        {/* ── Upload feedback ── */}
+        {uploadError && (
+          <div className="sp-upload-feedback sp-upload-error">
+            <span>⚠</span> {uploadError}
           </div>
-        </div>
+        )}
+        {uploadSuccess && (
+          <div className="sp-upload-feedback sp-upload-success">
+            <span>✓</span> Foto profil berhasil diperbarui!
+          </div>
+        )}
 
         {/* ── BODY ── */}
         <div className="sp-body">
 
-          {/* Upload hint */}
-          <div className="sp-hint-card">
-            <div className="sp-hint-icon">📸</div>
+          {/* Photo hint */}
+          <div className="sp-photo-hint">
+            <div className="sp-photo-hint-icon">
+              <IconCamera />
+            </div>
             <div>
-              <div className="sp-hint-title">Foto Profil</div>
-              <div className="sp-hint-sub">
-                Ketuk ikon kamera pada foto untuk menggantinya. Maks. 2 MB · JPG, PNG, WebP
+              <div className="sp-photo-hint-title">Foto Profil</div>
+              <div className="sp-photo-hint-sub">
+                Ketuk ikon kamera di avatar untuk mengganti foto.<br />
+                Maks. 2 MB · Format: JPG, PNG, WebP
               </div>
             </div>
           </div>
 
           {/* Informasi Akun */}
-          <div className="sp-section-title">Informasi Akun</div>
+          <div className="sp-section-label">Informasi Akun</div>
           <div className="sp-card">
             <div className="sp-info-row">
-              <div className="sp-info-icon green"><IconUser /></div>
-              <div>
+              <div className="sp-icon-box sp-icon-green"><IconUser /></div>
+              <div className="sp-info-text">
                 <div className="sp-info-label">Nama Lengkap</div>
                 <div className="sp-info-value">{user?.name ?? '-'}</div>
               </div>
             </div>
             <div className="sp-info-row">
-              <div className="sp-info-icon blue"><IconMail /></div>
-              <div>
+              <div className="sp-icon-box sp-icon-blue"><IconMail /></div>
+              <div className="sp-info-text">
                 <div className="sp-info-label">Email</div>
-              </div>
-              <div className="sp-info-value-right">
                 <div className="sp-info-value">{user?.email ?? '-'}</div>
               </div>
             </div>
             <div className="sp-info-row">
-              <div className="sp-info-icon violet"><IconGraduate /></div>
-              <div>
-                <div className="sp-info-label">Role</div>
+              <div className="sp-icon-box sp-icon-violet"><IconShield /></div>
+              <div className="sp-info-text">
+                <div className="sp-info-label">Role Akun</div>
+                <div className="sp-info-value">Siswa</div>
               </div>
-              <div className="sp-info-value-right">
-                <span className="sp-info-badge-role">Siswa</span>
+              <div className="sp-info-right">
+                <span className="sp-badge-role">Aktif</span>
               </div>
             </div>
           </div>
 
           {/* Navigasi */}
-          <div className="sp-section-title">Navigasi</div>
+          <div className="sp-section-label">Menu Utama</div>
           <div className="sp-card">
             <Link href="/siswa/dashboard" className="sp-menu-row">
-              <div className="sp-info-icon" style={{ background: '#E0E7FF', color: '#4F46E5' }}><IconHome /></div>
-              <div>
+              <div className="sp-icon-box" style={{ background: 'rgba(79,70,229,0.15)', color: '#818CF8' }}><IconHome /></div>
+              <div className="sp-menu-text">
                 <div className="sp-menu-title">Beranda</div>
                 <div className="sp-menu-sub">Kembali ke dashboard utama</div>
               </div>
               <div className="sp-menu-chevron"><IconChevron /></div>
             </Link>
             <Link href="/siswa/pendaftaran" className="sp-menu-row">
-              <div className="sp-info-icon blue"><IconClipboard /></div>
-              <div>
+              <div className="sp-icon-box sp-icon-blue"><IconClipboard /></div>
+              <div className="sp-menu-text">
                 <div className="sp-menu-title">Formulir Pendaftaran</div>
-                <div className="sp-menu-sub">Isi atau edit data pendaftaran</div>
+                <div className="sp-menu-sub">Isi atau lengkapi data pendaftaran</div>
               </div>
               <div className="sp-menu-chevron"><IconChevron /></div>
             </Link>
             <Link href="/siswa/status" className="sp-menu-row">
-              <div className="sp-info-icon teal"><IconChart /></div>
-              <div>
+              <div className="sp-icon-box sp-icon-teal"><IconChart /></div>
+              <div className="sp-menu-text">
                 <div className="sp-menu-title">Status Pendaftaran</div>
-                <div className="sp-menu-sub">Pantau progress proses seleksi</div>
+                <div className="sp-menu-sub">Pantau progres proses seleksi</div>
+              </div>
+              <div className="sp-menu-chevron"><IconChevron /></div>
+            </Link>
+            <Link href="/siswa/profile/edit" className="sp-menu-row">
+              <div className="sp-icon-box sp-icon-green"><IconEdit /></div>
+              <div className="sp-menu-text">
+                <div className="sp-menu-title">Edit Profil</div>
+                <div className="sp-menu-sub">Ubah nama dan informasi akun</div>
               </div>
               <div className="sp-menu-chevron"><IconChevron /></div>
             </Link>
@@ -598,7 +634,6 @@ export default function SiswaProfilePage() {
             {loggingOut ? 'Keluar dari akun...' : 'Keluar dari Akun'}
           </button>
 
-          <div className="sp-footer">PSB App · Tahun Ajaran 2025/2026</div>
         </div>
 
         {/* ── BOTTOM NAV ── */}
@@ -609,15 +644,15 @@ export default function SiswaProfilePage() {
           </Link>
           <Link href="/siswa/pendaftaran" className="sp-nav-item">
             <IconClipboard />
-            Pendaftaran
+            Daftar
           </Link>
           <Link href="/siswa/verifikasi" className="sp-nav-item">
             <IconCheck />
-            Verifikasi
+            Status
           </Link>
           <Link href="/siswa/pembayaran" className="sp-nav-item">
             <IconPayment />
-            Pembayaran
+            Bayar
           </Link>
           <Link href="/siswa/profile" className="sp-nav-item active">
             <IconProfile />

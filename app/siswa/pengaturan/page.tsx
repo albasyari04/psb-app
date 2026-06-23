@@ -119,7 +119,6 @@ export default function SiswaPengaturanPage() {
     setLanguage,
     setFontSize,
     resetSettings,
-    t,
     ready,
   } = useSettings()
 
@@ -149,16 +148,6 @@ export default function SiswaPengaturanPage() {
     )
   }
 
-  const previewTextSize =
-    fontSize === 'small' ? styles.previewTextSm :
-    fontSize === 'large' ? styles.previewTextLg :
-    styles.previewTextMd
-
-  const previewSubSize =
-    fontSize === 'small' ? styles.previewSubSm :
-    fontSize === 'large' ? styles.previewSubLg :
-    styles.previewSubMd
-
   return (
     <div className={styles.shell}>
 
@@ -182,24 +171,7 @@ export default function SiswaPengaturanPage() {
           />
         </div>
       </header>
-
-      {/* ══ HERO BANNER ════════════════════════════════════════════ */}
-      <div className={styles.heroBanner}>
-        <div className={styles.heroBannerBg} />
-        <div className={styles.heroBannerContent}>
-          <div className={styles.heroBannerTextWrap}>
-            <span className={styles.heroBannerEyebrow}>⚙️ Konfigurasi Aplikasi</span>
-            <h2 className={styles.heroBannerTitle}>Sesuaikan<br />Pengalaman Anda</h2>
-            <p className={styles.heroBannerSub}>Atur tampilan, bahasa, dan preferensi sesuai kenyamanan Anda</p>
-          </div>
-          <div className={styles.heroBannerVisual}>
-            <div className={styles.heroBannerOrb1} />
-            <div className={styles.heroBannerOrb2} />
-            <div className={styles.heroBannerOrb3} />
-          </div>
-        </div>
-      </div>
-
+      
       {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
       <div className={styles.pageBody}>
 
@@ -364,18 +336,6 @@ export default function SiswaPengaturanPage() {
               })}
             </div>
 
-            {/* Live Preview */}
-            <div className={styles.previewBox}>
-              <div className={styles.previewBoxHeader}>
-                <span className={styles.previewBoxBadge}>PREVIEW</span>
-              </div>
-              <p className={`${styles.previewText} ${previewTextSize}`}>
-                Pondok Pesantren Al-Istiqomah
-              </p>
-              <p className={`${styles.previewSub} ${previewSubSize}`}>
-                Santri diharapkan menjaga adab dan akhlak mulia dalam setiap kegiatan di pesantren.
-              </p>
-            </div>
           </div>
         </div>
 

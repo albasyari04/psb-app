@@ -427,23 +427,24 @@ function PilihPembayaranModal({
         width: '100%', maxWidth: 520, background: '#fff',
         borderRadius: '24px 24px 0 0', maxHeight: '88vh',
         display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }}>
         {/* Handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 999, background: '#E2E8F0', margin: '12px auto 0' }} />
+        <div style={{ width: 40, height: 4, borderRadius: 999, background: '#E2E8F0', margin: '12px auto 0', flexShrink: 0 }} />
 
         {/* Header */}
-        <div style={{ padding: '16px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '16px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
             <p style={{ fontSize: 16, fontWeight: 800, color: '#1E293B', margin: 0, fontFamily: 'inherit' }}>Pilih Jenis Pembayaran</p>
             <p style={{ fontSize: 11, color: '#94A3B8', margin: '2px 0 0', fontFamily: 'inherit' }}>{filtered.length} item tersedia</p>
           </div>
-          <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: 10, border: '1.5px solid #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: 10, border: '1.5px solid #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
         {/* Search */}
-        <div style={{ padding: '12px 20px 0' }}>
+        <div style={{ padding: '12px 20px 0', flexShrink: 0 }}>
           <div style={{ position: 'relative' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}>
               <circle cx="11" cy="11" r="8" stroke="#94A3B8" strokeWidth="2"/><path d="m21 21-4.35-4.35" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"/>
@@ -456,13 +457,14 @@ function PilihPembayaranModal({
                 width: '100%', padding: '10px 12px 10px 34px', borderRadius: 12,
                 border: '1.5px solid #E2E8F0', fontSize: 12, fontFamily: 'inherit',
                 outline: 'none', color: '#1E293B', background: '#F8FAFC',
+                boxSizing: 'border-box',
               }}
             />
           </div>
         </div>
 
         {/* Kategori filter */}
-        <div style={{ padding: '10px 20px 0', display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+        <div style={{ padding: '10px 20px 0', display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2, flexShrink: 0, minHeight: 36 }}>
           {['Semua', ...KATEGORI_LIST].map((k) => (
             <button
               key={k}
@@ -482,7 +484,7 @@ function PilihPembayaranModal({
         </div>
 
         {/* List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 20px 24px' }}>
+        <div style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', padding: '10px 20px 24px' }}>
           {filtered.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#94A3B8', fontSize: 12, padding: '24px 0', fontFamily: 'inherit' }}>Tidak ditemukan</p>
           ) : (
