@@ -1,115 +1,92 @@
 // lib/notifications.ts
-// Helper terpusat untuk membuat notifikasi.
-// Dipakai di API route manapun yang perlu trigger notifikasi.
+// Helper terpusat untuk membuat notifikasi siswa dari route admin.
+// Dipakai oleh: announcements, pembayaran, laporan, jadwal, berkas, pendaftaran.
 
 import { getSupabaseAdmin } from '@/lib/supabase'
 
-type NotifType = 'success' | 'error' | 'info'
+export type NotifType = 'success' | 'error' | 'info' | 'warning'
 
-interface SendNotifOptions {
-  user_id: string
+interface CreateNotificationInput {
+  userId: string
   title: string
   message: string
-  type?: NotifType
+  type: NotifType
 }
 
 /**
- * Kirim satu notifikasi ke user tertentu.
+ * Insert satu notifikasi untuk satu user.
+ * Gagal insert TIDAK melempar error ke caller — hanya di-log.
+ * Ini supaya aksi utama (misal update status pembayaran) tetap
+ * berhasil walau notifikasi gagal terkirim.
  */
-export async function sendNotification(opts: SendNotifOptions): Promise<void> {
-  const supabase = getSupabaseAdmin()
-  const { error } = await supabase.from('notifications').insert({
-    user_id: opts.user_id,
-    title:   opts.title,
-    message: opts.message,
-    type:    opts.type ?? 'info',
-    is_read: false,
-  })
-
-  if (error) {
-    // Jangan throw — notif gagal tidak boleh break flow utama
-    console.error('[notifications] Gagal kirim notif:', error.message)
-  }
-}
-
-/**
- * Kirim notifikasi ke semua admin yang terdaftar di tabel `admin`.
- */
-export async function notifyAllAdmins(opts: Omit<SendNotifOptions, 'user_id'>): Promise<void> {
-  const supabase = getSupabaseAdmin()
-
-  // Ambil semua ID admin
-  const { data: admins, error } = await supabase
-    .from('admin')
-    .select('id')
-
-  if (error || !admins?.length) {
-    console.error('[notifications] Gagal ambil admin list:', error?.message)
+export async function createNotification({
+  userId,
+  title,
+  message,
+  type,
+}: CreateNotificationInput): Promise<void> {
+  if (!userId) {
+    console.warn('[notifications] Lewati insert: userId kosong')
     return
   }
 
-  // Bulk insert notifikasi ke semua admin
-  const rows = admins.map(a => ({
-    user_id: a.id,
-    title:   opts.title,
-    message: opts.message,
-    type:    opts.type ?? 'info',
-    is_read: false,
-  }))
+  try {
+    const supabase = getSupabaseAdmin()
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      title,
+      message,
+      type,
+      is_read: false,
+    })
 
-  const { error: insertError } = await supabase
-    .from('notifications')
-    .insert(rows)
-
-  if (insertError) {
-    console.error('[notifications] Gagal bulk insert notif admin:', insertError.message)
+    if (error) {
+      console.error('[notifications] Gagal insert notifikasi:', error.message)
+    }
+  } catch (err) {
+    console.error('[notifications] Unexpected error saat insert notifikasi:', err)
   }
 }
 
-// ── Template notifikasi siap pakai ────────────────────────────────────────────
+/**
+ * Insert notifikasi yang sama untuk banyak user sekaligus.
+ * Dipakai misalnya untuk pengumuman yang harus diterima semua santri.
+ */
+export async function createNotificationForUsers(
+  userIds: string[],
+  payload: Omit<CreateNotificationInput, 'userId'>
+): Promise<void> {
+  const uniqueIds = Array.from(new Set(userIds.filter(Boolean)))
+  if (uniqueIds.length === 0) {
+    console.warn('[notifications] Lewati broadcast: tidak ada userId valid')
+    return
+  }
 
-export const NotifTemplate = {
-  /** Dikirim ke ADMIN saat ada pendaftar baru */
-  pendaftarBaru: (namaSiswa: string) => ({
-    title:   '🎓 Pendaftar Baru',
-    message: `${namaSiswa} baru saja mendaftar dan menunggu verifikasi.`,
-    type:    'info' as NotifType,
-  }),
+  try {
+    const supabase = getSupabaseAdmin()
+    const rows = uniqueIds.map((userId) => ({
+      user_id: userId,
+      title: payload.title,
+      message: payload.message,
+      type: payload.type,
+      is_read: false,
+    }))
 
-  /** Dikirim ke SISWA setelah berhasil mendaftar */
-  pendaftaranDiterima: (namaSiswa: string) => ({
-    title:   '✅ Pendaftaran Berhasil',
-    message: `Halo ${namaSiswa}, pendaftaranmu berhasil dikirim! Tunggu verifikasi dari admin.`,
-    type:    'success' as NotifType,
-  }),
+    const { error } = await supabase.from('notifications').insert(rows)
 
-  /** Dikirim ke SISWA saat status diverifikasi */
-  statusDiverifikasi: () => ({
-    title:   '✅ Pendaftaran Diverifikasi',
-    message: 'Selamat! Pendaftaranmu telah diverifikasi oleh admin.',
-    type:    'success' as NotifType,
-  }),
+    if (error) {
+      console.error('[notifications] Gagal broadcast notifikasi:', error.message)
+    }
+  } catch (err) {
+    console.error('[notifications] Unexpected error saat broadcast notifikasi:', err)
+  }
+}
 
-  /** Dikirim ke SISWA saat status ditolak */
-  statusDitolak: (catatan?: string | null) => ({
-    title:   '❌ Pendaftaran Ditolak',
-    message: catatan
-      ? `Pendaftaranmu ditolak. Catatan admin: ${catatan}`
-      : 'Pendaftaranmu ditolak. Hubungi admin untuk informasi lebih lanjut.',
-    type: 'error' as NotifType,
-  }),
-
-  /** Dikirim ke SISWA saat pembayaran dikonfirmasi */
-  pembayaranDikonfirmasi: (nominal: number) => ({
-    title:   '💰 Pembayaran Dikonfirmasi',
-    message: `Pembayaran sebesar Rp ${nominal.toLocaleString('id-ID')} telah dikonfirmasi.`,
-    type:    'success' as NotifType,
-  }),
-
-  /** Dikirim ke ADMIN saat ada pembayaran baru */
-  pembayaranBaru: (namaSiswa: string, nominal: number) => ({
-    title:   '💳 Pembayaran Baru',
-    message: `${namaSiswa} mengirim bukti pembayaran Rp ${nominal.toLocaleString('id-ID')}.`,
-    type:    'info' as NotifType,
-  }),
+/** Format Rupiah konsisten untuk pesan notifikasi pembayaran */
+export function formatRupiah(value: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(value)
 }

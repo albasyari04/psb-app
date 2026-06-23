@@ -1,6 +1,7 @@
 // app/api/admin/announcements/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createNotificationForUsers } from '@/lib/notifications'
 
 // ── GET /api/admin/announcements ──────────────────────────────────────────────
 // Query params: ?tipe=Penting&q=keyword&page=1&limit=20
@@ -81,6 +82,40 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error('[POST /api/admin/announcements]', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // ── Broadcast notifikasi ke SEMUA santri ──────────────────────────────
+    // Pengumuman bersifat umum (bukan untuk 1 user spesifik), jadi semua
+    // profile dengan role 'siswa' menerima notifikasi yang sama.
+    try {
+      const { data: siswaList, error: siswaErr } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'siswa')
+
+      if (siswaErr) {
+        console.error('[announcements] Gagal ambil daftar santri:', siswaErr.message)
+      } else if (siswaList && siswaList.length > 0) {
+        const TIPE_TO_NOTIF_TYPE: Record<string, 'success' | 'error' | 'info' | 'warning'> = {
+          Penting:    'warning',
+          Peringatan: 'warning',
+          Informasi:  'info',
+          Info:       'info',
+        }
+
+        await createNotificationForUsers(
+          siswaList.map((s) => s.id),
+          {
+            title:   `📢 Pengumuman Baru: ${judul.trim()}`,
+            message: konten.trim().length > 140
+              ? `${konten.trim().slice(0, 140)}...`
+              : konten.trim(),
+            type: TIPE_TO_NOTIF_TYPE[tipe] ?? 'info',
+          }
+        )
+      }
+    } catch (notifErr) {
+      console.error('[announcements] Gagal broadcast notifikasi:', notifErr)
     }
 
     return NextResponse.json({ data }, { status: 201 })

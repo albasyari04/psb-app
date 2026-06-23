@@ -58,6 +58,14 @@ interface Announcement {
   created_at: string
 }
 
+interface PeraturanItem {
+  id: string
+  judul: string
+  deskripsi: string
+  kategori: string
+  tanggal: string
+}
+
 /* ════════════════════════════════════════════════════════════════
    CONSTANTS
    ════════════════════════════════════════════════════════════════ */
@@ -99,6 +107,14 @@ const TIPE_CONFIG: Record<string, { pill: string }> = {
   Informasi:  { pill: styles.pillInformasi },
   Info:       { pill: styles.pillInfo },
   Peringatan: { pill: styles.pillPeringatan },
+}
+
+// Mapping kategori peraturan → warna pill (pakai class yang sudah ada di CSS)
+const KATEGORI_PERATURAN_CONFIG: Record<string, string> = {
+  'Tata Tertib': styles.pillInfo,
+  'Larangan':    styles.pillPeringatan,
+  'Kewajiban':   styles.pillPenting,
+  'Informasi':   styles.pillInformasi,
 }
 
 const LAPORAN_TIPE_CONFIG: Record<string, { labelKey: 'laporan_tipe_bulanan' | 'laporan_tipe_tahunan' | 'laporan_tipe_khusus'; badge: string }> = {
@@ -324,11 +340,6 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
               <div className={styles.payIconBadge}><IconCheckSmall /></div>
             </div>
           </div>
-          {/*
-           * FIX UTAMA: href="/siswa/pembayaran/bayar"
-           * Route ini butuh file: app/siswa/pembayaran/bayar/page.tsx
-           * File tersebut sudah dibuat sebagai bagian dari perbaikan ini.
-           */}
           <Link href="/siswa/pembayaran/bayar" className={styles.payBtn}>{t('dashboard_payment_cta')}</Link>
 
           {data.items.length === 0 ? (
@@ -473,6 +484,41 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
 }
 
 /* ════════════════════════════════════════════════════════════════
+   PERATURAN CARD — tampil seperti pengumuman (annCard style)
+   ════════════════════════════════════════════════════════════════ */
+function PeraturanCard({ item }: { item: PeraturanItem }) {
+  // Pilih class pill sesuai kategori, fallback ke pillInfo
+  const pillClass = KATEGORI_PERATURAN_CONFIG[item.kategori] ?? styles.pillInfo
+
+  return (
+    <Link
+      href="/siswa/peraturan"
+      className={styles.annCard}
+      aria-label={`Buka peraturan: ${item.judul}`}
+    >
+      <div className={styles.annThumb}>
+        <Image
+          src="/icons/tata-tertib-icon.png"
+          alt="Peraturan"
+          fill
+          className={styles.annThumbImg}
+        />
+      </div>
+      <div className={styles.annBody}>
+        <div className={styles.annTopRow}>
+          <p className={styles.annTitle}>{item.judul}</p>
+          <span className={styles.annDate}>{formatTanggalShort(item.tanggal)}</span>
+        </div>
+        <p className={styles.annPreview}>{truncate(item.deskripsi, 90)}</p>
+        <div className={styles.annBadgeRow}>
+          <span className={`${styles.annBadge} ${pillClass}`}>{item.kategori}</span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
    CTA BANNER
    ════════════════════════════════════════════════════════════════ */
 function CtaBanner() {
@@ -504,6 +550,31 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [annLoading, setAnnLoading] = useState(true)
   const [selectedAnn, setSelectedAnn] = useState<Announcement | null>(null)
+
+  // Data peraturan — bisa diganti fetch dari API jika sudah tersedia
+  const [peraturan] = useState<PeraturanItem[]>([
+    {
+      id: '1',
+      judul: 'Tata Tertib Umum',
+      deskripsi: 'Seluruh santri wajib menjaga adab, disiplin dan ketertiban pondok.',
+      kategori: 'Tata Tertib',
+      tanggal: '2026-06-15',
+    },
+    {
+      id: '2',
+      judul: 'Larangan Membawa HP',
+      deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',
+      kategori: 'Larangan',
+      tanggal: '2026-06-08',
+    },
+    {
+      id: '3',
+      judul: 'Kewajiban Mengikuti Jamaah',
+      deskripsi: 'Seluruh santri wajib mengikuti sholat berjamaah dan kegiatan pondok.',
+      kategori: 'Kewajiban',
+      tanggal: '2026-06-01',
+    },
+  ])
 
   useEffect(() => {
     async function load() {
@@ -641,7 +712,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           <LaporanCard data={laporan} loading={laporanLoading} />
         </div>
 
-        {/* Pengumuman */}
+        {/* ══ Pengumuman Terbaru ══════════════════════════════════════ */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>{t('dashboard_announcement')}</p>
@@ -673,20 +744,26 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           )}
         </div>
 
-        {/* Banner Peraturan */}
-        <div style={{ padding: '0 16px', marginTop: '16px' }}>
-          <Link href="/siswa/peraturan" style={{ display: 'block', position: 'relative', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
-            <Image
-              src="/icons/hi.jpeg"
-              alt="Banner Peraturan"
-              width={1200}
-              height={430}
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
-            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(20, 20, 20, 0.5)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}>
-              {t('dashboard_see_more')}
+        {/* ══ Peraturan Terbaru — tampil seperti pengumuman ══════════ */}
+        <div className={styles.sectionWrap}>
+          <div className={styles.sectionRow}>
+            <p className={styles.sectionTitle}>Peraturan</p>
+            <Link href="/siswa/peraturan" className={styles.sectionLink}>
+              Lihat Semua →
+            </Link>
+          </div>
+          {peraturan.length === 0 ? (
+            <div className={styles.annEmpty}>
+              <span className={styles.annEmptyIcon}>📋</span>
+              <p className={styles.annEmptyText}>Belum ada peraturan.</p>
             </div>
-          </Link>
+          ) : (
+            <div className={styles.announcementList}>
+              {peraturan.map((item) => (
+                <PeraturanCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
         </div>
 
         <CtaBanner />

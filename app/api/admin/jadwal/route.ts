@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createNotificationForUsers } from '@/lib/notifications'
 
 export async function GET() {
   try {
@@ -75,6 +76,37 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) throw error
+
+    // ── Broadcast notifikasi jadwal baru ke semua santri ────────────────────
+    // Jadwal (misal: tes wawancara, daftar ulang, dsb) relevan untuk semua
+    // santri yang sedang dalam proses pendaftaran, jadi dikirim ke semua.
+    try {
+      const { data: siswaList, error: siswaErr } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'siswa')
+
+      if (siswaErr) {
+        console.error('[jadwal] Gagal ambil daftar santri:', siswaErr.message)
+      } else if (siswaList && siswaList.length > 0) {
+        const tanggalFormatted = new Date(tanggal).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+
+        await createNotificationForUsers(
+          siswaList.map((s) => s.id),
+          {
+            title:   '🗓️ Jadwal Baru Ditambahkan',
+            message: `${label} dijadwalkan pada ${tanggalFormatted}. Pastikan kamu tidak melewatkannya.`,
+            type:    'info',
+          }
+        )
+      }
+    } catch (notifErr) {
+      console.error('[jadwal] Gagal broadcast notifikasi:', notifErr)
+    }
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (error) {

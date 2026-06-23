@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { createNotification } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 
@@ -135,6 +136,14 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[admin/laporan] Created successfully:', data)
+
+    // ── Notifikasi: laporan baru tersedia untuk siswa ───────────────────────
+    await createNotification({
+      userId:  user_id,
+      title:   '📄 Laporan Baru Tersedia',
+      message: `Laporan "${judul}" telah diterbitkan untukmu. Buka halaman Laporan untuk melihat detailnya.`,
+      type:    'info',
+    })
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (error) {

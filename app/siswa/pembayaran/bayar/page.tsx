@@ -1,9 +1,5 @@
 'use client'
 
-/**
- * app/siswa/pembayaran/bayar/page.tsx
- */
-
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'

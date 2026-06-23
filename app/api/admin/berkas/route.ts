@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { createNotification } from '@/lib/notifications'
 
 // ── Definisikan tipe untuk data ─────────────────────────────────────────────
 type BerkasStatus = 'pending' | 'diverifikasi' | 'ditolak'
@@ -215,7 +216,7 @@ export async function GET() {
   }
 }
 
-// ── PATCH: Update status verifikasi berkas ─────────────────────────────────
+// ── PATCH: Update status verifikasi berkas + kirim notifikasi ──────────────
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions)
 
@@ -282,6 +283,32 @@ export async function PATCH(req: NextRequest) {
       }
 
       throw updateError
+    }
+
+    // ── Kirim notifikasi sesuai status verifikasi ───────────────────────────
+    const NOTIF_MAP: Record<string, { title: string; message: string; type: 'success' | 'error' | 'info' | 'warning' }> = {
+      diverifikasi: {
+        title:   '✅ Berkas Terverifikasi',
+        message: 'Seluruh dokumen yang kamu unggah telah diverifikasi dan dinyatakan lengkap oleh admin.',
+        type:    'success',
+      },
+      ditolak: {
+        title:   '⚠️ Berkas Ditolak',
+        message: catatan
+          ? `Berkas yang kamu unggah ditolak. Catatan admin: ${catatan}`
+          : 'Berkas yang kamu unggah ditolak. Silakan periksa kembali dan unggah ulang dokumen yang sesuai.',
+        type:    'error',
+      },
+    }
+
+    const notifData = NOTIF_MAP[status]
+    if (notifData) {
+      await createNotification({
+        userId:  user_id,
+        title:   notifData.title,
+        message: notifData.message,
+        type:    notifData.type,
+      })
     }
 
     // Jika tidak ada baris yang ter-update, buat baris baru

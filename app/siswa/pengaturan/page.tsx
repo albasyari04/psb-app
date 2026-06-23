@@ -17,29 +17,73 @@ function IconArrowLeft() {
     </svg>
   )
 }
+function IconGear() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  )
+}
+function IconChevronRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  )
+}
+function IconPerson() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="4" stroke="#0e7c5f" strokeWidth="1.8" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
 function IconGlobe() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="9" stroke="#0e7c5f" strokeWidth="1.8" />
       <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke="#0e7c5f" strokeWidth="1.8" />
     </svg>
   )
 }
-function IconPalette() {
+function IconMonitor() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z" fill="rgba(14,124,95,0.12)" stroke="#0e7c5f" strokeWidth="1.8" />
-      <circle cx="6.5" cy="11.5" r="1.5" fill="#0e7c5f" />
-      <circle cx="9.5" cy="7.5" r="1.5" fill="#0a5c46" />
-      <circle cx="14.5" cy="7.5" r="1.5" fill="#16a34a" />
-      <circle cx="17.5" cy="11.5" r="1.5" fill="#0e7c5f" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="3" width="20" height="14" rx="2" stroke="#0e7c5f" strokeWidth="1.8" />
+      <path d="M8 21h8M12 17v4" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   )
 }
-function IconText() {
+function IconTextSize() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path d="M4 7V5h16v2M9 19h6M12 5v14" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconBell() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconHelp() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="#0e7c5f" strokeWidth="1.8" />
+      <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="0.5" fill="#0e7c5f" stroke="#0e7c5f" strokeWidth="1" />
+    </svg>
+  )
+}
+function IconReset() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -62,13 +106,6 @@ function IconMoon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
       <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" fill="#6366f1" stroke="#6366f1" strokeWidth="1" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function IconReset() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -108,6 +145,214 @@ function IconPersonOutline() {
 }
 
 /* ════════════════════════════════════════════════════════════════
+   SUB-COMPONENTS
+   ════════════════════════════════════════════════════════════════ */
+
+/** Satu baris menu di dalam card */
+function SettingRow({
+  icon,
+  title,
+  sub,
+  href,
+  onClick,
+  chevron = true,
+  isLast = false,
+}: {
+  icon: React.ReactNode
+  title: string
+  sub: string
+  href?: string
+  onClick?: () => void
+  chevron?: boolean
+  isLast?: boolean
+}) {
+  const inner = (
+    <>
+      <div className={styles.rowIconWrap}>{icon}</div>
+      <div className={styles.rowText}>
+        <p className={styles.rowTitle}>{title}</p>
+        <p className={styles.rowSub}>{sub}</p>
+      </div>
+      {chevron && (
+        <span className={styles.rowChevron}>
+          <IconChevronRight />
+        </span>
+      )}
+    </>
+  )
+
+  const cls = `${styles.settingRow} ${isLast ? styles.settingRowLast : ''}`
+
+  if (href) {
+    return (
+      <Link href={href} className={cls}>
+        {inner}
+      </Link>
+    )
+  }
+  return (
+    <button type="button" className={cls} onClick={onClick}>
+      {inner}
+    </button>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL — Bahasa
+   ════════════════════════════════════════════════════════════════ */
+function ModalBahasa({
+  language,
+  onSelect,
+  onClose,
+}: {
+  language: Language
+  onSelect: (v: Language) => void
+  onClose: () => void
+}) {
+  return (
+    <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className={styles.modalSheet}>
+        <div className={styles.modalHandle} />
+        <p className={styles.modalTitle}>Pilih Bahasa</p>
+        <p className={styles.modalSub}>Ubah bahasa tampilan seluruh aplikasi</p>
+        <div className={styles.modalDivider} />
+        <div className={styles.segment}>
+          {(['id', 'en'] as Language[]).map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              className={`${styles.segBtn} ${language === lang ? styles.segBtnActive : ''}`}
+              onClick={() => { onSelect(lang); onClose() }}
+            >
+              <span className={styles.segFlag}>{lang === 'id' ? '🇮🇩' : '🇬🇧'}</span>
+              <span className={styles.segText}>{lang === 'id' ? 'Indonesia' : 'English'}</span>
+              {language === lang && <span className={styles.segCheck}><IconCheck /></span>}
+            </button>
+          ))}
+        </div>
+        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL — Tampilan (Tema)
+   ════════════════════════════════════════════════════════════════ */
+function ModalTampilan({
+  theme,
+  onSelect,
+  onClose,
+}: {
+  theme: Theme
+  onSelect: (v: Theme) => void
+  onClose: () => void
+}) {
+  return (
+    <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className={styles.modalSheet}>
+        <div className={styles.modalHandle} />
+        <p className={styles.modalTitle}>Mode Tampilan</p>
+        <p className={styles.modalSub}>Pilih antara tema terang atau gelap</p>
+        <div className={styles.modalDivider} />
+        <div className={styles.themeGrid}>
+          {/* Light */}
+          <button
+            type="button"
+            className={`${styles.themeCard} ${theme === 'light' ? styles.themeCardActive : ''}`}
+            onClick={() => { onSelect('light'); onClose() }}
+          >
+            <div className={`${styles.themePreview} ${styles.themePreviewLight}`}>
+              <div className={styles.themePreviewTopBar} />
+              <div className={styles.themePreviewLineWrap}>
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineLong}`} />
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineShort}`} />
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineMed}`} />
+              </div>
+              {theme === 'light' && (
+                <div className={styles.themeActiveOverlay}>
+                  <div className={styles.themeActiveBadge}><IconCheck /></div>
+                </div>
+              )}
+            </div>
+            <div className={styles.themeCardLabel}>
+              <IconSun /><span>Terang</span>
+            </div>
+          </button>
+          {/* Dark */}
+          <button
+            type="button"
+            className={`${styles.themeCard} ${theme === 'dark' ? styles.themeCardActive : ''}`}
+            onClick={() => { onSelect('dark'); onClose() }}
+          >
+            <div className={`${styles.themePreview} ${styles.themePreviewDark}`}>
+              <div className={styles.themePreviewTopBar} />
+              <div className={styles.themePreviewLineWrap}>
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineLong}`} />
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineShort}`} />
+                <div className={`${styles.themePreviewLine} ${styles.themePreviewLineMed}`} />
+              </div>
+              {theme === 'dark' && (
+                <div className={styles.themeActiveOverlay}>
+                  <div className={styles.themeActiveBadge}><IconCheck /></div>
+                </div>
+              )}
+            </div>
+            <div className={styles.themeCardLabel}>
+              <IconMoon /><span>Gelap</span>
+            </div>
+          </button>
+        </div>
+        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL — Ukuran Teks
+   ════════════════════════════════════════════════════════════════ */
+function ModalTeks({
+  fontSize,
+  onSelect,
+  onClose,
+}: {
+  fontSize: FontSize
+  onSelect: (v: FontSize) => void
+  onClose: () => void
+}) {
+  return (
+    <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className={styles.modalSheet}>
+        <div className={styles.modalHandle} />
+        <p className={styles.modalTitle}>Ukuran Teks</p>
+        <p className={styles.modalSub}>Sesuaikan ukuran huruf agar nyaman dibaca</p>
+        <div className={styles.modalDivider} />
+        <div className={styles.fontGroup}>
+          {(['small', 'medium', 'large'] as FontSize[]).map((size) => {
+            const label = size === 'small' ? 'Kecil' : size === 'large' ? 'Besar' : 'Sedang'
+            const glyphClass = size === 'small' ? styles.fontGlyphSm : size === 'large' ? styles.fontGlyphLg : styles.fontGlyphMd
+            return (
+              <button
+                key={size}
+                type="button"
+                className={`${styles.fontBtn} ${fontSize === size ? styles.fontBtnActive : ''}`}
+                onClick={() => { onSelect(size); onClose() }}
+              >
+                <span className={`${styles.fontGlyph} ${glyphClass} ${fontSize === size ? styles.fontGlyphActive : ''}`}>A</span>
+                <span className={`${styles.fontLabel} ${fontSize === size ? styles.fontLabelActive : ''}`}>{label}</span>
+                {fontSize === size && <span className={styles.fontCheckDot}><IconCheck /></span>}
+              </button>
+            )
+          })}
+        </div>
+        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+      </div>
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
    MAIN PAGE
    ════════════════════════════════════════════════════════════════ */
 export default function SiswaPengaturanPage() {
@@ -124,6 +369,7 @@ export default function SiswaPengaturanPage() {
 
   const [showToast, setShowToast] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [modal, setModal] = useState<'bahasa' | 'tampilan' | 'teks' | null>(null)
 
   useEffect(() => {
     if (!ready || !hasInteracted) return
@@ -137,7 +383,10 @@ export default function SiswaPengaturanPage() {
     theme: (v: Theme) => { setHasInteracted(true); setTheme(v) },
     language: (v: Language) => { setHasInteracted(true); setLanguage(v) },
     fontSize: (v: FontSize) => { setHasInteracted(true); setFontSize(v) },
-    reset: () => { setHasInteracted(true); resetSettings() },
+    reset: () => {
+      setHasInteracted(true)
+      resetSettings()
+    },
   }
 
   if (!ready) {
@@ -160,212 +409,124 @@ export default function SiswaPengaturanPage() {
           <h1 className={styles.topBarTitle}>Pengaturan</h1>
           <p className={styles.topBarSub}>Preferensi aplikasi santri</p>
         </div>
-        <div className={styles.topBarRight}>
-          <Image
-            src="/icons/pengaturan-icon.png"
-            alt="Pengaturan"
-            width={36}
-            height={36}
-            className={styles.topBarIcon}
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-          />
+        <div className={styles.topBarIconBtn}>
+          <IconGear />
         </div>
       </header>
-      
+
       {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
       <div className={styles.pageBody}>
 
-        {/* ── SECTION: Bahasa ──────────────────────────────────── */}
+        {/* ── SECTION: AKUN & PROFIL ─────────────────────────────── */}
         <div className={styles.section}>
-          <div className={styles.sectionLabelRow}>
-            <span className={styles.sectionDot} />
-            <p className={styles.sectionLabel}>Bahasa / Language</p>
-          </div>
+          <p className={styles.sectionLabel}>Akun &amp; Profil</p>
           <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <div className={`${styles.cardIconWrap} ${styles.cardIconTeal}`}>
-                <IconGlobe />
-              </div>
-              <div className={styles.cardTextWrap}>
-                <p className={styles.cardTitle}>Pilih Bahasa</p>
-                <p className={styles.cardSub}>Ubah bahasa tampilan seluruh aplikasi</p>
-              </div>
-            </div>
-            <div className={styles.cardDivider} />
-            <div className={styles.segment} role="tablist" aria-label="Pilih bahasa">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={language === 'id'}
-                className={`${styles.segBtn} ${language === 'id' ? styles.segBtnActive : ''}`}
-                onClick={() => handle.language('id')}
-              >
-                <span className={styles.segFlag}>🇮🇩</span>
-                <span className={styles.segText}>Indonesia</span>
-                {language === 'id' && <span className={styles.segCheck}><IconCheck /></span>}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={language === 'en'}
-                className={`${styles.segBtn} ${language === 'en' ? styles.segBtnActive : ''}`}
-                onClick={() => handle.language('en')}
-              >
-                <span className={styles.segFlag}>🇬🇧</span>
-                <span className={styles.segText}>English</span>
-                {language === 'en' && <span className={styles.segCheck}><IconCheck /></span>}
-              </button>
-            </div>
+            <SettingRow
+              icon={<IconPerson />}
+              title="Pengaturan Akun & Profil"
+              sub="Kelola informasi akun, keamanan, dan profil Anda"
+              href="/siswa/profile"
+              isLast
+            />
           </div>
         </div>
 
-        {/* ── SECTION: Tema ─────────────────────────────────────── */}
+        {/* ── SECTION: PREFERENSI & TAMPILAN ───────────────────────── */}
         <div className={styles.section}>
-          <div className={styles.sectionLabelRow}>
-            <span className={styles.sectionDot} />
-            <p className={styles.sectionLabel}>Tampilan</p>
-          </div>
+          <p className={styles.sectionLabel}>Preferensi &amp; Tampilan</p>
           <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <div className={`${styles.cardIconWrap} ${styles.cardIconGreen}`}>
-                <IconPalette />
-              </div>
-              <div className={styles.cardTextWrap}>
-                <p className={styles.cardTitle}>Mode Tampilan</p>
-                <p className={styles.cardSub}>Pilih antara tema terang atau gelap</p>
-              </div>
-            </div>
-            <div className={styles.cardDivider} />
-            <div className={styles.themeGrid}>
-              {/* Light */}
-              <button
-                type="button"
-                aria-pressed={theme === 'light'}
-                className={`${styles.themeCard} ${theme === 'light' ? styles.themeCardActive : ''}`}
-                onClick={() => handle.theme('light')}
-              >
-                <div className={`${styles.themePreview} ${styles.themePreviewLight}`}>
-                  <div className={styles.themePreviewTopBar} />
-                  <div className={styles.themePreviewLineWrap}>
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineLong}`} />
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineShort}`} />
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineMed}`} />
-                  </div>
-                  {theme === 'light' && (
-                    <div className={styles.themeActiveOverlay}>
-                      <div className={styles.themeActiveBadge}><IconCheck /></div>
-                    </div>
-                  )}
-                </div>
-                <div className={styles.themeCardLabel}>
-                  <IconSun />
-                  <span>Terang</span>
-                </div>
-              </button>
-
-              {/* Dark */}
-              <button
-                type="button"
-                aria-pressed={theme === 'dark'}
-                className={`${styles.themeCard} ${theme === 'dark' ? styles.themeCardActive : ''}`}
-                onClick={() => handle.theme('dark')}
-              >
-                <div className={`${styles.themePreview} ${styles.themePreviewDark}`}>
-                  <div className={styles.themePreviewTopBar} />
-                  <div className={styles.themePreviewLineWrap}>
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineLong}`} />
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineShort}`} />
-                    <div className={`${styles.themePreviewLine} ${styles.themePreviewLineMed}`} />
-                  </div>
-                  {theme === 'dark' && (
-                    <div className={styles.themeActiveOverlay}>
-                      <div className={styles.themeActiveBadge}><IconCheck /></div>
-                    </div>
-                  )}
-                </div>
-                <div className={styles.themeCardLabel}>
-                  <IconMoon />
-                  <span>Gelap</span>
-                </div>
-              </button>
-            </div>
+            <SettingRow
+              icon={<IconGlobe />}
+              title="Bahasa / Language"
+              sub="Ubah bahasa tampilan aplikasi"
+              onClick={() => setModal('bahasa')}
+            />
+            <div className={styles.rowDivider} />
+            <SettingRow
+              icon={<IconMonitor />}
+              title="Tampilan"
+              sub="Atur mode tampilan, tema, dan ukuran teks"
+              onClick={() => setModal('tampilan')}
+            />
+            <div className={styles.rowDivider} />
+            <SettingRow
+              icon={<IconTextSize />}
+              title="Teks"
+              sub="Sesuaikan ukuran huruf agar nyaman dibaca"
+              onClick={() => setModal('teks')}
+              isLast
+            />
           </div>
         </div>
 
-        {/* ── SECTION: Ukuran Font ──────────────────────────────── */}
+        {/* ── SECTION: NOTIFIKASI ────────────────────────────────────── */}
         <div className={styles.section}>
-          <div className={styles.sectionLabelRow}>
-            <span className={styles.sectionDot} />
-            <p className={styles.sectionLabel}>Teks</p>
-          </div>
+          <p className={styles.sectionLabel}>Notifikasi</p>
           <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <div className={`${styles.cardIconWrap} ${styles.cardIconAmber}`}>
-                <IconText />
-              </div>
-              <div className={styles.cardTextWrap}>
-                <p className={styles.cardTitle}>Ukuran Teks</p>
-                <p className={styles.cardSub}>Sesuaikan ukuran huruf agar nyaman dibaca</p>
-              </div>
-            </div>
-            <div className={styles.cardDivider} />
-
-            {/* Font buttons */}
-            <div className={styles.fontGroup} role="radiogroup" aria-label="Pilih ukuran teks">
-              {(['small', 'medium', 'large'] as FontSize[]).map((size) => {
-                const label = size === 'small' ? 'Kecil' : size === 'large' ? 'Besar' : 'Sedang'
-                const glyphClass = size === 'small' ? styles.fontGlyphSm : size === 'large' ? styles.fontGlyphLg : styles.fontGlyphMd
-                return (
-                  <button
-                    key={size}
-                    type="button"
-                    role="radio"
-                    aria-checked={fontSize === size}
-                    className={`${styles.fontBtn} ${fontSize === size ? styles.fontBtnActive : ''}`}
-                    onClick={() => handle.fontSize(size)}
-                  >
-                    <span className={`${styles.fontGlyph} ${glyphClass} ${fontSize === size ? styles.fontGlyphActive : ''}`}>A</span>
-                    <span className={`${styles.fontLabel} ${fontSize === size ? styles.fontLabelActive : ''}`}>{label}</span>
-                    {fontSize === size && (
-                      <span className={styles.fontCheckDot}>
-                        <IconCheck />
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
+            <SettingRow
+              icon={<IconBell />}
+              title="Notifikasi"
+              sub="Kelola preferensi notifikasi dan pengingat"
+              href="/siswa/notifikasi"
+              isLast
+            />
           </div>
         </div>
 
-        {/* ── INFO CARD ─────────────────────────────────────────── */}
-        <div className={styles.infoCard}>
-          <div className={styles.infoCardIcon}>ℹ️</div>
-          <div className={styles.infoCardText}>
-            <p className={styles.infoCardTitle}>Perubahan Otomatis Tersimpan</p>
-            <p className={styles.infoCardSub}>Semua pengaturan langsung diterapkan dan disimpan secara otomatis di perangkat Anda.</p>
+        {/* ── SECTION: BANTUAN & INFORMASI ──────────────────────────── */}
+        <div className={styles.section}>
+          <p className={styles.sectionLabel}>Bantuan &amp; Informasi</p>
+          <div className={styles.card}>
+            <SettingRow
+              icon={<IconHelp />}
+              title="Bantuan & Informasi Aplikasi"
+              sub="Temukan bantuan, panduan, dan informasi aplikasi"
+              href="/siswa/bantuan"
+              isLast
+            />
           </div>
         </div>
 
-        {/* ── RESET BUTTON ──────────────────────────────────────── */}
-        <button type="button" className={styles.resetBtn} onClick={handle.reset}>
-          <IconReset />
-          <span>Reset ke Pengaturan Awal</span>
-        </button>
+        {/* ── INFO BANNER — Perubahan Otomatis Tersimpan ─────────────── */}
+        <div className={styles.infoBanner}>
+          <img
+            src="/icons/pengaturan-kata-banner.png"
+            alt="Perubahan Otomatis Tersimpan"
+            className={styles.infoBannerImg}
+          />
+        </div>
 
-        {/* ── APP VERSION ───────────────────────────────────────── */}
+        {/* ── RESET BUTTON ──────────────────────────────────────────── */}
+        <div className={styles.card}>
+          <button type="button" className={styles.resetRow} onClick={handle.reset}>
+            <div className={styles.rowIconWrap} style={{ background: 'rgba(239,68,68,0.1)' }}>
+              <IconReset />
+            </div>
+            <div className={styles.rowText}>
+              <p className={styles.resetTitle}>Reset ke Pengaturan Awal</p>
+              <p className={styles.rowSub}>Kembalikan semua pengaturan ke default</p>
+            </div>
+            <span className={styles.rowChevron} style={{ color: '#ef4444' }}>
+              <IconChevronRight />
+            </span>
+          </button>
+        </div>
+
+        {/* ── APP VERSION ───────────────────────────────────────────── */}
         <div className={styles.versionRow}>
           <div className={styles.versionBadge}>
             <Image
               src="/icons/icon-48.png"
               alt="App Icon"
-              width={20}
-              height={20}
+              width={32}
+              height={32}
               className={styles.versionAppIcon}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
-            <span>PSMB Al-Istiqomah</span>
+            <div>
+              <p className={styles.versionAppName}>PSMB Al-Istiqomah</p>
+              <p className={styles.versionAppCaption}>Aplikasi Resmi Santri</p>
+            </div>
           </div>
           <span className={styles.versionText}>v1.0.0</span>
         </div>
@@ -378,6 +539,10 @@ export default function SiswaPengaturanPage() {
           <div className={styles.navIconWrap}><IconHomeFilled /></div>
           <span>Beranda</span>
         </Link>
+        <Link href="/siswa/pendaftaran" className={styles.navItem}>
+          <div className={styles.navIconWrap}><IconDocumentOutline /></div>
+          <span>Daftar</span>
+        </Link>
         <Link href="/siswa/pembayaran" className={styles.navItem}>
           <div className={styles.navIconWrap}><IconWalletOutline /></div>
           <span>Bayar</span>
@@ -386,11 +551,34 @@ export default function SiswaPengaturanPage() {
           <div className={styles.navIconWrap}><IconDocumentOutline /></div>
           <span>Status</span>
         </Link>
-        <Link href="/siswa/profile" className={styles.navItem}>
+        <Link href="/siswa/profile" className={`${styles.navItem} ${styles.navItemActive}`}>
           <div className={styles.navIconWrap}><IconPersonOutline /></div>
           <span>Profil</span>
         </Link>
       </nav>
+
+      {/* ══ MODALS ════════════════════════════════════════════════ */}
+      {modal === 'bahasa' && (
+        <ModalBahasa
+          language={language}
+          onSelect={handle.language}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal === 'tampilan' && (
+        <ModalTampilan
+          theme={theme}
+          onSelect={handle.theme}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal === 'teks' && (
+        <ModalTeks
+          fontSize={fontSize}
+          onSelect={handle.fontSize}
+          onClose={() => setModal(null)}
+        />
+      )}
 
       {/* ══ TOAST ════════════════════════════════════════════════ */}
       {showToast && (
