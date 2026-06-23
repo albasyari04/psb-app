@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import styles from './notifikasi.module.css'
 
@@ -19,46 +19,93 @@ interface NotificationItem {
   created_at: string | null
 }
 
-type FilterKey = 'semua' | 'belum_dibaca'
+type FilterKey = 'semua' | 'belum_dibaca' | 'transaksi' | 'info' | 'promo'
+type SortKey = 'terbaru' | 'terlama'
 
 /* ════════════════════════════════════════════════════════════════
    ICONS
    ════════════════════════════════════════════════════════════════ */
 function IconArrowLeft() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 12H5M12 5l-7 7 7 7" />
+    </svg>
+  )
+}
+function IconGear() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   )
 }
 function IconBellHero() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconBellIllustration() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#34a37d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="rgba(52,163,125,0.12)" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#34a37d" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconCheckBadge() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="11" fill="#16a34a" />
+      <path d="M7.5 12.5l3 3 6-6.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 function IconCheckDouble() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2.5 12.5l4 4 4-4M8 16.5L18 5.5" opacity="0" />
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
       <path d="M1 12l4 4L15 6" />
       <path d="M9 16l1.5 1.5L21 7" />
     </svg>
   )
 }
-function IconSuccess() {
+function IconChevronRight() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M9 12l2 2 4-4" stroke="#16a34a" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="9" stroke="#16a34a" strokeWidth="1.8" />
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  )
+}
+function IconChevronDown() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  )
+}
+function IconDocCheck() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#0e7c5f" strokeWidth="1.8" strokeLinejoin="round" />
+      <polyline points="14 2 14 8 20 8" stroke="#0e7c5f" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9 14l1.8 1.8L15 12" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconCard() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="5" width="20" height="14" rx="2.5" stroke="#b45309" strokeWidth="1.8" />
+      <path d="M2 10h20" stroke="#b45309" strokeWidth="1.8" />
     </svg>
   )
 }
 function IconInfo() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="9" stroke="#2563eb" strokeWidth="1.8" />
       <path d="M12 11v5" stroke="#2563eb" strokeWidth="2.2" strokeLinecap="round" />
       <circle cx="12" cy="8" r="0.6" fill="#2563eb" stroke="#2563eb" strokeWidth="1.4" />
@@ -67,7 +114,7 @@ function IconInfo() {
 }
 function IconWarning() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M12 3l9.5 17H2.5L12 3z" stroke="#d97706" strokeWidth="1.8" strokeLinejoin="round" />
       <path d="M12 10v4" stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" />
       <circle cx="12" cy="17" r="0.6" fill="#d97706" stroke="#d97706" strokeWidth="1.4" />
@@ -76,7 +123,7 @@ function IconWarning() {
 }
 function IconError() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="9" stroke="#dc2626" strokeWidth="1.8" />
       <path d="M9.5 9.5l5 5M14.5 9.5l-5 5" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
@@ -84,9 +131,17 @@ function IconError() {
 }
 function IconBellEmpty() {
   return (
-    <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+    <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#9ca3af" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#9ca3af" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconTagEmpty() {
+  return (
+    <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
+      <path d="M20.6 12.6L13 5H6a2 2 0 0 0-2 2v7l7.6 7.6a2 2 0 0 0 2.8 0l6.2-6.2a2 2 0 0 0 0-2.8z" stroke="#9ca3af" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="9" cy="9" r="1.4" fill="#9ca3af" />
     </svg>
   )
 }
@@ -102,18 +157,33 @@ function IconRefresh() {
    HELPERS
    ════════════════════════════════════════════════════════════════ */
 
-/** Pilih ikon & warna berdasarkan tipe notifikasi */
-function getTypeVisual(type: NotifType) {
-  switch (type) {
+const TRANSAKSI_KEYWORDS = ['pembayaran', 'tagihan', 'transfer', 'spp', 'bayar']
+
+/** Kategori turunan dari title/message + type, dipakai untuk filter chip */
+function getCategory(item: NotificationItem): 'transaksi' | 'info' {
+  const text = `${item.title} ${item.message}`.toLowerCase()
+  const isTransaksi = TRANSAKSI_KEYWORDS.some((kw) => text.includes(kw))
+  return isTransaksi ? 'transaksi' : 'info'
+}
+
+/** Pilih ikon & warna pastel berdasarkan tipe + kategori notifikasi */
+function getTypeVisual(item: NotificationItem) {
+  const category = getCategory(item)
+
+  if (category === 'transaksi') {
+    return { icon: <IconCard />, bg: '#fdecc8' }
+  }
+
+  switch (item.type) {
     case 'success':
-      return { icon: <IconSuccess />, bg: '#dcfce7', accent: '#16a34a', label: 'Berhasil' }
+      return { icon: <IconDocCheck />, bg: '#d8f0e3' }
     case 'warning':
-      return { icon: <IconWarning />, bg: '#fef3c7', accent: '#d97706', label: 'Perhatian' }
+      return { icon: <IconWarning />, bg: '#fef3c7' }
     case 'error':
-      return { icon: <IconError />, bg: '#fee2e2', accent: '#dc2626', label: 'Penting' }
+      return { icon: <IconError />, bg: '#fee2e2' }
     case 'info':
     default:
-      return { icon: <IconInfo />, bg: '#dbeafe', accent: '#2563eb', label: 'Info' }
+      return { icon: <IconInfo />, bg: '#dbeafe' }
   }
 }
 
@@ -130,10 +200,10 @@ function formatRelativeTime(dateStr: string | null): string {
   const diffDay = Math.floor(diffHour / 24)
 
   if (diffSec < 60) return 'Baru saja'
-  if (diffMin < 60) return `${diffMin} menit lalu`
-  if (diffHour < 24) return `${diffHour} jam lalu`
+  if (diffMin < 60) return `${diffMin} menit yang lalu`
+  if (diffHour < 24) return `${diffHour} jam yang lalu`
   if (diffDay === 1) return 'Kemarin'
-  if (diffDay < 7) return `${diffDay} hari lalu`
+  if (diffDay < 7) return `${diffDay} hari yang lalu`
 
   return date.toLocaleDateString('id-ID', {
     day: 'numeric',
@@ -183,27 +253,28 @@ function NotificationCard({
   item: NotificationItem
   onMarkRead: (id: string) => void
 }) {
-  const visual = getTypeVisual(item.type)
+  const visual = getTypeVisual(item)
+  const isUnread = !item.is_read
 
   return (
     <button
       type="button"
-      className={`${styles.notifCard} ${!item.is_read ? styles.notifCardUnread : ''}`}
-      style={{ '--accent-color': visual.accent } as React.CSSProperties}
-      onClick={() => !item.is_read && onMarkRead(item.id)}
+      className={`${styles.notifCard} ${isUnread ? styles.notifCardUnread : ''}`}
+      onClick={() => isUnread && onMarkRead(item.id)}
     >
-      <div className={styles.notifAccentBar} />
+      {isUnread && <span className={styles.notifSideBar} />}
       <div className={styles.notifIconWrap} style={{ background: visual.bg }}>
         {visual.icon}
       </div>
       <div className={styles.notifBody}>
-        <div className={styles.notifTopRow}>
-          <p className={styles.notifTitle}>{item.title}</p>
-          {!item.is_read && <span className={styles.unreadDot} aria-label="Belum dibaca" />}
-        </div>
+        <p className={styles.notifTitle}>{item.title}</p>
         <p className={styles.notifMessage}>{item.message}</p>
         <p className={styles.notifTime}>{formatRelativeTime(item.created_at)}</p>
       </div>
+      <span className={styles.notifChevron}>
+        <IconChevronRight />
+      </span>
+      {isUnread && <span className={styles.notifDotIndicator} aria-hidden="true" />}
     </button>
   )
 }
@@ -237,7 +308,10 @@ export default function NotifikasiPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterKey>('semua')
+  const [sort, setSort] = useState<SortKey>('terbaru')
+  const [sortOpen, setSortOpen] = useState(false)
   const [marking, setMarking] = useState(false)
+  const sortRef = useRef<HTMLDivElement>(null)
 
   const fetchNotifications = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
@@ -262,17 +336,38 @@ export default function NotifikasiPage() {
     fetchNotifications()
   }, [fetchNotifications])
 
+  // Tutup dropdown sort saat klik di luar
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const unreadCount = useMemo(() => items.filter((n) => !n.is_read).length, [items])
 
   const filteredItems = useMemo(() => {
-    if (filter === 'belum_dibaca') return items.filter((n) => !n.is_read)
-    return items
-  }, [items, filter])
+    let result = items
+    if (filter === 'belum_dibaca') result = result.filter((n) => !n.is_read)
+    else if (filter === 'transaksi') result = result.filter((n) => getCategory(n) === 'transaksi')
+    else if (filter === 'info') result = result.filter((n) => getCategory(n) === 'info')
+    else if (filter === 'promo') result = [] // belum ada sumber data promo di sistem
+
+    const sorted = [...result].sort((a, b) => {
+      const tA = a.created_at ? new Date(a.created_at).getTime() : 0
+      const tB = b.created_at ? new Date(b.created_at).getTime() : 0
+      return sort === 'terbaru' ? tB - tA : tA - tB
+    })
+
+    return sorted
+  }, [items, filter, sort])
 
   const grouped = useMemo(() => groupByDate(filteredItems), [filteredItems])
 
   const handleMarkRead = useCallback(async (id: string) => {
-    // Optimistic update
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)))
     try {
       const res = await fetch('/api/notifications', {
@@ -283,7 +378,6 @@ export default function NotifikasiPage() {
       if (!res.ok) throw new Error('Gagal menandai dibaca')
     } catch (err) {
       console.error('[notifikasi] mark read error:', err)
-      // revert kalau gagal
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false } : n)))
     }
   }, [])
@@ -308,70 +402,88 @@ export default function NotifikasiPage() {
     }
   }, [items, unreadCount, marking])
 
+  const FILTERS: { key: FilterKey; label: string }[] = [
+    { key: 'semua', label: 'Semua' },
+    { key: 'belum_dibaca', label: 'Belum dibaca' },
+    { key: 'transaksi', label: 'Transaksi' },
+    { key: 'info', label: 'Info' },
+    { key: 'promo', label: 'Promo' },
+  ]
+
+  const emptyMessage = (() => {
+    if (filter === 'belum_dibaca') {
+      return { title: 'Tidak ada yang belum dibaca', sub: 'Semua pemberitahuan sudah kamu baca. Kerja bagus!', icon: <IconBellEmpty /> }
+    }
+    if (filter === 'promo') {
+      return { title: 'Belum ada promo', sub: 'Saat ini belum ada penawaran atau promo yang tersedia untukmu.', icon: <IconTagEmpty /> }
+    }
+    if (filter === 'transaksi') {
+      return { title: 'Belum ada notifikasi transaksi', sub: 'Pemberitahuan tentang pembayaran dan tagihan akan muncul di sini.', icon: <IconBellEmpty /> }
+    }
+    if (filter === 'info') {
+      return { title: 'Belum ada informasi', sub: 'Pemberitahuan umum seperti pengumuman dan jadwal akan muncul di sini.', icon: <IconBellEmpty /> }
+    }
+    return { title: 'Belum ada notifikasi', sub: 'Pemberitahuan tentang pembayaran, pengumuman, dan status pendaftaran akan muncul di sini.', icon: <IconBellEmpty /> }
+  })()
+
   return (
     <div className={styles.shell}>
 
-      {/* ══ HERO / TOP BAR ══════════════════════════════════════════ */}
-      <header className={styles.hero}>
-        <div className={styles.heroTopRow}>
-          <Link href="/siswa/pengaturan" className={styles.backBtn} aria-label="Kembali ke Pengaturan">
-            <IconArrowLeft />
-          </Link>
-          <button
-            type="button"
-            className={styles.refreshBtn}
-            onClick={() => fetchNotifications(true)}
-            disabled={refreshing}
-            aria-label="Muat ulang"
-          >
-            <span className={refreshing ? styles.spinning : ''}>
-              <IconRefresh />
-            </span>
-          </button>
+      {/* ══ TOP BAR (gaya pengaturan: putih, kotak rounded) ══════════ */}
+      <header className={styles.topBar}>
+        <Link href="/siswa/pengaturan" className={styles.topBarBtn} aria-label="Kembali ke Pengaturan">
+          <IconArrowLeft />
+        </Link>
+        <div className={styles.topBarCenter}>
+          <h1 className={styles.topBarTitle}>Notifikasi</h1>
+          <p className={styles.topBarSub}>Pemberitahuan penting untuk Anda</p>
         </div>
-
-        <div className={styles.heroMain}>
-          <div className={styles.heroIconWrap}>
-            <IconBellHero />
-            {unreadCount > 0 && (
-              <span className={styles.heroBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
-            )}
-          </div>
-          <div>
-            <h1 className={styles.heroTitle}>Notifikasi</h1>
-            <p className={styles.heroSub}>
-              {unreadCount > 0
-                ? `${unreadCount} pemberitahuan belum dibaca`
-                : 'Semua pemberitahuan sudah dibaca'}
-            </p>
-          </div>
-        </div>
+        <div className={styles.topBarBtn} />
       </header>
 
       {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
       <div className={styles.pageBody}>
 
-        {/* ── FILTER CHIPS + AKSI ────────────────────────────────── */}
-        <div className={styles.controlRow}>
-          <div className={styles.filterChips}>
-            <button
-              type="button"
-              className={`${styles.chip} ${filter === 'semua' ? styles.chipActive : ''}`}
-              onClick={() => setFilter('semua')}
-            >
-              Semua
-            </button>
-            <button
-              type="button"
-              className={`${styles.chip} ${filter === 'belum_dibaca' ? styles.chipActive : ''}`}
-              onClick={() => setFilter('belum_dibaca')}
-            >
-              Belum dibaca
-              {unreadCount > 0 && <span className={styles.chipCount}>{unreadCount}</span>}
-            </button>
+        {/* ── CARD: Aktifkan notifikasi penting ──────────────────── */}
+        <div className={styles.promoCard}>
+          <div className={styles.promoIconWrap}>
+            <IconBellIllustration />
+            <span className={styles.promoCheckBadge}>
+              <IconCheckBadge />
+            </span>
           </div>
+          <div className={styles.promoText}>
+            <p className={styles.promoTitle}>Aktifkan notifikasi penting</p>
+            <p className={styles.promoSub}>
+              Dapatkan informasi terbaru dan jangan lewatkan hal penting.
+            </p>
+          </div>
+          <Link href="/siswa/pengaturan/notifikasi" className={styles.promoBtn}>
+            <span>Kelola Pengaturan</span>
+            <IconChevronRight />
+          </Link>
+        </div>
 
-          {unreadCount > 0 && (
+        {/* ── FILTER CHIPS ────────────────────────────────────────── */}
+        <div className={styles.filterChipsRow}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              className={`${styles.chip} ${filter === f.key ? styles.chipActive : ''}`}
+              onClick={() => setFilter(f.key)}
+            >
+              <span>{f.label}</span>
+              {f.key === 'belum_dibaca' && unreadCount > 0 && (
+                <span className={styles.chipCount}>{unreadCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* ── CONTROL ROW: tandai semua + urutkan ─────────────────── */}
+        <div className={styles.controlRow}>
+          {unreadCount > 0 ? (
             <button
               type="button"
               className={styles.markAllBtn}
@@ -379,9 +491,38 @@ export default function NotifikasiPage() {
               disabled={marking}
             >
               <IconCheckDouble />
-              <span>Tandai semua</span>
+              <span>Tandai semua sebagai dibaca</span>
             </button>
-          )}
+          ) : <span />}
+
+          <div className={styles.sortWrap} ref={sortRef}>
+            <button
+              type="button"
+              className={styles.sortBtn}
+              onClick={() => setSortOpen((v) => !v)}
+            >
+              <span>Urutkan {sort === 'terbaru' ? 'terbaru' : 'terlama'}</span>
+              <IconChevronDown />
+            </button>
+            {sortOpen && (
+              <div className={styles.sortMenu}>
+                <button
+                  type="button"
+                  className={`${styles.sortMenuItem} ${sort === 'terbaru' ? styles.sortMenuItemActive : ''}`}
+                  onClick={() => { setSort('terbaru'); setSortOpen(false) }}
+                >
+                  Terbaru
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.sortMenuItem} ${sort === 'terlama' ? styles.sortMenuItemActive : ''}`}
+                  onClick={() => { setSort('terlama'); setSortOpen(false) }}
+                >
+                  Terlama
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── KONTEN ──────────────────────────────────────────────── */}
@@ -396,31 +537,26 @@ export default function NotifikasiPage() {
           </div>
         ) : filteredItems.length === 0 ? (
           <div className={styles.emptyState}>
-            <div className={styles.emptyIconWrap}>
-              <IconBellEmpty />
-            </div>
-            <p className={styles.emptyTitle}>
-              {filter === 'belum_dibaca' ? 'Tidak ada yang belum dibaca' : 'Belum ada notifikasi'}
-            </p>
-            <p className={styles.emptySub}>
-              {filter === 'belum_dibaca'
-                ? 'Semua pemberitahuan sudah kamu baca. Kerja bagus!'
-                : 'Pemberitahuan tentang pembayaran, pengumuman, dan status pendaftaran akan muncul di sini.'}
-            </p>
+            <div className={styles.emptyIconWrap}>{emptyMessage.icon}</div>
+            <p className={styles.emptyTitle}>{emptyMessage.title}</p>
+            <p className={styles.emptySub}>{emptyMessage.sub}</p>
           </div>
         ) : (
-          <div className={styles.groupsWrap}>
-            {grouped.map((group) => (
-              <div key={group.label} className={styles.group}>
-                <p className={styles.groupLabel}>{group.label}</p>
-                <div className={styles.cardList}>
-                  {group.items.map((item) => (
-                    <NotificationCard key={item.id} item={item} onMarkRead={handleMarkRead} />
-                  ))}
+          <>
+            <div className={styles.groupsWrap}>
+              {grouped.map((group) => (
+                <div key={group.label} className={styles.group}>
+                  <p className={styles.groupLabel}>{group.label.toUpperCase()}</p>
+                  <div className={styles.cardList}>
+                    {group.items.map((item) => (
+                      <NotificationCard key={item.id} item={item} onMarkRead={handleMarkRead} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <p className={styles.endOfListText}>Tidak ada notifikasi lainnya</p>
+          </>
         )}
       </div>
     </div>
