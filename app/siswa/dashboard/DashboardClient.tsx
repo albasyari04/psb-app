@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './dashboard.module.css'
+import { useSettings } from '@/contexts/SettingsContext'
 
 /* ════════════════════════════════════════════════════════════════
    TYPES
@@ -85,13 +86,13 @@ const HERO_SLIDES = [
 ] as const
 
 const QUICK_ITEMS = [
-  { href: '/siswa/jadwal',      label: 'Jadwal',      sub: 'Lihat kegiatan & jadwal harian',  icon: '/icons/jadwal icon.png' },
-  { href: '/siswa/berkas',      label: 'Berkas',      sub: 'Isi Berkas yang di butuhkan',      icon: '/icons/berkas icon.png' },
-  { href: '/siswa/pembayaran',  label: 'Pembayaran',  sub: 'Cek tagihan & lakukan bayar',      icon: '/icons/pembayaran icon.png' },
-  { href: '/siswa/laporan',     label: 'Laporan',     sub: 'Lihat laporan perkembangan',       icon: '/icons/laporan icon.png' },
-  { href: '/siswa/pengumuman',  label: 'Pengumuman',  sub: 'Info terbaru dari pesantren',      icon: '/icons/pengumuman icon.png' },
-  { href: '/siswa/formulir',    label: 'Formulir',    sub: 'Isi formulir data diri',           icon: '/icons/formulir icon.png' },
-]
+  { href: '/siswa/jadwal',      labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal icon.png' },
+  { href: '/siswa/berkas',      labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas icon.png' },
+  { href: '/siswa/pembayaran',  labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/pembayaran icon.png' },
+  { href: '/siswa/laporan',     labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan icon.png' },
+  { href: '/siswa/pengumuman',  labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman icon.png' },
+  { href: '/siswa/formulir',    labelKey: 'menu_formulir',   subKey: 'menu_formulir_sub',   icon: '/icons/formulir icon.png' },
+] as const
 
 const TIPE_CONFIG: Record<string, { pill: string }> = {
   Penting:    { pill: styles.pillPenting },
@@ -100,10 +101,10 @@ const TIPE_CONFIG: Record<string, { pill: string }> = {
   Peringatan: { pill: styles.pillPeringatan },
 }
 
-const LAPORAN_TIPE_CONFIG: Record<string, { label: string; badge: string }> = {
-  bulanan: { label: 'Bulanan', badge: styles.laporanBadgeBulanan },
-  tahunan: { label: 'Tahunan', badge: styles.laporanBadgeTahunan },
-  khusus:  { label: 'Khusus',  badge: styles.laporanBadgeKhusus },
+const LAPORAN_TIPE_CONFIG: Record<string, { labelKey: 'laporan_tipe_bulanan' | 'laporan_tipe_tahunan' | 'laporan_tipe_khusus'; badge: string }> = {
+  bulanan: { labelKey: 'laporan_tipe_bulanan', badge: styles.laporanBadgeBulanan },
+  tahunan: { labelKey: 'laporan_tipe_tahunan', badge: styles.laporanBadgeTahunan },
+  khusus:  { labelKey: 'laporan_tipe_khusus',  badge: styles.laporanBadgeKhusus },
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -193,10 +194,20 @@ function IconPersonOutline() {
   )
 }
 
+function IconSettings() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  )
+}
+
 /* ════════════════════════════════════════════════════════════════
    HERO BANNER — carousel dengan auto-rotate
    ════════════════════════════════════════════════════════════════ */
 function HeroBanner() {
+  const { t } = useSettings()
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -218,7 +229,7 @@ function HeroBanner() {
           </h2>
         </div>
         <Link href={slide.href} className={styles.heroBannerBtn}>
-          Selengkapnya <span aria-hidden>→</span>
+          {t('dashboard_hero_cta')} <span aria-hidden>→</span>
         </Link>
       </div>
       <div className={styles.heroBannerImageWrap}>
@@ -243,18 +254,19 @@ function HeroBanner() {
    JADWAL TERDEKAT
    ════════════════════════════════════════════════════════════════ */
 function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: boolean }) {
+  const { t } = useSettings()
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>Jadwal Ter...</p>
-        <Link href="/siswa/jadwal" className={styles.miniCardLink}>Lihat Jadwal</Link>
+        <p className={styles.miniCardTitle}>{t('dashboard_jadwal_title')}</p>
+        <Link href="/siswa/jadwal" className={styles.miniCardLink}>{t('dashboard_jadwal_link')}</Link>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
           {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 8}%` }} />)}
         </div>
       ) : items.length === 0 ? (
-        <p className={styles.timelineEmpty}>Belum ada jadwal.</p>
+        <p className={styles.timelineEmpty}>{t('dashboard_jadwal_empty')}</p>
       ) : (
         <ol className={styles.timeline}>
           {items.map((it, idx) => (
@@ -291,11 +303,12 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
    PEMBAYARAN
    ════════════════════════════════════════════════════════════════ */
 function PembayaranCard({ data, loading }: { data: PembayaranData; loading: boolean }) {
+  const { t } = useSettings()
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>Pembayar...</p>
-        <Link href="/siswa/pembayaran" className={styles.miniCardLink}>Lihat Semua</Link>
+        <p className={styles.miniCardTitle}>{t('dashboard_payment_title')}</p>
+        <Link href="/siswa/pembayaran" className={styles.miniCardLink}>{t('dashboard_payment_link')}</Link>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
@@ -303,7 +316,7 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
         </div>
       ) : (
         <>
-          <p className={styles.payCaption}>Tagihan Bulan Ini</p>
+          <p className={styles.payCaption}>{t('dashboard_payment_caption')}</p>
           <div className={styles.payAmountRow}>
             <span className={styles.payAmount}>Rp {formatRupiah(data.total)}</span>
             <div className={styles.payIconWrap}>
@@ -316,10 +329,10 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
            * Route ini butuh file: app/siswa/pembayaran/bayar/page.tsx
            * File tersebut sudah dibuat sebagai bagian dari perbaikan ini.
            */}
-          <Link href="/siswa/pembayaran/bayar" className={styles.payBtn}>Bayar Sekarang</Link>
+          <Link href="/siswa/pembayaran/bayar" className={styles.payBtn}>{t('dashboard_payment_cta')}</Link>
 
           {data.items.length === 0 ? (
-            <p className={styles.payEmpty}>Tidak ada tagihan tertunda.</p>
+            <p className={styles.payEmpty}>{t('dashboard_payment_empty')}</p>
           ) : (
             <div className={styles.payList}>
               {data.items.map((item) => (
@@ -329,7 +342,7 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
                     <p className={styles.payItemAmount}>Rp {formatRupiah(item.jumlah)}</p>
                   </div>
                   <span className={`${styles.payBadge} ${item.status === 'lunas' ? styles.payBadgeLunas : styles.payBadgeBelumLunas}`}>
-                    {item.status === 'lunas' ? 'Lunas' : 'Belum Lunas'}
+                    {item.status === 'lunas' ? t('dashboard_payment_lunas') : t('dashboard_payment_belum_lunas')}
                   </span>
                 </div>
               ))}
@@ -345,22 +358,23 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
    LAPORAN TERBARU
    ════════════════════════════════════════════════════════════════ */
 function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean }) {
+  const { t } = useSettings()
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>Laporan T...</p>
-        <Link href="/siswa/laporan" className={styles.miniCardLink}>Lihat Semua</Link>
+        <p className={styles.miniCardTitle}>{t('dashboard_laporan_title')}</p>
+        <Link href="/siswa/laporan" className={styles.miniCardLink}>{t('dashboard_laporan_link')}</Link>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
           {[1, 2, 3].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
         </div>
       ) : data.length === 0 ? (
-        <p className={styles.laporanMiniEmpty}>Belum ada laporan.</p>
+        <p className={styles.laporanMiniEmpty}>{t('dashboard_laporan_empty')}</p>
       ) : (
         <div className={styles.laporanMiniList}>
           {data.map((item) => {
-            const cfg = LAPORAN_TIPE_CONFIG[item.tipe] ?? { label: item.tipe, badge: styles.laporanBadgeKhusus }
+            const cfg = LAPORAN_TIPE_CONFIG[item.tipe] ?? { labelKey: 'laporan_tipe_khusus' as const, badge: styles.laporanBadgeKhusus }
             return (
               <Link key={item.id} href={`/siswa/laporan/${item.id}`} className={styles.laporanMiniItem}>
                 <p className={styles.laporanMiniTitle}>{item.judul}</p>
@@ -368,7 +382,7 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
                   <span className={styles.laporanMiniDate}>
                     {item.created_at ? formatTanggalShort(item.created_at) : '-'}
                   </span>
-                  <span className={`${styles.laporanMiniBadge} ${cfg.badge}`}>{cfg.label}</span>
+                  <span className={`${styles.laporanMiniBadge} ${cfg.badge}`}>{t(cfg.labelKey)}</span>
                 </div>
               </Link>
             )
@@ -412,6 +426,7 @@ function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: 
 }
 
 function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () => void }) {
+  const { t } = useSettings()
   const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
 
   function handleBackdrop(e: React.MouseEvent<HTMLDivElement>) {
@@ -424,7 +439,7 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
         <div className={styles.modalHandle} />
         <div className={styles.modalHeader}>
           <span className={`${styles.annBadge} ${cfg.pill}`}>{item.tipe}</span>
-          <button className={styles.modalClose} onClick={onClose} aria-label="Tutup">
+          <button className={styles.modalClose} onClick={onClose} aria-label={t('dashboard_close')}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -447,11 +462,11 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
-            <span>{item.lampiran_nama || 'Buka Lampiran'}</span>
+            <span>{item.lampiran_nama || t('dashboard_open_attachment')}</span>
             <span className={styles.modalAttachmentArrow}>↗</span>
           </a>
         )}
-        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+        <button className={styles.modalCloseBtn} onClick={onClose}>{t('dashboard_close')}</button>
       </div>
     </div>
   )
@@ -479,6 +494,7 @@ function CtaBanner() {
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════ */
 export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: Props) {
+  const { t } = useSettings()
   const [jadwal, setJadwal] = useState<JadwalItem[]>([])
   const [jadwalLoading, setJadwalLoading] = useState(true)
   const [pembayaran, setPembayaran] = useState<PembayaranData>({ total: 0, items: [] })
@@ -583,10 +599,15 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
             )}
           </div>
           <div className={styles.greetWrap}>
-            <p className={styles.greetText}>Assalamu&apos;alaikum,</p>
+            <p className={styles.greetText}>{t('dashboard_greeting')}</p>
             <h1 className={styles.greetName}>{fullName}</h1>
-            <p className={styles.greetSchool}>Santri Pondok Pesantren Al-Istiqomah</p>
+            <p className={styles.greetSchool}>{t('dashboard_school')}</p>
           </div>
+        </div>
+        <div className={styles.topHeaderRight}>
+          <Link href="/siswa/pengaturan" className={styles.iconBtn} aria-label={t('settings_title')}>
+            <IconSettings />
+          </Link>
         </div>
       </header>
 
@@ -597,17 +618,17 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         {/* Akses Cepat */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
-            <p className={styles.sectionTitle}>Akses Cepat</p>
-            <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
+            <p className={styles.sectionTitle}>{t('dashboard_quick_access')}</p>
+            <Link href="/siswa/menu" className={styles.sectionLink}>{t('dashboard_see_all')}</Link>
           </div>
           <div className={styles.quickGrid}>
-            {QUICK_ITEMS.map(({ href, label, sub, icon }) => (
-              <Link key={label} href={href} className={styles.quickCard}>
+            {QUICK_ITEMS.map(({ href, labelKey, subKey, icon }) => (
+              <Link key={labelKey} href={href} className={styles.quickCard}>
                 <div className={styles.quickIconWrap}>
-                  <Image src={icon} alt={label} width={52} height={52} className={styles.quickIconImage} />
+                  <Image src={icon} alt={t(labelKey)} width={52} height={52} className={styles.quickIconImage} />
                 </div>
-                <span className={styles.quickLabel}>{label}</span>
-                <span className={styles.quickSub}>{sub}</span>
+                <span className={styles.quickLabel}>{t(labelKey)}</span>
+                <span className={styles.quickSub}>{t(subKey)}</span>
               </Link>
             ))}
           </div>
@@ -623,8 +644,8 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         {/* Pengumuman */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
-            <p className={styles.sectionTitle}>Pengumuman Terbaru</p>
-            <Link href="/siswa/pengumuman" className={styles.sectionLink}>Lihat Semua →</Link>
+            <p className={styles.sectionTitle}>{t('dashboard_announcement')}</p>
+            <Link href="/siswa/pengumuman" className={styles.sectionLink}>{t('dashboard_see_all')}</Link>
           </div>
           {annLoading ? (
             <div className={styles.announcementList}>
@@ -641,7 +662,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           ) : announcements.length === 0 ? (
             <div className={styles.annEmpty}>
               <span className={styles.annEmptyIcon}>📭</span>
-              <p className={styles.annEmptyText}>Belum ada pengumuman</p>
+              <p className={styles.annEmptyText}>{t('dashboard_no_announcement')}</p>
             </div>
           ) : (
             <div className={styles.announcementList}>
@@ -663,7 +684,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
               style={{ width: '100%', height: 'auto', display: 'block' }}
             />
             <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(20, 20, 20, 0.5)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}>
-              Lihat Selengkapnya →
+              {t('dashboard_see_more')}
             </div>
           </Link>
         </div>
@@ -675,19 +696,19 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
       <nav className={styles.bottomNav}>
         <Link href="/siswa" className={`${styles.navItem} ${styles.navItemActive}`}>
           <div className={styles.navIconWrap}><IconHomeFilled /></div>
-          <span>Beranda</span>
+          <span>{t('nav_beranda')}</span>
         </Link>
         <Link href="/siswa/pembayaran" className={styles.navItem}>
           <div className={styles.navIconWrap}><IconWalletOutline /></div>
-          <span>Bayar</span>
+          <span>{t('nav_bayar')}</span>
         </Link>
         <Link href="/siswa/laporan" className={styles.navItem}>
           <div className={styles.navIconWrap}><IconDocumentOutline /></div>
-          <span>Status</span>
+          <span>{t('nav_status')}</span>
         </Link>
         <Link href="/siswa/profile" className={styles.navItem}>
           <div className={styles.navIconWrap}><IconPersonOutline /></div>
-          <span>Profil</span>
+          <span>{t('nav_profil')}</span>
         </Link>
       </nav>
 

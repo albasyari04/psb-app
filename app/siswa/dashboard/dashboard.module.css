@@ -523,6 +523,133 @@
 .laporanBadgeTahunan { background: var(--green-lighter); color: var(--green); }
 .laporanBadgeKhusus  { background: var(--amber-light); color: var(--amber); }
 .laporanMiniEmpty { font-size: 0.62rem; color: var(--gray-light); font-weight: 500; padding: 0.5rem 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE
+   Target [data-theme='dark'] di <html> via :global()
+   Pola sama dengan pengaturan_module.css agar konsisten di seluruh app.
+   ══════════════════════════════════════════════════════════════ */
+:global([data-theme='dark']) .shell {
+  --bg: #0d0d16;
+  --border: #2a2640;
+  --ink: #f1f0f5;
+  --slate: #c9c5d8;
+  --gray: #9892af;
+  --gray-light: #6b6680;
+  --green-lighter: rgba(22, 163, 74, 0.12);
+  --green-light: rgba(22, 163, 74, 0.2);
+  --amber-light: rgba(217, 119, 6, 0.16);
+}
+
+:global([data-theme='dark']) .topHeader {
+  background: #15131f;
+}
+:global([data-theme='dark']) .iconBtn {
+  background: #1a1728;
+  border-color: #2a2640;
+  color: var(--gray);
+}
+:global([data-theme='dark']) .iconBtn:hover {
+  background: #211d33;
+}
+
+:global([data-theme='dark']) .quickIconWrap {
+  background: #1a1728;
+}
+
+:global([data-theme='dark']) .miniCard {
+  background: #15131f;
+  border-color: #2a2640;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+:global([data-theme='dark']) .skelBar {
+  background: #211d33;
+}
+:global([data-theme='dark']) .timelineLine {
+  background: #2a2640;
+}
+
+:global([data-theme='dark']) .payIconBg {
+  background: #211d33;
+  color: #6b6680;
+}
+:global([data-theme='dark']) .payIconBadge {
+  border-color: #15131f;
+}
+:global([data-theme='dark']) .payItem {
+  border-top-color: #2a2640;
+}
+
+:global([data-theme='dark']) .annCard {
+  background: #15131f;
+  border-color: #2a2640;
+}
+:global([data-theme='dark']) .annCard:hover {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+:global([data-theme='dark']) .annThumb {
+  background: #1a1728;
+}
+:global([data-theme='dark']) .pillInformasi  { background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
+:global([data-theme='dark']) .pillInfo       { background: rgba(22, 163, 74, 0.15); color: #4ade80; }
+
+:global([data-theme='dark']) .annSkeletonCard {
+  background: #15131f;
+  border-color: #2a2640;
+}
+:global([data-theme='dark']) .annEmpty {
+  background: #15131f;
+  border-color: #2a2640;
+}
+
+:global([data-theme='dark']) .bottomNav {
+  background: #15131f;
+  border-top-color: #2a2640;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+:global([data-theme='dark']) .navItemActive .navIconWrap {
+  background: rgba(22, 163, 74, 0.15);
+}
+
+:global([data-theme='dark']) .modalBackdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+:global([data-theme='dark']) .modalSheet {
+  background: #15131f;
+}
+:global([data-theme='dark']) .modalHandle {
+  background: #2a2640;
+}
+:global([data-theme='dark']) .modalClose {
+  background: #1a1728;
+  border-color: #2a2640;
+  color: var(--gray);
+}
+:global([data-theme='dark']) .modalClose:hover {
+  background: #211d33;
+}
+:global([data-theme='dark']) .modalDivider {
+  background: #2a2640;
+}
+:global([data-theme='dark']) .modalContent {
+  color: var(--slate);
+}
+:global([data-theme='dark']) .modalAttachment {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: rgba(22, 163, 74, 0.25);
+  color: #4ade80;
+}
+:global([data-theme='dark']) .modalAttachment:hover {
+  background: rgba(22, 163, 74, 0.2);
+}
+:global([data-theme='dark']) .modalCloseBtn {
+  background: #1a1728;
+  border-color: #2a2640;
+  color: var(--gray);
+}
+:global([data-theme='dark']) .modalCloseBtn:hover {
+  background: #211d33;
+}
 /* ══════════════════════════════════════════════════════════════
    PENGUMUMAN TERBARU
    ══════════════════════════════════════════════════════════════ */
