@@ -2,15 +2,6 @@
 
 /**
  * app/siswa/pembayaran/bayar/page.tsx
- *
- * ── PENYEBAB 404 ──────────────────────────────────────────────────────────────
- * Route /siswa/pembayaran/bayar tidak punya file page.tsx.
- * Next.js App Router membutuhkan file page.tsx di setiap folder route.
- * DashboardClient.tsx memanggil href="/siswa/pembayaran/bayar" pada tombol
- * "Bayar Sekarang", sehingga muncul 404 ketika tombol diklik.
- *
- * SOLUSI: Buat file ini di app/siswa/pembayaran/bayar/page.tsx
- * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react'
@@ -207,7 +198,7 @@ function CopyButton({ text }: { text: string }) {
       }}
     >
       {copied ? <IcCheck /> : <IcCopy />}
-      {copied ? 'Disalin!' : 'Salin'}
+      {copied ? 'Disalin!' : 'Salin Nomor'}
     </button>
   )
 }
@@ -217,29 +208,35 @@ function CopyButton({ text }: { text: string }) {
 function RekeningCard({ item }: { item: typeof REKENING_INFO[0] }) {
   return (
     <div style={{
-      background: item.bgGradient, borderRadius: 20,
-      border: `1.5px solid ${item.borderColor}`,
+      background: '#fff',
+      borderRadius: 16,
+      border: '1.5px solid #E8EDF5',
+      borderLeft: `4px solid ${item.primaryColor}`,
       padding: '14px', flex: 1, minWidth: 0,
-      boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      {/* Header: icon + label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <div style={{
-          width: 38, height: 38, borderRadius: 11, background: '#fff',
+          width: 34, height: 34, borderRadius: 10, background: item.bgGradient,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.10)', flexShrink: 0,
+          flexShrink: 0,
         }}>
           {item.icon}
         </div>
-        <span style={{ fontWeight: 800, fontSize: 12, color: item.primaryColor, fontFamily: 'inherit' }}>
+        <span style={{ fontWeight: 800, fontSize: 13, color: item.primaryColor, fontFamily: 'inherit' }}>
           {item.label}
         </span>
       </div>
-      <p style={{ fontWeight: 800, fontSize: 14, color: '#1E293B', letterSpacing: 0.6, margin: '0 0 2px', fontFamily: 'inherit' }}>
+      {/* Nomor rekening besar */}
+      <p style={{ fontWeight: 800, fontSize: 15, color: '#1E293B', letterSpacing: 0.3, margin: '0 0 3px', fontFamily: 'inherit', lineHeight: 1.3 }}>
         {item.number}
       </p>
-      <p style={{ fontSize: 10, color: '#64748B', margin: '0 0 10px', fontWeight: 600, fontFamily: 'inherit' }}>
-         {item.name}
+      {/* Nama */}
+      <p style={{ fontSize: 10, color: '#64748B', margin: '0 0 12px', fontWeight: 500, fontFamily: 'inherit' }}>
+        a.n {item.name}
       </p>
+      {/* Tombol salin dengan label "Salin Nomor" */}
       <CopyButton text={item.numberRaw} />
     </div>
   )
@@ -819,104 +816,152 @@ export default function SiswaPembayaranBayarPage() {
         </div>
       )}
 
-      {/* ── Hero Header ───────────────────────────────────────────────────────── */}
+      {/* ── Hero Header ──────────────────────────────────────────────────────── */}
       <div style={{
-        background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 50%, #6D28D9 100%)',
-        padding: '28px 20px 28px',
-        position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #2D1FA3 0%, #4338CA 40%, #5B21B6 100%)',
+        padding: '32px 20px 32px',
+        position: 'relative',
+        overflow: 'hidden',               /* clip ilustrasi agar rapi dalam header */
+        minHeight: 150,
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-        <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
-        {/* Title row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, position: 'relative', marginBottom: 18 }}>
-          <div style={{
-            width: 50, height: 50, borderRadius: 16,
-            background: 'rgba(255,255,255,0.18)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '1.5px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-          }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V8z" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 2v4a2 2 0 0 0 2 2h4" stroke="#fff" strokeWidth="1.5"/>
-              <line x1="9" y1="13" x2="15" y2="13" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="9" y1="17" x2="13" y2="17" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: 0, letterSpacing: -0.3, fontFamily: 'inherit' }}>
-              Pembayaran
-            </h1>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: 0, fontWeight: 500, fontFamily: 'inherit' }}>
-              Penerimaan Santri Baru 2025/2026
-            </p>
-          </div>
+        {/* ── Background ilustrasi berkas-admin.png di sisi kanan ── */}
+        {/* Ini yang ditandai: gambar jadi latar belakang di area kanan hero */}
+        <div style={{
+          position: 'absolute',
+          right: -10,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 170,
+          height: 170,
+          zIndex: 0,
+          pointerEvents: 'none',
+          opacity: 1,
+        }}>
+          <Image
+            src="/icons/berkas-admin.png"
+            alt=""
+            fill
+            style={{ objectFit: 'contain', objectPosition: 'right center' }}
+            priority
+          />
         </div>
 
-        {/* Status chips */}
-        <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '6px 14px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.14)' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'inherit' }}>{dikonfirmasiCount} dikonfirmasi</span>
+        {/* Blur overlay di kanan agar teks kiri tetap terbaca */}
+        <div style={{
+          position: 'absolute', right: 0, top: 0, bottom: 0,
+          width: '55%',
+          background: 'linear-gradient(to right, rgba(67,56,202,0.85) 0%, rgba(67,56,202,0) 100%)',
+          zIndex: 1, pointerEvents: 'none',
+        }} />
+
+        {/* Dekorasi lingkaran blur pojok kiri bawah */}
+        <div style={{
+          position: 'absolute', bottom: -50, left: -50,
+          width: 160, height: 160, borderRadius: '50%',
+          background: 'rgba(99,102,241,0.20)',
+          filter: 'blur(28px)', zIndex: 0, pointerEvents: 'none',
+        }} />
+
+        {/* ── Konten kiri: icon box + teks + chips ── */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, position: 'relative', zIndex: 2 }}>
+
+          {/* Icon box — menggunakan pembayaran_icon.png */}
+          <div style={{
+            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            background: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '1.5px solid rgba(255,255,255,0.25)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.22)',
+            overflow: 'hidden',
+          }}>
+            <Image
+              src="/icons/pembayaran icon.png"
+              alt="Pembayaran"
+              width={36}
+              height={36}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '6px 14px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.14)' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FBBF24', boxShadow: '0 0 6px #FBBF24' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'inherit' }}>{menungguCount} menunggu</span>
+
+          {/* Teks + chips */}
+          <div style={{ paddingTop: 2 }}>
+            <h1 style={{
+              color: '#fff', fontWeight: 800, fontSize: 24,
+              margin: 0, letterSpacing: -0.5, fontFamily: 'inherit', lineHeight: 1.1,
+            }}>
+              Pembayaran
+            </h1>
+
+            {/* Status chips */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'rgba(255,255,255,0.13)',
+                borderRadius: 20, padding: '6px 14px',
+                backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(255,255,255,0.18)',
+              }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
+                <span style={{ fontSize: 11, color: '#fff', fontWeight: 700, fontFamily: 'inherit' }}>
+                  {dikonfirmasiCount} dikonfirmasi
+                </span>
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'rgba(255,255,255,0.13)',
+                borderRadius: 20, padding: '6px 14px',
+                backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(255,255,255,0.18)',
+              }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FBBF24', boxShadow: '0 0 6px #FBBF24' }} />
+                <span style={{ fontSize: 11, color: '#fff', fontWeight: 700, fontFamily: 'inherit' }}>
+                  {menungguCount} menunggu
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Content ───────────────────────────────────────────────────────────── */}
+      {/* ── Content ─────────────────────────────────────────────────────────── */}
       <div style={{ padding: '22px 16px', maxWidth: 520, margin: '0 auto' }}>
 
-        {/* ── Banner ilustrasi pembayaran ─────────────────────────────────── */}
+        {/* ── Banner pembayaran-banner.png — full visible, tidak terpotong ── */}
         <div style={{
-          borderRadius: 22, overflow: 'hidden', marginBottom: 24,
+          borderRadius: 20,
+          overflow: 'hidden',
+          marginBottom: 24,
+          boxShadow: '0 8px 28px rgba(79,70,229,0.22)',
           background: 'linear-gradient(135deg, #3730A3 0%, #6D28D9 100%)',
-          boxShadow: '0 12px 36px rgba(79,70,229,0.30)',
-          padding: '24px 20px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-          position: 'relative',
+          width: '100%',
+          lineHeight: 0,               /* hapus white-space bawah img */
         }}>
-          {/* Decorative */}
-          <div style={{ position: 'absolute', top: -20, right: 80, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-          <div style={{ position: 'absolute', bottom: -30, right: -20, width: 130, height: 130, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
-
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: '#FCD34D', margin: '0 0 6px', letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: 'inherit' }}>
-              Pesantren Al-I&apos;tiqomah
-            </p>
-            <p style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 4px', fontFamily: 'inherit', lineHeight: 1.3 }}>
-              Bayar & Upload<br />Bukti Transfer
-            </p>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: 0, fontFamily: 'inherit' }}>
-              Mudah, aman & langsung terverifikasi
-            </p>
-          </div>
-          <div style={{ position: 'relative', zIndex: 1, flexShrink: 0 }}>
-            <div style={{
-              width: 72, height: 72, borderRadius: 20,
-              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-              border: '1.5px solid rgba(255,255,255,0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V8z" fill="rgba(255,255,255,0.15)" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M16 2v4a2 2 0 0 0 2 2h4" stroke="#fff" strokeWidth="1.5"/>
-                <line x1="9" y1="13" x2="15" y2="13" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-                <line x1="9" y1="17" x2="13" y2="17" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-          </div>
+          {/* Gunakan <img> biasa agar height auto mengikuti rasio asli gambar */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/icons/pembayaran-banner.png"
+            alt="Bayar mudah, aman & terpercaya"
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
         </div>
 
         {/* ── Tujuan Transfer ─────────────────────────────────────────────── */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.3, margin: '0 0 10px', fontFamily: 'inherit' }}>
-          Tujuan Transfer
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.3, margin: 0, fontFamily: 'inherit' }}>
+            Transfer Cepat
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7l-9-5z"
+                fill="#22C55E" opacity="0.15" stroke="#22C55E" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M9 12l2 2 4-4" stroke="#22C55E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#22C55E', fontFamily: 'inherit' }}>Aman &amp; Terverifikasi</span>
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: 12, marginBottom: 22 }}>
           {REKENING_INFO.map((r) => <RekeningCard key={r.id} item={r} />)}
         </div>
@@ -929,18 +974,62 @@ export default function SiswaPembayaranBayarPage() {
           background: '#fff', borderRadius: 20, border: '1.5px solid #F1F5F9',
           padding: '16px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', marginBottom: 20,
         }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 12px' }}>
-            {[
-              { label: 'Nama Pendaftar', value: session?.user?.name ?? '-' },
-              { label: 'Periode', value: '2025/2026' },
-              { label: 'Total Dikonfirmasi', value: `${dikonfirmasiCount} item` },
-              { label: 'Menunggu Verifikasi', value: `${menungguCount} item` },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'inherit' }}>{label}</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit' }}>{value}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 12px' }}>
+            {/* Nama Pendaftar */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#6366F1" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="#6366F1" strokeWidth="2"/>
+                </svg>
               </div>
-            ))}
+              <div>
+                <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'inherit' }}>Nama Pendaftar</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit', lineHeight: 1.3 }}>{session?.user?.name ?? '-'}</p>
+              </div>
+            </div>
+            {/* Periode */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="#6366F1" strokeWidth="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke="#6366F1" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke="#6366F1" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke="#6366F1" strokeWidth="2"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'inherit' }}>Periode</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit' }}>2025/2026</p>
+              </div>
+            </div>
+            {/* Total Dikonfirmasi */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="#22C55E" strokeWidth="2"/>
+                  <path d="M9 12l2 2 4-4" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'inherit' }}>Total Dikonfirmasi</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit' }}>{dikonfirmasiCount} Item</p>
+              </div>
+            </div>
+            {/* Menunggu Verifikasi */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="#F97316" strokeWidth="2"/>
+                  <line x1="12" y1="7" x2="12" y2="12" stroke="#F97316" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="12" y1="15" x2="12" y2="15.5" stroke="#F97316" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, margin: '0 0 2px', fontFamily: 'inherit' }}>Menunggu Verifikasi</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit' }}>{menungguCount} Item</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -977,11 +1066,9 @@ export default function SiswaPembayaranBayarPage() {
           <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.3, margin: 0, fontFamily: 'inherit' }}>
             Riwayat Pembayaran
           </p>
-          {data.length > 0 && (
-            <span style={{ fontSize: 11, color: '#6366F1', fontWeight: 800, background: '#EEF2FF', borderRadius: 20, padding: '3px 10px', fontFamily: 'inherit' }}>
-              {data.length} transaksi
-            </span>
-          )}
+          <span style={{ fontSize: 12, color: '#6366F1', fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>
+            Lihat semua
+          </span>
         </div>
 
         {error ? (

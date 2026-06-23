@@ -308,69 +308,31 @@ function KataBanner() {
    Bagian kiri gambar sengaja polos (gradient teal) — di situlah teks
    salam, nama, kelas/asrama, dan kutipan ayat ditumpuk (overlay).
    ════════════════════════════════════════════════════════════════ */
-function GreetingBanner({ name, kelas, asrama }: { name: string; kelas: string; asrama: string }) {
+function GreetingBanner() {
   return (
-    <div style={{
-      position: 'relative',
-      width: '100%',
-      // Rasio asli laporan-banner.png = 729 x 342px, disamakan persis
-      // supaya object-fit: cover tidak memotong/zoom gambar.
-      // minHeight DIHAPUS — minHeight memaksa container lebih tinggi
-      // dari rasio asli di layar sempit, sehingga cover men-zoom &
-      // memotong sisi kiri-kanan gambar (masjid jadi terlihat sempit).
-      aspectRatio: '729/342',
-      borderRadius: '1.25rem',
-      overflow: 'hidden',
-      boxShadow: '0 12px 28px rgba(7,59,44,0.28)',
-    }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '16 / 9',
+        borderRadius: '1.25rem',
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(15,23,42,0.12)',
+        background: '#fff',
+      }}
+    >
       <Image
-        src="/icons/laporan-banner.png"
-        alt=""
+        src="/icons/laporan-santri-banner.png"
+        alt="Banner Laporan Santri"
         fill
-        style={{ objectFit: 'cover', objectPosition: 'center' }}
         priority
         sizes="(max-width: 480px) 100vw, 480px"
+        style={{
+          objectFit: 'contain',
+          objectPosition: 'center',
+          background: '#ffffff',
+        }}
       />
-
-      {/* Teks ditumpuk di area polos sebelah kiri gambar */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '1.4rem 1.3rem',
-        maxWidth: '68%',
-      }}>
-        <p style={{
-          fontSize: '0.78rem',
-          fontWeight: 700,
-          color: '#e8c178',
-          margin: '0 0 0.25rem',
-          letterSpacing: '0.01em',
-        }}>
-          Assalamu&apos;alaikum,
-        </p>
-        <h2 style={{
-          fontSize: '1.25rem',
-          fontWeight: 800,
-          color: '#fff',
-          margin: 0,
-          lineHeight: 1.25,
-          letterSpacing: '-0.01em',
-          textShadow: '0 2px 10px rgba(0,0,0,0.2)',
-        }}>
-          {name}
-        </h2>
-        <p style={{
-          fontSize: '0.74rem',
-          color: 'rgba(255,255,255,0.85)',
-          fontWeight: 600,
-          margin: '0.2rem 0 0.85rem',
-        }}>
-          {kelas ? `${kelas} - ${asrama}` : asrama}
-        </p>
-      </div>
     </div>
   )
 }
@@ -845,7 +807,6 @@ const FILTER_OPTIONS = [
    MAIN PAGE
    ════════════════════════════════════════════════════════════════ */
 export default function LaporanPage() {
-  const { data: session } = useSession()
   const [items, setItems] = useState<LaporanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -879,11 +840,6 @@ export default function LaporanPage() {
   }, [filter, load])
 
   const activeFilterLabel = FILTER_OPTIONS.find(f => f.value === filter)?.label ?? 'Semua'
-
-  // Data siswa (contoh - bisa dari session)
-  const studentName = session?.user?.name || 'Muhammad Soleh Jailani'
-  const studentKelas = ''
-  const studentAsrama = 'Asrama Putra'
 
   return (
     <>
@@ -1018,11 +974,7 @@ export default function LaporanPage() {
           gap: '1rem',
         }}>
           {/* GREETING BANNER */}
-          <GreetingBanner
-            name={studentName}
-            kelas={studentKelas}
-            asrama={studentAsrama}
-          />
+          <GreetingBanner />
 
           {/* Error */}
           {error && (

@@ -1,4 +1,3 @@
-// page.tsx - VERSI LENGKAP DENGAN PERBAIKAN
 'use client'
 
 import Link from 'next/link'
@@ -730,85 +729,38 @@ export default function PeraturanPage() {
       )}
 
       {/* ══ FILTER CHIPS ═══════════════════════════════════════════════ */}
-      <div className={styles.tabsContainer}>
-        <div className={styles.tabsWrap}>
-          <div className={styles.tabsScroll}>
-            <button
-              className={`${styles.tabBtn} ${isSemua ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('semua')}
-            >
-              <span className={styles.tabIcon}>
-                <IconGrid color={isSemua ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Semua</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'tata-tertib' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('tata-tertib')}
-            >
-              <span className={styles.tabIcon}>
-                <Image
-                  src="/icons/tata-tertib-icon.png"
-                  alt="Tata Tertib"
-                  width={16}
-                  height={16}
-                  className={styles.tabIconImage}
-                />
-              </span>
-              <span>Tata Tertib</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'kewajiban' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('kewajiban')}
-            >
-              <span className={styles.tabIcon}>
-                <IconShieldCheck color={activeFilter === 'kewajiban' ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Kewajiban</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'larangan' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('larangan')}
-            >
-              <span className={styles.tabIcon}>
-                <IconAlertTriangle color={activeFilter === 'larangan' ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Larangan</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'sanksi' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('sanksi')}
-            >
-              <span className={styles.tabIcon}>
-                <IconGavel color={activeFilter === 'sanksi' ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Sanksi</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'lain' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('lain')}
-            >
-              <span className={styles.tabIcon}>
-                <IconScroll color={activeFilter === 'lain' ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Ketentuan Lain</span>
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeFilter === 'wali-santri' ? styles.tabBtnActive : ''}`}
-              onClick={() => selectCategory('wali-santri')}
-            >
-              <span className={styles.tabIcon}>
-                <IconUsers color={activeFilter === 'wali-santri' ? 'white' : '#64748b'} size={14} />
-              </span>
-              <span>Wali Santri</span>
-            </button>
-          </div>
+      <div style={{ margin: '0 0 24px' }}>
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 2px 4px' }}>
+          {[
+            { id: 'semua', label: 'Semua' },
+            { id: 'tata-tertib', label: 'Tata Tertib' },
+            { id: 'kewajiban', label: 'Kewajiban' },
+            { id: 'larangan', label: 'Larangan' },
+            { id: 'sanksi', label: 'Sanksi' },
+            { id: 'lain', label: 'Ketentuan Lain' },
+            { id: 'wali-santri', label: 'Wali Santri' },
+          ].map((tab) => {
+            const isActive = activeFilter === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => selectCategory(tab.id)}
+                style={{
+                  padding: '7px 14px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+                  lineHeight: 1.4, minHeight: 30,
+                  border: `1.5px solid ${isActive ? '#6366F1' : '#E2E8F0'}`,
+                  background: isActive ? '#EEF2FF' : '#F8FAFC',
+                  color: isActive ? '#4338CA' : '#64748B',
+                  cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
+                  flexShrink: 0,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
