@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
-import { sendNotification, notifyAllAdmins, NotifTemplate } from '@/lib/notifications'
+import { createNotification, notifyAllAdmins, NotifTemplate } from '@/lib/notifications'
 
 export async function GET() {
   try {
@@ -91,8 +91,8 @@ export async function POST(req: Request) {
 
     // ── Kirim notifikasi setelah pendaftaran berhasil tersimpan ──────────────
     // Notif ke siswa: konfirmasi pendaftaran berhasil
-    await sendNotification({
-      user_id: session.user.id,
+    await createNotification({
+      userId: session.user.id,
       ...NotifTemplate.pendaftaranDiterima(namaLengkap),
     })
 

@@ -90,3 +90,62 @@ export function formatRupiah(value: number): string {
     minimumFractionDigits: 0,
   }).format(value)
 }
+
+/**
+ * Kirim notifikasi yang sama ke SEMUA admin.
+ *
+ * Catatan penting: tabel `notifications` punya kolom `user_id` tunggal
+ * dan tidak ada foreign key ke tabel `admin` secara eksplisit di schema —
+ * jadi baris notifikasi admin disimpan dengan `user_id` = id admin terkait,
+ * sama seperti pola notifikasi siswa. Halaman/listing notifikasi admin
+ * (jika ada) tinggal query `notifications` dengan `user_id` = id admin
+ * yang sedang login.
+ */
+export async function notifyAllAdmins(
+  payload: Omit<CreateNotificationInput, 'userId'>
+): Promise<void> {
+  try {
+    const supabase = getSupabaseAdmin()
+    const { data: admins, error: adminErr } = await supabase
+      .from('admin')
+      .select('id')
+
+    if (adminErr) {
+      console.error('[notifications] Gagal ambil daftar admin:', adminErr.message)
+      return
+    }
+
+    if (!admins || admins.length === 0) {
+      console.warn('[notifications] Lewati notifyAllAdmins: tidak ada admin terdaftar')
+      return
+    }
+
+    await createNotificationForUsers(
+      admins.map((a) => a.id),
+      payload
+    )
+  } catch (err) {
+    console.error('[notifications] Unexpected error saat notifyAllAdmins:', err)
+  }
+}
+
+/**
+ * Kumpulan template pesan notifikasi yang sering dipakai berulang,
+ * supaya teks di berbagai route tetap konsisten dan tidak ditulis manual
+ * di setiap tempat.
+ */
+export const NotifTemplate = {
+  /** Dikirim ke siswa setelah ia berhasil submit formulir pendaftaran */
+  pendaftaranDiterima: (namaLengkap: string): Omit<CreateNotificationInput, 'userId'> => ({
+    title:   '✅ Pendaftaran Berhasil Dikirim',
+    message: `Halo ${namaLengkap}, data pendaftaranmu telah berhasil dikirim dan akan segera diverifikasi oleh panitia. Pantau status pendaftaranmu secara berkala.`,
+    type:    'success',
+  }),
+
+  /** Dikirim ke semua admin saat ada pendaftar baru masuk */
+  pendaftarBaru: (namaLengkap: string): Omit<CreateNotificationInput, 'userId'> => ({
+    title:   '🆕 Pendaftar Baru',
+    message: `${namaLengkap} baru saja mengirimkan formulir pendaftaran. Segera lakukan verifikasi data dan berkas.`,
+    type:    'info',
+  }),
+}
