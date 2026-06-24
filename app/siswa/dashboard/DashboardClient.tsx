@@ -110,7 +110,6 @@ const QUICK_ITEMS = [
   { href: '/siswa/laporan',    labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan icon.png' },
   { href: '/siswa/pengumuman', labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman icon.png' },
   { href: '/siswa/chat',       labelKey: 'menu_chat',       subKey: 'menu_chat_sub',       icon: '/icons/chat icon.png' },
-  { href: '/siswa/formulir',   labelKey: 'menu_formulir',   subKey: 'menu_formulir_sub',   icon: '/icons/formulir icon.png' },
 ] as const
 
 const TIPE_CONFIG: Record<string, { pill: string }> = {
