@@ -122,23 +122,30 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   })
 
   // Update counter unread_by_siswa di thread
-  await supabase.rpc('increment_unread_by_siswa', { thread_id: threadId })
-    .catch(() => {
-      // Fallback manual jika RPC belum ada
-      supabase
-        .from('chat_threads')
-        .select('unread_by_siswa')
-        .eq('id', threadId)
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            supabase
-              .from('chat_threads')
-              .update({ unread_by_siswa: (data.unread_by_siswa ?? 0) + 1 })
-              .eq('id', threadId)
-          }
-        })
+  try {
+    // PERBAIKAN SEMENTARA: Gunakan `as any` untuk menekan error TypeScript.
+    // SOLUSI PERMANEN: Jalankan `npx supabase gen types typescript ...` untuk update tipe.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: rpcError } = await (supabase.rpc as any)('increment_unread_by_siswa', {
+      p_thread_id: threadId,
     })
+    if (rpcError) throw rpcError // Lemparkan error untuk ditangkap di blok catch
+  } catch (error) {
+    // Fallback manual jika RPC gagal atau belum ada
+    console.warn('RPC increment_unread_by_siswa gagal, menjalankan fallback manual:', error)
+    const { data } = await supabase
+      .from('chat_threads')
+      .select('unread_by_siswa')
+      .eq('id', threadId)
+      .single()
+
+    if (data) {
+      await supabase
+        .from('chat_threads')
+        .update({ unread_by_siswa: (data.unread_by_siswa ?? 0) + 1 })
+        .eq('id', threadId)
+    }
+  }
 
   return NextResponse.json({ data: newMessage }, { status: 201 })
 }
