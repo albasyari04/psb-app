@@ -227,6 +227,10 @@ const IconJadwal = () => (
   <Image src="/icons/jadwal icon.png" alt="Jadwal" width={48} height={48} />
 )
 
+const IconChat = () => (
+  <Image src="/icons/chat icon.png" alt="Chat" width={48} height={48} />
+)
+
 // ── Menu Cepat Admin Items ────────────────────────────────────────────────────
 const QUICK_MENU = [
   { id: 'pendaftar',  label: 'Pendaftar',  Icon: IconPendaftar,  href: '/admin/pendaftar'  },
@@ -235,6 +239,7 @@ const QUICK_MENU = [
   { id: 'berkas',     label: 'Berkas',     Icon: IconBerkas,     href: '/admin/berkas'     },
   { id: 'pengumuman', label: 'Pengumuman', Icon: IconPengumuman, href: '/admin/pengumuman' },
   { id: 'notifikasi', label: 'Notifikasi', Icon: IconNotifikasi, href: '/admin/notifikasi' },
+  { id: 'chat',       label: 'Chat',       Icon: IconChat,       href: '/admin/chat'       },
   { id: 'pengaturan', label: 'Pengaturan', Icon: IconPengaturan, href: '/admin/pengaturan' },
   { id: 'jadwal',     label: 'Jadwal',     Icon: IconJadwal,     href: '/admin/jadwal'     },
 ]
