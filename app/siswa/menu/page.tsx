@@ -44,6 +44,18 @@ const ALL_MENUS = [
     ],
   },
   {
+    category: 'Obrolan',
+    items: [
+      {
+        href:    '/siswa/chat',
+        icon:    '/icons/chat icon.png',
+        title:   'Chat',
+        sub:     'Chat Admin',
+        isImage: true,
+      },
+    ],
+  },
+  {
     category: 'Informasi',
     items: [
       {
