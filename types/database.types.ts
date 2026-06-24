@@ -346,6 +346,88 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_threads: {
+        Row: {
+          id: string
+          siswa_id: string
+          siswa_nama: string
+          siswa_avatar_url: string | null
+          last_message: string | null
+          last_message_at: string | null
+          last_sender_role: string | null
+          unread_by_admin: number
+          unread_by_siswa: number
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          siswa_id: string
+          siswa_nama: string
+          siswa_avatar_url?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          last_sender_role?: string | null
+          unread_by_admin?: number
+          unread_by_siswa?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          siswa_id?: string
+          siswa_nama?: string
+          siswa_avatar_url?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          last_sender_role?: string | null
+          unread_by_admin?: number
+          unread_by_siswa?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          id: string
+          thread_id: string
+          sender_role: string
+          sender_id: string
+          sender_nama: string
+          message: string
+          attachment_url: string | null
+          attachment_nama: string | null
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          thread_id: string
+          sender_role: string
+          sender_id: string
+          sender_nama: string
+          message: string
+          attachment_url?: string | null
+          attachment_nama?: string | null
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          thread_id?: string
+          sender_role?: string
+          sender_id?: string
+          sender_nama?: string
+          message?: string
+          attachment_url?: string | null
+          attachment_nama?: string | null
+          is_read?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       auth_users_view: {

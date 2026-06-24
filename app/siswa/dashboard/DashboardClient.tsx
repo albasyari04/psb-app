@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link  from 'next/link'
 import styles from './dashboard.module.css'
 import { useSettings } from '@/contexts/SettingsContext'
 
@@ -10,60 +10,70 @@ import { useSettings } from '@/contexts/SettingsContext'
    TYPES
    ════════════════════════════════════════════════════════════════ */
 interface Props {
-  fullName: string
-  avatarInitial: string
-  avatarUrl: string | null
+  fullName      : string
+  avatarInitial : string
+  avatarUrl     : string | null
 }
 
 interface JadwalItem {
-  id: string
-  label: string
-  tanggal: string
-  tanggal_mulai: string | null
-  tanggal_selesai: string | null
-  status: string
-  warna: string
-  urutan?: number
+  id               : string
+  label            : string
+  tanggal          : string
+  tanggal_mulai    : string | null
+  tanggal_selesai  : string | null
+  status           : string
+  warna            : string
+  urutan?          : number
 }
 
 interface PembayaranItem {
-  id: string
-  judul: string
-  jumlah: number
-  status: 'lunas' | 'belum_lunas' | string
+  id     : string
+  judul  : string
+  jumlah : number
+  status : 'lunas' | 'belum_lunas' | string
 }
 
 interface PembayaranData {
-  total: number
-  items: PembayaranItem[]
+  total : number
+  items : PembayaranItem[]
 }
 
 interface LaporanItem {
-  id: string
-  judul: string
-  tipe: 'bulanan' | 'tahunan' | 'khusus' | string
-  deskripsi: string | null
-  file_url: string | null
-  created_at: string | null
+  id         : string
+  judul      : string
+  tipe       : 'bulanan' | 'tahunan' | 'khusus' | string
+  deskripsi  : string | null
+  file_url   : string | null
+  created_at : string | null
 }
 
 interface Announcement {
-  id: string
-  judul: string
-  tipe: 'Penting' | 'Informasi' | 'Info' | 'Peringatan'
-  konten: string
-  tanggal: string
-  lampiran_url: string | null
+  id           : string
+  judul        : string
+  tipe         : 'Penting' | 'Informasi' | 'Info' | 'Peringatan'
+  konten       : string
+  tanggal      : string
+  lampiran_url : string | null
   lampiran_nama: string | null
-  created_at: string
+  created_at   : string
 }
 
 interface PeraturanItem {
-  id: string
-  judul: string
-  deskripsi: string
-  kategori: string
-  tanggal: string
+  id        : string
+  judul     : string
+  deskripsi : string
+  kategori  : string
+  tanggal   : string
+}
+
+// ── Notifikasi ──────────────────────────────────────────────────
+interface NotifItem {
+  id         : string
+  title      : string
+  message    : string
+  type       : string
+  is_read    : boolean
+  created_at : string | null
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -71,56 +81,70 @@ interface PeraturanItem {
    ════════════════════════════════════════════════════════════════ */
 const HERO_SLIDES = [
   {
-    eyebrow: 'Rutinan Ahad Legi',
-    titleBold: 'Ngaji Hikam,',
-    titleLight:'bersama K.H Thobroni Hanani',
-    href: '/siswa/galeri',
-    image: '/image/galeri/ngaji.jpeg',
+    eyebrow   : 'Rutinan Ahad Legi',
+    titleBold : 'Ngaji Hikam,',
+    titleLight: 'bersama K.H Thobroni Hanani',
+    href      : '/siswa/galeri',
+    image     : '/image/galeri/ngaji.jpeg',
   },
   {
-    eyebrow: 'Ziarah Wali Songo',
-    titleBold: 'Sowan Ploso ',
-    titleLight:'K.H Nurul Huda \nDjazuli',
-    href: '/siswa/galeri',
-    image: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
+    eyebrow   : 'Ziarah Wali Songo',
+    titleBold : 'Sowan Ploso ',
+    titleLight: 'K.H Nurul Huda \nDjazuli',
+    href      : '/siswa/galeri',
+    image     : '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
   },
   {
-    eyebrow: 'Masyayikh Ploso',
-    titleBold: 'Halal Bihalal,',
-    titleLight:'Gus Kautsar & \nGus Fahim Ploso',
-    href: '/siswa/galeri',
-    image: '/image/galeri/ngaji1.jpeg',
+    eyebrow   : 'Masyayikh Ploso',
+    titleBold : 'Halal Bihalal,',
+    titleLight: 'Gus Kautsar & \nGus Fahim Ploso',
+    href      : '/siswa/galeri',
+    image     : '/image/galeri/ngaji1.jpeg',
   },
 ] as const
 
 const QUICK_ITEMS = [
-  { href: '/siswa/jadwal',      labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal icon.png' },
-  { href: '/siswa/berkas',      labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas icon.png' },
-  { href: '/siswa/pembayaran',  labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/pembayaran icon.png' },
-  { href: '/siswa/laporan',     labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan icon.png' },
-  { href: '/siswa/pengumuman',  labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman icon.png' },
-  { href: '/siswa/formulir',    labelKey: 'menu_formulir',   subKey: 'menu_formulir_sub',   icon: '/icons/formulir icon.png' },
+  { href: '/siswa/jadwal',     labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal icon.png' },
+  { href: '/siswa/berkas',     labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas icon.png' },
+  { href: '/siswa/pembayaran', labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/pembayaran icon.png' },
+  { href: '/siswa/laporan',    labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan icon.png' },
+  { href: '/siswa/pengumuman', labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman icon.png' },
+  { href: '/siswa/chat',       labelKey: 'menu_chat',       subKey: 'menu_chat_sub',       icon: '/icons/chat icon.png' },
+  { href: '/siswa/formulir',   labelKey: 'menu_formulir',   subKey: 'menu_formulir_sub',   icon: '/icons/formulir icon.png' },
 ] as const
 
 const TIPE_CONFIG: Record<string, { pill: string }> = {
-  Penting:    { pill: styles.pillPenting },
-  Informasi:  { pill: styles.pillInformasi },
-  Info:       { pill: styles.pillInfo },
+  Penting   : { pill: styles.pillPenting },
+  Informasi : { pill: styles.pillInformasi },
+  Info      : { pill: styles.pillInfo },
   Peringatan: { pill: styles.pillPeringatan },
 }
 
-// Mapping kategori peraturan → warna pill (pakai class yang sudah ada di CSS)
 const KATEGORI_PERATURAN_CONFIG: Record<string, string> = {
   'Tata Tertib': styles.pillInfo,
-  'Larangan':    styles.pillPeringatan,
-  'Kewajiban':   styles.pillPenting,
-  'Informasi':   styles.pillInformasi,
+  'Larangan'   : styles.pillPeringatan,
+  'Kewajiban'  : styles.pillPenting,
+  'Informasi'  : styles.pillInformasi,
 }
 
-const LAPORAN_TIPE_CONFIG: Record<string, { labelKey: 'laporan_tipe_bulanan' | 'laporan_tipe_tahunan' | 'laporan_tipe_khusus'; badge: string }> = {
+const LAPORAN_TIPE_CONFIG: Record<string, {
+  labelKey: 'laporan_tipe_bulanan' | 'laporan_tipe_tahunan' | 'laporan_tipe_khusus'
+  badge: string
+}> = {
   bulanan: { labelKey: 'laporan_tipe_bulanan', badge: styles.laporanBadgeBulanan },
   tahunan: { labelKey: 'laporan_tipe_tahunan', badge: styles.laporanBadgeTahunan },
-  khusus:  { labelKey: 'laporan_tipe_khusus',  badge: styles.laporanBadgeKhusus },
+  khusus : { labelKey: 'laporan_tipe_khusus',  badge: styles.laporanBadgeKhusus },
+}
+
+// Ikon notifikasi per type
+const NOTIF_TYPE_ICON: Record<string, string> = {
+  chat        : '💬',
+  laporan     : '📋',
+  jadwal      : '📅',
+  pembayaran  : '💰',
+  pengumuman  : '📢',
+  pendaftaran : '📝',
+  info        : 'ℹ️',
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -130,11 +154,8 @@ function formatRupiah(n: number): string {
   return new Intl.NumberFormat('id-ID').format(n)
 }
 function formatTanggalShort(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-  } catch {
-    return iso
-  }
+  try { return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }
+  catch { return iso }
 }
 function formatTanggalRange(start: string, end: string | null): string {
   if (!end || end === start) return formatTanggalShort(start)
@@ -146,15 +167,23 @@ function hexToRgba(hex: string, alpha: number): string {
   const clean = hex.replace('#', '').trim()
   if (clean.length !== 3 && clean.length !== 6) return fallback
   const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean
-  const num = parseInt(full, 16)
+  const num  = parseInt(full, 16)
   if (Number.isNaN(num)) return fallback
-  const r = (num >> 16) & 255
-  const g = (num >> 8) & 255
-  const b = num & 255
+  const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n) + '…' : s
+}
+function timeAgo(iso: string | null): string {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const m    = Math.floor(diff / 60_000)
+  if (m < 1)  return 'baru saja'
+  if (m < 60) return `${m} menit lalu`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h} jam lalu`
+  return `${Math.floor(h / 24)} hari lalu`
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -163,8 +192,7 @@ function truncate(s: string, n: number): string {
 function IconCardSmall() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <line x1="2" y1="10" x2="22" y2="10" />
+      <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" />
     </svg>
   )
 }
@@ -185,8 +213,7 @@ function IconHomeFilled() {
 function IconWalletOutline() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
       <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
     </svg>
   )
@@ -195,27 +222,202 @@ function IconDocumentOutline() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="9" y1="13" x2="15" y2="13" />
-      <line x1="9" y1="17" x2="15" y2="17" />
+      <polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" />
     </svg>
   )
 }
 function IconPersonOutline() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
     </svg>
   )
 }
-
 function IconSettings() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
+  )
+}
+
+// ── IKON LONCENG ──────────────────────────────────────────────────────────
+function IconBell() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
+}
+function IconClose() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NOTIFICATION BELL — ikon + dropdown panel
+   ════════════════════════════════════════════════════════════════ */
+function NotificationBell() {
+  const [open,          setOpen         ] = useState(false)
+  const [notifs,        setNotifs       ] = useState<NotifItem[]>([])
+  const [unreadCount,   setUnreadCount  ] = useState(0)
+  const [loading,       setLoading      ] = useState(true)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const btnRef   = useRef<HTMLButtonElement>(null)
+
+  /* Fetch notifikasi */
+  const fetchNotifs = useCallback(async () => {
+    try {
+      const res  = await fetch('/api/notifications?limit=20')
+      const json = await res.json()
+      if (res.ok) {
+        setNotifs(json.data ?? [])
+        setUnreadCount(json.unreadCount ?? 0)
+      }
+    } catch { /* silent */ }
+    finally { setLoading(false) }
+  }, [])
+
+  /* Mount + polling 30 detik */
+  useEffect(() => {
+    fetchNotifs()
+    const id = setInterval(fetchNotifs, 30_000)
+    return () => clearInterval(id)
+  }, [fetchNotifs])
+
+  /* Tutup panel saat klik di luar */
+  useEffect(() => {
+    if (!open) return
+    function onClickOutside(e: MouseEvent) {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target as Node) &&
+        btnRef.current   && !btnRef.current.contains(e.target as Node)
+      ) { setOpen(false) }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [open])
+
+  /* Tandai satu sudah dibaca */
+  const markRead = useCallback(async (id: string) => {
+    setNotifs(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+    setUnreadCount(prev => Math.max(0, prev - 1))
+    await fetch('/api/notifications', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ id }),
+    }).catch(() => { /* silent */ })
+  }, [])
+
+  /* Tandai semua sudah dibaca */
+  const markAllRead = useCallback(async () => {
+    setNotifs(prev => prev.map(n => ({ ...n, is_read: true })))
+    setUnreadCount(0)
+    await fetch('/api/notifications', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ markAllRead: true }),
+    }).catch(() => { /* silent */ })
+  }, [])
+
+  const handleOpen = () => {
+    setOpen(o => !o)
+    if (!open) fetchNotifs() // refresh saat buka
+  }
+
+  return (
+    <div className={styles.notifWrap}>
+      {/* ── Tombol lonceng ── */}
+      <button
+        ref={btnRef}
+        type="button"
+        className={styles.iconBtn}
+        onClick={handleOpen}
+        aria-label="Notifikasi"
+        aria-expanded={open}
+      >
+        <IconBell />
+        {unreadCount > 0 && (
+          <span className={styles.notifBadge}>
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* ── Dropdown panel ── */}
+      {open && (
+        <div ref={panelRef} className={styles.notifPanel} role="dialog" aria-label="Panel Notifikasi">
+          {/* Header */}
+          <div className={styles.notifPanelHeader}>
+            <span className={styles.notifPanelTitle}>Notifikasi</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  className={styles.notifMarkAllBtn}
+                  onClick={markAllRead}
+                >
+                  Tandai semua dibaca
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.notifCloseBtn}
+                onClick={() => setOpen(false)}
+                aria-label="Tutup panel notifikasi"
+              >
+                <IconClose />
+              </button>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className={styles.notifList}>
+            {loading ? (
+              <div className={styles.notifEmpty}>
+                <div className={styles.miniSkeleton} style={{ padding: '0.5rem 1rem' }}>
+                  {[1, 2, 3].map(i => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 10}%` }} />)}
+                </div>
+              </div>
+            ) : notifs.length === 0 ? (
+              <div className={styles.notifEmpty}>
+                <span style={{ fontSize: '1.8rem' }}>🔔</span>
+                <p className={styles.notifEmptyText}>Belum ada notifikasi</p>
+              </div>
+            ) : (
+              notifs.map(n => (
+                <button
+                  key={n.id}
+                  type="button"
+                  className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ''}`}
+                  onClick={() => { if (!n.is_read) markRead(n.id) }}
+                >
+                  <span className={styles.notifIcon}>
+                    {NOTIF_TYPE_ICON[n.type] ?? '🔔'}
+                  </span>
+                  <div className={styles.notifItemBody}>
+                    <p className={styles.notifItemTitle}>{n.title}</p>
+                    <p className={styles.notifItemMsg}>{n.message}</p>
+                    <span className={styles.notifItemTime}>{timeAgo(n.created_at)}</span>
+                  </div>
+                  {!n.is_read && <span className={styles.notifDot} aria-hidden />}
+                </button>
+              ))
+            )}
+          </div>
+
+          {/* Footer */}
+          <Link href="/siswa/notifikasi" className={styles.notifPanelFooter} onClick={() => setOpen(false)}>
+            Lihat semua notifikasi →
+          </Link>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -227,8 +429,8 @@ function HeroBanner() {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % HERO_SLIDES.length), 6000)
-    return () => clearInterval(t)
+    const id = setInterval(() => setIndex((i) => (i + 1) % HERO_SLIDES.length), 6000)
+    return () => clearInterval(id)
   }, [])
 
   const slide = HERO_SLIDES[index]
@@ -253,10 +455,7 @@ function HeroBanner() {
       </div>
       <div className={styles.heroBannerDots}>
         {HERO_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Slide ${i + 1}`}
+          <button key={i} type="button" aria-label={`Slide ${i + 1}`}
             className={`${styles.heroBannerDot} ${i === index ? styles.heroBannerDotActive : ''}`}
             onClick={() => setIndex(i)}
           />
@@ -279,7 +478,7 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
-          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 8}%` }} />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 8}%` }} />)}
         </div>
       ) : items.length === 0 ? (
         <p className={styles.timelineEmpty}>{t('dashboard_jadwal_empty')}</p>
@@ -299,10 +498,8 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
                     : formatTanggalShort(it.tanggal)}
                 </span>
                 {it.status && (
-                  <span
-                    className={styles.jadwalStatusBadge}
-                    style={{ color: it.warna || 'var(--green)', background: hexToRgba(it.warna, 0.14) }}
-                  >
+                  <span className={styles.jadwalStatusBadge}
+                    style={{ color: it.warna || 'var(--green)', background: hexToRgba(it.warna, 0.14) }}>
                     {it.status}
                   </span>
                 )}
@@ -328,7 +525,7 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
-          {[1, 2, 3, 4].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
         </div>
       ) : (
         <>
@@ -341,12 +538,11 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
             </div>
           </div>
           <Link href="/siswa/pembayaran/bayar" className={styles.payBtn}>{t('dashboard_payment_cta')}</Link>
-
           {data.items.length === 0 ? (
             <p className={styles.payEmpty}>{t('dashboard_payment_empty')}</p>
           ) : (
             <div className={styles.payList}>
-              {data.items.map((item) => (
+              {data.items.map(item => (
                 <div key={item.id} className={styles.payItem}>
                   <div className={styles.payItemText}>
                     <p className={styles.payItemTitle}>{item.judul}</p>
@@ -378,21 +574,19 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
-          {[1, 2, 3].map((i) => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
+          {[1, 2, 3].map(i => <div key={i} className={styles.skelBar} style={{ width: `${55 + i * 9}%` }} />)}
         </div>
       ) : data.length === 0 ? (
         <p className={styles.laporanMiniEmpty}>{t('dashboard_laporan_empty')}</p>
       ) : (
         <div className={styles.laporanMiniList}>
-          {data.map((item) => {
+          {data.map(item => {
             const cfg = LAPORAN_TIPE_CONFIG[item.tipe] ?? { labelKey: 'laporan_tipe_khusus' as const, badge: styles.laporanBadgeKhusus }
             return (
               <Link key={item.id} href={`/siswa/laporan/${item.id}`} className={styles.laporanMiniItem}>
                 <p className={styles.laporanMiniTitle}>{item.judul}</p>
                 <div className={styles.laporanMiniMeta}>
-                  <span className={styles.laporanMiniDate}>
-                    {item.created_at ? formatTanggalShort(item.created_at) : '-'}
-                  </span>
+                  <span className={styles.laporanMiniDate}>{item.created_at ? formatTanggalShort(item.created_at) : '-'}</span>
                   <span className={`${styles.laporanMiniBadge} ${cfg.badge}`}>{t(cfg.labelKey)}</span>
                 </div>
               </Link>
@@ -407,20 +601,17 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
 /* ════════════════════════════════════════════════════════════════
    PENGUMUMAN
    ════════════════════════════════════════════════════════════════ */
-function isImageUrl(url: string) {
-  return /\.(png|jpe?g|webp|gif)$/i.test(url)
-}
+function isImageUrl(url: string) { return /\.(png|jpe?g|webp|gif)$/i.test(url) }
 
 function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: Announcement) => void }) {
   const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
   return (
     <button type="button" className={styles.annCard} onClick={() => onClick(item)} aria-label={`Buka pengumuman: ${item.judul}`}>
       <div className={styles.annThumb}>
-        {item.lampiran_url && isImageUrl(item.lampiran_url) ? (
-          <Image src={item.lampiran_url} alt="" fill className={styles.annThumbImg} />
-        ) : (
-          <Image src="/icons/pengumuman icon.png" alt="Pengumuman" fill className={styles.annThumbImg} />
-        )}
+        {item.lampiran_url && isImageUrl(item.lampiran_url)
+          ? <Image src={item.lampiran_url} alt="" fill className={styles.annThumbImg} />
+          : <Image src="/icons/pengumuman icon.png" alt="Pengumuman" fill className={styles.annThumbImg} />
+        }
       </div>
       <div className={styles.annBody}>
         <div className={styles.annTopRow}>
@@ -438,7 +629,7 @@ function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: 
 
 function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () => void }) {
   const { t } = useSettings()
-  const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
+  const cfg   = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
 
   function handleBackdrop(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === e.currentTarget) onClose()
@@ -460,8 +651,7 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
         <div className={styles.modalDateRow}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
+            <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
           </svg>
           <span>{formatTanggalShort(item.tanggal)}</span>
         </div>
@@ -484,25 +674,14 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
 }
 
 /* ════════════════════════════════════════════════════════════════
-   PERATURAN CARD — tampil seperti pengumuman (annCard style)
+   PERATURAN CARD
    ════════════════════════════════════════════════════════════════ */
 function PeraturanCard({ item }: { item: PeraturanItem }) {
-  // Pilih class pill sesuai kategori, fallback ke pillInfo
   const pillClass = KATEGORI_PERATURAN_CONFIG[item.kategori] ?? styles.pillInfo
-
   return (
-    <Link
-      href="/siswa/peraturan"
-      className={styles.annCard}
-      aria-label={`Buka peraturan: ${item.judul}`}
-    >
+    <Link href="/siswa/peraturan" className={styles.annCard} aria-label={`Buka peraturan: ${item.judul}`}>
       <div className={styles.annThumb}>
-        <Image
-          src="/icons/tata-tertib-icon.png"
-          alt="Peraturan"
-          fill
-          className={styles.annThumbImg}
-        />
+        <Image src="/icons/tata-tertib-icon.png" alt="Peraturan" fill className={styles.annThumbImg} />
       </div>
       <div className={styles.annBody}>
         <div className={styles.annTopRow}>
@@ -524,14 +703,8 @@ function PeraturanCard({ item }: { item: PeraturanItem }) {
 function CtaBanner() {
   return (
     <div className={styles.bannerKataWrap}>
-      <Image
-        src="/icons/kata-banner.png"
-        alt="Banner Motivasi Santri"
-        width={1200}
-        height={350}
-        className={styles.bannerKataImage}
-        priority
-      />
+      <Image src="/icons/kata-banner.png" alt="Banner Motivasi Santri" width={1200} height={350}
+        className={styles.bannerKataImage} priority />
     </div>
   )
 }
@@ -541,64 +714,42 @@ function CtaBanner() {
    ════════════════════════════════════════════════════════════════ */
 export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: Props) {
   const { t } = useSettings()
-  const [jadwal, setJadwal] = useState<JadwalItem[]>([])
-  const [jadwalLoading, setJadwalLoading] = useState(true)
-  const [pembayaran, setPembayaran] = useState<PembayaranData>({ total: 0, items: [] })
-  const [pembayaranLoading, setPembayaranLoading] = useState(true)
-  const [laporan, setLaporan] = useState<LaporanItem[]>([])
-  const [laporanLoading, setLaporanLoading] = useState(true)
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
-  const [annLoading, setAnnLoading] = useState(true)
-  const [selectedAnn, setSelectedAnn] = useState<Announcement | null>(null)
+  const [jadwal,           setJadwal          ] = useState<JadwalItem[]>([])
+  const [jadwalLoading,    setJadwalLoading   ] = useState(true)
+  const [pembayaran,       setPembayaran      ] = useState<PembayaranData>({ total: 0, items: [] })
+  const [pembayaranLoading,setPembayaranLoading] = useState(true)
+  const [laporan,          setLaporan         ] = useState<LaporanItem[]>([])
+  const [laporanLoading,   setLaporanLoading  ] = useState(true)
+  const [announcements,    setAnnouncements   ] = useState<Announcement[]>([])
+  const [annLoading,       setAnnLoading      ] = useState(true)
+  const [selectedAnn,      setSelectedAnn     ] = useState<Announcement | null>(null)
 
-  // Data peraturan — bisa diganti fetch dari API jika sudah tersedia
   const [peraturan] = useState<PeraturanItem[]>([
-    {
-      id: '1',
-      judul: 'Tata Tertib Umum',
-      deskripsi: 'Seluruh santri wajib menjaga adab, disiplin dan ketertiban pondok.',
-      kategori: 'Tata Tertib',
-      tanggal: '2026-06-15',
-    },
-    {
-      id: '2',
-      judul: 'Larangan Membawa HP',
-      deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',
-      kategori: 'Larangan',
-      tanggal: '2026-06-08',
-    },
-    {
-      id: '3',
-      judul: 'Kewajiban Mengikuti Jamaah',
-      deskripsi: 'Seluruh santri wajib mengikuti sholat berjamaah dan kegiatan pondok.',
-      kategori: 'Kewajiban',
-      tanggal: '2026-06-01',
-    },
+    { id: '1', judul: 'Tata Tertib Umum',         deskripsi: 'Seluruh santri wajib menjaga adab, disiplin dan ketertiban pondok.', kategori: 'Tata Tertib', tanggal: '2026-06-15' },
+    { id: '2', judul: 'Larangan Membawa HP',       deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',       kategori: 'Larangan',    tanggal: '2026-06-08' },
+    { id: '3', judul: 'Kewajiban Mengikuti Jamaah',deskripsi: 'Seluruh santri wajib mengikuti sholat berjamaah dan kegiatan pondok.',kategori: 'Kewajiban',   tanggal: '2026-06-01' },
   ])
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/siswa/jadwal')
+        const res  = await fetch('/api/siswa/jadwal')
         const json = await res.json()
         if (res.ok) {
           const mapped: JadwalItem[] = (json.data ?? []).slice(0, 5).map((row: Record<string, unknown>) => ({
-            id: row.id as string,
-            label: (row.label ?? '') as string,
-            tanggal: (row.tanggal ?? '') as string,
-            tanggal_mulai: (row.tanggal_mulai ?? null) as string | null,
+            id             : row.id as string,
+            label          : (row.label    ?? '') as string,
+            tanggal        : (row.tanggal  ?? '') as string,
+            tanggal_mulai  : (row.tanggal_mulai  ?? null) as string | null,
             tanggal_selesai: (row.tanggal_selesai ?? null) as string | null,
-            status: (row.status ?? '') as string,
-            warna: (row.warna ?? '#16a34a') as string,
-            urutan: row.urutan as number | undefined,
+            status         : (row.status   ?? '') as string,
+            warna          : (row.warna    ?? '#16a34a') as string,
+            urutan         : row.urutan as number | undefined,
           }))
           setJadwal(mapped)
         }
-      } catch (e) {
-        console.error('Gagal memuat jadwal:', e)
-      } finally {
-        setJadwalLoading(false)
-      }
+      } catch (e) { console.error('Gagal memuat jadwal:', e) }
+      finally      { setJadwalLoading(false) }
     }
     load()
   }, [])
@@ -606,14 +757,11 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/siswa/pembayaran/ringkasan')
+        const res  = await fetch('/api/siswa/pembayaran/ringkasan')
         const json = await res.json()
         if (res.ok) setPembayaran(json.data ?? { total: 0, items: [] })
-      } catch (e) {
-        console.error('Gagal memuat ringkasan pembayaran:', e)
-      } finally {
-        setPembayaranLoading(false)
-      }
+      } catch (e) { console.error('Gagal memuat ringkasan pembayaran:', e) }
+      finally      { setPembayaranLoading(false) }
     }
     load()
   }, [])
@@ -621,14 +769,11 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/siswa/laporan/ringkasan')
+        const res  = await fetch('/api/siswa/laporan/ringkasan')
         const json = await res.json()
         if (res.ok) setLaporan(json.data ?? [])
-      } catch (e) {
-        console.error('Gagal memuat ringkasan laporan:', e)
-      } finally {
-        setLaporanLoading(false)
-      }
+      } catch (e) { console.error('Gagal memuat ringkasan laporan:', e) }
+      finally      { setLaporanLoading(false) }
     }
     load()
   }, [])
@@ -636,14 +781,11 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/siswa/announcements?limit=3')
+        const res  = await fetch('/api/siswa/announcements?limit=3')
         const json = await res.json()
         if (res.ok) setAnnouncements(json.data ?? [])
-      } catch (e) {
-        console.error('Gagal memuat pengumuman:', e)
-      } finally {
-        setAnnLoading(false)
-      }
+      } catch (e) { console.error('Gagal memuat pengumuman:', e) }
+      finally      { setAnnLoading(false) }
     }
     load()
   }, [])
@@ -656,15 +798,8 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         <div className={styles.topHeaderLeft}>
           <div className={styles.avatarWrap}>
             {avatarUrl ? (
-              <Image
-                src={avatarUrl}
-                alt={fullName}
-                width={52}
-                height={52}
-                className={styles.avatarImg}
-                referrerPolicy="no-referrer"
-                unoptimized
-              />
+              <Image src={avatarUrl} alt={fullName} width={52} height={52}
+                className={styles.avatarImg} referrerPolicy="no-referrer" unoptimized />
             ) : (
               <span className={styles.avatarInitialText}>{avatarInitial}</span>
             )}
@@ -675,7 +810,12 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
             <p className={styles.greetSchool}>{t('dashboard_school')}</p>
           </div>
         </div>
+
+        {/* ── Kanan: lonceng + settings ── */}
         <div className={styles.topHeaderRight}>
+          {/* ✅ NOTIF: tombol lonceng notifikasi */}
+          <NotificationBell />
+
           <Link href="/siswa/pengaturan" className={styles.iconBtn} aria-label={t('settings_title')}>
             <IconSettings />
           </Link>
@@ -707,12 +847,12 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
 
         {/* 3 Kartu */}
         <div className={styles.threeColGrid}>
-          <JadwalHariIniCard items={jadwal} loading={jadwalLoading} />
-          <PembayaranCard data={pembayaran} loading={pembayaranLoading} />
-          <LaporanCard data={laporan} loading={laporanLoading} />
+          <JadwalHariIniCard  items={jadwal}    loading={jadwalLoading}    />
+          <PembayaranCard     data={pembayaran} loading={pembayaranLoading} />
+          <LaporanCard        data={laporan}    loading={laporanLoading}    />
         </div>
 
-        {/* ══ Pengumuman Terbaru ══════════════════════════════════════ */}
+        {/* Pengumuman Terbaru */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>{t('dashboard_announcement')}</p>
@@ -720,7 +860,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           </div>
           {annLoading ? (
             <div className={styles.announcementList}>
-              {[1, 2].map((i) => (
+              {[1, 2].map(i => (
                 <div key={i} className={styles.annSkeletonCard}>
                   <div className={styles.miniSkeleton}>
                     <div className={styles.skelBar} style={{ width: '60%' }} />
@@ -737,20 +877,18 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
             </div>
           ) : (
             <div className={styles.announcementList}>
-              {announcements.map((ann) => (
+              {announcements.map(ann => (
                 <AnnouncementCard key={ann.id} item={ann} onClick={setSelectedAnn} />
               ))}
             </div>
           )}
         </div>
 
-        {/* ══ Peraturan Terbaru — tampil seperti pengumuman ══════════ */}
+        {/* Peraturan */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>Peraturan</p>
-            <Link href="/siswa/peraturan" className={styles.sectionLink}>
-              Lihat Semua →
-            </Link>
+            <Link href="/siswa/peraturan" className={styles.sectionLink}>Lihat Semua →</Link>
           </div>
           {peraturan.length === 0 ? (
             <div className={styles.annEmpty}>
@@ -759,9 +897,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
             </div>
           ) : (
             <div className={styles.announcementList}>
-              {peraturan.map((item) => (
-                <PeraturanCard key={item.id} item={item} />
-              ))}
+              {peraturan.map(item => <PeraturanCard key={item.id} item={item} />)}
             </div>
           )}
         </div>

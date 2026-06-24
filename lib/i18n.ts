@@ -78,6 +78,7 @@ export const translations = {
     menu_laporan:    'Laporan',
     menu_pengumuman: 'Pengumuman',
     menu_formulir:   'Formulir',
+    menu_chat:       'Chat Admin',
 
     // ── Quick menu subs ──────────────────────────────────────────
     menu_jadwal_sub:     'Lihat kegiatan & jadwal harian',
@@ -86,6 +87,7 @@ export const translations = {
     menu_laporan_sub:    'Lihat laporan perkembangan',
     menu_pengumuman_sub: 'Info terbaru dari pesantren',
     menu_formulir_sub:   'Isi formulir data diri',
+    menu_chat_sub:       'Tanya admin pondok',
 
     // ── Pengaturan Siswa page ────────────────────────────────────
     siswa_settings_subtitle:     'Preferensi aplikasi santri',
@@ -186,6 +188,7 @@ export const translations = {
     menu_laporan:    'Reports',
     menu_pengumuman: 'Announcements',
     menu_formulir:   'Form',
+    menu_chat:       'Chat Admin',
 
     // ── Quick menu subs ──────────────────────────────────────────
     menu_jadwal_sub:     'View activities & daily schedule',
@@ -194,6 +197,7 @@ export const translations = {
     menu_laporan_sub:    'View progress reports',
     menu_pengumuman_sub: 'Latest info from the school',
     menu_formulir_sub:   'Fill in personal data form',
+    menu_chat_sub:       'Ask the school admin',
 
     // ── Pengaturan Siswa page ────────────────────────────────────
     siswa_settings_subtitle:     'Student app preferences',
