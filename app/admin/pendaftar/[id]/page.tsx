@@ -9,12 +9,12 @@ type Action = 'diterima' | 'ditolak' | 'diproses' | null
 // ─── Status Config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, {
   label: string; color: string; bg: string; dot: string;
-  borderColor: string; icon: string;
+  borderColor: string;
 }> = {
-  menunggu: { label: 'Menunggu Verifikasi', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b', borderColor: '#fde68a', icon: '⏳' },
-  diproses: { label: 'Sedang Diproses',     color: '#2563eb', bg: '#dbeafe', dot: '#3b82f6', borderColor: '#bfdbfe', icon: '🔄' },
-  diterima: { label: 'Diterima',            color: '#059669', bg: '#d1fae5', dot: '#10b981', borderColor: '#a7f3d0', icon: '✅' },
-  ditolak:  { label: 'Ditolak',             color: '#dc2626', bg: '#fee2e2', dot: '#ef4444', borderColor: '#fca5a5', icon: '❌' },
+  menunggu: { label: 'Menunggu Verifikasi', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b', borderColor: '#fde68a' },
+  diproses: { label: 'Sedang Diproses',     color: '#2563eb', bg: '#dbeafe', dot: '#3b82f6', borderColor: '#bfdbfe' },
+  diterima: { label: 'Diterima',            color: '#059669', bg: '#d1fae5', dot: '#10b981', borderColor: '#a7f3d0' },
+  ditolak:  { label: 'Ditolak',             color: '#dc2626', bg: '#fee2e2', dot: '#ef4444', borderColor: '#fca5a5' },
 }
 
 const CONFIRM_CONFIG: Record<string, { label: string; icon: string; btnBg: string; btnText: string }> = {
@@ -23,23 +23,24 @@ const CONFIRM_CONFIG: Record<string, { label: string; icon: string; btnBg: strin
   diproses: { label: 'Tandai Diproses',    icon: '🔄', btnBg: 'linear-gradient(135deg,#2563eb,#3b82f6)', btnText: '#fff' },
 }
 
-const AV_COLORS = [
-  { bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', text: '#fff' },
-  { bg: 'linear-gradient(135deg,#0ea5e9,#38bdf8)', text: '#fff' },
-  { bg: 'linear-gradient(135deg,#10b981,#34d399)', text: '#fff' },
-  { bg: 'linear-gradient(135deg,#f59e0b,#fbbf24)', text: '#fff' },
-  { bg: 'linear-gradient(135deg,#ec4899,#f472b6)', text: '#fff' },
-  { bg: 'linear-gradient(135deg,#14b8a6,#2dd4bf)', text: '#fff' },
-]
-
-function getAvatarGrad(name: string) {
-  return AV_COLORS[(name.charCodeAt(0) ?? 0) % AV_COLORS.length]
-}
+const AV_BG = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const IconChevronLeft = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6"/>
+  </svg>
+)
+
+const IconChevronDown = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+)
+
+const IconDotsVertical = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>
   </svg>
 )
 
@@ -52,8 +53,8 @@ const IconUser = () => (
 
 const IconBook = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    <path d="M22 10 12 5 2 10l10 5 10-5Z"/>
+    <path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/>
   </svg>
 )
 
@@ -93,12 +94,69 @@ const IconRefresh = () => (
   </svg>
 )
 
+const IconSchool = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 22v-4a2 2 0 1 0-4 0v4"/>
+    <path d="M18 10v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9"/>
+    <path d="M12 2 2 8.5 12 15l10-6.5L12 2Z"/>
+  </svg>
+)
+
+const IconMars = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="10" cy="14" r="6"/>
+    <line x1="14.5" y1="9.5" x2="21" y2="3"/>
+    <polyline points="15 3 21 3 21 9"/>
+  </svg>
+)
+
+const IconVenus = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="6"/>
+    <line x1="12" y1="14" x2="12" y2="22"/>
+    <line x1="9" y1="19" x2="15" y2="19"/>
+  </svg>
+)
+
+const IconInfoCircle = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="16" x2="12" y2="11"/>
+    <line x1="12" y1="8" x2="12" y2="8.01"/>
+  </svg>
+)
+
+const IconCheckCircleFill = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.7 7.7-5.4 5.4a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 1 1 1.4-1.4l1.9 1.9 4.7-4.7a1 1 0 1 1 1.4 1.4Z"/>
+  </svg>
+)
+
 // ─── Info Row ─────────────────────────────────────────────────────────────────
-function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
+function InfoRow({
+  label, value, valueIcon, valueIconBg, valueIconColor, multiline,
+}: {
+  label: string
+  value?: string | number | null
+  valueIcon?: React.ReactNode
+  valueIconBg?: string
+  valueIconColor?: string
+  multiline?: boolean
+}) {
   return (
-    <div className="det-info-row">
+    <div className={`det-info-row${multiline ? ' det-info-row--multiline' : ''}`}>
       <span className="det-info-label">{label}</span>
-      <span className="det-info-val">{value ?? '—'}</span>
+      <span className="det-info-val">
+        {valueIcon && (
+          <span
+            className="det-info-val-icon"
+            style={{ background: valueIconBg, color: valueIconColor }}
+          >
+            {valueIcon}
+          </span>
+        )}
+        {value ?? '—'}
+      </span>
     </div>
   )
 }
@@ -111,11 +169,14 @@ function SectionCard({
 }) {
   return (
     <div className="det-section-card">
-      <div className="det-section-header" style={{ borderLeftColor: accent }}>
-        <div className="det-section-icon" style={{ background: accent + '20', color: accent }}>
+      <div className="det-section-header">
+        <div className="det-section-icon" style={{ background: accent + '1c', color: accent }}>
           {icon}
         </div>
         <span className="det-section-title">{title}</span>
+        <span className="det-section-chevron" style={{ color: accent }}>
+          <IconChevronDown />
+        </span>
       </div>
       <div className="det-section-body">
         {children}
@@ -188,19 +249,24 @@ export default function DetailPendaftarPage({
 
   const isFinished = data!.status === 'diterima' || data!.status === 'ditolak'
   const sc         = STATUS_CONFIG[data!.status] ?? STATUS_CONFIG.menunggu
-  const av         = getAvatarGrad(data!.nama_lengkap ?? 'A')
 
-  const infoRows: [string, string | number | undefined | null][] = [
+  const jenisKelamin   = (data!.jenis_kelamin ?? '').toLowerCase()
+  const isLaki         = jenisKelamin.startsWith('l')
+  const jenisKelaminLabel =
+    !data!.jenis_kelamin ? undefined :
+    isLaki ? 'Laki-laki' : 'Perempuan'
+
+  const infoRowsTop: [string, string | number | undefined | null][] = [
     ['NISN',          data!.nisn],
     ['NIK',           data!.nik],
     ['Tempat Lahir',  data!.tempat_lahir],
     ['Tanggal Lahir', data!.tanggal_lahir
-      ? new Date(data!.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+      ? new Date(data!.tanggal_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       : undefined],
-    ['Jenis Kelamin', data!.jenis_kelamin],
-    ['Agama',         data!.agama],
-    ['No. HP / WA',   data!.no_hp],
-    ['Alamat',        data!.alamat],
+  ]
+  const infoRowsBottom: [string, string | number | undefined | null][] = [
+    ['Agama',       data!.agama],
+    ['No. HP / WA', data!.no_hp],
   ]
 
   const akademikRows: [string, string | number | undefined | null][] = [
@@ -224,9 +290,14 @@ export default function DetailPendaftarPage({
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .det-root {
           min-height: 100vh;
-          background: #f5f6fa;
-          font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: #f0f1f8;
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           padding-bottom: 120px;
+          max-width: 430px;
+          width: 100%;
+          margin: 0 auto;
+          position: relative;
+          overflow-x: hidden;
         }
 
         /* ── Splash ── */
@@ -235,8 +306,8 @@ export default function DetailPendaftarPage({
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           gap: 16px;
-          background: #f5f6fa;
-          font-family: 'Nunito', sans-serif;
+          background: #f0f1f8;
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .det-splash-text { font-size: 15px; font-weight: 600; color: #64748b; }
         .det-spinner {
@@ -255,144 +326,175 @@ export default function DetailPendaftarPage({
           cursor: pointer; font-family: inherit; margin-top: 8px;
         }
 
-        /* ── Hero ── */
-        .det-hero {
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 60%, #a78bfa 100%);
-          padding: 0 0 24px;
-          position: relative;
-          overflow: hidden;
-        }
-        .det-hero::before {
-          content: '';
-          position: absolute; top: -80px; right: -80px;
-          width: 220px; height: 220px;
-          background: rgba(255,255,255,0.08);
-          border-radius: 50%;
-        }
-        .det-hero::after {
-          content: '';
-          position: absolute; bottom: -60px; left: -60px;
-          width: 180px; height: 180px;
-          background: rgba(255,255,255,0.05);
-          border-radius: 50%;
-        }
-
-        /* Back bar */
+        /* ── Topbar (terang, terpisah dari hero) ── */
         .det-topbar {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 16px 16px 0;
-          position: relative; z-index: 2;
+          padding: 16px 16px 14px;
+          position: relative;
         }
         .det-back-btn {
           display: inline-flex; align-items: center; gap: 6px;
-          background: rgba(255,255,255,0.2);
-          border: 1px solid rgba(255,255,255,0.3);
-          border-radius: 10px;
-          color: #fff; font-size: 13px; font-weight: 700;
-          padding: 8px 14px;
+          background: #fff;
+          border: none;
+          border-radius: 12px;
+          color: #4338ca; font-size: 13.5px; font-weight: 700;
+          padding: 9px 16px 9px 12px;
           cursor: pointer; font-family: inherit;
-          transition: background 0.15s;
+          box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+          transition: box-shadow 0.15s;
         }
-        .det-back-btn:hover { background: rgba(255,255,255,0.3); }
+        .det-back-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .det-topbar-title {
-          font-size: 15px; font-weight: 800; color: #fff;
+          font-size: 16px; font-weight: 800; color: #1e1b3a;
           position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        .det-menu-btn {
+          width: 38px; height: 38px;
+          border-radius: 50%;
+          background: #fff;
+          border: none;
+          display: flex; align-items: center; justify-content: center;
+          color: #6366f1;
+          cursor: pointer;
+          box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+          flex-shrink: 0;
+          transition: box-shadow 0.15s;
+        }
+        .det-menu-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+        /* ── Hero Card ── */
+        .det-hero {
+          margin: 0 16px;
+          background: linear-gradient(135deg, #818cf8 0%, #a78bfa 55%, #c4b5fd 100%);
+          border-radius: 24px;
+          padding: 20px 18px;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 8px 24px rgba(99,102,241,0.22);
+        }
+        .det-hero-deco {
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(circle at 85% 15%, rgba(255,255,255,0.18) 0%, transparent 45%),
+            radial-gradient(circle at 10% 90%, rgba(255,255,255,0.12) 0%, transparent 40%);
+          pointer-events: none;
         }
 
         /* Identity */
         .det-identity {
-          display: flex; align-items: center; gap: 14px;
-          padding: 20px 16px 0;
+          display: flex; align-items: flex-start; gap: 14px;
           position: relative; z-index: 2;
         }
         .det-av {
-          width: 64px; height: 64px;
-          border-radius: 20px;
+          width: 58px; height: 58px;
+          border-radius: 16px;
           display: flex; align-items: center; justify-content: center;
-          font-size: 26px; font-weight: 900; color: #fff;
+          font-size: 24px; font-weight: 800; color: #fff;
           flex-shrink: 0;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-          border: 3px solid rgba(255,255,255,0.4);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.18);
         }
+        .det-id-info { padding-top: 2px; }
         .det-id-name {
-          font-size: 20px; font-weight: 900; color: #fff; line-height: 1.2;
+          font-size: 18px; font-weight: 800; color: #1e1b3a; line-height: 1.25;
         }
         .det-id-school {
-          font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 3px;
+          display: flex; align-items: center; gap: 6px;
+          font-size: 12.5px; color: rgba(30,27,58,0.65); font-weight: 600;
+          margin-top: 4px;
         }
         .det-status-chip {
-          display: inline-flex; align-items: center; gap: 5px;
-          border-radius: 20px; padding: 4px 12px;
+          display: inline-flex; align-items: center; gap: 6px;
+          border-radius: 20px; padding: 5px 12px 5px 10px;
           font-size: 12px; font-weight: 700;
-          margin-top: 6px;
-        }
-        .det-status-dot {
-          width: 6px; height: 6px; border-radius: 50%;
+          margin-top: 9px;
+          border: 1px solid transparent;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
 
         /* Banner (diterima/ditolak) */
         .det-final-banner {
-          margin: 14px 16px 0;
-          border-radius: 14px;
-          padding: 14px 16px;
+          margin-top: 16px;
+          background: rgba(255,255,255,0.55);
+          border: 1px solid rgba(255,255,255,0.6);
+          border-radius: 16px;
+          padding: 13px 14px;
           display: flex; align-items: center; gap: 12px;
           position: relative; z-index: 2;
         }
-        .det-final-banner-icon { font-size: 28px; }
+        .det-final-banner-icon {
+          font-size: 24px;
+          width: 42px; height: 42px;
+          background: rgba(255,255,255,0.6);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
         .det-final-banner-title {
-          font-size: 14px; font-weight: 800; color: #fff;
+          font-size: 13.5px; font-weight: 800; color: #4338ca;
         }
         .det-final-banner-sub {
-          font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px;
+          font-size: 11.5px; color: #4b4470; margin-top: 2px; font-weight: 500;
+          line-height: 1.4;
         }
-        .det-banner-green { background: rgba(16,185,129,0.35); border: 1px solid rgba(16,185,129,0.5); }
-        .det-banner-red   { background: rgba(239, 68, 68,0.35); border: 1px solid rgba(239,68,68,0.5);  }
 
         /* ── Content ── */
         .det-content {
           padding: 16px 16px 0;
-          display: flex; flex-direction: column; gap: 12px;
+          display: flex; flex-direction: column; gap: 14px;
         }
 
         /* ── Section Card ── */
         .det-section-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .det-section-header {
           display: flex; align-items: center; gap: 10px;
-          padding: 14px 16px 12px;
-          border-left: 4px solid transparent;
+          padding: 15px 16px;
           border-bottom: 1px solid #f1f5f9;
         }
         .det-section-icon {
           width: 32px; height: 32px;
           border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
         }
         .det-section-title {
-          font-size: 14px; font-weight: 800; color: #1e293b;
+          font-size: 14.5px; font-weight: 800; color: #1e293b;
+          flex: 1;
         }
-        .det-section-body { padding: 4px 0; }
+        .det-section-chevron {
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .det-section-body { padding: 6px 0 4px; }
 
         /* Info Row */
         .det-info-row {
-          display: flex; align-items: flex-start; justify-content: space-between;
+          display: flex; align-items: center; justify-content: space-between;
           padding: 10px 16px;
           gap: 16px;
-          border-bottom: 1px solid #f8fafc;
         }
-        .det-info-row:last-child { border-bottom: none; }
+        .det-info-row--multiline { align-items: flex-start; }
         .det-info-label {
-          font-size: 12px; font-weight: 700; color: #94a3b8;
-          flex-shrink: 0; min-width: 110px;
+          font-size: 12.5px; font-weight: 600; color: #94a3b8;
+          flex-shrink: 0;
         }
         .det-info-val {
-          font-size: 13px; font-weight: 600; color: #1e293b;
+          font-size: 13.5px; font-weight: 700; color: #1e293b;
           text-align: right; flex: 1;
           word-break: break-word;
+          display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+          line-height: 1.5;
+        }
+        .det-info-row--multiline .det-info-val { text-align: right; }
+        .det-info-val-icon {
+          width: 20px; height: 20px;
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
         }
 
         /* ── Catatan ── */
@@ -404,11 +506,28 @@ export default function DetailPendaftarPage({
           transition: border-color 0.2s;
           min-height: 90px;
         }
-        .det-textarea:focus   { border-color: #6366f1; }
-        .det-textarea:disabled {
-          background: #f8fafc; color: #94a3b8; cursor: not-allowed;
+        .det-textarea:focus { border-color: #6366f1; }
+        .det-catatan-inner { padding: 10px 16px 16px; }
+        .det-catatan-info {
+          display: flex; align-items: center; gap: 10px;
+          background: #f8fafc;
+          border: 1px dashed #e2e8f0;
+          border-radius: 12px;
+          padding: 13px 14px;
+          color: #94a3b8;
+          font-size: 12.5px; font-weight: 600;
+          line-height: 1.4;
         }
-        .det-catatan-inner { padding: 12px 16px 14px; }
+        .det-catatan-info svg { flex-shrink: 0; }
+        .det-catatan-readonly {
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          border-radius: 12px;
+          padding: 13px 14px;
+          color: #475569;
+          font-size: 13px; font-weight: 600;
+          line-height: 1.6;
+        }
 
         /* ── Actions ── */
         .det-actions {
@@ -488,32 +607,44 @@ export default function DetailPendaftarPage({
         }
         .det-sheet-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
+      `}</style>
 
       <div className="det-root">
 
-        {/* ── Hero ── */}
+        {/* ── Topbar ── */}
+        <div className="det-topbar">
+          <button className="det-back-btn" onClick={() => router.back()}>
+            <IconChevronLeft />
+            Kembali
+          </button>
+          <span className="det-topbar-title">Detail Pendaftar</span>
+          <button className="det-menu-btn" aria-label="Menu lainnya">
+            <IconDotsVertical />
+          </button>
+        </div>
+
+        {/* ── Hero Card ── */}
         <div className="det-hero">
-          <div className="det-topbar">
-            <button className="det-back-btn" onClick={() => router.back()}>
-              <IconChevronLeft />
-              Kembali
-            </button>
-            <span className="det-topbar-title">Detail Pendaftar</span>
-          </div>
+          <div className="det-hero-deco" />
 
           {/* Identity */}
           <div className="det-identity">
-            <div className="det-av" style={{ background: av.bg }}>
+            <div className="det-av" style={{ background: AV_BG }}>
               {data!.nama_lengkap?.charAt(0)?.toUpperCase() ?? '?'}
             </div>
-            <div>
+            <div className="det-id-info">
               <div className="det-id-name">{data!.nama_lengkap}</div>
-              <div className="det-id-school">🏫 {data!.asal_sekolah ?? '—'}</div>
+              <div className="det-id-school">
+                <IconSchool />
+                {data!.asal_sekolah ?? '—'}
+              </div>
               <div
                 className="det-status-chip"
-                style={{ background: sc.bg, color: sc.color }}
+                style={{ background: '#fff', color: sc.color, borderColor: sc.borderColor }}
               >
-                <div className="det-status-dot" style={{ background: sc.dot }} />
+                <IconCheckCircleFill />
                 {sc.label}
               </div>
             </div>
@@ -521,7 +652,7 @@ export default function DetailPendaftarPage({
 
           {/* Final banners */}
           {data!.status === 'diterima' && (
-            <div className="det-final-banner det-banner-green">
+            <div className="det-final-banner">
               <div className="det-final-banner-icon">🎉</div>
               <div>
                 <div className="det-final-banner-title">Pendaftar Diterima</div>
@@ -530,7 +661,7 @@ export default function DetailPendaftarPage({
             </div>
           )}
           {data!.status === 'ditolak' && (
-            <div className="det-final-banner det-banner-red">
+            <div className="det-final-banner">
               <div className="det-final-banner-icon">📋</div>
               <div>
                 <div className="det-final-banner-title">Pendaftar Ditolak</div>
@@ -545,9 +676,20 @@ export default function DetailPendaftarPage({
 
           {/* Data Pribadi */}
           <SectionCard icon={<IconUser />} title="Data Pribadi" accent="#6366f1">
-            {infoRows.map(([k, v]) => (
+            {infoRowsTop.map(([k, v]) => (
               <InfoRow key={String(k)} label={String(k)} value={v} />
             ))}
+            <InfoRow
+              label="Jenis Kelamin"
+              value={jenisKelaminLabel}
+              valueIcon={isLaki ? <IconMars /> : <IconVenus />}
+              valueIconBg={isLaki ? '#eef2ff' : '#fce7f3'}
+              valueIconColor={isLaki ? '#6366f1' : '#db2777'}
+            />
+            {infoRowsBottom.map(([k, v]) => (
+              <InfoRow key={String(k)} label={String(k)} value={v} />
+            ))}
+            <InfoRow label="Alamat" value={data!.alamat} multiline />
           </SectionCard>
 
           {/* Akademik */}
@@ -567,18 +709,24 @@ export default function DetailPendaftarPage({
           {/* Catatan */}
           <SectionCard icon={<IconEdit />} title="Catatan Panitia" accent="#f59e0b">
             <div className="det-catatan-inner">
-              <textarea
-                className="det-textarea"
-                value={catatan}
-                onChange={e => setCatatan(e.target.value)}
-                rows={3}
-                disabled={isFinished}
-                placeholder={
-                  isFinished
-                    ? 'Tidak dapat diubah setelah keputusan final'
-                    : 'Tambahkan catatan untuk pendaftar ini...'
-                }
-              />
+              {isFinished ? (
+                catatan ? (
+                  <p className="det-catatan-readonly">{catatan}</p>
+                ) : (
+                  <div className="det-catatan-info">
+                    <IconInfoCircle />
+                    <span>Tidak dapat diubah setelah keputusan final.</span>
+                  </div>
+                )
+              ) : (
+                <textarea
+                  className="det-textarea"
+                  value={catatan}
+                  onChange={e => setCatatan(e.target.value)}
+                  rows={3}
+                  placeholder="Tambahkan catatan untuk pendaftar ini..."
+                />
+              )}
             </div>
           </SectionCard>
 

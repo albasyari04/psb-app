@@ -27,21 +27,21 @@ interface StatsData {
 }
 
 // ─── Status Config ────────────────────────────────────────────────────────────
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  menunggu: { label: 'Menunggu Verifikasi', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b' },
-  diproses: { label: 'Sedang Diproses',     color: '#2563eb', bg: '#dbeafe', dot: '#3b82f6' },
-  diterima: { label: 'Diterima',            color: '#059669', bg: '#d1fae5', dot: '#10b981' },
-  ditolak:  { label: 'Ditolak',             color: '#dc2626', bg: '#fee2e2', dot: '#ef4444' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string; border: string }> = {
+  menunggu: { label: 'Menunggu',  color: '#d97706', bg: '#fffbeb', dot: '#f59e0b', border: '#fde68a' },
+  diproses: { label: 'Diproses',  color: '#2563eb', bg: '#eff6ff', dot: '#3b82f6', border: '#bfdbfe' },
+  diterima: { label: 'Diterima',  color: '#059669', bg: '#f0fdf4', dot: '#10b981', border: '#a7f3d0' },
+  ditolak:  { label: 'Ditolak',   color: '#dc2626', bg: '#fff5f5', dot: '#ef4444', border: '#fca5a5' },
 }
 
 // ─── Avatar Colors ────────────────────────────────────────────────────────────
 const AV_COLORS = [
   { bg: '#ede9fe', text: '#7c3aed' },
   { bg: '#dbeafe', text: '#1d4ed8' },
-  { bg: '#dcfce7', text: '#15803d' },
+  { bg: '#dcfce7', text: '#16a34a' },
   { bg: '#fce7f3', text: '#be185d' },
   { bg: '#ffedd5', text: '#c2410c' },
-  { bg: '#f0fdf4', text: '#166534' },
+  { bg: '#e0f2fe', text: '#0369a1' },
 ]
 function getAvatarColor(name: string) {
   return AV_COLORS[(name?.charCodeAt(0) ?? 65) % AV_COLORS.length]
@@ -49,66 +49,75 @@ function getAvatarColor(name: string) {
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconArrowLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
   </svg>
 )
-const IconUsers = () => (
+const IconMenu = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+)
+const IconUsers = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
   </svg>
 )
 const IconClock = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
   </svg>
 )
 const IconCheckCircle = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 )
 const IconXCircle = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
   </svg>
 )
 const IconSearch = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
   </svg>
 )
-const IconFilter = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-  </svg>
-)
-const IconDownload = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-  </svg>
-)
 const IconChevronDown = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="6 9 12 15 18 9"/>
   </svg>
 )
 const IconEye = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
   </svg>
 )
 const IconDots = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
   </svg>
 )
 const IconBell = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
+)
+const IconBook = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+)
+const IconArrowRight = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
   </svg>
 )
 
@@ -120,43 +129,49 @@ const NavHome = ({ active }: { active?: boolean }) => (
   </svg>
 )
 const NavPendaftar = ({ active }: { active?: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#6366f1' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#6366f1' : 'none'} stroke={active ? '#6366f1' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" fill="none"/>
     <circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" fill="none"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" fill="none"/>
   </svg>
 )
-const NavVerifikasi = ({ active }: { active?: boolean }) => (
+const NavPendaftaran = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#6366f1' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="12" y1="18" x2="12" y2="12"/>
+    <line x1="9" y1="15" x2="15" y2="15"/>
   </svg>
 )
 const NavLaporan = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#6366f1' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10 9 9 9 8 9"/>
+    <line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6" y1="20" x2="6" y2="14"/>
   </svg>
 )
-const NavPengaturan = ({ active }: { active?: boolean }) => (
+const NavProfil = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#6366f1' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
   </svg>
 )
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({
-  label, sub, value, icon, iconBg, iconColor, onClick, active,
+  label, sub, value, icon, iconBg, iconColor, borderColor, onClick, active,
 }: {
   label: string; sub: string; value: number
-  icon: React.ReactNode; iconBg: string; iconColor: string
+  icon: React.ReactNode; iconBg: string; iconColor: string; borderColor: string
   onClick?: () => void; active?: boolean
 }) {
   return (
-    <button className={`stat-card${active ? ' stat-card--active' : ''}`} onClick={onClick}>
+    <button
+      className={`stat-card${active ? ' stat-card--active' : ''}`}
+      style={active ? { borderColor } : {}}
+      onClick={onClick}
+    >
       <div className="stat-icon-wrap" style={{ background: iconBg, color: iconColor }}>
         {icon}
       </div>
@@ -169,209 +184,228 @@ function StatCard({
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  background: #f0f2f8;
+  overflow-x: hidden;
+  width: 100%;
+}
+
 .pnd-root {
   min-height: 100vh;
-  background: #f4f5f9;
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  padding-bottom: 72px;
-  max-width: 480px;
+  background: #f0f2f8;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding-bottom: 80px;
+  max-width: 430px;
+  width: 100%;
   margin: 0 auto;
   position: relative;
+  overflow-x: hidden;
 }
 
 /* ── Topbar ── */
 .pnd-topbar {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  background: #fff;
-  position: sticky; top: 0; z-index: 50;
-  border-bottom: 1px solid #f1f5f9;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  background: #f0f2f8;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
-.pnd-topbar-back-btn, .pnd-notif-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+.pnd-topbar-left { display: flex; align-items: center; gap: 12px; }
+.pnd-topbar-back-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #475569;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.pnd-topbar-menu-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #475569;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.pnd-topbar-title-wrap { text-align: center; }
+.pnd-topbar-title-wrap h1 { font-size: 16px; font-weight: 800; color: #0f172a; }
+.pnd-topbar-title-wrap p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+.pnd-notif-btn {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: #fff;
+  border: none;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #475569;
   text-decoration: none;
   position: relative;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.pnd-topbar-title { text-align: center; min-width: 0; }
-.pnd-topbar-title h1 { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; }
-.pnd-topbar-title p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pnd-notif-badge {
-  position: absolute; top: 9px; right: 9px;
+  position: absolute; top: 7px; right: 7px;
   width: 8px; height: 8px; border-radius: 50%;
-  background: #ef4444;
+  background: #6366f1;
   border: 1.5px solid #fff;
 }
 
 /* ── Hero Banner ── */
 .pnd-hero {
-  margin: 14px 16px 0;
-  background: linear-gradient(130deg, #eef2ff 0%, #e0e7ff 60%, #ede9fe 100%);
-  border-radius: 20px;
-  padding: 20px 18px 0;
+  margin: 4px 16px 0;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #ede9fe 100%);
+  border-radius: 24px;
+  padding: 22px 0 0 22px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   overflow: hidden;
-  min-height: 148px;
+  min-height: 152px;
   position: relative;
-  border: 1px solid #c7d2fe;
+  border: 1px solid rgba(199,210,254,0.6);
+  box-shadow: 0 4px 20px rgba(99,102,241,0.10);
 }
-.pnd-hero::before {
-  content: '';
-  position: absolute; top: -30px; right: 120px;
-  width: 8px; height: 8px;
-  background: #818cf8; border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(129,140,248,0.2);
+.pnd-hero-deco-1 {
+  position: absolute; top: 18px; right: 145px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #a5b4fc;
+  box-shadow: 0 0 0 4px rgba(165,180,252,0.2);
 }
-.pnd-hero-text { flex: 1; padding-bottom: 20px; }
+.pnd-hero-deco-2 {
+  position: absolute; top: 50px; left: 70%;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #c4b5fd;
+  box-shadow: 0 0 0 3px rgba(196,181,253,0.2);
+}
+.pnd-hero-text { flex: 1; padding-bottom: 22px; }
 .pnd-hero-text h2 {
-  font-size: 16px; font-weight: 700; color: #1e293b; line-height: 1.4;
+  font-size: 15.5px; font-weight: 700; color: #1e293b; line-height: 1.45;
 }
-.pnd-hero-text h2 span { color: #6366f1; font-weight: 800; }
+.pnd-hero-text h2 span { color: #4f46e5; font-weight: 800; }
 .pnd-hero-btn {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 7px;
   margin-top: 14px;
-  background: rgba(255,255,255,0.7);
-  border: 1.5px solid #c7d2fe;
+  background: rgba(255,255,255,0.75);
+  border: 1.5px solid rgba(199,210,254,0.8);
   border-radius: 20px;
   padding: 7px 14px;
-  font-size: 12px; font-weight: 700; color: #4f46e5;
+  font-size: 11.5px; font-weight: 700; color: #4338ca;
   cursor: pointer; font-family: inherit;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  transition: all 0.18s;
+}
+.pnd-hero-btn:hover {
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.15);
 }
 .pnd-hero-img {
-  width: 130px;
+  width: 140px;
   flex-shrink: 0;
   align-self: flex-end;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
 }
-.pnd-hero-img img {
-  width: 130px;
-  height: auto;
-  display: block;
-  object-fit: contain;
-  object-position: bottom;
-}
 
 /* ── Stats Grid ── */
 .pnd-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   padding: 14px 16px 0;
 }
 .stat-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 12px 8px 10px;
+  border-radius: 18px;
+  padding: 13px 8px 11px;
   display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
+  align-items: center; gap: 5px;
   border: 2px solid transparent;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-  cursor: pointer; font-family: inherit;
-  transition: all 0.18s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
   text-align: center;
+  min-width: 0;
 }
-.stat-card:active { transform: scale(0.96); }
+.stat-card:active { transform: scale(0.95); }
 .stat-card--active {
-  border-color: #6366f1;
-  box-shadow: 0 2px 16px rgba(99,102,241,0.18);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
 }
 .stat-icon-wrap {
-  width: 38px; height: 38px; border-radius: 12px;
+  width: 36px; height: 36px; border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.stat-value { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1; }
-.stat-label { font-size: 9.5px; font-weight: 700; color: #475569; line-height: 1.3; }
-.stat-sub   { font-size: 8.5px; color: #94a3b8; font-weight: 500; }
+.stat-value { font-size: 21px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-top: 2px; }
+.stat-label { font-size: 9px; font-weight: 700; color: #374151; line-height: 1.3; }
+.stat-sub   { font-size: 8px; color: #94a3b8; font-weight: 500; line-height: 1.2; }
 
-/* ── Search + Filter + Export ── */
+/* ── Search ── */
 .pnd-search-row {
   display: flex; gap: 8px; align-items: center;
   padding: 14px 16px 0;
 }
 .pnd-search-box {
-  flex: 1; height: 44px;
+  flex: 1; width: 100%; height: 46px;
   display: flex; align-items: center; gap: 9px;
   background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1.5px solid #e8ecf2;
+  border-radius: 14px;
   padding: 0 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  transition: border-color 0.18s;
-  color: #94a3b8;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: border-color 0.18s, box-shadow 0.18s;
+  color: #c4cdd6;
 }
-.pnd-search-box:focus-within { border-color: #6366f1; color: #6366f1; }
+.pnd-search-box:focus-within {
+  border-color: #6366f1;
+  color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+}
 .pnd-search-box input {
   flex: 1; border: none; outline: none;
   font-size: 13px; color: #0f172a;
   font-family: inherit; background: transparent;
 }
-.pnd-search-box input::placeholder { color: #cbd5e1; }
-.pnd-filter-btn {
-  height: 44px; padding: 0 13px;
-  display: flex; align-items: center; gap: 6px;
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 12px; font-weight: 700; color: #475569;
-  cursor: pointer; font-family: inherit;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-.pnd-export-btn {
-  height: 44px; padding: 0 13px;
-  display: flex; align-items: center; gap: 6px;
-  background: #6366f1;
-  border: none; border-radius: 12px;
-  font-size: 12px; font-weight: 700; color: #fff;
-  cursor: pointer; font-family: inherit;
-  white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(99,102,241,0.3);
-}
+.pnd-search-box input::placeholder { color: #c4cdd6; font-weight: 500; }
 
 /* ── Tabs ── */
 .pnd-tabs {
-  display: flex; gap: 6px; align-items: center;
-  padding: 10px 16px 0;
+  display: flex; gap: 7px; align-items: center;
+  padding: 12px 16px 0;
   overflow-x: auto; scrollbar-width: none;
 }
 .pnd-tabs::-webkit-scrollbar { display: none; }
 .pnd-tab {
-  display: flex; align-items: center; gap: 5px;
-  padding: 7px 13px;
-  border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 22px;
   font-size: 12.5px; font-weight: 700;
   cursor: pointer; white-space: nowrap;
   border: 1.5px solid transparent;
   font-family: inherit;
-  transition: all 0.18s;
+  transition: all 0.2s;
   flex-shrink: 0;
 }
-.pnd-tab--off  { background: #fff; color: #64748b; border-color: #e2e8f0; }
-.pnd-tab--on   { background: #6366f1; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
+.pnd-tab--off  { background: #fff; color: #64748b; border-color: #e8ecf2; }
+.pnd-tab--off:hover { border-color: #c7d2fe; color: #4f46e5; }
+.pnd-tab--on   { background: #6366f1; color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
 .pnd-tab--diterima-on { background: #fff; color: #059669; border-color: #a7f3d0; }
 .pnd-tab--ditolak-on  { background: #fff; color: #dc2626; border-color: #fca5a5; }
 .pnd-tab-badge {
-  min-width: 18px; height: 18px;
-  border-radius: 9px; font-size: 10px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+  min-width: 20px; height: 20px;
+  border-radius: 10px; font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
 }
-.pnd-tab--on .pnd-tab-badge           { background: rgba(255,255,255,0.25); color: #fff; }
+.pnd-tab--on .pnd-tab-badge           { background: rgba(255,255,255,0.22); color: #fff; }
 .pnd-tab--off .pnd-tab-badge          { background: #f1f5f9; color: #475569; }
 .pnd-tab--diterima-on .pnd-tab-badge  { background: #d1fae5; color: #059669; }
 .pnd-tab--ditolak-on .pnd-tab-badge   { background: #fee2e2; color: #dc2626; }
@@ -379,32 +413,38 @@ const CSS = `
 /* Sort bar */
 .pnd-sort-bar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 16px 0;
+  padding: 12px 16px 0;
 }
 .pnd-result-text { font-size: 12.5px; color: #64748b; font-weight: 600; }
 .pnd-sort-wrap   { position: relative; }
 .pnd-sort-btn {
   display: flex; align-items: center; gap: 5px;
-  background: #fff; border: 1.5px solid #e2e8f0;
-  border-radius: 10px; padding: 6px 11px;
+  background: #fff;
+  border: 1.5px solid #e8ecf2;
+  border-radius: 10px;
+  padding: 7px 12px;
   font-size: 12px; font-weight: 700; color: #475569;
   cursor: pointer; font-family: inherit;
+  transition: all 0.18s;
 }
+.pnd-sort-btn:hover { border-color: #6366f1; color: #4f46e5; }
 .pnd-sort-dropdown {
   position: absolute; top: calc(100% + 6px); right: 0;
-  background: #fff; border: 1.5px solid #e2e8f0;
-  border-radius: 12px; overflow: hidden; z-index: 50;
+  background: #fff;
+  border: 1.5px solid #e8ecf2;
+  border-radius: 14px;
+  overflow: hidden; z-index: 50;
   min-width: 150px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
 }
 .pnd-sort-opt {
   display: block; width: 100%; text-align: left;
-  padding: 10px 15px; border: none; background: none;
+  padding: 11px 16px; border: none; background: none;
   font-size: 12.5px; font-weight: 600; color: #1e293b;
-  cursor: pointer; font-family: inherit;
+  cursor: pointer; font-family: inherit; transition: background 0.12s;
 }
-.pnd-sort-opt:hover      { background: #f8fafc; }
-.pnd-sort-opt--on        { color: #6366f1; font-weight: 700; background: #eef2ff; }
+.pnd-sort-opt:hover  { background: #f8fafc; }
+.pnd-sort-opt--on    { color: #6366f1; font-weight: 700; background: #eef2ff; }
 
 /* ── List ── */
 .pnd-list {
@@ -415,19 +455,27 @@ const CSS = `
 /* ── Item Card ── */
 .pnd-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 13px 13px;
-  display: flex; align-items: center; gap: 11px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  border-radius: 18px;
+  padding: 14px 14px;
+  display: flex; align-items: flex-start; gap: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.055);
   border: 1.5px solid #f1f5f9;
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.pnd-card:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+  transform: translateY(-1px);
 }
 .pnd-card-av {
-  width: 44px; height: 44px; border-radius: 14px;
+  width: 46px; height: 46px; border-radius: 15px;
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; font-weight: 900; flex-shrink: 0;
 }
-.pnd-card-info { flex: 1; min-width: 0; }
+.pnd-card-body { flex: 1; min-width: 0; }
+.pnd-card-top-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 6px;
+}
+.pnd-card-name-wrap { flex: 1; min-width: 0; }
 .pnd-card-name {
   font-size: 14px; font-weight: 800; color: #0f172a;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -436,104 +484,120 @@ const CSS = `
   font-size: 11.5px; color: #64748b; font-weight: 500; margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.pnd-card-nisn {
-  display: inline-flex; align-items: center;
-  background: #f1f5f9; border-radius: 6px;
-  padding: 2px 8px; margin-top: 5px;
-  font-size: 10.5px; font-weight: 700; color: #475569;
-}
-.pnd-card-right {
-  display: flex; flex-direction: column;
-  align-items: flex-end; gap: 5px; flex-shrink: 0;
+.pnd-card-right-col {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0;
 }
 .pnd-status-pill {
   display: inline-flex; align-items: center; gap: 4px;
   border-radius: 20px; padding: 4px 9px;
   font-size: 10.5px; font-weight: 700;
+  border: 1px solid transparent;
 }
 .pnd-status-pill-dot {
   width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
 }
 .pnd-card-date {
-  font-size: 10.5px; color: #94a3b8; text-align: right;
-  white-space: pre-line; line-height: 1.5;
+  font-size: 10px; color: #94a3b8; text-align: right;
+  white-space: pre-line; line-height: 1.5; font-weight: 500;
+}
+.pnd-card-bottom-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 8px;
+}
+.pnd-card-nisn {
+  display: inline-flex; align-items: center;
+  background: #f4f6fa;
+  border-radius: 7px;
+  padding: 3px 9px;
+  font-size: 10.5px; font-weight: 700; color: #475569;
+  letter-spacing: 0.2px;
 }
 .pnd-card-actions {
-  display: flex; align-items: center; gap: 5px; margin-top: 1px;
+  display: flex; align-items: center; gap: 5px;
 }
 .pnd-detail-btn {
   display: inline-flex; align-items: center; gap: 4px;
-  background: #f1f5f9; border: none; border-radius: 8px;
-  padding: 5px 10px;
+  background: #f4f6fa;
+  border: 1.5px solid #e8ecf2;
+  border-radius: 9px;
+  padding: 5px 11px;
   font-size: 11px; font-weight: 700; color: #475569;
   cursor: pointer; font-family: inherit;
+  transition: all 0.18s;
 }
-.pnd-detail-btn:hover { background: #e2e8f0; }
+.pnd-detail-btn:hover { background: #eef2ff; border-color: #c7d2fe; color: #4f46e5; }
 .pnd-dots-btn {
-  width: 30px; height: 30px; border-radius: 8px;
-  background: #f8fafc; border: 1px solid #e2e8f0;
+  width: 30px; height: 30px; border-radius: 9px;
+  background: #f4f6fa;
+  border: 1.5px solid #e8ecf2;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: #94a3b8;
+  transition: all 0.18s;
 }
+.pnd-dots-btn:hover { background: #eef2ff; border-color: #c7d2fe; color: #6366f1; }
 
 /* ── Loading & Empty ── */
 .pnd-loading-wrap {
-  padding: 48px 16px;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 56px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
 .pnd-spinner {
-  width: 34px; height: 34px;
+  width: 36px; height: 36px;
   border: 3px solid #e2e8f0; border-top-color: #6366f1;
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pnd-loading-text { font-size: 13px; font-weight: 600; color: #94a3b8; }
 .pnd-empty {
-  padding: 48px 16px; text-align: center;
+  padding: 56px 16px; text-align: center;
 }
-.pnd-empty-icon { font-size: 44px; margin-bottom: 10px; }
+.pnd-empty-icon { font-size: 48px; margin-bottom: 12px; }
 .pnd-empty h3   { font-size: 15px; font-weight: 800; color: #475569; }
-.pnd-empty p    { font-size: 12.5px; color: #94a3b8; margin-top: 4px; }
+.pnd-empty p    { font-size: 12.5px; color: #94a3b8; margin-top: 6px; font-weight: 500; }
 
 /* ── Bottom Nav ── */
 .pnd-bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
+  width: 100%; max-width: 430px;
   background: #fff;
   border-top: 1px solid #f1f5f9;
   display: flex;
-  padding: 6px 0 env(safe-area-inset-bottom, 6px);
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.06);
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.07);
   z-index: 100;
 }
 .pnd-nav-btn {
   flex: 1; border: none; background: none;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 5px 0; cursor: pointer; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 4px 0 2px; cursor: pointer; font-family: inherit;
   font-size: 10px; font-weight: 600; color: #94a3b8;
+  transition: color 0.18s;
 }
 .pnd-nav-btn--active { color: #6366f1; }
 .pnd-nav-icon {
-  width: 40px; height: 26px;
+  width: 42px; height: 28px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 13px;
+  border-radius: 14px;
+  transition: background 0.18s;
 }
-.pnd-nav-btn--active .pnd-nav-icon { background: #eef2ff; }
+.pnd-nav-btn--active .pnd-nav-icon {
+  background: #eef2ff;
+}
 `
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function PendaftarPage() {
   const router = useRouter()
 
-  const [items,    setItems]    = useState<PendaftarItem[]>([])
-  const [stats,    setStats]    = useState<StatsData>({ total: 0, menunggu: 0, diproses: 0, diterima: 0, ditolak: 0 })
-  const [statusTab,setStatusTab]= useState<StatusFilter>('semua')
-  const [search,   setSearch]   = useState('')
-  const [sort,     setSort]     = useState<SortOrder>('terbaru')
-  const [page,     setPage]     = useState(1)
-  const [loading,  setLoading]  = useState(true)
-  const [showSort, setShowSort] = useState(false)
+  const [items,     setItems]     = useState<PendaftarItem[]>([])
+  const [stats,     setStats]     = useState<StatsData>({ total: 0, menunggu: 0, diproses: 0, diterima: 0, ditolak: 0 })
+  const [statusTab, setStatusTab] = useState<StatusFilter>('semua')
+  const [search,    setSearch]    = useState('')
+  const [sort,      setSort]      = useState<SortOrder>('terbaru')
+  const [page,      setPage]      = useState(1)
+  const [loading,   setLoading]   = useState(true)
+  const [showSort,  setShowSort]  = useState(false)
 
   const limit = 20
 
@@ -599,45 +663,69 @@ export default function PendaftarPage() {
 
         {/* ── Topbar ── */}
         <div className="pnd-topbar">
-          <Link href="/admin/dashboard" className="pnd-topbar-back-btn">
-            <IconArrowLeft />
-          </Link>
-          <div className="pnd-topbar-title">
+          <div className="pnd-topbar-left">
+            <button className="pnd-topbar-menu-btn" onClick={() => router.back()}>
+              <IconMenu />
+            </button>
+          </div>
+          <div className="pnd-topbar-title-wrap">
             <h1>Pendaftar</h1>
             <p>Kelola data pendaftar</p>
           </div>
           <Link href="/admin/notifikasi" className="pnd-notif-btn">
             <IconBell />
-            {/* <div className="pnd-notif-badge" /> */}
+            <div className="pnd-notif-badge" />
           </Link>
         </div>
 
         {/* ── Hero Banner ── */}
         <div className="pnd-hero">
+          <div className="pnd-hero-deco-1" />
+          <div className="pnd-hero-deco-2" />
           <div className="pnd-hero-text">
-            <h2>Kelola data pendaftar dengan<br /><span>mudah dan terstruktur</span></h2>
-            <button className="pnd-hero-btn">
-              📖 Pelajari Panduan →
-            </button>
+            <h2>
+              Kelola data pendaftar dengan<br />
+              <span>mudah<br />dan terstruktur</span>
+            </h2>
           </div>
           <div className="pnd-hero-img">
             <Image
-                src="/image/pendaftar.gif"
-                alt="Kelola Pendaftar"
-                width={130}
-                height={130}
-                style={{ objectFit: 'contain', objectPosition: 'bottom' }}
-                priority
-              />
+              src="/icons/pendaftar icon.png"
+              alt="Kelola Pendaftar"
+              width={450}
+              height={450}
+              style={{ objectFit: 'contain', objectPosition: 'bottom' }}
+              priority
+            />
           </div>
         </div>
 
         {/* ── Stats ── */}
         <div className="pnd-stats">
-          <StatCard label="Total Pendaftar"     sub="Semua Pendaftar"   value={stats.total}    icon={<IconUsers />}       iconBg="#ede9fe" iconColor="#7c3aed" onClick={() => setStatusTab('semua')}    active={statusTab === 'semua'} />
-          <StatCard label="Menunggu Verifikasi" sub="Perlu Diperiksa"   value={stats.menunggu} icon={<IconClock />}       iconBg="#fef3c7" iconColor="#d97706" onClick={() => setStatusTab('menunggu')} active={statusTab === 'menunggu'} />
-          <StatCard label="Diterima"            sub="Pendaftar Lolos"   value={stats.diterima} icon={<IconCheckCircle />} iconBg="#d1fae5" iconColor="#059669" onClick={() => setStatusTab('diterima')} active={statusTab === 'diterima'} />
-          <StatCard label="Ditolak"             sub="Pendaftar Ditolak" value={stats.ditolak}  icon={<IconXCircle />}     iconBg="#fee2e2" iconColor="#dc2626" onClick={() => setStatusTab('ditolak')}  active={statusTab === 'ditolak'} />
+          <StatCard
+            label="Total Pendaftar" sub="Semua data"
+            value={stats.total} icon={<IconUsers />}
+            iconBg="#ede9fe" iconColor="#7c3aed" borderColor="#a78bfa"
+            onClick={() => setStatusTab('semua')} active={statusTab === 'semua'}
+          />
+          <StatCard
+            label="Menunggu Verifikasi" sub="Perlu diperiksa"
+            value={stats.menunggu} icon={<IconClock />}
+            iconBg="#fef3c7" iconColor="#d97706" borderColor="#fbbf24"
+            onClick={() => setStatusTab('menunggu')} active={statusTab === 'menunggu'}
+          />
+          <StatCard
+            label="Diterima" sub="Pendaftar lulus"
+            value={stats.diterima} icon={<IconCheckCircle />}
+            iconBg="#d1fae5" iconColor="#059669" borderColor="#34d399"
+            onClick={() => setStatusTab('diterima')} active={statusTab === 'diterima'}
+          />
+          <StatCard
+            label="Ditolak" sub="Pendaftar ditolak"
+            value={stats.ditolak} icon={<IconXCircle />}
+            iconBg="#fee2e2" iconColor="#dc2626" borderColor="#f87171"
+            onClick={() => setStatusTab('ditolak')} active={statusTab === 'ditolak'}
+          />
         </div>
 
         {/* ── Search Row ── */}
@@ -646,13 +734,11 @@ export default function PendaftarPage() {
             <IconSearch />
             <input
               type="text"
-              placeholder="Cari nama, NISN, atau sekolah..."
+              placeholder="Cari nama, NISN, atau sekolah"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <button className="pnd-filter-btn"><IconFilter /> Filter</button>
-          <button className="pnd-export-btn"><IconDownload /> Export</button>
         </div>
 
         {/* ── Tabs ── */}
@@ -678,8 +764,11 @@ export default function PendaftarPage() {
             {showSort && (
               <div className="pnd-sort-dropdown">
                 {([['terbaru', 'Terbaru'], ['terlama', 'Terlama'], ['nama', 'Nama A–Z']] as [SortOrder, string][]).map(([k, l]) => (
-                  <button key={k} className={`pnd-sort-opt${sort === k ? ' pnd-sort-opt--on' : ''}`}
-                    onClick={() => { setSort(k); setShowSort(false) }}>
+                  <button
+                    key={k}
+                    className={`pnd-sort-opt${sort === k ? ' pnd-sort-opt--on' : ''}`}
+                    onClick={() => { setSort(k); setShowSort(false) }}
+                  >
                     {l}
                   </button>
                 ))}
@@ -715,22 +804,34 @@ export default function PendaftarPage() {
                 <div className="pnd-card-av" style={{ background: av.bg, color: av.text }}>
                   {item.nama_lengkap?.charAt(0)?.toUpperCase() ?? '?'}
                 </div>
-                <div className="pnd-card-info">
-                  <div className="pnd-card-name">{item.nama_lengkap}</div>
-                  <div className="pnd-card-school">{item.asal_sekolah ?? '—'}</div>
-                  <div className="pnd-card-nisn">NISN:&nbsp;{item.nisn ?? '—'}</div>
-                </div>
-                <div className="pnd-card-right">
-                  <div className="pnd-status-pill" style={{ background: sc.bg, color: sc.color }}>
-                    <div className="pnd-status-pill-dot" style={{ background: sc.dot }} />
-                    {sc.label}
+                <div className="pnd-card-body">
+                  <div className="pnd-card-top-row">
+                    <div className="pnd-card-name-wrap">
+                      <div className="pnd-card-name">{item.nama_lengkap}</div>
+                      <div className="pnd-card-school">{item.asal_sekolah ?? '—'}</div>
+                    </div>
+                    <div className="pnd-card-right-col">
+                      <div
+                        className="pnd-status-pill"
+                        style={{ background: sc.bg, color: sc.color, borderColor: sc.border }}
+                      >
+                        <div className="pnd-status-pill-dot" style={{ background: sc.dot }} />
+                        {sc.label}
+                      </div>
+                      <div className="pnd-card-date">{dateStr}</div>
+                    </div>
                   </div>
-                  <div className="pnd-card-date">{dateStr}</div>
-                  <div className="pnd-card-actions">
-                    <button className="pnd-detail-btn" onClick={() => router.push(`/admin/pendaftar/${item.id}`)}>
-                      <IconEye /> Lihat Detail
-                    </button>
-                    <div className="pnd-dots-btn"><IconDots /></div>
+                  <div className="pnd-card-bottom-row">
+                    <div className="pnd-card-nisn">NISN: {item.nisn ?? '—'}</div>
+                    <div className="pnd-card-actions">
+                      <button
+                        className="pnd-detail-btn"
+                        onClick={() => router.push(`/admin/pendaftar/${item.id}`)}
+                      >
+                        <IconEye /> Lihat Detail
+                      </button>
+                      <div className="pnd-dots-btn"><IconDots /></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -740,20 +841,25 @@ export default function PendaftarPage() {
 
         {/* ── Bottom Nav ── */}
         <nav className="pnd-bottom-nav">
-          <button className="pnd-nav-btn"            onClick={() => router.push('/admin')}>
-            <div className="pnd-nav-icon"><NavHome /></div>Dashboard
+          <button className="pnd-nav-btn" onClick={() => router.push('/admin')}>
+            <div className="pnd-nav-icon"><NavHome /></div>
+            Beranda
           </button>
           <button className="pnd-nav-btn pnd-nav-btn--active" onClick={() => router.push('/admin/pendaftar')}>
-            <div className="pnd-nav-icon"><NavPendaftar active /></div>Pendaftar
+            <div className="pnd-nav-icon"><NavPendaftar active /></div>
+            Pendaftar
           </button>
-          <button className="pnd-nav-btn"            onClick={() => router.push('/admin/verifikasi')}>
-            <div className="pnd-nav-icon"><NavVerifikasi /></div>Verifikasi
+          <button className="pnd-nav-btn" onClick={() => router.push('/admin/pendaftaran')}>
+            <div className="pnd-nav-icon"><NavPendaftaran /></div>
+            Pendaftaran
           </button>
-          <button className="pnd-nav-btn"            onClick={() => router.push('/admin/laporan')}>
-            <div className="pnd-nav-icon"><NavLaporan /></div>Laporan
+          <button className="pnd-nav-btn" onClick={() => router.push('/admin/laporan')}>
+            <div className="pnd-nav-icon"><NavLaporan /></div>
+            Laporan
           </button>
-          <button className="pnd-nav-btn"            onClick={() => router.push('/admin/pengaturan')}>
-            <div className="pnd-nav-icon"><NavPengaturan /></div>Pengaturan
+          <button className="pnd-nav-btn" onClick={() => router.push('/admin/profil')}>
+            <div className="pnd-nav-icon"><NavProfil /></div>
+            Profil
           </button>
         </nav>
       </div>
