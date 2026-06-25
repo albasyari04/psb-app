@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 interface ProfileData {
   name: string
   email: string
@@ -20,13 +20,201 @@ interface Toast {
   message: string
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Page
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// SVG Icon Components
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Chevron kiri untuk tombol back */
+const IconChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M15 18l-6-6 6-6"
+      stroke="#16A34A"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** Gear / Settings */
+const IconGear = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="3" stroke="#16A34A" strokeWidth="1.9" />
+    <path
+      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+      stroke="#16A34A"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** User / person */
+const IconUser = ({ color = '#16A34A' }: { color?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      stroke={color}
+      strokeWidth="1.9"
+      strokeLinecap="round"
+    />
+    <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="1.9" />
+  </svg>
+)
+
+/** Envelope / email */
+const IconMail = ({ color = '#16A34A' }: { color?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="1.9" />
+    <path d="M2 8l10 6 10-6" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+  </svg>
+)
+
+/** Padlock */
+const IconLock = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <rect x="5" y="11" width="14" height="10" rx="2" stroke="#94A3B8" strokeWidth="1.8" />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+)
+
+/** Checkmark */
+const IconCheck = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M5 13l4 4L19 7"
+      stroke="white"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** Camera */
+const IconCamera = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <circle cx="12" cy="13" r="4" stroke="white" strokeWidth="2" />
+  </svg>
+)
+
+/** Image placeholder */
+const IconImagePlaceholder = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="18" height="18" rx="2" stroke="#16A34A" strokeWidth="1.8" />
+    <circle cx="8.5" cy="8.5" r="1.5" stroke="#16A34A" strokeWidth="1.8" />
+    <path
+      d="M21 15l-5-5L5 21"
+      stroke="#16A34A"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+// ── Bottom nav icons ──────────────────────────────────────────────────────────
+const IconHome = ({ active }: { active?: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 22V12h6v10"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+const IconClipboard = ({ active }: { active?: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <rect
+      x="5" y="3" width="14" height="18" rx="2"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+    />
+    <path
+      d="M9 3h6v2H9z"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+    />
+    <path
+      d="M9 10h6M9 14h4"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+const IconCard = ({ active }: { active?: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <rect
+      x="2" y="5" width="20" height="14" rx="2"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+    />
+    <path
+      d="M2 10h20"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+    />
+    <path
+      d="M6 15h4"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+const IconBarChart = ({ active }: { active?: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M18 20V10M12 20V4M6 20v-6"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+const IconProfileNav = ({ active }: { active?: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <circle
+      cx="12" cy="8" r="4"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+    />
+    <path
+      d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
+      stroke={active ? '#16A34A' : '#94A3B8'}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page Component
+// ─────────────────────────────────────────────────────────────────────────────
 export default function EditProfilePage() {
   const router = useRouter()
   const { status, update: updateSession } = useSession()
-
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [loading, setLoading] = useState(true)
@@ -38,27 +226,23 @@ export default function EditProfilePage() {
   const [email, setEmail] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-
   const [nameError, setNameError] = useState<string | null>(null)
+  const [nameFocused, setNameFocused] = useState(false)
 
-  // ── Toast auto-dismiss ──────────────────────────────────────────────────
+  // ── Toast auto-dismiss ────────────────────────────────────────────────────
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3500)
     return () => clearTimeout(t)
   }, [toast])
 
-  // ── Fetch profil saat mount ─────────────────────────────────────────────
+  // ── Fetch profil ──────────────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true)
       const res = await fetch('/api/siswa/profile')
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal memuat profil')
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Gagal memuat profil')
       const profile: ProfileData = data.profile
       setName(profile.name ?? '')
       setEmail(profile.email ?? '')
@@ -74,24 +258,19 @@ export default function EditProfilePage() {
   }, [])
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchProfile()
-    } else if (status === 'unauthenticated') {
-      router.replace('/login')
-    }
+    if (status === 'authenticated') fetchProfile()
+    else if (status === 'unauthenticated') router.replace('/login')
   }, [status, fetchProfile, router])
 
-  // ── Handle pilih foto ───────────────────────────────────────────────────
-  const handlePickPhoto = () => {
-    fileInputRef.current?.click()
-  }
+  // ── Upload foto ───────────────────────────────────────────────────────────
+  const handlePickPhoto = () => fileInputRef.current?.click()
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowed.includes(file.type)) {
       setToast({ type: 'error', message: 'Format foto harus JPG, PNG, atau WebP' })
       return
     }
@@ -100,29 +279,17 @@ export default function EditProfilePage() {
       return
     }
 
-    // Preview instan
-    const localPreview = URL.createObjectURL(file)
-    setAvatarPreview(localPreview)
+    setAvatarPreview(URL.createObjectURL(file))
 
     try {
       setUploadingPhoto(true)
       const formData = new FormData()
       formData.append('file', file)
-
-      const res = await fetch('/api/siswa/profile/upload', {
-        method: 'POST',
-        body: formData,
-      })
+      const res = await fetch('/api/siswa/profile/upload', { method: 'POST', body: formData })
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal mengunggah foto')
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Gagal mengunggah foto')
       setAvatarUrl(data.avatar_url)
       setToast({ type: 'success', message: 'Foto profil berhasil diperbarui' })
-
-      // Sinkronkan foto baru ke session NextAuth (untuk navbar dsb)
       await updateSession?.({ avatar_url: data.avatar_url })
     } catch (err) {
       setToast({
@@ -136,16 +303,10 @@ export default function EditProfilePage() {
     }
   }
 
-  // ── Handle simpan data ──────────────────────────────────────────────────
+  // ── Simpan perubahan ──────────────────────────────────────────────────────
   const validate = () => {
-    if (!name.trim()) {
-      setNameError('Nama lengkap wajib diisi')
-      return false
-    }
-    if (name.trim().length < 3) {
-      setNameError('Nama minimal 3 karakter')
-      return false
-    }
+    if (!name.trim()) { setNameError('Nama lengkap wajib diisi'); return false }
+    if (name.trim().length < 3) { setNameError('Nama minimal 3 karakter'); return false }
     setNameError(null)
     return true
   }
@@ -153,7 +314,6 @@ export default function EditProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
-
     try {
       setSaving(true)
       const res = await fetch('/api/siswa/profile/update', {
@@ -162,11 +322,7 @@ export default function EditProfilePage() {
         body: JSON.stringify({ name: name.trim() }),
       })
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal menyimpan perubahan')
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan perubahan')
       setToast({ type: 'success', message: 'Profil berhasil disimpan' })
       await updateSession?.({ name: name.trim() })
     } catch (err) {
@@ -179,91 +335,188 @@ export default function EditProfilePage() {
     }
   }
 
+  // ── Computed ──────────────────────────────────────────────────────────────
   const displayedAvatar = avatarPreview || avatarUrl
-  const initials = (name || email || 'S')
-    .trim()
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join('') || 'S'
+  const initials =
+    (name || email || 'S')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join('') || 'S'
 
-  // ── Loading skeleton ─────────────────────────────────────────────────────
+  // ── Bottom nav items ──────────────────────────────────────────────────────
+  const navItems = [
+    { label: 'Beranda', icon: <IconHome />, href: '/dashboard' },
+    { label: 'Daftar', icon: <IconClipboard />, href: '/dashboard/formulir' },
+    { label: 'Bayar', icon: <IconCard />, href: '/dashboard/bayar' },
+    { label: 'Status', icon: <IconBarChart />, href: '/dashboard/status' },
+    { label: 'Profil', icon: <IconProfileNav active />, href: '/dashboard/profil', active: true },
+  ]
+
+  // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={styles.page}>
-        <div style={styles.hero}>
-          <div style={styles.heroMesh} />
-        </div>
-        <div style={{ ...styles.container, ...styles.loadingContainer }}>
-          <div style={styles.spinner} />
-          <p style={styles.loadingText}>Memuat profil…</p>
+      <div style={s.page}>
+        <div style={s.loadingWrap}>
+          <div style={s.spinner} />
+          <p style={s.loadingText}>Memuat profil…</p>
         </div>
         <style>{globalCss}</style>
       </div>
     )
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={styles.page}>
-      {/* ── HERO BANNER ──────────────────────────────────────────────── */}
-      <div style={styles.hero}>
-        <div style={styles.heroMesh} />
+    <div style={s.page}>
+
+      {/* ── TOP HEADER ──────────────────────────────────────────────────── */}
+      <div style={s.header}>
+        {/* Back button */}
         <button
           onClick={() => router.back()}
-          style={styles.backButton}
+          style={s.iconBtn}
+          type="button"
           aria-label="Kembali"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18l-6-6 6-6" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <IconChevronLeft />
         </button>
 
-        <div style={styles.heroLabelRow}>
-          <span style={styles.heroEyebrow}>Pengaturan Akun</span>
+        {/* Title */}
+        <div style={s.headerCenter}>
+          <h1 style={s.headerTitle}>Edit Profil</h1>
+          <p style={s.headerSub}>Perbarui foto dan informasi pribadimu</p>
         </div>
-        <h1 style={styles.heroTitle}>Edit Profil</h1>
-        <p style={styles.heroSubtitle}>Perbarui foto dan informasi pribadimu</p>
 
-        {/* Avatar signature element — overlap antara hero & card */}
-        <div style={styles.avatarWrap}>
-          <div style={styles.avatarRing}>
-            <div style={styles.avatarInner}>
-              {displayedAvatar ? (
-                <Image
-                  src={displayedAvatar}
-                  alt="Foto profil"
-                  width={96}
-                  height={96}
-                  style={styles.avatarImg}
-                />
-              ) : (
-                <span style={styles.avatarInitials}>{initials}</span>
-              )}
-              {uploadingPhoto && (
-                <div style={styles.avatarUploadOverlay}>
-                  <div style={styles.avatarSpinner} />
-                </div>
-              )}
+        {/* Settings button */}
+        <button
+          onClick={() => router.push('/dashboard/pengaturan')}
+          style={s.iconBtn}
+          type="button"
+          aria-label="Pengaturan"
+        >
+          <IconGear />
+        </button>
+      </div>
+
+      {/* ── BODY ────────────────────────────────────────────────────────── */}
+      <div style={s.body}>
+
+        {/* ── FORM CARD ─────────────────────────────────────────────────── */}
+        <div style={s.card}>
+
+          {/* Card header: icon + title */}
+          <div style={s.cardHeader}>
+            <div style={s.cardIconWrap}>
+              <IconUser />
             </div>
-            <button
-              onClick={handlePickPhoto}
-              style={styles.cameraButton}
-              aria-label="Ganti foto profil"
-              disabled={uploadingPhoto}
-              type="button"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 8h2.5l1.3-2h8.4l1.3 2H20a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"
-                  stroke="white"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
-                <circle cx="12" cy="13.5" r="3.2" stroke="white" strokeWidth="1.8" />
-              </svg>
-            </button>
+            <div>
+              <h2 style={s.cardTitle}>Informasi Pribadi</h2>
+              <p style={s.cardSubtitle}>Data ini akan tampil di seluruh portal siswa</p>
+            </div>
           </div>
+
+          <form onSubmit={handleSave} noValidate>
+
+            {/* Nama Lengkap */}
+            <div style={s.fieldGroup}>
+              <label htmlFor="name" style={s.fieldLabel}>Nama Lengkap</label>
+              <div style={s.inputWrap}>
+                <span style={s.inputIcon}>
+                  <IconUser color={nameFocused ? '#16A34A' : '#94A3B8'} />
+                </span>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); if (nameError) setNameError(null) }}
+                  onFocus={() => setNameFocused(true)}
+                  onBlur={() => setNameFocused(false)}
+                  placeholder="Masukkan nama lengkap"
+                  style={{
+                    ...s.input,
+                    ...(nameError ? s.inputErr : {}),
+                    ...(nameFocused ? s.inputFocused : {}),
+                  }}
+                  autoComplete="name"
+                />
+              </div>
+              {nameError && <span style={s.errorText}>{nameError}</span>}
+            </div>
+
+            {/* Email */}
+            <div style={s.fieldGroup}>
+              <label htmlFor="email" style={s.fieldLabel}>Email</label>
+              <div style={s.inputWrap}>
+                <span style={s.inputIcon}>
+                  <IconMail color="#16A34A" />
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  disabled
+                  style={s.inputDisabled}
+                />
+                <span style={s.inputIconRight}>
+                  <IconLock />
+                </span>
+              </div>
+              <p style={s.helperText}>
+                Email tidak dapat diubah. Hubungi admin jika perlu mengganti.
+              </p>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                ...s.submitBtn,
+                ...(saving ? s.submitBtnDisabled : {}),
+              }}
+            >
+              {saving ? (
+                <>
+                  <span style={s.btnSpinner} />
+                  <span>Menyimpan…</span>
+                </>
+              ) : (
+                <>
+                  <IconCheck />
+                  <span>Simpan Perubahan</span>
+                </>
+              )}
+            </button>
+
+          </form>
+        </div>
+
+        {/* ── FOTO PROFIL INFO CARD ──────────────────────────────────────── */}
+        <div style={s.infoCard}>
+          <div style={s.infoCardIcon}>
+            <IconImagePlaceholder />
+          </div>
+          <div>
+            <p style={s.infoCardTitle}>Foto profil maksimal 2 MB</p>
+            <p style={s.infoCardSub}>Format: JPG, PNG, atau WebP</p>
+          </div>
+          {/* Hidden avatar edit trigger – tapping icon area opens file picker */}
+          <button
+            onClick={handlePickPhoto}
+            style={s.changePhotoBtn}
+            type="button"
+            disabled={uploadingPhoto}
+            aria-label="Ganti foto profil"
+          >
+            {uploadingPhoto ? (
+              <span style={s.miniSpinner} />
+            ) : (
+              <IconCamera />
+            )}
+          </button>
           <input
             ref={fileInputRef}
             type="file"
@@ -272,101 +525,45 @@ export default function EditProfilePage() {
             style={{ display: 'none' }}
           />
         </div>
+
       </div>
 
-      {/* ── FORM CARD ────────────────────────────────────────────────── */}
-      <div style={styles.container}>
-        <form onSubmit={handleSave} style={styles.card}>
-          <div style={styles.cardHeader}>
-            <div style={styles.cardIconBadge}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="12" cy="7" r="4" stroke="#6366F1" strokeWidth="2" />
-              </svg>
-            </div>
-            <div>
-              <h2 style={styles.cardTitle}>Informasi Pribadi</h2>
-              <p style={styles.cardSubtitle}>Data ini akan tampil di seluruh portal siswa</p>
-            </div>
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label htmlFor="name" style={styles.label}>
-              Nama Lengkap
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                if (nameError) setNameError(null)
-              }}
-              placeholder="Masukkan nama lengkap"
-              style={{
-                ...styles.input,
-                ...(nameError ? styles.inputError : {}),
-              }}
-            />
-            {nameError && <span style={styles.errorText}>{nameError}</span>}
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label htmlFor="email" style={styles.label}>
-              Email
-            </label>
-            <div style={styles.inputDisabledWrap}>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                disabled
-                style={styles.inputDisabled}
-              />
-              <span style={styles.lockIcon}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <rect x="5" y="11" width="14" height="9" rx="2" stroke="#94A3B8" strokeWidth="1.8" />
-                  <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#94A3B8" strokeWidth="1.8" />
-                </svg>
-              </span>
-            </div>
-            <span style={styles.helperText}>Email tidak dapat diubah. Hubungi admin jika perlu mengganti.</span>
-          </div>
-
-          <button type="submit" disabled={saving} style={styles.submitButton}>
-            {saving ? (
-              <>
-                <span style={styles.btnSpinner} />
-                Menyimpan…
-              </>
-            ) : (
-              <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Simpan Perubahan
-              </>
-            )}
+      {/* ── BOTTOM NAV ──────────────────────────────────────────────────── */}
+      <nav style={s.bottomNav}>
+        {navItems.map((item) => (
+          <button
+            key={item.href}
+            onClick={() => router.push(item.href)}
+            type="button"
+            style={s.navBtn}
+            aria-label={item.label}
+          >
+            {item.icon}
+            <span style={{ ...s.navLabel, ...(item.active ? s.navLabelActive : {}) }}>
+              {item.label}
+            </span>
           </button>
-        </form>
+        ))}
+      </nav>
 
-        <p style={styles.footerNote}>
-          Foto profil maksimal 2&nbsp;MB · format JPG, PNG, atau WebP
-        </p>
-      </div>
-
-      {/* ── TOAST ────────────────────────────────────────────────────── */}
+      {/* ── TOAST ──────────────────────────────────────────────────────── */}
       {toast && (
         <div
           style={{
-            ...styles.toast,
-            ...(toast.type === 'success' ? styles.toastSuccess : styles.toastError),
+            ...s.toast,
+            ...(toast.type === 'success' ? s.toastSuccess : s.toastError),
           }}
         >
           {toast.type === 'success' ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" />
-              <path d="M8.5 12.5l2.2 2.2 4.8-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M8.5 12.5l2.2 2.2 4.8-5"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -384,322 +581,382 @@ export default function EditProfilePage() {
   )
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Global CSS (keyframes — tidak bisa lewat inline style)
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Global CSS
+// ─────────────────────────────────────────────────────────────────────────────
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-  * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+  *, *::before, *::after {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-sizing: border-box;
+  }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translate(-50%, 14px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-  input:focus { outline: none; border-color: #6366F1 !important; box-shadow: 0 0 0 4px rgba(99,102,241,0.12) !important; }
-  input::placeholder { color: #94A3B8; }
+  /* Input focus ring override */
+  input:focus {
+    outline: none;
+    border-color: #16A34A !important;
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.12) !important;
+  }
+  input::placeholder { color: #CBD5E1; }
+  input:disabled { cursor: not-allowed; }
+
+  button { font-family: inherit; }
 `
 
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Styles
-// ────────────────────────────────────────────────────────────────────────────
-const styles: Record<string, React.CSSProperties> = {
+// ─────────────────────────────────────────────────────────────────────────────
+const s: Record<string, React.CSSProperties> = {
+
+  /* ── Page shell ── */
   page: {
     minHeight: '100vh',
-    background: '#F8FAFC',
-    paddingBottom: 48,
-  },
-  hero: {
-    position: 'relative',
-    background: 'linear-gradient(135deg, #4338CA 0%, #6366F1 55%, #818CF8 100%)',
-    paddingTop: 28,
-    paddingBottom: 76,
-    paddingLeft: 20,
-    paddingRight: 20,
-    overflow: 'hidden',
+    background: '#F0FDF4',
     maxWidth: 480,
     margin: '0 auto',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
-  heroMesh: {
-    position: 'absolute',
-    inset: 0,
-    backgroundImage:
-      'radial-gradient(circle at 85% 15%, rgba(255,255,255,0.18) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(255,255,255,0.12) 0%, transparent 40%)',
-    pointerEvents: 'none',
-  },
-  backButton: {
     position: 'relative',
-    zIndex: 2,
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    background: 'rgba(255,255,255,0.16)',
-    border: '1px solid rgba(255,255,255,0.25)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    marginBottom: 18,
-    backdropFilter: 'blur(6px)',
+    paddingBottom: 88,
   },
-  heroLabelRow: { position: 'relative', zIndex: 2 },
-  heroEyebrow: {
-    fontSize: 12,
-    fontWeight: 700,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.75)',
-  },
-  heroTitle: {
-    position: 'relative',
-    zIndex: 2,
-    fontSize: 28,
-    fontWeight: 800,
-    color: '#FFFFFF',
-    margin: '6px 0 4px',
-    letterSpacing: -0.4,
-  },
-  heroSubtitle: {
-    position: 'relative',
-    zIndex: 2,
-    fontSize: 14,
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.8)',
-    margin: 0,
-  },
-  avatarWrap: {
-    position: 'absolute',
-    bottom: -44,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 3,
-  },
-  avatarRing: {
-    position: 'relative',
-    width: 112,
-    height: 112,
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #C7D2FE, #6366F1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 8px 24px rgba(67,56,202,0.35)',
-    padding: 4,
-  },
-  avatarInner: {
-    width: '100%',
-    height: '100%',
-    borderRadius: '50%',
-    background: '#EEF2FF',
-    border: '3px solid #FFFFFF',
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  avatarImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  avatarInitials: {
-    fontSize: 34,
-    fontWeight: 800,
-    color: '#4338CA',
-  },
-  avatarUploadOverlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'rgba(15,23,42,0.45)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarSpinner: {
-    width: 24,
-    height: 24,
-    borderRadius: '50%',
-    border: '3px solid rgba(255,255,255,0.35)',
-    borderTopColor: '#FFFFFF',
-    animation: 'spin 0.8s linear infinite',
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 34,
-    height: 34,
-    borderRadius: '50%',
-    background: '#4338CA',
-    border: '3px solid #FFFFFF',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 4px 10px rgba(67,56,202,0.4)',
-  },
-  container: {
-    maxWidth: 480,
-    margin: '0 auto',
-    padding: '0 20px',
-    marginTop: 64,
-  },
-  loadingContainer: {
+
+  /* ── Loading ── */
+  loadingWrap: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '50vh',
+    minHeight: '100vh',
     gap: 14,
   },
   spinner: {
     width: 32,
     height: 32,
     borderRadius: '50%',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#6366F1',
+    border: '3px solid #DCFCE7',
+    borderTopColor: '#16A34A',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: 13,
     fontWeight: 600,
     color: '#64748B',
+    margin: 0,
   },
-  card: {
-    background: '#FFFFFF',
-    borderRadius: 24,
-    padding: 24,
-    boxShadow: '0 1px 3px rgba(15,23,42,0.04), 0 12px 32px rgba(15,23,42,0.06)',
-    border: '1px solid #F1F5F9',
-    animation: 'fadeIn 0.4s ease',
-  },
-  cardHeader: {
+
+  /* ── Header ── */
+  header: {
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 12,
-    marginBottom: 22,
+    padding: '52px 20px 20px',
+    background: '#F0FDF4',
   },
-  cardIconBadge: {
-    width: 36,
-    height: 36,
-    minWidth: 36,
-    borderRadius: 10,
-    background: '#EEF2FF',
+  iconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    border: '1.5px solid #D1FAE5',
+    background: '#FFFFFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
+    flexShrink: 0,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#0F172A',
+  headerCenter: {
+    flex: 1,
+    textAlign: 'center' as const,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 800,
+    color: '#14532D',
     margin: 0,
+    letterSpacing: -0.3,
   },
-  cardSubtitle: {
+  headerSub: {
     fontSize: 12.5,
     fontWeight: 500,
-    color: '#94A3B8',
-    margin: '2px 0 0',
+    color: '#6B7280',
+    margin: '3px 0 0',
   },
+
+  /* ── Body ── */
+  body: {
+    padding: '0 16px',
+    animation: 'fadeUp 0.4s ease',
+  },
+
+  /* ── Form card ── */
+  card: {
+    background: '#FFFFFF',
+    borderRadius: 20,
+    padding: '22px 20px 20px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+    border: '1px solid #E7F5EF',
+    marginBottom: 16,
+  },
+  cardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 22,
+    paddingBottom: 18,
+    borderBottom: '1px solid #F0FDF4',
+  },
+  cardIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    background: '#F0FDF4',
+    border: '1.5px solid #D1FAE5',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  cardTitle: {
+    fontSize: 15.5,
+    fontWeight: 800,
+    color: '#14532D',
+    margin: '0 0 2px',
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#94A3B8',
+    margin: 0,
+  },
+
+  /* ── Field ── */
   fieldGroup: {
     marginBottom: 18,
-    display: 'flex',
-    flexDirection: 'column',
   },
-  label: {
+  fieldLabel: {
+    display: 'block',
     fontSize: 13,
-    fontWeight: 600,
-    color: '#334155',
-    marginBottom: 7,
+    fontWeight: 700,
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  inputWrap: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 14,
+    display: 'flex',
+    alignItems: 'center',
+    pointerEvents: 'none',
+    zIndex: 1,
+  },
+  inputIconRight: {
+    position: 'absolute',
+    right: 14,
+    display: 'flex',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
   input: {
-    height: 46,
+    width: '100%',
+    height: 50,
     borderRadius: 12,
     border: '1.5px solid #E2E8F0',
-    padding: '0 14px',
+    padding: '0 14px 0 46px',
     fontSize: 14.5,
-    fontWeight: 500,
-    color: '#0F172A',
+    fontWeight: 600,
+    color: '#111827',
     background: '#FFFFFF',
     transition: 'border-color 0.15s, box-shadow 0.15s',
   },
-  inputError: {
-    borderColor: '#FCA5A5',
+  inputFocused: {
+    borderColor: '#16A34A',
+    boxShadow: '0 0 0 3px rgba(22,163,74,0.12)',
   },
-  inputDisabledWrap: {
-    position: 'relative',
+  inputErr: {
+    borderColor: '#FCA5A5',
+    background: '#FFF5F5',
   },
   inputDisabled: {
-    height: 46,
     width: '100%',
+    height: 50,
     borderRadius: 12,
     border: '1.5px solid #E2E8F0',
-    padding: '0 40px 0 14px',
+    padding: '0 46px 0 46px',
     fontSize: 14.5,
-    fontWeight: 500,
-    color: '#94A3B8',
-    background: '#F8FAFC',
-    cursor: 'not-allowed',
-    boxSizing: 'border-box',
-  },
-  lockIcon: {
-    position: 'absolute',
-    right: 14,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    display: 'flex',
+    fontWeight: 600,
+    color: '#6B7280',
+    background: '#F9FAFB',
+    transition: 'none',
   },
   errorText: {
+    display: 'block',
     fontSize: 12,
     fontWeight: 600,
     color: '#EF4444',
-    marginTop: 6,
+    marginTop: 5,
   },
   helperText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: 500,
-    color: '#94A3B8',
-    marginTop: 6,
-    lineHeight: 1.4,
+    color: '#9CA3AF',
+    margin: '6px 0 0',
+    lineHeight: 1.5,
   },
-  submitButton: {
+
+  /* ── Submit button ── */
+  submitBtn: {
     width: '100%',
-    height: 50,
+    height: 52,
     borderRadius: 14,
     border: 'none',
-    background: 'linear-gradient(135deg, #4338CA, #6366F1)',
+    background: '#14532D',
     color: '#FFFFFF',
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: 700,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     cursor: 'pointer',
-    marginTop: 6,
-    boxShadow: '0 8px 20px rgba(67,56,202,0.28)',
+    marginTop: 4,
+    letterSpacing: 0.1,
+    transition: 'opacity 0.15s, transform 0.1s',
+    boxShadow: '0 4px 16px rgba(20,83,45,0.25)',
+  },
+  submitBtnDisabled: {
+    opacity: 0.7,
+    cursor: 'not-allowed',
   },
   btnSpinner: {
     width: 16,
     height: 16,
     borderRadius: '50%',
-    border: '2.5px solid rgba(255,255,255,0.4)',
+    border: '2.5px solid rgba(255,255,255,0.35)',
     borderTopColor: '#FFFFFF',
     animation: 'spin 0.7s linear infinite',
   },
-  footerNote: {
-    textAlign: 'center',
-    fontSize: 11.5,
-    fontWeight: 500,
-    color: '#94A3B8',
-    marginTop: 16,
+
+  /* ── Info card (foto profil) ── */
+  infoCard: {
+    background: '#FFFFFF',
+    borderRadius: 16,
+    padding: '16px 18px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+    border: '1px solid #E7F5EF',
+    marginBottom: 16,
   },
+  infoCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    background: '#F0FDF4',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  infoCardTitle: {
+    fontSize: 13.5,
+    fontWeight: 700,
+    color: '#111827',
+    margin: '0 0 3px',
+  },
+  infoCardSub: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#9CA3AF',
+    margin: 0,
+  },
+  changePhotoBtn: {
+    marginLeft: 'auto',
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    border: 'none',
+    background: '#16A34A',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    flexShrink: 0,
+    boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+  },
+  miniSpinner: {
+    width: 14,
+    height: 14,
+    borderRadius: '50%',
+    border: '2px solid rgba(255,255,255,0.35)',
+    borderTopColor: '#FFFFFF',
+    animation: 'spin 0.7s linear infinite',
+  },
+
+  /* ── Bottom nav ── */
+  bottomNav: {
+    position: 'fixed',
+    bottom: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '100%',
+    maxWidth: 480,
+    background: '#FFFFFF',
+    borderTop: '1px solid #E2E8F0',
+    display: 'flex',
+    padding: '10px 0 14px',
+    zIndex: 10,
+  },
+  navBtn: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: 4,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+  },
+  navLabel: {
+    fontSize: 10.5,
+    fontWeight: 600,
+    color: '#94A3B8',
+  },
+  navLabelActive: {
+    color: '#16A34A',
+  },
+
+  /* ── Active nav dot ── */
+  navActiveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: '50%',
+    background: '#16A34A',
+    margin: '0 auto',
+  },
+
+  /* ── Toast ── */
   toast: {
     position: 'fixed',
-    bottom: 28,
+    bottom: 96,
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
@@ -713,12 +970,9 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 10px 28px rgba(15,23,42,0.22)',
     zIndex: 50,
     animation: 'slideUp 0.3s ease',
-    maxWidth: '90%',
+    whiteSpace: 'nowrap' as const,
+    maxWidth: '92%',
   },
-  toastSuccess: {
-    background: '#16A34A',
-  },
-  toastError: {
-    background: '#DC2626',
-  },
+  toastSuccess: { background: '#16A34A' },
+  toastError: { background: '#DC2626' },
 }

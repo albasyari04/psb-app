@@ -7,12 +7,31 @@
  * Ini berbeda dari /siswa/pembayaran/bayar (route Upload).
  * Halaman ini menampilkan ringkasan pembayaran dari API ringkasan.
  *
- * Bug yang diperbaiki vs versi lama:
- * 1. Fetch data dari /api/siswa/pembayaran/ringkasan (bukan /api/admin/pembayaran)
- * 2. Image layout="fill" deprecated → pakai fill prop saja
- * 3. Tombol back di pojok kiri atas hero header dihapus karena tumpang
- *    tindih secara visual dengan icon dompet (IcWallet) pada title row
- *    di bawahnya. Navigasi balik ke beranda kini cukup lewat bottom nav.
+ * Revisi desain (sesuai pembayaran-desain.png):
+ * 1. Tema warna diganti dari indigo/ungu → hijau/teal, konsisten dengan
+ *    identitas visual portal siswa (bukan panel admin).
+ * 2. Hero header diganti dari card gradient solid → background polos
+ *    dengan wave SVG tipis, tombol back & settings sebagai kotak putih
+ *    bulat terpisah (tidak menyatu di dalam header berwarna).
+ * 3. Chip "lunas / belum lunas" dipindah ke luar header, jadi pill
+ *    putih dengan border halus.
+ * 4. Total card: dari gradient ungu solid → putih kehijauan lembut +
+ *    ilustrasi dompet hijau 3D (SVG inline, bukan file gambar — supaya
+ *    tidak tergantung aset eksternal & warnanya konsisten dengan tema).
+ * 5. Tombol "Bayar Sekarang" full hijau gelap (bukan putih+teks ungu).
+ * 6. Item tagihan: ikon kotak lebih besar & lebih "profesional"
+ *    (dokumen utk belum lunas, check-circle utk lunas), bukan ikon kecil
+ *    generik.
+ * 7. Section baru: card "Upload Bukti Pembayaran" (dashed border, ikon
+ *    cloud-upload) — menggantikan tombol CTA besar gradient ungu di
+ *    paling bawah yang sebelumnya terpotong / tumpang-tindih bottom nav.
+ * 8. Section baru: card "Transaksi Aman & Terlindungi" dengan ikon
+ *    shield + ilustrasi gembok transparan di kanan, sebagai elemen
+ *    kepercayaan (trust signal) di akhir halaman.
+ *
+ * Catatan implementasi yang tetap dipertahankan dari versi sebelumnya:
+ * - Fetch data dari /api/siswa/pembayaran/ringkasan (bukan /api/admin/pembayaran)
+ * - Tidak memakai next/image (semua ilustrasi adalah SVG inline)
  */
 
 import { useEffect, useState, useCallback } from 'react'
@@ -34,6 +53,26 @@ interface PembayaranData {
   items: PembayaranItem[]
 }
 
+// ─── Palet warna (konsisten dgn tema hijau portal siswa) ──────────────────────
+
+const C = {
+  bg        : '#F4F7F5',
+  ink       : '#0F2E22',
+  slate     : '#475569',
+  gray      : '#94A3B8',
+  border    : '#E2E8F0',
+  teal1     : '#0E7C5F',
+  teal2     : '#0A5C46',
+  teal3     : '#073D2F',
+  green     : '#16A34A',
+  greenLight: '#DCFCE7',
+  greenBg   : '#F0FDF4',
+  amber     : '#D97706',
+  amberLight: '#FEF3C7',
+  amberBg   : '#FFF7ED',
+  amberBorder: '#FED7AA',
+} as const
+
 // ─── Utils ─────────────────────────────────────────────────────────────────────
 
 function formatRupiah(n: number) {
@@ -42,24 +81,97 @@ function formatRupiah(n: number) {
   }).format(n)
 }
 
-// ─── Icons ─────────────────────────────────────────────────────────────────────
+// ─── Icons (semua inline SVG, tanpa dependensi aset eksternal) ────────────────
 
-const IcWallet = () => (
+const IcArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M19 12H5M5 12l7-7M5 12l7 7" stroke={C.teal3} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+const IcSettings = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="3" stroke={C.teal2} strokeWidth="1.8" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke={C.teal2} strokeWidth="1.8" />
+  </svg>
+)
+const IcUpload = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    <polyline points="17 8 12 3 7 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+  </svg>
+)
+const IcDocument = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7 3.5Z" stroke={C.amber} strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M14 3.5V7a1 1 0 0 0 1 1h3.5" stroke={C.amber} strokeWidth="1.8" strokeLinejoin="round" />
+    <line x1="9" y1="12" x2="15" y2="12" stroke={C.amber} strokeWidth="1.6" strokeLinecap="round" />
+    <line x1="9" y1="15.5" x2="15" y2="15.5" stroke={C.amber} strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+)
+const IcCheckCircle = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <polyline points="20 6 9 17 4 12" stroke={C.green} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+const IcCloudUpload = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M18 12a2 2 0 0 0 0 4h4v-4z" fill="rgba(255,255,255,0.3)" stroke="#fff" strokeWidth="1.5"/>
+    <path d="M7 18a4 4 0 0 1-.6-7.96A5 5 0 0 1 16.2 8.04 4.5 4.5 0 0 1 16 17H7z" stroke={C.teal1} strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M12 11v6" stroke={C.teal1} strokeWidth="1.8" strokeLinecap="round" />
+    <polyline points="9.5 13.5 12 11 14.5 13.5" stroke={C.teal1} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const IcCheck = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-    <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+const IcChevronRight = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <polyline points="9 18 15 12 9 6" stroke={C.gray} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const IcClock = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-    <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+const IcShieldCheck = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path d="M12 3l7 3v5c0 5-3.2 8-7 10-3.8-2-7-5-7-10V6l7-3Z" fill={C.greenLight} stroke={C.green} strokeWidth="1.6" strokeLinejoin="round" />
+    <polyline points="9 12 11.2 14.2 15.5 9.8" stroke={C.teal3} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+const IcLockWatermark = () => (
+  <svg width="84" height="84" viewBox="0 0 24 24" fill="none" opacity={0.5}>
+    <rect x="5" y="11" width="14" height="9" rx="2" stroke={C.green} strokeWidth="1.3" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke={C.green} strokeWidth="1.3" strokeLinecap="round" />
+    <circle cx="12" cy="15.2" r="1.4" fill={C.green} />
+  </svg>
+)
+
+/** Ilustrasi dompet hijau 3D + lembar uang + sparkle, sesuai desain target. */
+const IcWalletIllustration = () => (
+  <svg width="118" height="100" viewBox="0 0 140 120" fill="none" aria-hidden="true">
+    {/* sparkle kecil kiri */}
+    <path d="M22 56l2.6 6 6 2.6-6 2.6-2.6 6-2.6-6-6-2.6 6-2.6 2.6-6Z" fill={C.teal1} opacity={0.85} />
+    <path d="M40 40l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8 1.8-4.2Z" fill={C.teal1} opacity={0.6} />
+
+    {/* lembar uang di belakang dompet */}
+    <g>
+      <rect x="64" y="22" width="46" height="28" rx="3" fill="#A7E8C7" transform="rotate(-14 64 22)" />
+      <rect x="70" y="20" width="46" height="28" rx="3" fill="#7FDBAE" transform="rotate(-5 70 20)" />
+      <rect x="74" y="22" width="44" height="26" rx="3" fill="#E9FBF1" transform="rotate(2 74 22)" />
+    </g>
+
+    {/* badan dompet */}
+    <rect x="34" y="46" width="84" height="58" rx="14" fill={C.teal1} />
+    <rect x="34" y="46" width="84" height="58" rx="14" fill="url(#walletShade)" />
+
+    {/* kantung kancing dompet di kanan */}
+    <path d="M104 70h14a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-14v-16Z" fill={C.teal3} />
+    <circle cx="111" cy="78" r="3.2" fill="#fff" />
+
+    {/* lingkaran tombol "naik" pojok kanan bawah, sesuai desain */}
+    <circle cx="116" cy="104" r="11" fill="#fff" />
+    <path d="M116 109v-9M111.5 104.5 116 100l4.5 4.5" stroke={C.teal1} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+    <defs>
+      <linearGradient id="walletShade" x1="34" y1="46" x2="118" y2="104" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stopColor="#ffffff" stopOpacity="0.18" />
+        <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+      </linearGradient>
+    </defs>
   </svg>
 )
 
@@ -103,23 +215,23 @@ export default function SiswaPembayaranPage() {
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        background: '#F4F6FA', gap: 16,
+        background: C.bg, gap: 16,
         fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
       }}>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         <div style={{ position: 'relative', width: 56, height: 56 }}>
-          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid #E0E7FF' }} />
-          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid transparent', borderTopColor: '#6366F1', borderRightColor: '#8B5CF6', animation: 'spin .8s linear infinite' }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid #D1FAE5' }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '3px solid transparent', borderTopColor: C.teal1, borderRightColor: C.green, animation: 'spin .8s linear infinite' }} />
         </div>
-        <p style={{ color: '#94A3B8', fontSize: 13, fontWeight: 600 }}>Memuat pembayaran...</p>
+        <p style={{ color: C.gray, fontSize: 13, fontWeight: 600 }}>Memuat pembayaran...</p>
       </div>
     )
   }
 
   return (
     <div style={{
-      minHeight: '100vh', background: '#F4F6FA',
-      paddingBottom: 100,
+      minHeight: '100vh', background: C.bg,
+      paddingBottom: 40,
       fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
     }}>
       <style>{`
@@ -128,135 +240,139 @@ export default function SiswaPembayaranPage() {
         * { box-sizing: border-box; }
       `}</style>
 
-      {/* Hero Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 50%, #6D28D9 100%)',
-        padding: '28px 20px 28px', position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-        <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+      {/* Hero Header — background polos + wave tipis, bukan card gradient */}
+      <div style={{ padding: '20px 16px 4px', position: 'relative', overflow: 'hidden' }}>
+        {/* wave dekoratif tipis di kanan, sesuai desain */}
+        <svg
+          width="280" height="180" viewBox="0 0 280 180"
+          style={{ position: 'absolute', top: -10, right: -40, pointerEvents: 'none' }}
+          aria-hidden="true"
+        >
+          <path d="M40 90 C 100 40, 180 140, 280 70" stroke={C.teal1} strokeOpacity="0.12" strokeWidth="10" fill="none" strokeLinecap="round" />
+        </svg>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, position: 'relative', marginBottom: 18 }}>
-          <div style={{
-            width: 50, height: 50, borderRadius: 16,
-            background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(6px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '1.5px solid rgba(255,255,255,0.25)',
-          }}>
-            <IcWallet />
-          </div>
-          <div>
-            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: 0, fontFamily: 'inherit' }}>Pembayaran</h1>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: 0, fontFamily: 'inherit' }}>Ringkasan tagihan santri</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+          <button
+            onClick={() => router.back()}
+            aria-label="Kembali"
+            style={{
+              width: 46, height: 46, borderRadius: 16, flexShrink: 0,
+              background: '#fff', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(15,46,34,0.06)', cursor: 'pointer',
+            }}
+          >
+            <IcArrowLeft />
+          </button>
         </div>
 
-        {/* Summary chips */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.14)' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'inherit' }}>{lunasCount} lunas</span>
+        {/* Chip lunas / belum lunas */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 18, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 999, padding: '8px 16px', border: `1px solid ${C.border}` }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: C.green, fontWeight: 700, fontFamily: 'inherit' }}>{lunasCount} lunas</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.14)' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FBBF24', boxShadow: '0 0 6px #FBBF24' }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: 'inherit' }}>{belumLunasCount} belum lunas</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 999, padding: '8px 16px', border: `1px solid ${C.border}` }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: C.amber, flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: C.amber, fontWeight: 700, fontFamily: 'inherit' }}>{belumLunasCount} belum lunas</span>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: '22px 16px', maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ padding: '20px 16px 0', maxWidth: 520, margin: '0 auto' }}>
 
-        {/* Total Card */}
+        {/* Total Card — putih kehijauan lembut + ilustrasi dompet */}
         <div style={{
-          borderRadius: 22,
-          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-          padding: '20px', marginBottom: 20,
-          boxShadow: '0 12px 32px rgba(79,70,229,0.35)',
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FAF5 100%)',
+          padding: '22px 20px', marginBottom: 22,
+          border: `1px solid ${C.border}`,
           position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ position: 'absolute', top: -30, right: -30, width: 130, height: 130, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-          <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.7)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: 1.2, fontFamily: 'inherit' }}>
-            Total Tagihan Belum Lunas
-          </p>
-          <p style={{ fontSize: 28, fontWeight: 800, color: '#fff', margin: '0 0 16px', fontFamily: 'inherit', letterSpacing: -0.5 }}>
-            {formatRupiah(pembayaran.total)}
-          </p>
-          <Link
-            href="/siswa/pembayaran/bayar"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '12px 20px', borderRadius: 14,
-              background: '#fff', color: '#4F46E5',
-              fontWeight: 800, fontSize: 13, textDecoration: 'none',
-              fontFamily: 'inherit',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="17 8 12 3 7 8" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="12" y1="3" x2="12" y2="15" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            Bayar Sekarang
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 11, fontWeight: 800, color: C.teal1, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'inherit' }}>
+                Total Tagihan Belum Lunas
+              </p>
+              <p style={{ fontSize: 30, fontWeight: 800, color: C.ink, margin: '0 0 18px', fontFamily: 'inherit', letterSpacing: -0.5, lineHeight: 1.1 }}>
+                {formatRupiah(pembayaran.total)}
+              </p>
+              <Link
+                href="/siswa/pembayaran/bayar"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '13px 22px', borderRadius: 14,
+                  background: C.teal3, color: '#fff',
+                  fontWeight: 800, fontSize: 14, textDecoration: 'none',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <IcUpload />
+                Bayar Sekarang
+              </Link>
+            </div>
+
+            <div style={{ flexShrink: 0 }}>
+              <IcWalletIllustration />
+            </div>
+          </div>
         </div>
 
         {/* Item list */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 1.3, margin: '0 0 12px', fontFamily: 'inherit' }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: C.gray, textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 12px', fontFamily: 'inherit' }}>
           Detail Tagihan
         </p>
 
         {error ? (
           <div style={{ textAlign: 'center', padding: '32px', background: '#fff', borderRadius: 18, border: '1.5px solid #FEE2E2' }}>
-            <p style={{ color: '#EF4444', fontWeight: 600, fontSize: 13, fontFamily: 'inherit' }}>⚠️ {error}</p>
-            <button onClick={fetchData} style={{ marginTop: 12, padding: '9px 22px', borderRadius: 12, background: '#6366F1', color: '#fff', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <p style={{ color: '#EF4444', fontWeight: 600, fontSize: 13, fontFamily: 'inherit' }}>{error}</p>
+            <button onClick={fetchData} style={{ marginTop: 12, padding: '9px 22px', borderRadius: 12, background: C.teal2, color: '#fff', border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
               Coba Lagi
             </button>
           </div>
         ) : pembayaran.items.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 20, padding: '48px 20px', textAlign: 'center', border: '2px dashed #E2E8F0' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
-            <p style={{ fontWeight: 800, color: '#1E293B', fontSize: 14, margin: '0 0 6px', fontFamily: 'inherit' }}>Semua Lunas!</p>
-            <p style={{ color: '#94A3B8', fontSize: 12, margin: 0, fontFamily: 'inherit' }}>Tidak ada tagihan yang tertunda</p>
+          <div style={{ background: '#fff', borderRadius: 20, padding: '40px 20px', textAlign: 'center', border: `2px dashed ${C.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <IcCheckCircle />
+            </div>
+            <p style={{ fontWeight: 800, color: C.ink, fontSize: 14, margin: '0 0 6px', fontFamily: 'inherit' }}>Semua Lunas!</p>
+            <p style={{ color: C.gray, fontSize: 12, margin: 0, fontFamily: 'inherit' }}>Tidak ada tagihan yang tertunda</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {pembayaran.items.map((item) => {
               const isLunas = item.status === 'lunas'
               return (
                 <div
                   key={item.id}
                   style={{
-                    background: '#fff', borderRadius: 18, padding: '14px 16px',
-                    border: `1.5px solid ${isLunas ? '#BBF7D0' : '#FED7AA'}`,
+                    background: '#fff', borderRadius: 18, padding: '16px',
+                    border: `1.5px solid ${isLunas ? C.greenLight : C.amberBorder}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0 }}>
                     <div style={{
-                      width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-                      background: isLunas ? '#F0FDF4' : '#FFF7ED',
+                      width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+                      background: isLunas ? C.greenBg : C.amberBg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: isLunas ? '#16A34A' : '#D97706',
                     }}>
-                      {isLunas ? <IcCheck /> : <IcClock />}
+                      {isLunas ? <IcCheckCircle /> : <IcDocument />}
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', margin: 0, fontFamily: 'inherit', lineHeight: 1.3 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: C.ink, margin: 0, fontFamily: 'inherit', lineHeight: 1.35 }}>
                         {item.judul}
                       </p>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: '#475569', margin: '3px 0 0', fontFamily: 'inherit' }}>
+                      <p style={{ fontSize: 13, fontWeight: 500, color: C.gray, margin: '4px 0 0', fontFamily: 'inherit' }}>
                         {formatRupiah(item.jumlah)}
                       </p>
                     </div>
                   </div>
                   <span style={{
-                    fontSize: 10, fontWeight: 800, padding: '5px 12px', borderRadius: 999, flexShrink: 0,
-                    background: isLunas ? '#F0FDF4' : '#FFF7ED',
-                    color: isLunas ? '#16A34A' : '#D97706',
-                    border: `1px solid ${isLunas ? '#BBF7D0' : '#FED7AA'}`,
+                    fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 999, flexShrink: 0,
+                    background: isLunas ? C.greenBg : C.amberBg,
+                    color: isLunas ? C.green : C.amber,
                     fontFamily: 'inherit',
                   }}>
                     {isLunas ? 'Lunas' : 'Belum Lunas'}
@@ -267,26 +383,56 @@ export default function SiswaPembayaranPage() {
           </div>
         )}
 
-        {/* Bottom CTA */}
-        <div style={{ marginTop: 24 }}>
-          <Link
-            href="/siswa/pembayaran/bayar"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '17px', borderRadius: 18, textDecoration: 'none',
-              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-              color: '#fff', fontWeight: 800, fontSize: 15,
-              boxShadow: '0 10px 30px rgba(79,70,229,0.45)',
-              fontFamily: 'inherit',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="17 8 12 3 7 8" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="12" y1="3" x2="12" y2="15" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            Upload Bukti Pembayaran
-          </Link>
+        {/* Card: Upload Bukti Pembayaran */}
+        <Link
+          href="/siswa/pembayaran/bayar"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            marginTop: 16, padding: '18px 16px', borderRadius: 18,
+            background: C.greenBg, border: `1.5px dashed ${C.teal1}`,
+            textDecoration: 'none',
+          }}
+        >
+          <div style={{ flexShrink: 0 }}>
+            <IcCloudUpload />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 14, fontWeight: 800, color: C.teal3, margin: 0, fontFamily: 'inherit' }}>
+              Upload Bukti Pembayaran
+            </p>
+            <p style={{ fontSize: 12.5, color: C.slate, margin: '3px 0 0', fontFamily: 'inherit', fontWeight: 500 }}>
+              Unggah bukti pembayaran untuk diverifikasi
+            </p>
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            <IcChevronRight />
+          </div>
+        </Link>
+
+        {/* Card: Transaksi Aman & Terlindungi */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 14,
+          marginTop: 12, padding: '18px 16px', borderRadius: 18,
+          background: C.greenBg, position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+            background: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <IcShieldCheck />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 800, color: C.teal3, margin: 0, fontFamily: 'inherit' }}>
+              Transaksi Aman &amp; Terlindungi
+            </p>
+            <p style={{ fontSize: 12, color: C.slate, margin: '3px 0 0', fontFamily: 'inherit', fontWeight: 500 }}>
+              Data pembayaran Anda dienkripsi dan aman.
+            </p>
+          </div>
+          <div style={{ position: 'absolute', right: 10, bottom: -6, pointerEvents: 'none' }}>
+            <IcLockWatermark />
+          </div>
         </div>
       </div>
     </div>

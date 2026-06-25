@@ -913,7 +913,7 @@
 .modalCloseBtn:hover { background: #f1f5f9; }
 /* ================================================================
    TAMBAHKAN KE dashboard.module.css
-   Bagian: Notification Bell
+   Bagian: Notification Bell — sesuai pop-up-notifikasi-desain.png
    ================================================================ */
 
 /* ── Wrapper posisi relative agar dropdown bisa absolute ───────── */
@@ -921,7 +921,7 @@
   position: relative;
 }
 
-/* ── Badge merah di atas ikon lonceng ─────────────────────────── */
+/* ── Badge merah di atas ikon lonceng (tombol header utama) ────── */
 .notifBadge {
   position     : absolute;
   top          : -4px;
@@ -938,7 +938,6 @@
   text-align   : center;
   border       : 2px solid #fff;
   pointer-events: none;
-  /* animasi muncul */
   animation    : badgePop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 @keyframes badgePop {
@@ -947,75 +946,144 @@
 }
 
 /* ── Dropdown panel ───────────────────────────────────────────── */
-.notifPanel {
-  position     : absolute;
-  top          : calc(100% + 10px);
-  right        : 0;
-  width        : min(340px, calc(100vw - 2rem));
-  background   : #fff;
-  border-radius: 1.1rem;
-  box-shadow   : 0 8px 32px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.08);
-  border       : 1px solid var(--border);
-  z-index      : 200;
-  overflow     : hidden;
-  /* animasi slide-down */
-  animation    : notifSlideDown 0.2s ease both;
+/* ── Backdrop overlay fixed (menutupi seluruh layar, panel di tengah) ── */
+.notifBackdrop {
+  position       : fixed;
+  inset          : 0;
+  z-index        : 300;
+  background     : rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  padding        : 1.25rem;
+  animation       : notifBackdropIn 0.18s ease both;
 }
-@keyframes notifSlideDown {
-  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+@keyframes notifBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Panel notifikasi (di dalam backdrop, posisi tengah) ────────── */
+.notifPanel {
+  width        : 100%;
+  max-width    : 420px;
+  max-height   : min(640px, 88vh);
+  display      : flex;
+  flex-direction: column;
+  background   : #fff;
+  border-radius: 1.5rem;
+  box-shadow   : 0 16px 40px rgba(15, 23, 42, 0.16), 0 4px 10px rgba(15, 23, 42, 0.08);
+  border       : 1px solid var(--border);
+  overflow     : hidden;
+  animation    : notifPanelIn 0.22s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@keyframes notifPanelIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
 }
 
 /* ── Header panel ─────────────────────────────────────────────── */
 .notifPanelHeader {
   display        : flex;
-  align-items    : center;
+  align-items    : flex-start;
   justify-content: space-between;
-  padding        : 0.85rem 1rem 0.7rem;
-  border-bottom  : 1px solid var(--border);
+  gap            : 0.75rem;
+  padding        : 1.25rem 1.25rem 1rem;
+  flex-shrink    : 0;
 }
-.notifPanelTitle {
-  font-size  : 0.88rem;
-  font-weight: 700;
-  color      : var(--ink);
-  margin     : 0;
+.notifPanelHeaderLeft {
+  display    : flex;
+  align-items: center;
+  gap        : 0.75rem;
 }
 
-/* Tombol "Tandai semua dibaca" */
+/* Lingkaran hijau muda berisi ikon lonceng */
+.notifPanelIconWrap {
+  position     : relative;
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  width        : 44px;
+  height       : 44px;
+  flex-shrink  : 0;
+  border-radius: 50%;
+  background   : var(--green-lighter);
+  color        : var(--green);
+}
+.notifPanelIconDot {
+  position     : absolute;
+  top          : 2px;
+  right        : 2px;
+  width         : 9px;
+  height        : 9px;
+  border-radius : 50%;
+  background    : var(--green);
+  border        : 2px solid #fff;
+}
+
+.notifPanelHeaderText {
+  display       : flex;
+  flex-direction: column;
+  gap           : 0.15rem;
+}
+.notifPanelTitle {
+  font-size  : 1.05rem;
+  font-weight: 800;
+  color      : var(--ink);
+  line-height: 1.2;
+}
+.notifPanelSubtitle {
+  font-size  : 0.78rem;
+  font-weight: 600;
+  color      : var(--green);
+}
+
+/* Tombol ✕ tutup panel — bulat dengan border */
+.notifCloseBtn {
+  background   : #fff;
+  border       : 1px solid var(--border);
+  cursor       : pointer;
+  width        : 34px;
+  height       : 34px;
+  flex-shrink  : 0;
+  border-radius: 50%;
+  color        : var(--slate);
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+  transition   : background 0.15s, border-color 0.15s;
+}
+.notifCloseBtn:hover { background: var(--bg); border-color: var(--gray-light); }
+
+/* Baris "Tandai semua dibaca" — rata kanan, di atas list */
+.notifMarkAllRow {
+  display        : flex;
+  justify-content: flex-end;
+  padding        : 0 1.25rem 0.5rem;
+  flex-shrink    : 0;
+}
 .notifMarkAllBtn {
   background  : none;
   border      : none;
   cursor      : pointer;
-  font-size   : 0.72rem;
-  font-weight : 600;
+  font-size   : 0.74rem;
+  font-weight : 700;
   color       : var(--green);
-  padding     : 0.2rem 0.4rem;
+  padding     : 0.25rem 0.5rem;
   border-radius: 0.4rem;
   transition  : background 0.15s;
   white-space : nowrap;
 }
 .notifMarkAllBtn:hover { background: var(--green-lighter); }
 
-/* Tombol ✕ tutup panel */
-.notifCloseBtn {
-  background   : none;
-  border       : none;
-  cursor       : pointer;
-  padding      : 0.25rem;
-  border-radius: 50%;
-  color        : var(--gray);
-  display      : flex;
-  align-items  : center;
-  transition   : background 0.15s;
-}
-.notifCloseBtn:hover { background: var(--border); }
-
 /* ── Daftar notifikasi (scrollable) ──────────────────────────── */
 .notifList {
-  max-height  : 380px;
+  flex        : 1 1 auto;
+  min-height  : 0;
   overflow-y  : auto;
   overscroll-behavior: contain;
-  /* scrollbar tipis */
+  padding     : 0 1.25rem;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
@@ -1026,10 +1094,10 @@
 .notifItem {
   display    : flex;
   align-items: flex-start;
-  gap        : 0.65rem;
+  gap        : 0.85rem;
   width      : 100%;
-  padding    : 0.75rem 1rem;
-  background : #fff;
+  padding    : 1rem 0;
+  background : transparent;
   border     : none;
   border-bottom: 1px solid #f1f5f9;
   cursor     : pointer;
@@ -1038,57 +1106,79 @@
   position   : relative;
 }
 .notifItem:last-child { border-bottom: none; }
-.notifItem:hover      { background: #f8fafc; }
+.notifItem:hover      { background: #fafbfc; }
 
-/* Belum dibaca → latar sedikit biru/hijau muda */
-.notifItemUnread { background: #f0fdf4; }
-.notifItemUnread:hover { background: #dcfce7; }
+.notifItemUnread { background: transparent; }
+.notifItemUnread:hover { background: #fafbfc; }
 
-/* Ikon emoji di kiri */
+/* Kotak ikon rounded berwarna pastel, sesuai kategori notifikasi */
 .notifIcon {
-  font-size   : 1.3rem;
-  flex-shrink : 0;
-  margin-top  : 0.05rem;
-  width       : 28px;
-  text-align  : center;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 42px;
+  height         : 42px;
+  flex-shrink    : 0;
+  border-radius  : 0.85rem;
 }
+.notifIconChat        { background: #ede9fe; color: #7c3aed; }
+.notifIconPembayaran  { background: #dbeafe; color: #2563eb; }
+.notifIconPengumuman  { background: #fce7f3; color: #db2777; }
+.notifIconPendaftaran { background: #fef3c7; color: #d97706; }
+.notifIconLaporan     { background: #dbeafe; color: #2563eb; }
+.notifIconJadwal      { background: #ede9fe; color: #7c3aed; }
+.notifIconInfo        { background: var(--green-lighter); color: var(--green); }
 
 /* Konten teks */
-.notifItemBody  { flex: 1; min-width: 0; }
+.notifItemBody  { flex: 1; min-width: 0; padding-top: 0.05rem; }
 .notifItemTitle {
-  font-size  : 0.8rem;
+  font-size  : 0.85rem;
   font-weight: 700;
   color      : var(--ink);
-  margin     : 0 0 0.15rem;
-  white-space: nowrap;
-  overflow   : hidden;
-  text-overflow: ellipsis;
+  margin     : 0 0 0.2rem;
+  line-height: 1.3;
 }
 .notifItemMsg {
-  font-size  : 0.75rem;
+  font-size  : 0.78rem;
   color      : var(--slate);
-  margin     : 0 0 0.2rem;
-  line-height: 1.4;
+  margin     : 0;
+  line-height: 1.45;
   display    : -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow   : hidden;
 }
+
+/* Kolom kanan: waktu di atas, dot warna di bawah — sejajar vertikal */
+.notifItemMeta {
+  display       : flex;
+  flex-direction: column;
+  align-items   : flex-end;
+  gap           : 0.5rem;
+  flex-shrink   : 0;
+  padding-top   : 0.1rem;
+}
 .notifItemTime {
-  font-size  : 0.68rem;
+  font-size  : 0.7rem;
   color      : var(--gray-light);
   font-weight: 500;
+  white-space: nowrap;
 }
 
-/* Titik hijau "belum dibaca" di kanan */
+/* Dot warna "belum dibaca" — muncul di kiri (sejajar ikon) & kanan (sejajar waktu) */
 .notifDot {
   width        : 8px;
   height       : 8px;
   border-radius: 50%;
-  background   : var(--green);
   flex-shrink  : 0;
-  align-self   : center;
-  margin-left  : 0.25rem;
+}
+.notifDotLeft {
+  position : absolute;
+  left     : 0;
+  top      : 1.35rem;
+}
+.notifDotRight {
+  /* warna diisi inline via JSX (cfg.dotColor) agar konsisten dengan kategori ikon */
 }
 
 /* ── State kosong ─────────────────────────────────────────────── */
@@ -1106,16 +1196,96 @@
   margin     : 0;
 }
 
-/* ── Footer: link "Lihat semua" ───────────────────────────────── */
+/* ── Footer wrapper (tombol "Lihat semua" + card "Pengaturan") ─── */
+.notifPanelFooterWrap {
+  display       : flex;
+  flex-direction: column;
+  gap           : 0.65rem;
+  padding       : 1rem 1.25rem 1.25rem;
+  flex-shrink   : 0;
+}
+
+/* Tombol pill hijau pucat "Lihat semua notifikasi" */
 .notifPanelFooter {
-  display        : block;
-  text-align     : center;
-  padding        : 0.65rem;
-  font-size      : 0.78rem;
-  font-weight    : 600;
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 0.3rem;
+  padding        : 0.8rem 1rem;
+  border-radius  : 999px;
+  background     : var(--green-lighter);
+  font-size      : 0.85rem;
+  font-weight    : 700;
   color          : var(--green);
   text-decoration: none;
-  border-top     : 1px solid var(--border);
-  transition     : background 0.12s;
+  transition     : background 0.15s;
 }
-.notifPanelFooter:hover { background: var(--green-lighter); }
+.notifPanelFooter:hover { background: var(--green-light); }
+.notifPanelFooter svg { flex-shrink: 0; }
+
+/* Card "Pengaturan Notifikasi" */
+.notifSettingsRow {
+  display        : flex;
+  align-items    : center;
+  gap            : 0.75rem;
+  padding        : 0.85rem 1rem;
+  border         : 1px solid var(--border);
+  border-radius  : 1rem;
+  text-decoration: none;
+  transition     : background 0.15s, border-color 0.15s;
+}
+.notifSettingsRow:hover { background: var(--bg); border-color: var(--gray-light); }
+
+.notifSettingsIconWrap {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 38px;
+  height         : 38px;
+  flex-shrink    : 0;
+  border-radius  : 0.75rem;
+  background     : var(--green-lighter);
+  color          : var(--green);
+}
+.notifSettingsText {
+  display       : flex;
+  flex-direction: column;
+  gap           : 0.1rem;
+  flex          : 1;
+  min-width     : 0;
+}
+.notifSettingsTitle {
+  font-size  : 0.85rem;
+  font-weight: 700;
+  color      : var(--ink);
+}
+.notifSettingsSub {
+  font-size  : 0.74rem;
+  color      : var(--gray);
+}
+.notifSettingsChevron {
+  display    : flex;
+  align-items: center;
+  color      : var(--gray-light);
+  flex-shrink: 0;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────── */
+:global([data-theme='dark']) .notifPanel {
+  background: #18162a;
+  border-color: var(--border);
+}
+:global([data-theme='dark']) .notifItem { border-bottom-color: #2a2640; }
+:global([data-theme='dark']) .notifItem:hover,
+:global([data-theme='dark']) .notifItemUnread:hover { background: #1f1c33; }
+:global([data-theme='dark']) .notifCloseBtn { background: #18162a; }
+:global([data-theme='dark']) .notifCloseBtn:hover { background: #241f3a; }
+:global([data-theme='dark']) .notifSettingsRow:hover { background: #1f1c33; }
+:global([data-theme='dark']) .notifPanelIconWrap,
+:global([data-theme='dark']) .notifSettingsIconWrap { background: rgba(22, 163, 74, 0.18); }
+:global([data-theme='dark']) .notifIconChat        { background: rgba(124, 58, 237, 0.22); color: #c4b5fd; }
+:global([data-theme='dark']) .notifIconPembayaran,
+:global([data-theme='dark']) .notifIconLaporan      { background: rgba(37, 99, 235, 0.22); color: #93c5fd; }
+:global([data-theme='dark']) .notifIconPengumuman  { background: rgba(219, 39, 119, 0.22); color: #f9a8d4; }
+:global([data-theme='dark']) .notifIconPendaftaran { background: rgba(217, 119, 6, 0.22); color: #fcd34d; }
+:global([data-theme='dark']) .notifIconJadwal      { background: rgba(124, 58, 237, 0.22); color: #c4b5fd; }

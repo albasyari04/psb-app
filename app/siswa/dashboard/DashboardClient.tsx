@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ReactElement, MouseEvent as ReactMouseEvent } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
 import styles from './dashboard.module.css'
@@ -135,16 +136,18 @@ const LAPORAN_TIPE_CONFIG: Record<string, {
   khusus : { labelKey: 'laporan_tipe_khusus',  badge: styles.laporanBadgeKhusus },
 }
 
-// Ikon notifikasi per type
-const NOTIF_TYPE_ICON: Record<string, string> = {
-  chat        : '💬',
-  laporan     : '📋',
-  jadwal      : '📅',
-  pembayaran  : '💰',
-  pengumuman  : '📢',
-  pendaftaran : '📝',
-  info        : 'ℹ️',
+// Konfigurasi tampilan notifikasi per type: kotak ikon berwarna + ikon SVG + warna dot
+type NotifTypeConfig = { box: string; dotColor: string; render: () => ReactElement }
+const NOTIF_TYPE_CONFIG: Record<string, NotifTypeConfig> = {
+  chat        : { box: styles.notifIconChat,        dotColor: '#7c3aed', render: () => <IconNotifChat /> },
+  laporan     : { box: styles.notifIconLaporan,      dotColor: '#2563eb', render: () => <IconNotifDoc /> },
+  jadwal      : { box: styles.notifIconJadwal,       dotColor: '#7c3aed', render: () => <IconNotifCalendar /> },
+  pembayaran  : { box: styles.notifIconPembayaran,   dotColor: '#2563eb', render: () => <IconNotifCard /> },
+  pengumuman  : { box: styles.notifIconPengumuman,   dotColor: '#db2777', render: () => <IconNotifMegaphone /> },
+  pendaftaran : { box: styles.notifIconPendaftaran,  dotColor: '#d97706', render: () => <IconNotifBell /> },
+  info        : { box: styles.notifIconInfo,         dotColor: '#16a34a', render: () => <IconNotifInfo /> },
 }
+const NOTIF_TYPE_DEFAULT: NotifTypeConfig = { box: styles.notifIconInfo, dotColor: '#16a34a', render: () => <IconNotifBell /> }
 
 /* ════════════════════════════════════════════════════════════════
    HELPERS
@@ -258,6 +261,71 @@ function IconClose() {
   )
 }
 
+/* ── Ikon kotak notifikasi (sesuai desain pop-up) ──────────────── */
+function IconNotifChat() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  )
+}
+function IconNotifCard() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" />
+    </svg>
+  )
+}
+function IconNotifMegaphone() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 5v-15L6 9H4a1 1 0 0 0-1 1z" />
+      <path d="M14 8a4 4 0 0 1 0 8" />
+      <path d="M17.5 5a8.5 8.5 0 0 1 0 14" />
+    </svg>
+  )
+}
+function IconNotifBell() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
+}
+function IconNotifDoc() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="16" y2="17" />
+    </svg>
+  )
+}
+function IconNotifCalendar() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+function IconNotifInfo() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  )
+}
+function IconChevronRight() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  )
+}
+
 /* ════════════════════════════════════════════════════════════════
    NOTIFICATION BELL — ikon + dropdown panel
    ════════════════════════════════════════════════════════════════ */
@@ -266,7 +334,6 @@ function NotificationBell() {
   const [notifs,        setNotifs       ] = useState<NotifItem[]>([])
   const [unreadCount,   setUnreadCount  ] = useState(0)
   const [loading,       setLoading      ] = useState(true)
-  const panelRef = useRef<HTMLDivElement>(null)
   const btnRef   = useRef<HTMLButtonElement>(null)
 
   /* Fetch notifikasi */
@@ -289,18 +356,10 @@ function NotificationBell() {
     return () => clearInterval(id)
   }, [fetchNotifs])
 
-  /* Tutup panel saat klik di luar */
-  useEffect(() => {
-    if (!open) return
-    function onClickOutside(e: MouseEvent) {
-      if (
-        panelRef.current && !panelRef.current.contains(e.target as Node) &&
-        btnRef.current   && !btnRef.current.contains(e.target as Node)
-      ) { setOpen(false) }
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    return () => document.removeEventListener('mousedown', onClickOutside)
-  }, [open])
+  /* Tutup panel saat klik backdrop (di luar panel) */
+  const handleBackdropClick = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) setOpen(false)
+  }, [])
 
   /* Tandai satu sudah dibaca */
   const markRead = useCallback(async (id: string) => {
@@ -348,22 +407,32 @@ function NotificationBell() {
         )}
       </button>
 
-      {/* ── Dropdown panel ── */}
+      {/* ── Modal panel (overlay tengah, sesuai desain) ── */}
       {open && (
-        <div ref={panelRef} className={styles.notifPanel} role="dialog" aria-label="Panel Notifikasi">
-          {/* Header */}
-          <div className={styles.notifPanelHeader}>
-            <span className={styles.notifPanelTitle}>Notifikasi</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {unreadCount > 0 && (
-                <button
-                  type="button"
-                  className={styles.notifMarkAllBtn}
-                  onClick={markAllRead}
-                >
-                  Tandai semua dibaca
-                </button>
-              )}
+        <div
+          className={styles.notifBackdrop}
+          onClick={handleBackdropClick}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Panel Notifikasi"
+        >
+          <div className={styles.notifPanel}>
+            {/* Header */}
+            <div className={styles.notifPanelHeader}>
+              <div className={styles.notifPanelHeaderLeft}>
+                <span className={styles.notifPanelIconWrap}>
+                  <IconBell />
+                  {unreadCount > 0 && <span className={styles.notifPanelIconDot} aria-hidden />}
+                </span>
+                <div className={styles.notifPanelHeaderText}>
+                  <span className={styles.notifPanelTitle}>Notifikasi</span>
+                  {unreadCount > 0 && (
+                    <span className={styles.notifPanelSubtitle}>
+                      {unreadCount} belum dibaca
+                    </span>
+                  )}
+                </div>
+              </div>
               <button
                 type="button"
                 className={styles.notifCloseBtn}
@@ -373,47 +442,90 @@ function NotificationBell() {
                 <IconClose />
               </button>
             </div>
-          </div>
 
-          {/* Body */}
-          <div className={styles.notifList}>
-            {loading ? (
-              <div className={styles.notifEmpty}>
-                <div className={styles.miniSkeleton} style={{ padding: '0.5rem 1rem' }}>
-                  {[1, 2, 3].map(i => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 10}%` }} />)}
-                </div>
-              </div>
-            ) : notifs.length === 0 ? (
-              <div className={styles.notifEmpty}>
-                <span style={{ fontSize: '1.8rem' }}>🔔</span>
-                <p className={styles.notifEmptyText}>Belum ada notifikasi</p>
-              </div>
-            ) : (
-              notifs.map(n => (
-                <button
-                  key={n.id}
-                  type="button"
-                  className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ''}`}
-                  onClick={() => { if (!n.is_read) markRead(n.id) }}
-                >
-                  <span className={styles.notifIcon}>
-                    {NOTIF_TYPE_ICON[n.type] ?? '🔔'}
-                  </span>
-                  <div className={styles.notifItemBody}>
-                    <p className={styles.notifItemTitle}>{n.title}</p>
-                    <p className={styles.notifItemMsg}>{n.message}</p>
-                    <span className={styles.notifItemTime}>{timeAgo(n.created_at)}</span>
-                  </div>
-                  {!n.is_read && <span className={styles.notifDot} aria-hidden />}
+            {/* Tandai semua dibaca (baris terpisah, tampil hanya jika ada yg belum dibaca) */}
+            {unreadCount > 0 && (
+              <div className={styles.notifMarkAllRow}>
+                <button type="button" className={styles.notifMarkAllBtn} onClick={markAllRead}>
+                  Tandai semua dibaca
                 </button>
-              ))
+              </div>
             )}
-          </div>
 
-          {/* Footer */}
-          <Link href="/siswa/notifikasi" className={styles.notifPanelFooter} onClick={() => setOpen(false)}>
-            Lihat semua notifikasi →
-          </Link>
+            {/* Body */}
+            <div className={styles.notifList}>
+              {loading ? (
+                <div className={styles.notifEmpty}>
+                  <div className={styles.miniSkeleton} style={{ padding: '0.5rem 1rem' }}>
+                    {[1, 2, 3].map(i => <div key={i} className={styles.skelBar} style={{ width: `${60 + i * 10}%` }} />)}
+                  </div>
+                </div>
+              ) : notifs.length === 0 ? (
+                <div className={styles.notifEmpty}>
+                  <span style={{ fontSize: '1.8rem' }}>🔔</span>
+                  <p className={styles.notifEmptyText}>Belum ada notifikasi</p>
+                </div>
+              ) : (
+                notifs.map(n => {
+                  const cfg = NOTIF_TYPE_CONFIG[n.type] ?? NOTIF_TYPE_DEFAULT
+                  return (
+                    <button
+                      key={n.id}
+                      type="button"
+                      className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ''}`}
+                      onClick={() => { if (!n.is_read) markRead(n.id) }}
+                    >
+                      {!n.is_read && (
+                        <span
+                          className={`${styles.notifDot} ${styles.notifDotLeft}`}
+                          style={{ background: cfg.dotColor }}
+                          aria-hidden
+                        />
+                      )}
+
+                      <span className={`${styles.notifIcon} ${cfg.box}`}>
+                        {cfg.render()}
+                      </span>
+
+                      <div className={styles.notifItemBody}>
+                        <p className={styles.notifItemTitle}>{n.title}</p>
+                        <p className={styles.notifItemMsg}>{n.message}</p>
+                      </div>
+
+                      <div className={styles.notifItemMeta}>
+                        <span className={styles.notifItemTime}>{timeAgo(n.created_at)}</span>
+                        {!n.is_read && (
+                          <span
+                            className={`${styles.notifDot} ${styles.notifDotRight}`}
+                            style={{ background: cfg.dotColor }}
+                            aria-hidden
+                          />
+                        )}
+                      </div>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className={styles.notifPanelFooterWrap}>
+              <Link href="/siswa/notifikasi" className={styles.notifPanelFooter} onClick={() => setOpen(false)}>
+                Lihat semua notifikasi <IconChevronRight />
+              </Link>
+
+              <Link href="/siswa/pengaturan/notifikasi" className={styles.notifSettingsRow} onClick={() => setOpen(false)}>
+                <span className={styles.notifSettingsIconWrap}>
+                  <IconSettings />
+                </span>
+                <div className={styles.notifSettingsText}>
+                  <span className={styles.notifSettingsTitle}>Pengaturan Notifikasi</span>
+                  <span className={styles.notifSettingsSub}>Kelola preferensi dan pengingat kamu</span>
+                </div>
+                <span className={styles.notifSettingsChevron}><IconChevronRight /></span>
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </div>
