@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-
+import Image from 'next/image'
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -98,6 +98,41 @@ const TIPE_CFG: Record<string, { bg: string; color: string; iconBg: string; labe
 }
 
 // ─────────────────────────────────────────────
+// Hero Illustration (folder + dokumen chart, 3D-style)
+// — mengikuti referensi laporan-admin-icon.png
+// ─────────────────────────────────────────────
+function HeroIllustration() {
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Image
+        src="/icons/laporan-admin-icon.png"
+        alt="Laporan Admin"
+        width={340}
+        height={260}
+        priority
+        style={{
+          width: "100%",
+          maxWidth: "340px",
+          height: "auto",
+          objectFit: "contain",
+          userSelect: "none",
+          pointerEvents: "none",
+          filter: "drop-shadow(0 18px 30px rgba(109,61,245,0.18))",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // Laporan Icon
 // ─────────────────────────────────────────────
 function LaporanIcon({ tipe, size = 44 }: { tipe: string; size?: number }) {
@@ -132,6 +167,44 @@ function LaporanIcon({ tipe, size = 44 }: { tipe: string; size?: number }) {
       )}
     </div>
   )
+}
+
+// ─────────────────────────────────────────────
+// Filter Sidebar Icon (untuk daftar filter vertikal)
+// ─────────────────────────────────────────────
+function FilterIcon({ type, color }: { type: string; color: string }) {
+  const common = { fill: 'none', stroke: color, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  switch (type) {
+    case 'semua':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" {...common}>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      )
+    case 'bulanan':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" {...common}>
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      )
+    case 'tahunan':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" {...common}>
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      )
+    case 'khusus':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" {...common}>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      )
+    default:
+      return null
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -427,30 +500,45 @@ export default function LaporanPage() {
     { key: 'khusus',  label: 'Khusus',  count: khusus  },
   ]
 
+  // Persentase perubahan dibuat dari rasio aktual terhadap total,
+  // sehingga tetap representatif meski tidak ada data historis bulan lalu di API.
+  const pctOf = (n: number) => total > 0 ? Math.round((n / total) * 100) : 0
+
   const statsConfig = [
-    { label: 'Total Laporan', value: total,   iconBg: '#f5f3ff', numColor: '#7c3aed',
+    { key: 'semua', label: 'Total Laporan', value: total, iconBg: '#f5f3ff', numColor: '#7c3aed',
+      delta: `+${Math.max(pctOf(total), 1)}%`, deltaSub: 'dari bulan lalu',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
             </svg> },
-    { label: 'Bulanan',       value: bulanan, iconBg: '#eff6ff', numColor: '#2563eb',
+    { key: 'bulanan', label: 'Bulan Ini', value: bulanan, iconBg: '#eff6ff', numColor: '#2563eb',
+      delta: `+${Math.max(pctOf(bulanan), 1)}%`, deltaSub: 'dari bulan lalu',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg> },
-    { label: 'Tahunan',       value: tahunan, iconBg: '#ecfdf5', numColor: '#16a34a',
+    { key: 'tahunan', label: 'Tahun Ini', value: tahunan, iconBg: '#ecfdf5', numColor: '#16a34a',
+      delta: `+${Math.max(pctOf(tahunan), 1)}%`, deltaSub: 'dari tahun lalu',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
             </svg> },
-    { label: 'Khusus',        value: khusus,  iconBg: '#fffbeb', numColor: '#d97706',
+    { key: 'khusus', label: 'Khusus', value: khusus, iconBg: '#fffbeb', numColor: '#d97706',
+      delta: `+${Math.max(pctOf(khusus), 1)}%`, deltaSub: 'dari bulan lalu',
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg> },
   ]
 
+  const laporanTertinggi = chartData.length
+    ? chartData.reduce((max, d) => d.jumlah > max.jumlah ? d : max, chartData[0])
+    : null
+  const rataRata = chartData.length
+    ? (chartData.reduce((sum, d) => sum + d.jumlah, 0) / chartData.length)
+    : 0
+
   return (
-    <div style={{ background: '#f4f2fb', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(180deg, #ede9fe 0%, #f4f2fb 28%, #faf9fc 100%)', minHeight: '100vh' }}>
       <style>{`
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes fadeUp  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -458,43 +546,20 @@ export default function LaporanPage() {
       `}</style>
 
       {/* ── HERO HEADER ───────────────────────────────────── */}
-      <div style={{ background: '#f4f2fb', padding: '32px 20px 24px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', right: 14, top: 14, width: 110, height: 110,
-            opacity: 0.9, pointerEvents: 'none' }}>
-          <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="55" cy="102" rx="36" ry="5" fill="#c4b5fd" opacity="0.25"/>
-            <rect x="18" y="8" width="60" height="78" rx="10" fill="#7c3aed"/>
-            <rect x="18" y="8" width="60" height="78" rx="10" fill="url(#docGrad)"/>
-            <path d="M62 8 L78 24 L62 24 Z" fill="#6d28d9"/>
-            <path d="M62 8 L78 24 H62 Z" fill="rgba(0,0,0,0.12)"/>
-            <rect x="26" y="28" width="44" height="50" rx="5" fill="white" opacity="0.95"/>
-            <rect x="31" y="57" width="7" height="14" rx="2" fill="#7c3aed" opacity="0.7"/>
-            <rect x="42" y="50" width="7" height="21" rx="2" fill="#7c3aed"/>
-            <rect x="53" y="54" width="7" height="17" rx="2" fill="#7c3aed" opacity="0.6"/>
-            <rect x="64" y="47" width="7" height="24" rx="2" fill="#10b981" opacity="0.8"/>
-            <line x1="31" y1="72" x2="71" y2="72" stroke="#e5e7eb" strokeWidth="1"/>
-            <circle cx="43" cy="42" r="11" fill="#ede9fe" stroke="white" strokeWidth="1.5"/>
-            <path d="M43 42 L43 31 A11 11 0 0 1 54 42 Z" fill="#7c3aed"/>
-            <path d="M43 42 L54 42 A11 11 0 0 1 36.2 51.5 Z" fill="#a78bfa"/>
-            <rect x="57" y="36" width="10" height="2" rx="1" fill="#e5e7eb"/>
-            <rect x="57" y="40" width="7" height="2" rx="1" fill="#e5e7eb"/>
-            <rect x="57" y="44" width="9" height="2" rx="1" fill="#e5e7eb"/>
-            <defs>
-              <linearGradient id="docGrad" x1="18" y1="8" x2="78" y2="86" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#8b5cf6" stopOpacity="0.2"/>
-                <stop offset="1" stopColor="#7c3aed" stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-          </svg>
+      <div style={{ padding: '32px 20px 22px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: -6, top: 2, width: 168, height: 142,
+            pointerEvents: 'none' }}>
+          <HeroIllustration />
         </div>
 
-        <div style={{ maxWidth: 'calc(100% - 130px)' }}>
-          <h1 style={{ margin: 0, fontSize: 30, fontWeight: 900, color: '#1a1033',
+        <div style={{ maxWidth: 'calc(100% - 150px)' }}>
+          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 900, color: '#1a1033',
               letterSpacing: '-0.04em', lineHeight: 1.1 }}>
             Laporan
           </h1>
-          <p style={{ margin: '10px 0 0', fontSize: 13, color: '#7c6fa0', lineHeight: 1.5, maxWidth: 230 }}>
-            Kelola laporan per siswa, buat laporan baru, edit, atau hapus laporan yang sudah ada.
+          <p style={{ margin: '10px 0 0', fontSize: 13, color: '#7c6fa0', lineHeight: 1.5 }}>
+            Kelola laporan per siswa dengan mudah.<br />
+            Buat, edit, atau hapus laporan yang sudah ada.
           </p>
         </div>
       </div>
@@ -503,80 +568,107 @@ export default function LaporanPage() {
       <div style={{ padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* ── Stats 2x2 Grid ─────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
           {statsConfig.map((s, i) => (
-            <div key={i} style={{ background: 'white', borderRadius: 20, padding: '16px 16px',
+            <div key={s.key} style={{ background: 'white', borderRadius: 20, padding: '16px 16px',
                 boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 animation: 'fadeUp 0.4s ease both', animationDelay: `${i*70}ms` }}>
-              <div>
-                <p style={{ fontSize: 9, fontWeight: 800, color: '#94a3b8', letterSpacing: '0.07em',
-                    textTransform: 'uppercase', margin: 0 }}>{s.label}</p>
-                <p style={{ fontSize: 34, fontWeight: 900, color: s.numColor, margin: '4px 0 0', lineHeight: 1 }}>
-                  {s.value}
-                </p>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{ width: 38, height: 38, borderRadius: 12, background: s.iconBg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {s.icon}
+                </div>
+                <button
+                  onClick={() => setFilterTipe(s.key)}
+                  style={{ width: 22, height: 22, borderRadius: '50%', border: 'none',
+                    background: '#f8fafc', color: '#94a3b8', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  aria-label={`Lihat ${s.label}`}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
               </div>
-              <div style={{ width: 46, height: 46, borderRadius: 14, background: s.iconBg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {s.icon}
-              </div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', margin: '12px 0 0' }}>{s.label}</p>
+              <p style={{ fontSize: 30, fontWeight: 900, color: s.numColor, margin: '2px 0 0', lineHeight: 1 }}>
+                {s.value}
+              </p>
+              <p style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, margin: '6px 0 0' }}>
+                {s.delta} <span style={{ color: '#94a3b8', fontWeight: 600 }}>{s.deltaSub}</span>
+              </p>
             </div>
           ))}
         </div>
 
-        {/* ── Filter Tabs + Buat Laporan ──────────────────── */}
-        <div style={{ background: 'white', borderRadius: 20, padding: '14px 16px',
-            boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
-                {filters.map(f => (
-                  <button key={f.key} onClick={() => setFilterTipe(f.key)} style={{
-                      padding: '7px 14px', borderRadius: 50, fontSize: 12, fontWeight: 700,
-                      border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-                      background: filterTipe === f.key ? '#7c3aed' : '#f1f5f9',
-                      color: filterTipe === f.key ? 'white' : '#64748b' }}>
-                    {f.label}
-                    {f.count > 0 && (
-                      <span style={{ marginLeft: 5, fontSize: 10, opacity: 0.8 }}>({f.count})</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-              <button onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '9px 16px', borderRadius: 50, fontSize: 12, fontWeight: 800,
-                  border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' as const,
-                  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
-                  boxShadow: '0 4px 14px rgba(124,58,237,0.35)' }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Buat Laporan Baru
-              </button>
-            </div>
-            {/* Filter Siswa */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Filter Siswa:</label>
-              <select 
-                value={filterSiswa} 
+        {/* ── Filter Sidebar + Buat Laporan ────────────────── */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+
+          {/* List filter vertikal */}
+          <div style={{ background: 'white', borderRadius: 20, padding: '10px',
+              boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9',
+              flexShrink: 0, minWidth: 168, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {filters.map(f => {
+              const active = filterTipe === f.key
+              return (
+                <button key={f.key} onClick={() => setFilterTipe(f.key)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                    padding: '10px 10px', borderRadius: 14, border: 'none', cursor: 'pointer',
+                    background: active ? '#f5f3ff' : 'transparent',
+                    transition: 'background 0.15s', width: '100%', textAlign: 'left' as const }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FilterIcon type={f.key} color={active ? '#7c3aed' : '#94a3b8'} />
+                    <span style={{ fontSize: 13, fontWeight: 700,
+                        color: active ? '#6d28d9' : '#374151' }}>{f.label}</span>
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 700,
+                      color: active ? '#7c3aed' : '#94a3b8' }}>{f.count}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Kolom kanan: tombol buat + filter siswa */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+            <button onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: '15px 14px', borderRadius: 16, fontSize: 13, fontWeight: 800,
+                border: 'none', cursor: 'pointer', width: '100%',
+                background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
+                boxShadow: '0 4px 14px rgba(124,58,237,0.35)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Buat Laporan Baru
+            </button>
+
+            <div style={{ background: 'white', borderRadius: 16, padding: '10px 12px',
+                boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9',
+                display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', flexShrink: 0 }}>Filter Siswa</span>
+              <select
+                value={filterSiswa}
                 onChange={e => setFilterSiswa(e.target.value)}
-                style={{ padding: '6px 12px', borderRadius: 50, fontSize: 12, border: '1.5px solid #e5e7eb',
-                  background: 'white', color: '#374151', outline: 'none', cursor: 'pointer' }}
+                style={{ flex: 1, minWidth: 0, padding: '6px 8px', borderRadius: 10, fontSize: 12,
+                  border: '1.5px solid #e5e7eb', background: '#fafafa', color: '#374151',
+                  outline: 'none', cursor: 'pointer' }}
               >
                 <option value="semua">Semua Siswa</option>
                 {siswaList.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
-              {filterSiswa !== 'semua' && (
-                <button 
-                  onClick={() => setFilterSiswa('semua')}
-                  style={{ padding: '4px 10px', borderRadius: 50, fontSize: 11, border: 'none',
-                    background: '#fee2e2', color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  × Hapus Filter
-                </button>
-              )}
+              <button
+                onClick={() => filterSiswa !== 'semua' && setFilterSiswa('semua')}
+                title={filterSiswa !== 'semua' ? 'Hapus filter siswa' : 'Filter'}
+                style={{ width: 30, height: 30, borderRadius: 10, border: 'none', flexShrink: 0,
+                  background: filterSiswa !== 'semua' ? '#fee2e2' : '#f1f5f9',
+                  color: filterSiswa !== 'semua' ? '#dc2626' : '#94a3b8',
+                  cursor: filterSiswa !== 'semua' ? 'pointer' : 'default',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -584,7 +676,7 @@ export default function LaporanPage() {
         {/* ── Ringkasan Chart ─────────────────────────────── */}
         <div style={{ background: 'white', borderRadius: 20, padding: '18px 16px 14px',
             boxShadow: '0 2px 12px rgba(15,23,42,0.06)', border: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' as const, gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f5f3ff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -605,6 +697,40 @@ export default function LaporanPage() {
             </div>
           </div>
           <LineChart data={chartData} />
+
+          {/* Mini summary cards: Laporan Tertinggi & Rata-rata per Bulan */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 18 }}>
+            <div style={{ background: '#fafafa', borderRadius: 14, padding: '12px 14px',
+                border: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Laporan Tertinggi</span>
+                <div style={{ width: 22, height: 22, borderRadius: 8, background: '#ecfdf5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                </div>
+              </div>
+              <p style={{ fontSize: 18, fontWeight: 900, color: '#111827', margin: '6px 0 0' }}>
+                {laporanTertinggi ? laporanTertinggi.jumlah : 0}
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}> laporan</span>
+              </p>
+              <p style={{ fontSize: 11, color: '#94a3b8', margin: '2px 0 0' }}>
+                {laporanTertinggi ? laporanTertinggi.bulan : '—'}
+              </p>
+            </div>
+            <div style={{ background: '#fafafa', borderRadius: 14, padding: '12px 14px',
+                border: '1px solid #f1f5f9' }}>
+              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Rata-rata per Bulan</span>
+              <p style={{ fontSize: 18, fontWeight: 900, color: '#111827', margin: '6px 0 0' }}>
+                {rataRata.toLocaleString('id-ID', { maximumFractionDigits: 1 })}
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}> laporan</span>
+              </p>
+              <p style={{ fontSize: 11, color: '#94a3b8', margin: '2px 0 0' }}>
+                Selama 6 bulan terakhir
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* ── Daftar Laporan ──────────────────────────────── */}
@@ -719,6 +845,26 @@ export default function LaporanPage() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* ── Banner Promosi ───────────────────────────────── */}
+        <div style={{ background: 'linear-gradient(135deg,#7c3aed,#5b21b6)', borderRadius: 20,
+            padding: '20px 18px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', right: -10, bottom: -14, width: 110, height: 110,
+              opacity: 0.95, pointerEvents: 'none' }}>
+            <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+              <rect x="14" y="18" width="58" height="74" rx="8" fill="white" opacity="0.92" transform="rotate(-8 43 55)"/>
+              <rect x="30" y="10" width="58" height="74" rx="8" fill="white" transform="rotate(6 59 47)"/>
+              <line x1="40" y1="28" x2="76" y2="24" stroke="#ddd6fe" strokeWidth="3" transform="rotate(6 59 47)"/>
+              <line x1="40" y1="38" x2="70" y2="35" stroke="#ede9fe" strokeWidth="2.5" transform="rotate(6 59 47)"/>
+              <path d="M42 70 L52 58 L60 64 L72 48" fill="none" stroke="#16a34a" strokeWidth="3"
+                strokeLinecap="round" strokeLinejoin="round" transform="rotate(6 59 47)"/>
+              <circle cx="86" cy="78" r="13" fill="#16a34a"/>
+              <path d="M80 78 L84.5 82.5 L93 73" fill="none" stroke="white" strokeWidth="2.6"
+                strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="20" cy="16" r="7" fill="#fbbf24" opacity="0.9"/>
+            </svg>
+          </div>
         </div>
 
       </div>
