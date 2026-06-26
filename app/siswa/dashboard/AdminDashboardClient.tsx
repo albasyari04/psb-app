@@ -213,7 +213,7 @@ const IconVerifikasi = () => (
 
 // ── Menu Cepat Admin Items ────────────────────────────────────────────────────
 const QUICK_MENU = [
-  { id: 'verifikasi',  label: 'Verifikasi', Icon: IconVerifikasi, href: '/admin/verifikasi' },
+  { id: 'verifikasi', label: 'Verifikasi', Icon: () => <Image src="/icons/verifikasi-icon.png" alt="Jadwal" width={52} height={52} />,     href: '/admin/verifikasi' },
   { id: 'jadwal',     label: 'Jadwal' ,    Icon: () => <Image src="/icons/jadwal icon.png" alt="Jadwal" width={52} height={52} />,         href: '/admin/jadwal'},
   { id: 'berkas',     label: 'Berkas',     Icon: () => <Image src="/icons/berkas icon.png" alt="Berkas" width={52} height={52} />,         href: '/admin/berkas'},
   { id: 'pengumuman', label: 'Pengumuman', Icon: () => <Image src="/icons/pengumuman icon.png" alt="Pengumuman" width={52} height={52} />, href: '/admin/pengumuman'},
@@ -402,15 +402,49 @@ export default function AdminDashboardClient({
         </div>
       </div>
 
-      {/* ══ 4 STAT CARDS — 2×2 grid seperti beranda.png ════════════════════ */}
+      {/* ═══════════════ HERO BANNER ═══════════════ */}
       <div style={{ padding: '12px 16px 0' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <Link
+          href="/admin/laporan"
+          style={{
+            display: 'block',
+            textDecoration: 'none',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              aspectRatio: '16 / 8',
+              borderRadius: 24,
+              overflow: 'hidden',
+              background: '#F5F3FF',
+              boxShadow: '0 12px 30px rgba(109,61,245,.16)',
+            }}
+          >
+            <Image
+              src="/icons/beranda-admin-banner.png"
+              alt="Beranda Admin Banner"
+              fill
+              priority
+              sizes="100vw"
+              style={{
+                objectFit: 'cover',
+              }}
+            />
+          </div>
+        </Link>
+      </div>
+
+      {/* ══ 4 STAT CARDS — 1 baris × 4 kolom seperti target desain ═════════ */}
+      <div style={{ padding: '12px 16px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
           {([
             {
               label: 'Total Pendaftar', value: s.total, change: '+12%', pos: true,
               iconBg: '#EDE9FE', iconStroke: '#6D3DF5',
               icon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#6D3DF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="9" cy="7" r="4" stroke="#6D3DF5" strokeWidth="2"/>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#6D3DF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -421,7 +455,7 @@ export default function AdminDashboardClient({
               label: 'Verifikasi', value: terVerif, change: '+40%', pos: true,
               iconBg: '#D1FAE5', iconStroke: '#059669',
               icon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="12" r="10" stroke="#059669" strokeWidth="2"/>
                   <path d="M8 12l2.5 2.5L16 9" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -431,7 +465,7 @@ export default function AdminDashboardClient({
               label: 'Menunggu', value: s.menunggu, change: '-8%', pos: false,
               iconBg: '#FEF3C7', iconStroke: '#D97706',
               icon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2"/>
                   <polyline points="12 6 12 12 16 14" stroke="#D97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -441,7 +475,7 @@ export default function AdminDashboardClient({
               label: 'Ditolak', value: s.ditolak, change: '-2%', pos: false,
               iconBg: '#FEE2E2', iconStroke: '#DC2626',
               icon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="12" r="10" stroke="#DC2626" strokeWidth="2"/>
                   <line x1="15" y1="9" x2="9" y2="15" stroke="#DC2626" strokeWidth="2.2" strokeLinecap="round"/>
                   <line x1="9" y1="9" x2="15" y2="15" stroke="#DC2626" strokeWidth="2.2" strokeLinecap="round"/>
@@ -451,45 +485,50 @@ export default function AdminDashboardClient({
           ] as const).map((c, i) => (
             <div key={i} style={{
               background: p.cardBg,
-              borderRadius: 18,
-              padding: '16px 14px 14px',
+              borderRadius: 16,
+              padding: '12px 10px 11px',
               boxShadow: cardShadow,
+              minWidth: 0,
             }}>
               {/* Icon circle */}
               <div style={{
-                width: 42, height: 42, borderRadius: 13,
+                width: 32, height: 32, borderRadius: 10,
                 background: c.iconBg,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 10,
+                marginBottom: 8,
               }}>
                 {c.icon}
               </div>
               {/* Label */}
-              <p style={{ fontSize: 11, color: p.textMuted, fontWeight: 500, margin: '0 0 2px' }}>
+              <p style={{
+                fontSize: 9.5, color: p.textMuted, fontWeight: 500, margin: '0 0 2px',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
                 {c.label}
               </p>
               {/* Big number */}
-              <p style={{ fontSize: 30, fontWeight: 800, color: p.textPrimary, lineHeight: 1, margin: 0, letterSpacing: '-1px' }}>
+              <p style={{ fontSize: 22, fontWeight: 800, color: p.textPrimary, lineHeight: 1, margin: 0, letterSpacing: '-0.8px' }}>
                 {c.value}
               </p>
               {/* % change */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 6 }}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 5, flexWrap: 'nowrap' }}>
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
                   {c.pos
                     ? <path d="M6 2L10 7H2L6 2Z" fill="#059669"/>
                     : <path d="M6 10L2 5H10L6 10Z" fill="#DC2626"/>
                   }
                 </svg>
                 <span style={{
-                  fontSize: 11, fontWeight: 700,
+                  fontSize: 9.5, fontWeight: 700, whiteSpace: 'nowrap',
                   color: c.pos ? '#059669' : '#DC2626',
                 }}>{c.change}</span>
-                <span style={{ fontSize: 10, color: p.textMuted, fontWeight: 400 }}>dari bulan lalu</span>
               </div>
+              <p style={{ fontSize: 8, color: p.textMuted, fontWeight: 400, margin: '1px 0 0' }}>dari bulan lalu</p>
             </div>
           ))}
         </div>
       </div>
+
 
       {/* ══ PENDAFTAR PER BULAN ══════════════════════════════════════════════ */}
       <div style={{ padding: '14px 16px 0' }}>
