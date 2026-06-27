@@ -152,7 +152,7 @@ const MENU: MenuCategory[] = [
       {
         label: "Profil",
         desc: "Data & pengaturan akun",
-        href: "/admin/profil",
+        href: "/admin/profile",
         icon: <PngIcon src="/icons/profil icon.png" alt="Profil" />,
       },
        {

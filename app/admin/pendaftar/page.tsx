@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -237,7 +236,6 @@ html, body {
   color: #475569;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.pnd-topbar-title-wrap { text-align: center; }
 .pnd-topbar-title-wrap h1 { font-size: 16px; font-weight: 800; color: #0f172a; }
 .pnd-topbar-title-wrap p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
 .pnd-notif-btn {
@@ -258,69 +256,12 @@ html, body {
   border: 1.5px solid #fff;
 }
 
-/* ── Hero Banner ── */
-.pnd-hero {
-  margin: 4px 16px 0;
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #ede9fe 100%);
-  border-radius: 24px;
-  padding: 22px 0 0 22px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  overflow: hidden;
-  min-height: 152px;
-  position: relative;
-  border: 1px solid rgba(199,210,254,0.6);
-  box-shadow: 0 4px 20px rgba(99,102,241,0.10);
-}
-.pnd-hero-deco-1 {
-  position: absolute; top: 18px; right: 145px;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #a5b4fc;
-  box-shadow: 0 0 0 4px rgba(165,180,252,0.2);
-}
-.pnd-hero-deco-2 {
-  position: absolute; top: 50px; left: 70%;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #c4b5fd;
-  box-shadow: 0 0 0 3px rgba(196,181,253,0.2);
-}
-.pnd-hero-text { flex: 1; padding-bottom: 22px; }
-.pnd-hero-text h2 {
-  font-size: 15.5px; font-weight: 700; color: #1e293b; line-height: 1.45;
-}
-.pnd-hero-text h2 span { color: #4f46e5; font-weight: 800; }
-.pnd-hero-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  margin-top: 14px;
-  background: rgba(255,255,255,0.75);
-  border: 1.5px solid rgba(199,210,254,0.8);
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 11.5px; font-weight: 700; color: #4338ca;
-  cursor: pointer; font-family: inherit;
-  backdrop-filter: blur(8px);
-  transition: all 0.18s;
-}
-.pnd-hero-btn:hover {
-  background: rgba(255,255,255,0.9);
-  box-shadow: 0 2px 8px rgba(99,102,241,0.15);
-}
-.pnd-hero-img {
-  width: 140px;
-  flex-shrink: 0;
-  align-self: flex-end;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-
 /* ── Stats Grid ── */
 .pnd-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  padding: 14px 16px 0;
+  padding: 18px 16px 0;
 }
 .stat-card {
   background: #fff;
@@ -664,39 +605,13 @@ export default function PendaftarPage() {
         {/* ── Topbar ── */}
         <div className="pnd-topbar">
           <div className="pnd-topbar-left">
-            <button className="pnd-topbar-menu-btn" onClick={() => router.back()}>
-              <IconMenu />
-            </button>
-          </div>
-          <div className="pnd-topbar-title-wrap">
-            <h1>Pendaftar</h1>
-            <p>Kelola data pendaftar</p>
-          </div>
-          <Link href="/admin/notifikasi" className="pnd-notif-btn">
-            <IconBell />
-            <div className="pnd-notif-badge" />
-          </Link>
-        </div>
-
-        {/* ── Hero Banner ── */}
-        <div className="pnd-hero">
-          <div className="pnd-hero-deco-1" />
-          <div className="pnd-hero-deco-2" />
-          <div className="pnd-hero-text">
-            <h2>
-              Kelola data pendaftar dengan<br />
-              <span>mudah<br />dan terstruktur</span>
-            </h2>
-          </div>
-          <div className="pnd-hero-img">
-            <Image
-              src="/icons/pendaftar icon.png"
-              alt="Kelola Pendaftar"
-              width={450}
-              height={450}
-              style={{ objectFit: 'contain', objectPosition: 'bottom' }}
-              priority
-            />
+            <Link href="/admin" className="pnd-topbar-back-btn">
+              <IconArrowLeft />
+            </Link>
+            <div className="pnd-topbar-title-wrap">
+              <h1>Pendaftar</h1>
+              <p>Kelola data pendaftar</p>
+            </div>
           </div>
         </div>
 
