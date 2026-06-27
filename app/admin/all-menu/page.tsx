@@ -82,21 +82,21 @@ const MENU: MenuCategory[] = [
     title: "PENDAFTARAN",
     items: [
       {
-        label: "Formulir",
-        desc: "Isi & edit data diri",
-        href: "/formulir",
+        label: "Pendaftar",
+        desc: "Lihat Siapa saja yang mendaftarkan diri",
+        href: "/admin/pendaftar",
         icon: <PngIcon src="/icons/formulir icon.png" alt="Formulir" />,
       },
       {
         label: "Berkas",
         desc: "Upload dokumen persyaratan",
-        href: "/berkas",
+        href: "/admin/berkas",
         icon: <PngIcon src="/icons/berkas icon.png" alt="Berkas" />,
       },
       {
         label: "Status",
         desc: "Pantau seleksi pendaftaran",
-        href: "/status",
+        href: "/admin/status",
         icon: <PngIcon src="/icons/status icon.png" alt="Status" />,
       },
     ],
@@ -107,7 +107,7 @@ const MENU: MenuCategory[] = [
       {
         label: "Pembayaran",
         desc: "Biaya pendaftaran santri",
-        href: "/pembayaran",
+        href: "/admin/pembayaran",
         icon: <PngIcon src="/icons/pembayaran icon.png" alt="Pembayaran" />,
       },
     ],
@@ -118,7 +118,7 @@ const MENU: MenuCategory[] = [
       {
         label: "Chat",
         desc: "Chat Admin",
-        href: "/chat",
+        href: "/admin/chat",
         icon: <PngIcon src="/icons/chat icon.png" alt="Chat" />,
       },
     ],
@@ -129,19 +129,19 @@ const MENU: MenuCategory[] = [
       {
         label: "Pengumuman",
         desc: "Info & berita terbaru",
-        href: "/pengumuman",
+        href: "/admin/pengumuman",
         icon: <PngIcon src="/icons/pengumuman icon.png" alt="Pengumuman" />,
       },
       {
         label: "Jadwal",
         desc: "Jadwal kegiatan santri",
-        href: "/jadwal",
+        href: "/admin/jadwal",
         icon: <PngIcon src="/icons/jadwal icon.png" alt="Jadwal" />,
       },
       {
         label: "Laporan",
         desc: "Laporan pendaftaran",
-        href: "/laporan",
+        href: "/admin/laporan",
         icon: <PngIcon src="/icons/laporan icon.png" alt="Laporan" />,
       },
     ],
@@ -152,13 +152,13 @@ const MENU: MenuCategory[] = [
       {
         label: "Profil",
         desc: "Data & pengaturan akun",
-        href: "/profil",
+        href: "/admin/profil",
         icon: <PngIcon src="/icons/profil icon.png" alt="Profil" />,
       },
        {
         label: "Pengaturan",
         desc: "pengaturan Aplikasi",
-        href: "/pengaturan",
+        href: "/admin/pengaturan",
         icon: <PngIcon src="/icons/pengaturan_icon.png" alt="Pengaturan" />,
       },
     ],

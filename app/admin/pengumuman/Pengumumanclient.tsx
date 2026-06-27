@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, ReactNode } from 'react'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Announcement {
@@ -32,14 +32,60 @@ const EMPTY_FORM: FormData = {
 
 const TIPE_OPTIONS = ['Penting', 'Informasi', 'Info', 'Peringatan'] as const
 
+// Disesuaikan dengan pengumuman-desain.png:
+// PENGUMUMAN(ungu), INFORMASI(biru), PERATURAN(kuning/orange), INFO(hijau)
+// Mapping tipe ke desain
 const TIPE_CONFIG: Record<string, {
   bg: string; color: string; border: string;
-  lightBg: string; icon: string; gradient: string;
+  lightBg: string; iconBg: string; gradient: string; dotColor: string;
 }> = {
-  Penting:    { bg: '#fff1f2', color: '#e11d48', border: '#fecdd3', lightBg: '#fff5f6', icon: '🔴', gradient: 'linear-gradient(135deg, #e11d48, #be123c)' },
-  Informasi:  { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe', lightBg: '#f0f7ff', icon: '🔵', gradient: 'linear-gradient(135deg, #2563eb, #1d4ed8)' },
-  Info:       { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', lightBg: '#f2fef5', icon: '🟢', gradient: 'linear-gradient(135deg, #16a34a, #15803d)' },
-  Peringatan: { bg: '#fffbeb', color: '#d97706', border: '#fde68a', lightBg: '#fffdf0', icon: '🟡', gradient: 'linear-gradient(135deg, #d97706, #b45309)' },
+  Penting:    {
+    bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe',
+    lightBg: '#faf5ff', iconBg: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+    gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)', dotColor: '#7c3aed',
+  },
+  Informasi:  {
+    bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe',
+    lightBg: '#f0f7ff', iconBg: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)', dotColor: '#3b82f6',
+  },
+  Info:       {
+    bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0',
+    lightBg: '#f2fef5', iconBg: 'linear-gradient(135deg, #22c55e, #16a34a)',
+    gradient: 'linear-gradient(135deg, #22c55e, #16a34a)', dotColor: '#22c55e',
+  },
+  Peringatan: {
+    bg: '#fffbeb', color: '#d97706', border: '#fde68a',
+    lightBg: '#fffdf0', iconBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', dotColor: '#f59e0b',
+  },
+}
+
+// Icon SVG per tipe (sesuai desain)
+const TIPE_ICONS: Record<string, ReactNode> = {
+  Penting: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/>
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+    </svg>
+  ),
+  Informasi: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+  ),
+  Info: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+    </svg>
+  ),
+  Peringatan: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  ),
 }
 
 function formatTanggal(iso: string): string {
@@ -118,9 +164,14 @@ const IcBell = () => (
     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
   </svg>
 )
-const IcChevronRight = () => (
+const IcBack = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+)
+const IcChevronDown = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"/>
+    <polyline points="6 9 12 15 18 9"/>
   </svg>
 )
 
@@ -143,6 +194,7 @@ export default function PengumumanClient() {
   const [formError, setFormError] = useState('')
   const [filterTipe, setFilterTipe] = useState('')
   const [searchQ, setSearchQ]       = useState('')
+  const [sortBy, setSortBy]         = useState('Terbaru')
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -220,8 +272,20 @@ export default function PengumumanClient() {
     return acc
   }, {} as Record<string, number>)
 
+  // Stat cards config sesuai pengumuman-desain.png
+  const statCards = [
+    { label: 'PENGUMUMAN', tipe: 'Penting',    iconBg: '#ede9fe', iconColor: '#7c3aed',
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> },
+    { label: 'INFORMASI',  tipe: 'Informasi',  iconBg: '#dbeafe', iconColor: '#2563eb',
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> },
+    { label: 'PERATURAN',  tipe: 'Peringatan', iconBg: '#fef3c7', iconColor: '#d97706',
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+    { label: 'INFO',       tipe: 'Info',       iconBg: '#dcfce7', iconColor: '#16a34a',
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> },
+  ]
+
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', 'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', 'Plus Jakarta Sans', sans-serif", background: '#f4f6fb', minHeight: '100vh' }}>
 
       {/* ── GLOBAL STYLES ─────────────────────────────────────────────────── */}
       <style>{`
@@ -239,10 +303,6 @@ export default function PengumumanClient() {
           from { transform: translateY(100%); opacity: 0; }
           to   { transform: translateY(0);    opacity: 1; }
         }
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.92); }
-          to   { opacity: 1; transform: scale(1); }
-        }
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(0.8); }
@@ -254,7 +314,7 @@ export default function PengumumanClient() {
         }
         .ann-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 32px rgba(15,23,42,0.10) !important;
+          box-shadow: 0 10px 28px rgba(15,23,42,0.10) !important;
         }
         .btn-action {
           transition: all 0.15s ease;
@@ -275,16 +335,13 @@ export default function PengumumanClient() {
           background: #fff !important;
           outline: none;
         }
-        .tipe-pill {
+        .stat-card {
           transition: all 0.15s ease;
           cursor: pointer;
         }
-        .tipe-pill:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .tipe-pill.active {
-          transform: translateY(-1px);
+        .stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
         }
         .modal-sheet {
           animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -295,368 +352,415 @@ export default function PengumumanClient() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+        .header-back-btn:hover { background: #f1f5f9 !important; }
+        .sort-btn:hover { background: #f1f5f9 !important; }
       `}</style>
 
-      {/* ── STATS ROW ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-
-        {/* Total card */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          HEADER — Style seperti halaman Pengaturan (back arrow + judul tengah + tombol buat)
+          ══════════════════════════════════════════════════════════════════ */}
+      <div style={{
+        background: '#fff',
+        borderBottom: '1px solid #f1f5f9',
+        padding: '0 16px',
+        position: 'sticky', top: 0, zIndex: 100,
+      }}>
         <div style={{
-          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-          borderRadius: 20, padding: '18px 16px',
-          boxShadow: '0 8px 24px rgba(99,102,241,0.28)',
-          gridColumn: '1 / -1',
-          position: 'relative', overflow: 'hidden',
+          display: 'flex', alignItems: 'center',
+          height: 56, position: 'relative',
         }}>
-          {/* Decorative circle */}
-          <div style={{
-            position: 'absolute', right: -20, top: -20,
-            width: 100, height: 100, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.08)',
-          }} />
-          <div style={{
-            position: 'absolute', right: 20, bottom: -30,
-            width: 70, height: 70, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.06)',
-          }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8,
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: 10,
-                  background: 'rgba(255,255,255,0.18)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff',
-                }}>
-                  <IcBell />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                  Total Pengumuman
-                </span>
-              </div>
-              <p style={{ fontSize: 38, fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
-                {loading ? '–' : total}
-              </p>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', margin: '6px 0 0' }}>
-                {loading ? 'Memuat data...' : 'pengumuman aktif terkelola'}
-              </p>
-            </div>
-            <button
-              onClick={openCreate}
-              className="btn-action"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '10px 16px', borderRadius: 14,
-                border: '1.5px solid rgba(255,255,255,0.35)',
-                background: 'rgba(255,255,255,0.15)',
-                color: '#fff', fontSize: 12, fontWeight: 700,
-                cursor: 'pointer', backdropFilter: 'blur(8px)',
-                flexShrink: 0,
-              }}
-            >
-              <IcPlus /> Buat
-            </button>
-          </div>
-        </div>
+          {/* Back button kiri */}
+          <button
+            className="header-back-btn btn-action"
+            style={{
+              width: 36, height: 36, borderRadius: 10,
+              border: '1.5px solid #e2e8f0',
+              background: '#f8fafc',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#374151',
+              flexShrink: 0,
+            }}
+          >
+            <IcBack />
+          </button>
 
-        {/* Mini stats per tipe */}
-        {TIPE_OPTIONS.slice(0, 4).map((tipe, i) => {
-          const cfg = TIPE_CONFIG[tipe]
-          return (
+          {/* Judul kiri — setelah back button, rata kiri */}
+          <div style={{
+            marginLeft: 12, flex: 1,
+          }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+              Pengumuman
+            </p>
+            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>
+              Informasi &amp; notifikasi terbaru
+            </p>
+          </div>
+
+          {/* Tombol Buat kanan — seperti desain: ungu/indigo dengan ikon bell */}
+          <button
+            onClick={openCreate}
+            className="btn-action"
+            style={{
+              marginLeft: 'auto',
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '9px 16px', borderRadius: 12,
+              border: 'none',
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              color: '#fff', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
+              flexShrink: 0,
+            }}
+          >
+            <IcBell />
+            Buat
+          </button>
+        </div>
+      </div>
+
+      {/* ── BODY ─────────────────────────────────────────────────────────── */}
+      <div style={{ padding: '16px 14px', maxWidth: 480, margin: '0 auto' }}>
+
+        {/* ── STAT CARDS — 4 kolom sesuai desain ──────────────────────── */}
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: '14px 10px',
+          boxShadow: '0 2px 12px rgba(15,23,42,0.05)',
+          border: '1px solid #f1f5f9',
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 8, marginBottom: 14,
+        }}>
+          {statCards.map((sc, i) => (
             <div
-              key={tipe}
-              className="tipe-pill"
-              onClick={() => setFilterTipe(filterTipe === tipe ? '' : tipe)}
+              key={sc.tipe}
+              className="stat-card"
+              onClick={() => setFilterTipe(filterTipe === sc.tipe ? '' : sc.tipe)}
               style={{
-                background: filterTipe === tipe ? cfg.bg : '#fff',
-                border: `1.5px solid ${filterTipe === tipe ? cfg.border : '#f1f5f9'}`,
-                borderRadius: 16, padding: '12px 14px',
-                boxShadow: filterTipe === tipe
-                  ? `0 4px 16px rgba(0,0,0,0.08)`
-                  : '0 2px 8px rgba(15,23,42,0.04)',
+                background: filterTipe === sc.tipe ? TIPE_CONFIG[sc.tipe].bg : '#fafbfd',
+                border: `1.5px solid ${filterTipe === sc.tipe ? TIPE_CONFIG[sc.tipe].border : '#f1f5f9'}`,
+                borderRadius: 14, padding: '12px 8px 10px',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                 animationDelay: `${i * 0.05}s`,
               }}
             >
-              <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {tipe}
+              {/* Icon bulat */}
+              <div style={{
+                width: 42, height: 42, borderRadius: 12,
+                background: sc.iconBg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {sc.icon}
+              </div>
+              <p style={{
+                fontSize: 9, fontWeight: 700, color: '#94a3b8',
+                margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em',
+                textAlign: 'center', lineHeight: 1.2,
+              }}>
+                {sc.label}
               </p>
-              <p style={{ fontSize: 22, fontWeight: 800, color: filterTipe === tipe ? cfg.color : '#1e293b', margin: 0, lineHeight: 1 }}>
-                {loading ? '–' : tipeCount[tipe] ?? 0}
+              <p style={{
+                fontSize: 22, fontWeight: 800,
+                color: filterTipe === sc.tipe ? TIPE_CONFIG[sc.tipe].color : '#1e293b',
+                margin: 0, lineHeight: 1,
+              }}>
+                {loading ? '–' : tipeCount[sc.tipe] ?? 0}
               </p>
             </div>
-          )
-        })}
-      </div>
-
-      {/* ── SEARCH & FILTER BAR ───────────────────────────────────────────── */}
-      <div style={{
-        background: '#fff', borderRadius: 18, padding: '12px 14px',
-        boxShadow: '0 2px 12px rgba(15,23,42,0.05)',
-        border: '1px solid #f1f5f9',
-        display: 'flex', gap: 10, marginBottom: 14, alignItems: 'center',
-      }}>
-        <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <span style={{ position: 'absolute', left: 11, pointerEvents: 'none', display: 'flex' }}>
-            <IcSearch />
-          </span>
-          <input
-            className="input-field"
-            placeholder="Cari judul pengumuman..."
-            value={searchQ}
-            onChange={e => setSearchQ(e.target.value)}
-            style={{
-              width: '100%', paddingLeft: 34, paddingRight: 12,
-              paddingTop: 9, paddingBottom: 9,
-              borderRadius: 12, border: '1.5px solid #e2e8f0',
-              fontSize: 12.5, background: '#f8fafc',
-              boxSizing: 'border-box', color: '#1e293b',
-            }}
-          />
+          ))}
         </div>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <span style={{ position: 'absolute', left: 10, display: 'flex', color: '#94a3b8' }}>
-            <IcFilter />
-          </span>
-          <select
-            className="input-field"
-            value={filterTipe}
-            onChange={e => setFilterTipe(e.target.value)}
-            style={{
-              paddingLeft: 28, paddingRight: 12,
-              paddingTop: 9, paddingBottom: 9,
-              borderRadius: 12, border: '1.5px solid #e2e8f0',
-              fontSize: 12.5, background: '#f8fafc',
-              color: filterTipe ? '#1e293b' : '#94a3b8',
-              cursor: 'pointer', appearance: 'none',
-            }}
-          >
-            <option value="">Semua</option>
-            {TIPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
-      </div>
 
-      {/* ── LIST SECTION ──────────────────────────────────────────────────── */}
-      <section style={{
-        background: '#fff', borderRadius: 24,
-        boxShadow: '0 2px 16px rgba(15,23,42,0.06)',
-        border: '1px solid #f1f5f9',
-        overflow: 'hidden',
-      }}>
-        {/* Section header */}
+        {/* ── SEARCH & FILTER ──────────────────────────────────────────── */}
         <div style={{
-          padding: '16px 18px 12px',
-          borderBottom: '1px solid #f8fafc',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: '#fff', borderRadius: 18, padding: '10px 12px',
+          boxShadow: '0 2px 10px rgba(15,23,42,0.05)',
+          border: '1px solid #f1f5f9',
+          display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center',
         }}>
-          <div>
-            <p style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a', margin: '0 0 2px' }}>
-              Daftar Pengumuman
-            </p>
-            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>
-              {loading ? 'Memuat...' : `${total} pengumuman ditemukan`}
-            </p>
+          <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <span style={{ position: 'absolute', left: 10, pointerEvents: 'none', display: 'flex' }}>
+              <IcSearch />
+            </span>
+            <input
+              className="input-field"
+              placeholder="Cari judul pengumuman..."
+              value={searchQ}
+              onChange={e => setSearchQ(e.target.value)}
+              style={{
+                width: '100%', paddingLeft: 32, paddingRight: 10,
+                paddingTop: 9, paddingBottom: 9,
+                borderRadius: 12, border: '1.5px solid #e2e8f0',
+                fontSize: 12.5, background: '#f8fafc',
+                boxSizing: 'border-box', color: '#1e293b',
+              }}
+            />
           </div>
-          {!loading && total > 0 && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              padding: '5px 10px', borderRadius: 99,
-              background: '#f0fdf4', border: '1px solid #bbf7d0',
-            }}>
-              <span className="live-dot" style={{
-                width: 6, height: 6, borderRadius: '50%', background: '#16a34a',
-              }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.04em' }}>
-                LIVE
-              </span>
+          {/* Filter pill — sesuai desain (tulisan "Semua" dengan ikon filter) */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <span style={{ position: 'absolute', left: 10, display: 'flex', color: '#64748b', pointerEvents: 'none' }}>
+              <IcFilter />
+            </span>
+            <select
+              className="input-field"
+              value={filterTipe}
+              onChange={e => setFilterTipe(e.target.value)}
+              style={{
+                paddingLeft: 28, paddingRight: 10,
+                paddingTop: 9, paddingBottom: 9,
+                borderRadius: 12, border: '1.5px solid #e2e8f0',
+                fontSize: 12.5, background: '#f8fafc',
+                color: filterTipe ? '#1e293b' : '#64748b',
+                cursor: 'pointer', appearance: 'none',
+                minWidth: 80,
+              }}
+            >
+              <option value="">Semua</option>
+              {TIPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* ── LIST SECTION ─────────────────────────────────────────────── */}
+        <section style={{
+          background: '#fff', borderRadius: 20,
+          boxShadow: '0 2px 12px rgba(15,23,42,0.05)',
+          border: '1px solid #f1f5f9', overflow: 'hidden',
+        }}>
+          {/* Section header */}
+          <div style={{
+            padding: '14px 16px 12px',
+            borderBottom: '1px solid #f8fafc',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* doc icon kecil */}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Daftar Pengumuman
+                </p>
+                <p style={{ fontSize: 10.5, color: '#94a3b8', margin: 0 }}>
+                  {loading ? 'Memuat...' : `${total} pengumuman ditemukan`}
+                </p>
+              </div>
+            </div>
+
+            {/* Sort dropdown sesuai desain "Terbaru ▾" */}
+            <button
+              className="sort-btn btn-action"
+              onClick={() => setSortBy(sortBy === 'Terbaru' ? 'Terlama' : 'Terbaru')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '6px 12px', borderRadius: 10,
+                border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                fontSize: 11.5, fontWeight: 600, color: '#374151',
+                cursor: 'pointer',
+              }}
+            >
+              {sortBy}
+              <IcChevronDown />
+            </button>
+          </div>
+
+          {/* Loading skeleton */}
+          {loading && (
+            <div style={{ padding: '12px 14px', display: 'grid', gap: 10 }}>
+              {[1,2,3].map(i => (
+                <div key={i} style={{
+                  height: 110, borderRadius: 16,
+                  background: 'linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%)',
+                  backgroundSize: '400px 100%',
+                  animation: `shimmer 1.6s ease infinite`,
+                  animationDelay: `${i * 0.15}s`,
+                }} />
+              ))}
             </div>
           )}
-        </div>
 
-        {/* Loading skeleton */}
-        {loading && (
-          <div style={{ padding: '12px 18px', display: 'grid', gap: 10 }}>
-            {[1,2,3].map(i => (
-              <div key={i} style={{
-                height: 90, borderRadius: 18,
-                background: 'linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%)',
-                backgroundSize: '400px 100%',
-                animation: `shimmer 1.6s ease infinite`,
-                animationDelay: `${i * 0.15}s`,
-              }} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && list.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: 20,
-              background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 28, margin: '0 auto 16px',
-            }}>
-              📭
-            </div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#334155', margin: '0 0 6px' }}>
-              Belum ada pengumuman
-            </p>
-            <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 20px' }}>
-              {filterTipe || searchQ ? 'Coba ubah filter pencarian' : 'Klik "Buat" untuk menambahkan pengumuman pertama'}
-            </p>
-            {!filterTipe && !searchQ && (
-              <button
-                onClick={openCreate}
-                className="btn-action"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '10px 18px', borderRadius: 12,
-                  border: 'none', cursor: 'pointer',
-                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                  color: '#fff', fontSize: 12, fontWeight: 700,
-                  boxShadow: '0 6px 16px rgba(99,102,241,0.3)',
-                }}
-              >
-                <IcPlus /> Buat Pengumuman Pertama
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* List items */}
-        {!loading && list.length > 0 && (
-          <div style={{ padding: '10px 12px', display: 'grid', gap: 8 }}>
-            {list.map((item, idx) => {
-              const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG['Informasi']
-              return (
-                <div
-                  key={item.id}
-                  className="ann-card"
+          {/* Empty state */}
+          {!loading && list.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: 20,
+                background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 28, margin: '0 auto 16px',
+              }}>
+                📭
+              </div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#334155', margin: '0 0 6px' }}>
+                Belum ada pengumuman
+              </p>
+              <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 20px' }}>
+                {filterTipe || searchQ ? 'Coba ubah filter pencarian' : 'Klik "Buat" untuk menambahkan pengumuman pertama'}
+              </p>
+              {!filterTipe && !searchQ && (
+                <button
+                  onClick={openCreate}
+                  className="btn-action"
                   style={{
-                    padding: '14px 15px', borderRadius: 18,
-                    border: '1.5px solid #f1f5f9',
-                    background: '#fafbfd',
-                    boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
-                    animationDelay: `${idx * 0.06}s`,
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '10px 18px', borderRadius: 12,
+                    border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                    color: '#fff', fontSize: 12, fontWeight: 700,
+                    boxShadow: '0 6px 16px rgba(99,102,241,0.3)',
                   }}
                 >
-                  {/* Top row: badge + tanggal */}
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center', gap: 8, marginBottom: 9,
-                  }}>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      fontSize: 10, fontWeight: 700,
-                      padding: '4px 10px', borderRadius: 999,
-                      background: cfg.bg, color: cfg.color,
-                      border: `1px solid ${cfg.border}`,
-                      letterSpacing: '0.05em', textTransform: 'uppercase',
-                    }}>
-                      <span style={{ fontSize: 8 }}>●</span>
-                      {item.tipe}
-                    </span>
-                    <span style={{
-                      display: 'flex', alignItems: 'center', gap: 4,
-                      fontSize: 10.5, color: '#94a3b8', flexShrink: 0,
-                    }}>
-                      <IcCalendar />
-                      {formatTanggalShort(item.tanggal)}
-                    </span>
+                  <IcPlus /> Buat Pengumuman Pertama
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* List items — sesuai pengumuman-desain.png */}
+          {!loading && list.length > 0 && (
+            <div style={{ padding: '10px 12px', display: 'grid', gap: 10 }}>
+              {list.map((item, idx) => {
+                const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG['Informasi']
+                const icon = TIPE_ICONS[item.tipe] ?? TIPE_ICONS['Informasi']
+                return (
+                  <div
+                    key={item.id}
+                    className="ann-card"
+                    style={{
+                      padding: '14px 14px 12px',
+                      borderRadius: 18,
+                      border: '1.5px solid #f1f5f9',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                      animationDelay: `${idx * 0.06}s`,
+                    }}
+                  >
+                    {/* Top row: icon box + konten + tanggal */}
+                    <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+
+                      {/* Icon box gradient — sesuai desain */}
+                      <div style={{
+                        width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                        background: cfg.iconBg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: `0 4px 12px ${cfg.dotColor}30`,
+                      }}>
+                        {icon}
+                      </div>
+
+                      {/* Kanan: tipe badge + tanggal + judul + konten */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {/* Badge tipe + tanggal */}
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between',
+                          alignItems: 'center', marginBottom: 4,
+                        }}>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            color: cfg.color,
+                            textTransform: 'uppercase', letterSpacing: '0.05em',
+                          }}>
+                            {item.tipe}
+                          </span>
+                          <span style={{
+                            display: 'flex', alignItems: 'center', gap: 3,
+                            fontSize: 10, color: '#94a3b8', flexShrink: 0,
+                          }}>
+                            <IcCalendar />
+                            {formatTanggalShort(item.tanggal)}
+                          </span>
+                        </div>
+
+                        {/* Judul */}
+                        <p style={{
+                          fontSize: 13.5, fontWeight: 700, color: '#0f172a',
+                          margin: '0 0 3px', lineHeight: 1.35,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          {item.judul}
+                        </p>
+
+                        {/* Preview konten */}
+                        <p style={{
+                          fontSize: 11.5, color: '#64748b', margin: 0,
+                          lineHeight: 1.5, display: '-webkit-box',
+                          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}>
+                          {item.konten}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Lampiran badge */}
+                    {item.lampiran_url && (
+                      <a
+                        href={item.lampiran_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '4px 10px', borderRadius: 999,
+                          background: '#eff6ff', border: '1px solid #bfdbfe',
+                          color: '#2563eb', fontSize: 10.5, fontWeight: 600,
+                          textDecoration: 'none', marginBottom: 10,
+                        }}
+                      >
+                        <IcLink />
+                        {item.lampiran_nama || 'Lihat Lampiran'}
+                      </a>
+                    )}
+
+                    {/* Divider */}
+                    <div style={{ height: 1, background: '#f1f5f9', margin: '10px 0 10px' }} />
+
+                    {/* Action buttons — sesuai desain: Detail | Edit | Hapus */}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => openDetail(item)}
+                        className="btn-action"
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                          padding: '8px 0', borderRadius: 10,
+                          border: '1.5px solid #e2e8f0', background: '#fff',
+                          fontSize: 12, fontWeight: 600, color: '#374151',
+                          cursor: 'pointer', flex: 1,
+                        }}
+                      >
+                        <IcEye /> Detail
+                      </button>
+                      <button
+                        onClick={() => openEdit(item)}
+                        className="btn-action"
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                          padding: '8px 0', borderRadius: 10,
+                          border: '1.5px solid #ddd6fe', background: '#f5f3ff',
+                          fontSize: 12, fontWeight: 600, color: '#6d28d9',
+                          cursor: 'pointer', flex: 1,
+                        }}
+                      >
+                        <IcEdit /> Edit
+                      </button>
+                      <button
+                        onClick={() => openDelete(item)}
+                        className="btn-action"
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                          padding: '8px 0', borderRadius: 10,
+                          border: '1.5px solid #fecaca', background: '#fff5f5',
+                          fontSize: 12, fontWeight: 600, color: '#dc2626',
+                          cursor: 'pointer', flex: 1,
+                        }}
+                      >
+                        <IcTrash /> Hapus
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Judul */}
-                  <p style={{
-                    fontSize: 13.5, fontWeight: 700, color: '#0f172a',
-                    margin: '0 0 5px', lineHeight: 1.4,
-                  }}>
-                    {item.judul}
-                  </p>
-
-                  {/* Preview konten */}
-                  <p style={{
-                    fontSize: 12, color: '#64748b', margin: '0 0 10px',
-                    lineHeight: 1.55, display: '-webkit-box',
-                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {item.konten}
-                  </p>
-
-                  {/* Lampiran badge */}
-                  {item.lampiran_url && (
-                    <a
-                      href={item.lampiran_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 5,
-                        padding: '4px 10px', borderRadius: 999,
-                        background: '#eff6ff', border: '1px solid #bfdbfe',
-                        color: '#2563eb', fontSize: 10.5, fontWeight: 600,
-                        textDecoration: 'none', marginBottom: 10,
-                      }}
-                    >
-                      <IcLink />
-                      {item.lampiran_nama || 'Lihat Lampiran'}
-                      <IcChevronRight />
-                    </a>
-                  )}
-
-                  {/* Divider */}
-                  <div style={{ height: 1, background: '#f1f5f9', margin: '10px 0 10px' }} />
-
-                  {/* Action buttons */}
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button
-                      onClick={() => openDetail(item)}
-                      className="btn-action"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '7px 13px', borderRadius: 10,
-                        border: '1.5px solid #e2e8f0', background: '#fff',
-                        fontSize: 11.5, fontWeight: 600, color: '#475569',
-                        cursor: 'pointer', flex: 1, justifyContent: 'center',
-                      }}
-                    >
-                      <IcEye /> Detail
-                    </button>
-                    <button
-                      onClick={() => openEdit(item)}
-                      className="btn-action"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '7px 13px', borderRadius: 10,
-                        border: '1.5px solid #ddd6fe', background: '#f5f3ff',
-                        fontSize: 11.5, fontWeight: 600, color: '#6d28d9',
-                        cursor: 'pointer', flex: 1, justifyContent: 'center',
-                      }}
-                    >
-                      <IcEdit /> Edit
-                    </button>
-                    <button
-                      onClick={() => openDelete(item)}
-                      className="btn-action"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '7px 13px', borderRadius: 10,
-                        border: '1.5px solid #fecaca', background: '#fff5f5',
-                        fontSize: 11.5, fontWeight: 600, color: '#dc2626',
-                        cursor: 'pointer', flex: 1, justifyContent: 'center',
-                      }}
-                    >
-                      <IcTrash /> Hapus
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
+                )
+              })}
+            </div>
+          )}
+        </section>
+      </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           MODAL BACKDROP
@@ -672,274 +776,577 @@ export default function PengumumanClient() {
             display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
           }}
         >
-
-          {/* ── FORM MODAL ────────────────────────────────────────────────── */}
+          {/* ── FORM MODAL — desain buat_pengumuman_desain.png ──────────── */}
           {modal === 'form' && (
             <div
               onClick={e => e.stopPropagation()}
               className="modal-sheet"
               style={{
-                width: '100%', maxWidth: 440,
+                width: '100%', maxWidth: 480,
                 background: '#fff',
-                borderRadius: '28px 28px 0 0',
-                padding: '8px 20px 40px',
-                maxHeight: '94dvh',
+                borderRadius: '24px 24px 0 0',
+                padding: '0 0 0 0',
+                maxHeight: '96dvh',
                 overflowY: 'auto',
+                display: 'flex', flexDirection: 'column',
               }}
             >
-              {/* Handle */}
-              <div style={{ width: 36, height: 4, borderRadius: 999, background: '#e2e8f0', margin: '14px auto 20px' }} />
+              {/* Handle bar */}
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: '#d1d5db', margin: '12px auto 0', flexShrink: 0 }} />
 
-              {/* Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
-                <div>
+              {/* Scrollable content */}
+              <div style={{ padding: '18px 20px 0', flex: 1, overflowY: 'auto' }}>
+
+                {/* ── Row 1: Badge kiri + X kanan ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  {/* Badge "BUAT BARU" / "MODE EDIT" — pill dengan icon */}
                   <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '4px 10px', borderRadius: 99,
+                    display: 'inline-flex', alignItems: 'center', gap: 7,
+                    padding: '6px 14px', borderRadius: 999,
                     background: editTarget ? '#faf5ff' : '#eef2ff',
-                    border: `1px solid ${editTarget ? '#e9d5ff' : '#c7d2fe'}`,
-                    marginBottom: 8,
+                    border: `1.5px solid ${editTarget ? '#ddd6fe' : '#c7d2fe'}`,
                   }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: editTarget ? '#7c3aed' : '#4f46e5', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                      {editTarget ? '✏️ Mode Edit' : '✨ Buat Baru'}
+                    {/* icon kecil di dalam badge */}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                      stroke={editTarget ? '#7c3aed' : '#4f46e5'} strokeWidth="2.5"
+                      strokeLinecap="round" strokeLinejoin="round">
+                      {editTarget
+                        ? <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></>
+                        : <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>
+                      }
+                    </svg>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700,
+                      color: editTarget ? '#7c3aed' : '#4f46e5',
+                      letterSpacing: '0.06em', textTransform: 'uppercase',
+                    }}>
+                      {editTarget ? 'Mode Edit' : 'Buat Baru'}
                     </span>
                   </div>
-                  <h2 style={{ fontSize: 19, fontWeight: 800, color: '#0f172a', margin: '0 0 3px', fontFamily: "'DM Serif Display', serif" }}>
-                    {editTarget ? 'Edit Pengumuman' : 'Buat Pengumuman'}
-                  </h2>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
-                    {editTarget ? 'Ubah isi pengumuman yang sudah ada.' : 'Isi detail pengumuman baru.'}
-                  </p>
-                </div>
-                <button
-                  onClick={closeModal}
-                  className="btn-action"
-                  style={{
-                    width: 36, height: 36, borderRadius: 12,
-                    border: '1.5px solid #e2e8f0', background: '#f8fafc',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#64748b', flexShrink: 0,
-                  }}
-                >
-                  <IcX />
-                </button>
-              </div>
 
-              {/* Error */}
-              {formError && (
+                  {/* X button */}
+                  <button
+                    onClick={closeModal}
+                    className="btn-action"
+                    style={{
+                      width: 38, height: 38, borderRadius: 12,
+                      border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', color: '#64748b',
+                    }}
+                  >
+                    <IcX />
+                  </button>
+                </div>
+
+                {/* ── Judul halaman ── */}
+                <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: '0 0 4px', lineHeight: 1.2 }}>
+                  {editTarget ? 'Edit Pengumuman' : 'Buat Pengumuman'}
+                </h2>
+                <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 22px' }}>
+                  {editTarget ? 'Ubah isi pengumuman yang sudah ada.' : 'Sampaikan informasi penting dengan jelas dan tepat.'}
+                </p>
+
+                {/* ── Error banner ── */}
+                {formError && (
+                  <div style={{
+                    padding: '12px 14px', borderRadius: 14, marginBottom: 16,
+                    background: '#fff1f2', border: '1.5px solid #fecdd3',
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    fontSize: 12.5, color: '#e11d48', fontWeight: 500,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2.5" strokeLinecap="round">
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {formError}
+                  </div>
+                )}
+
+                {/* ══ JUDUL FIELD ══ */}
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '11px 14px', borderRadius: 14,
-                  background: '#fef2f2', border: '1.5px solid #fecaca',
-                  color: '#dc2626', fontSize: 12, fontWeight: 600,
-                  marginBottom: 18,
+                  background: '#fff', borderRadius: 18, padding: '16px',
+                  border: '1.5px solid #e8eaf0',
+                  boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                  marginBottom: 14,
                 }}>
-                  <span style={{ fontSize: 16 }}>⚠️</span>
-                  {formError}
-                </div>
-              )}
-
-              {/* Fields */}
-              <div style={{ display: 'grid', gap: 16 }}>
-
-                {/* Judul */}
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 7 }}>
-                    Judul <span style={{ color: '#e11d48' }}>*</span>
-                  </label>
+                  {/* Icon + label row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12,
+                      background: '#eef2ff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <path d="M11 17H8"/><path d="M16 17h-2"/>
+                        {/* pen overlay */}
+                        <path d="M17.5 14.5l1.5 1.5-3 3-2 .5.5-2z" fill="#4f46e5" stroke="#4f46e5" strokeWidth="0.5"/>
+                      </svg>
+                    </div>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      Judul <span style={{ color: '#e11d48' }}>*</span>
+                    </label>
+                  </div>
                   <input
                     className="input-field"
                     value={form.judul}
                     onChange={e => setForm(f => ({ ...f, judul: e.target.value }))}
                     placeholder="Contoh: Penutupan pendaftaran gelombang 1"
                     style={{
-                      width: '100%', padding: '11px 14px', borderRadius: 14,
-                      border: '1.5px solid #e2e8f0', fontSize: 13,
-                      boxSizing: 'border-box', background: '#f8fafc', color: '#0f172a',
+                      width: '100%', padding: '13px 16px', borderRadius: 14,
+                      border: '1.5px solid #e8eaf0', fontSize: 13.5,
+                      background: '#f8fafc', boxSizing: 'border-box', color: '#0f172a',
                     }}
                   />
                 </div>
 
-                {/* Tipe + Tanggal */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 7 }}>
-                      Tipe <span style={{ color: '#e11d48' }}>*</span>
-                    </label>
-                    <select
-                      className="input-field"
-                      value={form.tipe}
-                      onChange={e => setForm(f => ({ ...f, tipe: e.target.value }))}
-                      style={{
-                        width: '100%', padding: '11px 12px', borderRadius: 14,
-                        border: '1.5px solid #e2e8f0', fontSize: 13,
-                        background: '#f8fafc', boxSizing: 'border-box', cursor: 'pointer',
-                        color: '#0f172a',
-                      }}
-                    >
-                      {TIPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 7 }}>
-                      Tanggal <span style={{ color: '#e11d48' }}>*</span>
-                    </label>
-                    <input
-                      className="input-field"
-                      type="date"
-                      value={form.tanggal}
-                      onChange={e => setForm(f => ({ ...f, tanggal: e.target.value }))}
-                      style={{
-                        width: '100%', padding: '11px 12px', borderRadius: 14,
-                        border: '1.5px solid #e2e8f0', fontSize: 13,
-                        background: '#f8fafc', boxSizing: 'border-box', color: '#0f172a',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Tipe preview badge */}
-                {form.tipe && (() => {
-                  const cfg = TIPE_CONFIG[form.tipe]
-                  return cfg ? (
-                    <div style={{
-                      padding: '10px 14px', borderRadius: 12,
-                      background: cfg.bg, border: `1px solid ${cfg.border}`,
-                      display: 'flex', alignItems: 'center', gap: 8,
-                    }}>
-                      <span style={{ fontSize: 14 }}>{cfg.icon}</span>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: cfg.color }}>
-                        Tipe <strong>{form.tipe}</strong> dipilih
+                {/* ══ TIPE + TANGGAL ROW ══ */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
+                  marginBottom: 14,
+                }}>
+                  {/* Tipe card */}
+                  <div style={{
+                    background: '#fff', borderRadius: 18, padding: '14px',
+                    border: '1.5px solid #e8eaf0',
+                    boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 10, background: '#eef2ff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                      </div>
+                      <label style={{ fontSize: 10.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
+                        Tipe <span style={{ color: '#e11d48' }}>*</span>
+                      </label>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <select
+                        className="input-field"
+                        value={form.tipe}
+                        onChange={e => setForm(f => ({ ...f, tipe: e.target.value }))}
+                        style={{
+                          width: '100%', padding: '10px 32px 10px 12px',
+                          borderRadius: 12, border: '1.5px solid #e8eaf0',
+                          fontSize: 13, background: '#f8fafc',
+                          color: '#0f172a', cursor: 'pointer', appearance: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        {TIPE_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                      <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#94a3b8' }}>
+                        <IcChevronDown />
                       </span>
                     </div>
-                  ) : null
-                })()}
+                  </div>
 
-                {/* Konten */}
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 7 }}>
-                    Isi Konten <span style={{ color: '#e11d48' }}>*</span>
-                  </label>
-                  <textarea
-                    className="input-field"
-                    value={form.konten}
-                    onChange={e => setForm(f => ({ ...f, konten: e.target.value }))}
-                    placeholder="Tulis isi pengumuman secara lengkap dan jelas..."
-                    rows={5}
-                    style={{
-                      width: '100%', padding: '11px 14px', borderRadius: 14,
-                      border: '1.5px solid #e2e8f0', fontSize: 13,
-                      resize: 'vertical', boxSizing: 'border-box',
-                      background: '#f8fafc', lineHeight: 1.65, color: '#0f172a',
-                    }}
-                  />
+                  {/* Tanggal card */}
+                  <div style={{
+                    background: '#fff', borderRadius: 18, padding: '14px',
+                    border: '1.5px solid #e8eaf0',
+                    boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 10, background: '#eef2ff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                          <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                      </div>
+                      <label style={{ fontSize: 10.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
+                        Tanggal <span style={{ color: '#e11d48' }}>*</span>
+                      </label>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        className="input-field"
+                        type="date"
+                        value={form.tanggal}
+                        onChange={e => setForm(f => ({ ...f, tanggal: e.target.value }))}
+                        style={{
+                          width: '100%', padding: '10px 12px',
+                          borderRadius: 12, border: '1.5px solid #e8eaf0',
+                          fontSize: 13, background: '#f8fafc',
+                          color: '#0f172a', boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Lampiran section */}
+                {/* ══ TIPE PREVIEW BANNER ══ */}
+                {form.tipe && (() => {
+                  const cfg = TIPE_CONFIG[form.tipe]
+                  if (!cfg) return null
+                  // icon bulat solid sesuai tipe
+                  const dotColor = cfg.dotColor
+                  return (
+                    <div style={{
+                      padding: '14px 16px', borderRadius: 16, marginBottom: 14,
+                      background: cfg.bg, border: `1.5px solid ${cfg.border}`,
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}>
+                      {/* Solid dot besar */}
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: dotColor, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: cfg.color, margin: '0 0 2px' }}>
+                          Tipe {form.tipe} dipilih
+                        </p>
+                        <p style={{ fontSize: 11.5, color: '#64748b', margin: 0 }}>
+                          Pengumuman ini akan dikategorikan sebagai {form.tipe}.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {/* ══ ISI KONTEN ══ */}
                 <div style={{
-                  padding: '14px', borderRadius: 16,
-                  background: '#f8fafc', border: '1.5px dashed #e2e8f0',
+                  background: '#fff', borderRadius: 18, padding: '16px',
+                  border: '1.5px solid #e8eaf0',
+                  boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                  marginBottom: 14,
                 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: '#64748b', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                    📎 Lampiran <span style={{ fontWeight: 400, color: '#94a3b8' }}>(opsional)</span>
-                  </p>
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    <input
-                      className="input-field"
-                      value={form.lampiran_url}
-                      onChange={e => setForm(f => ({ ...f, lampiran_url: e.target.value }))}
-                      placeholder="https://drive.google.com/..."
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                      Isi Konten <span style={{ color: '#e11d48' }}>*</span>
+                    </label>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    {/* icon kiri textarea */}
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                      background: '#f1f5f9',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      alignSelf: 'flex-start', marginTop: 2,
+                    }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <line x1="10" y1="9" x2="8" y2="9"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, position: 'relative' }}>
+                      <textarea
+                        className="input-field"
+                        value={form.konten}
+                        onChange={e => setForm(f => ({ ...f, konten: e.target.value }))}
+                        placeholder="Tulis isi pengumuman secara lengkap dan jelas..."
+                        maxLength={2000}
+                        rows={6}
+                        style={{
+                          width: '100%', padding: '12px 14px 28px',
+                          borderRadius: 14, border: '1.5px solid #e8eaf0',
+                          fontSize: 13, resize: 'vertical',
+                          boxSizing: 'border-box', background: '#f8fafc',
+                          lineHeight: 1.65, color: '#0f172a',
+                        }}
+                      />
+                      {/* Counter */}
+                      <span style={{
+                        position: 'absolute', bottom: 10, right: 14,
+                        fontSize: 11, color: '#94a3b8', fontWeight: 500,
+                      }}>
+                        {form.konten.length}/2000
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ══ LAMPIRAN ══ */}
+                <div style={{
+                  borderRadius: 18, padding: '16px',
+                  border: '1.5px solid #e8eaf0',
+                  background: '#fff',
+                  boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                  marginBottom: 20,
+                }}>
+                  {/* Header lampiran */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                    </svg>
+                    <p style={{ fontSize: 11.5, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                      Lampiran
+                    </p>
+                    <span style={{ fontSize: 11.5, fontWeight: 500, color: '#94a3b8' }}>(Opsional)</span>
+                  </div>
+
+                  {/* Row 1: Upload file */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                    borderRadius: 14, border: '1.5px solid #e8eaf0', background: '#f8fafc',
+                    marginBottom: 10,
+                  }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 12, background: '#eef2ff', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 12.5, fontWeight: 600, color: '#1e293b', margin: '0 0 2px' }}>Unggah file atau masukkan link</p>
+                      <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>PDF, DOC, JPG, PNG (maks. 10MB)</p>
+                    </div>
+                    <button
+                      className="btn-action"
                       style={{
-                        width: '100%', padding: '10px 14px', borderRadius: 12,
-                        border: '1.5px solid #e2e8f0', fontSize: 12.5,
-                        boxSizing: 'border-box', background: '#fff', color: '#0f172a',
+                        padding: '8px 16px', borderRadius: 10,
+                        border: '1.5px solid #4f46e5', background: '#fff',
+                        fontSize: 12, fontWeight: 700, color: '#4f46e5',
+                        cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
                       }}
-                    />
+                    >
+                      Pilih File
+                    </button>
+                  </div>
+
+                  {/* Row 2: Link input */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                    borderRadius: 14, border: '1.5px solid #e8eaf0', background: '#f8fafc',
+                    marginBottom: 10,
+                  }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 12, background: '#eef2ff', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: '#1e293b', margin: '0 0 2px' }}>
+                        Atau masukkan link <span style={{ color: '#94a3b8', fontWeight: 400 }}>(opsional)</span>
+                      </p>
+                      <input
+                        className="input-field"
+                        value={form.lampiran_url}
+                        onChange={e => setForm(f => ({ ...f, lampiran_url: e.target.value }))}
+                        placeholder="https://drive.google.com/..."
+                        style={{
+                          width: '100%', padding: '0', border: 'none',
+                          fontSize: 12, background: 'transparent',
+                          color: '#64748b', outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <button
+                      className="btn-action"
+                      onClick={() => {/* tambah link logic */}}
+                      style={{
+                        padding: '8px 14px', borderRadius: 10,
+                        border: '1.5px solid #4f46e5', background: '#fff',
+                        fontSize: 12, fontWeight: 700, color: '#4f46e5',
+                        cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Tambah Link
+                    </button>
+                  </div>
+
+                  {/* Row 3: Nama tampilan */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                    borderRadius: 14, border: '1.5px solid #e8eaf0', background: '#f8fafc',
+                  }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 12, background: '#f1f5f9', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                        <polyline points="13 2 13 9 20 9"/>
+                      </svg>
+                    </div>
                     <input
                       className="input-field"
                       value={form.lampiran_nama}
                       onChange={e => setForm(f => ({ ...f, lampiran_nama: e.target.value }))}
                       placeholder="Nama tampilan (cth: Download PDF Jadwal)"
                       style={{
-                        width: '100%', padding: '10px 14px', borderRadius: 12,
-                        border: '1.5px solid #e2e8f0', fontSize: 12.5,
-                        boxSizing: 'border-box', background: '#fff', color: '#0f172a',
+                        flex: 1, padding: '0', border: 'none',
+                        fontSize: 13, background: 'transparent',
+                        color: '#1e293b', outline: 'none',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* Action buttons */}
-              <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-                <button
-                  onClick={closeModal}
-                  className="btn-action"
-                  style={{
-                    flex: 1, padding: '13px', borderRadius: 16,
-                    border: '1.5px solid #e2e8f0', background: '#f8fafc',
-                    fontSize: 13, fontWeight: 700, color: '#64748b', cursor: 'pointer',
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={saving}
-                  className="btn-action"
-                  style={{
-                    flex: 2, padding: '13px', borderRadius: 16,
-                    border: 'none',
-                    background: saving ? '#a5b4fc' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                    fontSize: 13, fontWeight: 700, color: '#fff',
-                    cursor: saving ? 'not-allowed' : 'pointer',
-                    boxShadow: saving ? 'none' : '0 6px 20px rgba(99,102,241,0.35)',
-                  }}
-                >
-                  {saving ? '⏳ Menyimpan...' : editTarget ? '💾 Simpan Perubahan' : '✨ Buat Pengumuman'}
-                </button>
-              </div>
+                {/* ══ ACTION BUTTONS ══ */}
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                  <button
+                    onClick={closeModal}
+                    className="btn-action"
+                    style={{
+                      flex: 1, padding: '15px', borderRadius: 16,
+                      border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                      fontSize: 14, fontWeight: 700, color: '#64748b', cursor: 'pointer',
+                    }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={saving}
+                    className="btn-action"
+                    style={{
+                      flex: 2, padding: '15px', borderRadius: 16, border: 'none',
+                      background: saving ? '#a5b4fc' : 'linear-gradient(135deg, #5b21b6, #4f46e5)',
+                      fontSize: 14, fontWeight: 700, color: '#fff',
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      boxShadow: saving ? 'none' : '0 6px 24px rgba(79,70,229,0.4)',
+                    }}
+                  >
+                    {saving ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                        </svg>
+                        Menyimpan...
+                      </>
+                    ) : editTarget ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                          <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        Simpan Perubahan
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/>
+                          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                        </svg>
+                        Buat Pengumuman
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* ══ FOOTER INFO BANNER ══ */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '14px 16px', borderRadius: 16,
+                  background: '#eef2ff', border: '1px solid #c7d2fe',
+                  marginBottom: 24, position: 'relative', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 12, background: '#4f46e5', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', margin: '0 0 2px' }}>
+                      Pastikan informasi sudah benar
+                    </p>
+                    <p style={{ fontSize: 11.5, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                      Pengumuman yang dibuat akan langsung dikirim ke penerima sesuai pengaturan.
+                    </p>
+                  </div>
+                  {/* dekoratif icon kanan */}
+                  <div style={{ position: 'relative', width: 54, flexShrink: 0 }}>
+                    <div style={{
+                      width: 42, height: 42, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </div>
+                    <div style={{
+                      position: 'absolute', bottom: -2, right: -2,
+                      width: 22, height: 22, borderRadius: '50%',
+                      background: '#f59e0b',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '2px solid #fff',
+                    }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+              </div>{/* end scrollable content */}
             </div>
           )}
 
           {/* ── DETAIL MODAL ──────────────────────────────────────────────── */}
           {modal === 'detail' && detailTarget && (() => {
             const cfg = TIPE_CONFIG[detailTarget.tipe] ?? TIPE_CONFIG['Informasi']
+            const icon = TIPE_ICONS[detailTarget.tipe] ?? TIPE_ICONS['Informasi']
             return (
               <div
                 onClick={e => e.stopPropagation()}
                 className="modal-sheet"
                 style={{
-                  width: '100%', maxWidth: 440,
-                  background: '#fff',
+                  width: '100%', maxWidth: 480, background: '#fff',
                   borderRadius: '28px 28px 0 0',
                   padding: '8px 20px 44px',
                   maxHeight: '90dvh', overflowY: 'auto',
                 }}
               >
-                {/* Handle */}
                 <div style={{ width: 36, height: 4, borderRadius: 999, background: '#e2e8f0', margin: '14px auto 20px' }} />
 
-                {/* Color accent strip */}
+                {/* Color strip */}
                 <div style={{
                   height: 4, borderRadius: 99,
-                  background: cfg.gradient,
-                  marginBottom: 20,
-                  boxShadow: `0 2px 8px ${cfg.color}33`,
+                  background: cfg.gradient, marginBottom: 20,
+                  boxShadow: `0 2px 8px ${cfg.dotColor}33`,
                 }} />
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    fontSize: 10, fontWeight: 700,
-                    padding: '5px 12px', borderRadius: 999,
-                    background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`,
-                    textTransform: 'uppercase', letterSpacing: '0.05em',
-                  }}>
-                    <span style={{ fontSize: 8 }}>●</span>
-                    {detailTarget.tipe}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12,
+                      background: cfg.iconBg,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <div style={{ transform: 'scale(0.75)' }}>{icon}</div>
+                    </div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, color: cfg.color,
+                      textTransform: 'uppercase', letterSpacing: '0.05em',
+                    }}>
+                      {detailTarget.tipe}
+                    </span>
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#94a3b8' }}>
                       <IcCalendar /> {formatTanggal(detailTarget.tanggal)}
@@ -959,24 +1366,19 @@ export default function PengumumanClient() {
                   </div>
                 </div>
 
-                {/* Judul */}
-                <h2 style={{ fontSize: 21, fontWeight: 800, color: '#0f172a', margin: '0 0 14px', lineHeight: 1.3, fontFamily: "'DM Serif Display', serif" }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: '0 0 14px', lineHeight: 1.3 }}>
                   {detailTarget.judul}
                 </h2>
 
                 <div style={{ height: 1, background: '#f1f5f9', marginBottom: 16 }} />
 
-                {/* Konten */}
                 <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.8, margin: '0 0 20px', whiteSpace: 'pre-wrap' }}>
                   {detailTarget.konten}
                 </p>
 
-                {/* Lampiran */}
                 {detailTarget.lampiran_url && (
                   <a
-                    href={detailTarget.lampiran_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={detailTarget.lampiran_url} target="_blank" rel="noopener noreferrer"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       padding: '13px 16px', borderRadius: 16,
@@ -991,7 +1393,6 @@ export default function PengumumanClient() {
                   </a>
                 )}
 
-                {/* Meta info */}
                 <div style={{
                   padding: '12px 14px', borderRadius: 14,
                   background: '#f8fafc', border: '1px solid #f1f5f9',
@@ -1007,7 +1408,6 @@ export default function PengumumanClient() {
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
                   <button
                     onClick={() => { closeModal(); setTimeout(() => openEdit(detailTarget), 10) }}
@@ -1044,16 +1444,13 @@ export default function PengumumanClient() {
               onClick={e => e.stopPropagation()}
               className="modal-sheet"
               style={{
-                width: '100%', maxWidth: 440,
-                background: '#fff',
-                borderRadius: '28px 28px 0 0',
+                width: '100%', maxWidth: 480,
+                background: '#fff', borderRadius: '28px 28px 0 0',
                 padding: '8px 20px 44px',
               }}
             >
-              {/* Handle */}
               <div style={{ width: 36, height: 4, borderRadius: 999, background: '#e2e8f0', margin: '14px auto 24px' }} />
 
-              {/* Icon */}
               <div style={{
                 width: 64, height: 64, borderRadius: 22,
                 background: 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
@@ -1065,7 +1462,7 @@ export default function PengumumanClient() {
                 🗑️
               </div>
 
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', textAlign: 'center', margin: '0 0 8px', fontFamily: "'DM Serif Display', serif" }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', textAlign: 'center', margin: '0 0 8px' }}>
                 Hapus Pengumuman?
               </h2>
               <p style={{ fontSize: 13, color: '#64748b', textAlign: 'center', margin: '0 0 6px', lineHeight: 1.55 }}>
@@ -1097,8 +1494,7 @@ export default function PengumumanClient() {
                   disabled={!!deleting}
                   className="btn-action"
                   style={{
-                    flex: 2, padding: '13px', borderRadius: 16,
-                    border: 'none',
+                    flex: 2, padding: '13px', borderRadius: 16, border: 'none',
                     background: deleting ? '#fca5a5' : 'linear-gradient(135deg, #e11d48, #be123c)',
                     fontSize: 13, fontWeight: 700, color: '#fff',
                     cursor: deleting ? 'not-allowed' : 'pointer',

@@ -323,6 +323,10 @@ export default function AdminDashboardClient({
   // Shadows
   const cardShadow = '0 2px 12px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)'
 
+  // Tinggi top bar (perkiraan aman): padding atas 16 + padding bawah 18 + tinggi avatar 52
+  // Dipakai sebagai spacer pengganti supaya konten di bawah tidak ketutup top bar yang fixed.
+  const TOPBAR_HEIGHT = 86
+
   return (
     <div style={{
       fontFamily: "'Plus Jakarta Sans','Inter',system-ui,-apple-system,sans-serif",
@@ -331,13 +335,22 @@ export default function AdminDashboardClient({
       maxWidth: 430,
       margin: '0 auto',
       overflowX: 'hidden',
+      position: 'relative',
     }}>
 
-      {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
+      {/* ══ TOP BAR — FIXED, tidak ikut ter-scroll ═══════════════════════════ */}
       <div style={{
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 430,
+        zIndex: 200,
         background: p.topbarBg,
-        padding: '52px 20px 18px',
+        padding: '16px 20px 18px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
       }}>
         {/* Avatar + greeting + name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -401,6 +414,10 @@ export default function AdminDashboardClient({
           </Link>
         </div>
       </div>
+
+      {/* Spacer pengganti — mengisi tempat top bar yang sekarang fixed,
+          supaya konten di bawah tidak tertutup / "loncat" ke atas */}
+      <div style={{ height: TOPBAR_HEIGHT }} />
 
       {/* ═══════════════ HERO BANNER ═══════════════ */}
       <div style={{ padding: '12px 16px 0' }}>
@@ -533,11 +550,7 @@ export default function AdminDashboardClient({
       {/* ══ PENDAFTAR PER BULAN ══════════════════════════════════════════════ */}
       <div style={{ padding: '14px 16px 0' }}>
         <div style={{ background: p.cardBg, borderRadius: 20, padding: '18px 16px', boxShadow: cardShadow }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: p.textPrimary, margin: 0 }}>Pendaftar per Bulan</p>
-            <Link href="/admin/laporan" style={{ fontSize: 11.5, color: '#6D3DF5', textDecoration: 'none', fontWeight: 700 }}>Lihat Semua</Link>
-          </div>
+          
 
           {/* Content: chart kiri + tabel kanan */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginTop: 8 }}>
