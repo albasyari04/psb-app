@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSettings, type FontSize, type Theme } from '@/contexts/SettingsContext'
 import type { Language } from '@/lib/i18n'
 import styles from './pengaturan.module.css'
@@ -77,21 +76,6 @@ function IconHelp() {
       <circle cx="12" cy="12" r="9" stroke="#6d28d9" strokeWidth="1.8" />
       <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3" stroke="#6d28d9" strokeWidth="1.8" strokeLinecap="round" />
       <circle cx="12" cy="17" r="0.5" fill="#6d28d9" stroke="#6d28d9" strokeWidth="1" />
-    </svg>
-  )
-}
-function IconInfo() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="#6d28d9" strokeWidth="1.8" />
-      <path d="M12 8h.01M11 11h1v5h1" stroke="#6d28d9" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function IconReset() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
