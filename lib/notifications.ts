@@ -8,7 +8,7 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type NotifType = 'success' | 'error' | 'info'
+export type NotifType = 'success' | 'error' | 'info' | 'warning'
 
 export interface CreateNotificationPayload {
   userId: string
