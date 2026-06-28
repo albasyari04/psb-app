@@ -6,10 +6,9 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ── GET: Detail 1 pendaftar ───────────────────────────────────────────────────
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(_req: NextRequest, context: any) {
+  const { id } = context.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
@@ -20,7 +19,7 @@ export async function GET(
     const { data, error } = await supabase
       .from('pendaftaran')
       .select('*, siswa_berkas(*), pembayaran(*)')
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -34,10 +33,9 @@ export async function GET(
 }
 
 // ── PATCH: Admin terima atau tolak pendaftar ──────────────────────────────────
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PATCH(req: NextRequest, context: any) {
+  const { id } = context.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
@@ -58,7 +56,7 @@ export async function PATCH(
     const { data: pendaftar, error: fetchErr } = await supabase
       .from('pendaftaran')
       .select('id, user_id, nama_lengkap, status')
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle()
 
     if (fetchErr || !pendaftar) {
@@ -73,7 +71,7 @@ export async function PATCH(
         catatan_admin: catatan,
         updated_at:    new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
