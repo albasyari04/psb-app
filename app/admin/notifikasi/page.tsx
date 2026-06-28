@@ -175,35 +175,6 @@ function BellIllustration({ count }: { count: number }) {
   )
 }
 
-// ── Shield + Bell icon untuk card "Tetap update" ─────────────────────────────
-
-function ShieldBellIcon() {
-  return (
-    <div style={{
-      width: 52, height: 52, borderRadius: 16,
-      background: '#ede9fe',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-    }}>
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-        stroke="#5b4fcf" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <path d="M9.5 11A2.5 2.5 0 0 1 12 8.5M12 8.5A2.5 2.5 0 0 1 14.5 11" strokeDasharray="1 0" />
-        <path d="M12 6 L12.8 10 L16 11 L12.8 12 L12 16 L11.2 12 L8 11 L11.2 10 Z"
-          fill="#5b4fcf" stroke="none" opacity="0.25" />
-        <path d="M10 13.5c0-1.1.9-2 2-2s2 .9 2 2" />
-        <circle cx="12" cy="15" r="1" fill="#5b4fcf" stroke="none" />
-        <path d="M10 11a2 2 0 1 1 4 0" />
-        <path d="M9 13h6" opacity="0" />
-        {/* Bell inside shield */}
-        <path d="M11 10.5c0-2 3-2 3 0v2.5H11z" fill="#5b4fcf" stroke="none" opacity="0.8"/>
-        <path d="M10.5 13h3" stroke="#5b4fcf" strokeWidth="1.5"/>
-        <circle cx="12" cy="14" r="0.5" fill="#5b4fcf" />
-      </svg>
-    </div>
-  )
-}
-
 // ── Loading Skeleton ─────────────────────────────────────────────────────────
 
 function SkeletonItem() {

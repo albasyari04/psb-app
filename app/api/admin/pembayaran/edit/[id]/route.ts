@@ -6,10 +6,9 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ── PATCH: Admin konfirmasi atau tolak pembayaran ─────────────────────────────
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PATCH(req: NextRequest, context: any) {
+  const { id } = context.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
@@ -30,7 +29,7 @@ export async function PATCH(
     const { data: pembayaran, error: fetchErr } = await supabase
       .from('pembayaran')
       .select('id, user_id, jenis_pembayaran, nominal, nama_siswa, status')
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle()
 
     if (fetchErr || !pembayaran) {
@@ -51,7 +50,7 @@ export async function PATCH(
         confirmed_at: aksi === 'dikonfirmasi' ? new Date().toISOString() : null,
         updated_at:   new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -84,10 +83,9 @@ export async function PATCH(
 }
 
 // ── GET: Detail 1 pembayaran (admin) ─────────────────────────────────────────
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(_req: NextRequest, context: any) {
+  const { id } = context.params;
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
@@ -98,7 +96,7 @@ export async function GET(
     const { data, error } = await supabase
       .from('pembayaran')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
