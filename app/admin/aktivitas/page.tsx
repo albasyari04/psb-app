@@ -87,10 +87,11 @@ function SkeletonItem() {
   return (
     <div style={{
       display: 'flex', gap: 14, alignItems: 'center',
-      padding: '14px 0', borderBottom: '1px solid #f1f5f9',
+      padding: '14px 14px', borderRadius: 16,
+      background: '#fff', border: '1px solid #f1f5f9',
     }}>
       <div style={{
-        width: 48, height: 48, borderRadius: 14,
+        width: 46, height: 46, borderRadius: 14,
         background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
         backgroundSize: '200% 100%',
         animation: 'shimmer 1.5s infinite',
@@ -125,53 +126,55 @@ function ActivityRow({ item, index }: { item: AktivitasItem; index: number }) {
   const cfg = typeConfig[item.type] ?? typeConfig.diproses
   return (
     <div
+      className="activity-row"
       style={{
-        display: 'flex', gap: 14, alignItems: 'center',
-        padding: '14px 0',
-        borderBottom: '1px solid #f8fafc',
+        display: 'flex', gap: 14, alignItems: 'flex-start',
+        padding: '14px 14px',
+        borderRadius: 16,
+        background: '#fff',
+        border: '1px solid #f1f5f9',
         animation: 'fadeSlideIn 0.4s ease both',
-        animationDelay: `${index * 60}ms`,
+        animationDelay: `${index * 50}ms`,
+        transition: 'background 0.15s',
       }}
     >
       {/* Icon */}
       <div style={{
-        width: 48, height: 48, borderRadius: 14,
+        width: 46, height: 46, borderRadius: 14,
         background: cfg.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
-        boxShadow: `0 2px 8px ${cfg.bg}`,
       }}>
         <div style={{ width: 22, height: 22, color: cfg.color }}
           dangerouslySetInnerHTML={{ __html: cfg.icon }} />
       </div>
 
       {/* Text */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
         <p style={{
           margin: 0,
           fontSize: 14,
-          fontWeight: 600,
-          color: '#0f172a',
+          fontWeight: 700,
+          color: '#1e1b4b',
           letterSpacing: '-0.01em',
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          lineHeight: 1.3,
         }}>
           {item.name}
         </p>
         <p style={{
-          margin: '3px 0 0', fontSize: 12,
-          color: '#94a3b8', fontWeight: 500,
+          margin: '4px 0 0', fontSize: 12.5,
+          color: '#94a3b8', fontWeight: 500, lineHeight: 1.4,
         }}>
           {item.sub}
         </p>
       </div>
 
       {/* Time + dot */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>{item.time}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0, paddingTop: 2 }}>
+        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' as const }}>{item.time}</span>
         <span style={{
-          width: 7, height: 7, borderRadius: '50%',
+          width: 8, height: 8, borderRadius: '50%',
           background: cfg.dot,
-          boxShadow: `0 0 6px ${cfg.dot}80`,
         }} />
       </div>
     </div>
@@ -197,19 +200,6 @@ export default function AktivitasPage() {
       })
   }, [])
 
-  // Derived stats
-  const totalAktivitas  = items.length
-  const pendaftarBaru   = items.filter(i => i.type === 'pendaftar_baru').length
-  const verifikasi      = items.filter(i => ['diverifikasi', 'diterima'].includes(i.type)).length
-  const pembayaranCount = items.filter(i => i.type === 'pembayaran').length
-
-  const stats = [
-    { icon: '📋', value: totalAktivitas,  label: 'Total Aktivitas' },
-    { icon: '👤', value: pendaftarBaru,   label: 'Pendaftar Baru'  },
-    { icon: '✅', value: verifikasi,       label: 'Verifikasi'      },
-    { icon: '💳', value: pembayaranCount, label: 'Pembayaran'      },
-  ]
-
   return (
     <div>
       <style>{`
@@ -223,211 +213,103 @@ export default function AktivitasPage() {
         }
         .activity-row:hover {
           background: #fafbff !important;
-          border-radius: 12px;
-        }
-        .stat-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+          box-shadow: 0 2px 10px rgba(15,23,42,0.05);
         }
       `}</style>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: '#f6f5fa', minHeight: '100vh', padding: '20px 16px 32px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* ── Hero Banner — sama persis desain_aktivitas.png ───────── */}
-        <div style={{
-          background: 'linear-gradient(135deg, #eeeaf8 0%, #e9e4f6 50%, #ece7f7 100%)',
-          borderRadius: 0,
-          padding: '28px 24px',
-          display: 'flex', alignItems: 'center', gap: 20,
-          position: 'relative', overflow: 'hidden',
-          minHeight: 112,
-          marginLeft: -16,
-          marginRight: -16,
-          marginTop: -16,
-        }}>
-          {/* Dekorasi garis gelombang di pojok kanan */}
-          <svg
-            style={{
-              position: 'absolute', right: 0, top: 0,
-              height: '100%', width: 210,
-              opacity: 0.22, pointerEvents: 'none',
-            }}
-            viewBox="0 0 210 120" fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="xMaxYMid slice"
-          >
-            <path d="M250 5 C220 30, 190 20, 200 55 C210 90, 170 100, 160 118" stroke="#7c3aed" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
-            <path d="M270 -5 C240 22, 210 15, 220 50 C230 85, 188 98, 178 120" stroke="#7c3aed" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-            <path d="M290 -15 C258 14, 228 10, 240 46 C252 80, 208 96, 196 122" stroke="#7c3aed" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-            <path d="M310 -25 C276 6, 246 5, 258 42 C270 75, 226 94, 214 124" stroke="#7c3aed" strokeWidth="1.0" fill="none" strokeLinecap="round"/>
-            <path d="M330 -35 C294 -2, 264 0, 276 38 C288 70, 244 92, 232 126" stroke="#7c3aed" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
-            <path d="M350 -45 C312 -10, 282 -5, 294 34 C306 65, 262 90, 250 128" stroke="#7c3aed" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-          </svg>
-
-          {/* Icon clipboard — kotak putih rounded */}
-          <div style={{
-            width: 72, height: 72, borderRadius: 20,
-            background: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 2px 16px rgba(109,40,217,0.10)',
-            zIndex: 1,
-          }}>
-            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Clipboard body */}
-              <rect x="4" y="4" width="16" height="17" rx="2" fill="#7c3aed"/>
-              {/* Clip tab at top */}
-              <rect x="8" y="2" width="8" height="4" rx="1.5" fill="#7c3aed"/>
-              <rect x="8.5" y="2.5" width="7" height="3" rx="1" fill="#c4b5fd"/>
-              {/* Lines on clipboard */}
-              <rect x="7" y="9"  width="6" height="1.5" rx="0.75" fill="white"/>
-              <rect x="7" y="12" width="10" height="1.5" rx="0.75" fill="white"/>
-              <rect x="7" y="15" width="8" height="1.5" rx="0.75" fill="white"/>
-            </svg>
-          </div>
-
-          {/* Teks */}
-          <div style={{ zIndex: 1 }}>
-            <h1 style={{
-              margin: 0,
-              fontSize: 28,
-              fontWeight: 800,
-              color: '#1a1033',
-              letterSpacing: '-0.03em',
-              lineHeight: 1.15,
-            }}>
-              Aktivitas
-            </h1>
-            <p style={{
-              margin: '6px 0 0',
-              fontSize: 13,
-              color: '#7c6fa0',
-              fontWeight: 400,
-              lineHeight: 1.4,
-            }}>
-              Log aktivitas terbaru dan tindakan admin
-            </p>
-          </div>
-        </div>
-
-        {/* ── Section Header ──────────────────────────────────────── */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: '#ede9fe',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+          {/* ── HEADER ───────────────────────────────────────── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <button onClick={() => window.history.back()} style={{ width: 44, height: 44, borderRadius: 16,
+                  background: 'white', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <div>
+                <h1 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: '#1a1033', letterSpacing: '-0.03em' }}>
+                  Aktivitas
+                </h1>
+                <p style={{ margin: '2px 0 0', fontSize: 12.5, color: '#7c6fa0', lineHeight: 1.4 }}>
+                  Log aktivitas terbaru dan tindakan admin
+                </p>
+              </div>
+            </div>
+            <button style={{ width: 44, height: 44, borderRadius: 16, background: 'white',
+                border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', flexShrink: 0, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
                 <line x1="8" y1="18" x2="21" y2="18"/>
                 <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
                 <line x1="3" y1="18" x2="3.01" y2="18"/>
               </svg>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 16, color: '#1e1b4b' }}>Aktivitas Terbaru</span>
+            </button>
           </div>
-          <Link href="/admin/dashboard" style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            color: '#7c3aed', textDecoration: 'none',
-            fontWeight: 700, fontSize: 13,
-          }}>
-            Lihat semua
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </Link>
-        </div>
 
-        {/* ── Activity List Card ───────────────────────────────────── */}
-        <div style={{
-          background: '#fff',
-          borderRadius: 20,
-          padding: '4px 16px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-          border: '1px solid #f1f5f9',
-        }}>
-          {loading ? (
-            Array.from({ length: 5 }).map((_, i) => <SkeletonItem key={i} />)
-          ) : error ? (
+          {/* ── TAB: Aktivitas Terbaru / Lihat semua ──────────── */}
+          <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9',
+              boxShadow: '0 2px 8px rgba(15,23,42,0.05)', display: 'flex', overflow: 'hidden' }}>
             <div style={{
-              textAlign: 'center', padding: '40px 0',
-              color: '#ef4444', fontSize: 14, fontWeight: 500,
-            }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>⚠️</div>
-              {error}
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                padding: '14px 10px',
+                borderBottom: '2.5px solid #7c3aed',
+              }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+              <span style={{ fontWeight: 700, fontSize: 13.5, color: '#6d28d9' }}>Aktivitas Terbaru</span>
             </div>
-          ) : items.length === 0 ? (
-            <div style={{
-              textAlign: 'center', padding: '40px 0',
-              color: '#94a3b8', fontSize: 14,
-            }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
-              Belum ada aktivitas
-            </div>
-          ) : (
-            items.map((item, i) => (
-              <div
-                key={item.id}
-                className="activity-row"
-                style={{ transition: 'background 0.15s' }}
-              >
-                <ActivityRow item={item} index={i} />
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* ── Stats Summary Card ───────────────────────────────────── */}
-        <div style={{
-          background: 'linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%)',
-          borderRadius: 20,
-          padding: '20px 16px',
-          boxShadow: '0 8px 32px rgba(109,40,217,0.25)',
-        }}>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 8,
-          }}>
-            {stats.map((s, i) => (
-              <div
-                key={i}
-                className="stat-card"
-                style={{
-                  background: 'rgba(255,255,255,0.12)',
-                  borderRadius: 14,
-                  padding: '12px 8px',
-                  textAlign: 'center',
-                  backdropFilter: 'blur(4px)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  cursor: 'default',
-                  animation: 'fadeSlideIn 0.5s ease both',
-                  animationDelay: `${i * 80 + 200}ms`,
-                }}
-              >
-                <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-                <div style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  color: '#fff',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1,
-                }}>
-                  {loading ? '—' : s.value}
-                </div>
-                <div style={{
-                  fontSize: 10, color: 'rgba(255,255,255,0.75)',
-                  fontWeight: 600, marginTop: 4,
-                  textTransform: 'uppercase', letterSpacing: '0.04em',
-                }}>
-                  {s.label}
-                </div>
-              </div>
-            ))}
+            <Link href="/admin/aktivitas/semua" style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                padding: '14px 10px', textDecoration: 'none',
+                borderBottom: '2.5px solid transparent',
+              }}>
+              <span style={{ fontWeight: 600, fontSize: 13.5, color: '#64748b' }}>Lihat semua</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </Link>
           </div>
-        </div>
 
+          {/* ── Activity List ─────────────────────────────────── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => <SkeletonItem key={i} />)
+            ) : error ? (
+              <div style={{
+                textAlign: 'center', padding: '40px 0',
+                color: '#ef4444', fontSize: 14, fontWeight: 500,
+                background: 'white', borderRadius: 16, border: '1px solid #f1f5f9',
+              }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>⚠️</div>
+                {error}
+              </div>
+            ) : items.length === 0 ? (
+              <div style={{
+                textAlign: 'center', padding: '40px 0',
+                color: '#94a3b8', fontSize: 14,
+                background: 'white', borderRadius: 16, border: '1px solid #f1f5f9',
+              }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>📭</div>
+                Belum ada aktivitas
+              </div>
+            ) : (
+              items.map((item, i) => (
+                <ActivityRow key={item.id} item={item} index={i} />
+              ))
+            )}
+          </div>
+
+        </div>
       </div>
     </div>
   )

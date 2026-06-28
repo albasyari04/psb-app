@@ -1,7 +1,11 @@
 // app/api/admin/pembayaran/route.ts
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
-import { createNotification, formatRupiah } from '@/lib/notifications'
+import { createNotification } from '@/lib/notifications'
+
+function formatRupiah(nominal: number) {
+  return `Rp ${nominal.toLocaleString('id-ID')}`
+}
 
 export async function GET(request: NextRequest) {
   const supabase = getSupabaseAdmin()

@@ -1,35 +1,36 @@
 // lib/notifications.ts
-// Helper terpusat untuk membuat notifikasi siswa dari route admin.
-// Dipakai oleh: announcements, pembayaran, laporan, jadwal, berkas, pendaftaran.
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper terpusat untuk membuat notifikasi ke user atau semua admin.
+// Import dan panggil dari route mana pun setelah aksi berhasil.
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { getSupabaseAdmin } from '@/lib/supabase'
 
-export type NotifType = 'success' | 'error' | 'info' | 'warning'
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-interface CreateNotificationInput {
+export type NotifType = 'success' | 'error' | 'info'
+
+export interface CreateNotificationPayload {
   userId: string
   title: string
   message: string
-  type: NotifType
+  type?: NotifType
 }
 
-/**
- * Insert satu notifikasi untuk satu user.
- * Gagal insert TIDAK melempar error ke caller — hanya di-log.
- * Ini supaya aksi utama (misal update status pembayaran) tetap
- * berhasil walau notifikasi gagal terkirim.
- */
+export interface NotifPayload {
+  title: string
+  message: string
+  type?: NotifType
+}
+
+// ── Core: Buat 1 notifikasi ke 1 user ────────────────────────────────────────
+
 export async function createNotification({
   userId,
   title,
   message,
-  type,
-}: CreateNotificationInput): Promise<void> {
-  if (!userId) {
-    console.warn('[notifications] Lewati insert: userId kosong')
-    return
-  }
-
+  type = 'info',
+}: CreateNotificationPayload): Promise<void> {
   try {
     const supabase = getSupabaseAdmin()
     const { error } = await supabase.from('notifications').insert({
@@ -39,113 +40,139 @@ export async function createNotification({
       type,
       is_read: false,
     })
-
     if (error) {
-      console.error('[notifications] Gagal insert notifikasi:', error.message)
+      console.error('[notifications] createNotification error:', error.message)
     }
   } catch (err) {
-    console.error('[notifications] Unexpected error saat insert notifikasi:', err)
+    console.error('[notifications] createNotification unexpected error:', err)
   }
 }
 
-/**
- * Insert notifikasi yang sama untuk banyak user sekaligus.
- * Dipakai misalnya untuk pengumuman yang harus diterima semua santri.
- */
-export async function createNotificationForUsers(
-  userIds: string[],
-  payload: Omit<CreateNotificationInput, 'userId'>
-): Promise<void> {
-  const uniqueIds = Array.from(new Set(userIds.filter(Boolean)))
-  if (uniqueIds.length === 0) {
-    console.warn('[notifications] Lewati broadcast: tidak ada userId valid')
-    return
-  }
+// ── Core: Kirim notifikasi ke SEMUA admin ─────────────────────────────────────
+// Admin diambil dari tabel `profiles` dengan role = 'admin'
 
+export async function notifyAllAdmins(payload: NotifPayload): Promise<void> {
   try {
     const supabase = getSupabaseAdmin()
-    const rows = uniqueIds.map((userId) => ({
-      user_id: userId,
-      title: payload.title,
+
+    const { data: admins, error: fetchErr } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin')
+
+    if (fetchErr || !admins || admins.length === 0) {
+      console.warn('[notifications] Tidak ada admin ditemukan:', fetchErr?.message)
+      return
+    }
+
+    const rows = admins.map((admin) => ({
+      user_id: admin.id,
+      title:   payload.title,
       message: payload.message,
-      type: payload.type,
+      type:    payload.type ?? 'info',
       is_read: false,
     }))
 
-    const { error } = await supabase.from('notifications').insert(rows)
-
-    if (error) {
-      console.error('[notifications] Gagal broadcast notifikasi:', error.message)
+    const { error: insertErr } = await supabase.from('notifications').insert(rows)
+    if (insertErr) {
+      console.error('[notifications] notifyAllAdmins insert error:', insertErr.message)
     }
   } catch (err) {
-    console.error('[notifications] Unexpected error saat broadcast notifikasi:', err)
+    console.error('[notifications] notifyAllAdmins unexpected error:', err)
   }
 }
 
-/** Format Rupiah konsisten untuk pesan notifikasi pembayaran */
-export function formatRupiah(value: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value)
-}
+// ── Template Notifikasi ───────────────────────────────────────────────────────
+// Semua teks notifikasi dikumpulkan di satu tempat agar mudah diubah.
 
-/**
- * Kirim notifikasi yang sama ke SEMUA admin.
- *
- * Catatan penting: tabel `notifications` punya kolom `user_id` tunggal
- * dan tidak ada foreign key ke tabel `admin` secara eksplisit di schema —
- * jadi baris notifikasi admin disimpan dengan `user_id` = id admin terkait,
- * sama seperti pola notifikasi siswa. Halaman/listing notifikasi admin
- * (jika ada) tinggal query `notifications` dengan `user_id` = id admin
- * yang sedang login.
- */
-export async function notifyAllAdmins(
-  payload: Omit<CreateNotificationInput, 'userId'>
-): Promise<void> {
-  try {
-    const supabase = getSupabaseAdmin()
-    const { data: admins, error: adminErr } = await supabase
-      .from('admin')
-      .select('id')
-
-    if (adminErr) {
-      console.error('[notifications] Gagal ambil daftar admin:', adminErr.message)
-      return
-    }
-
-    if (!admins || admins.length === 0) {
-      console.warn('[notifications] Lewati notifyAllAdmins: tidak ada admin terdaftar')
-      return
-    }
-
-    await createNotificationForUsers(
-      admins.map((a) => a.id),
-      payload
-    )
-  } catch (err) {
-    console.error('[notifications] Unexpected error saat notifyAllAdmins:', err)
-  }
-}
-
-/**
- * Kumpulan template pesan notifikasi yang sering dipakai berulang,
- * supaya teks di berbagai route tetap konsisten dan tidak ditulis manual
- * di setiap tempat.
- */
 export const NotifTemplate = {
-  /** Dikirim ke siswa setelah ia berhasil submit formulir pendaftaran */
-  pendaftaranDiterima: (namaLengkap: string): Omit<CreateNotificationInput, 'userId'> => ({
-    title:   '✅ Pendaftaran Berhasil Dikirim',
-    message: `Halo ${namaLengkap}, data pendaftaranmu telah berhasil dikirim dan akan segera diverifikasi oleh panitia. Pantau status pendaftaranmu secara berkala.`,
+
+  // ── Pendaftaran ─────────────────────────────────────────────────────────────
+
+  /** Notif ke SISWA: pendaftaran berhasil dikirim */
+  pendaftaranDiterima: (nama: string): NotifPayload => ({
+    title:   'Pendaftaran Berhasil Dikirim ✅',
+    message: `Halo ${nama}, pendaftaran kamu sudah kami terima dan sedang dalam proses verifikasi.`,
     type:    'success',
   }),
 
-  /** Dikirim ke semua admin saat ada pendaftar baru masuk */
-  pendaftarBaru: (namaLengkap: string): Omit<CreateNotificationInput, 'userId'> => ({
-    title:   '🆕 Pendaftar Baru',
-    message: `${namaLengkap} baru saja mengirimkan formulir pendaftaran. Segera lakukan verifikasi data dan berkas.`,
+  /** Notif ke ADMIN: ada pendaftar baru */
+  pendaftarBaru: (nama: string): NotifPayload => ({
+    title:   'Pendaftar Baru 🎉',
+    message: `${nama} baru saja mengisi formulir pendaftaran. Segera lakukan verifikasi.`,
+    type:    'info',
+  }),
+
+  /** Notif ke SISWA: pendaftaran diterima oleh admin */
+  pendaftaranDiterimаAdmin: (nama: string): NotifPayload => ({
+    title:   'Selamat! Pendaftaran Diterima 🎊',
+    message: `Halo ${nama}, pendaftaran kamu telah DITERIMA. Silakan selesaikan proses selanjutnya.`,
+    type:    'success',
+  }),
+
+  /** Notif ke SISWA: pendaftaran ditolak oleh admin */
+  pendaftaranDitolak: (nama: string, catatan?: string | null): NotifPayload => ({
+    title:   'Pendaftaran Tidak Diterima',
+    message: catatan
+      ? `Maaf ${nama}, pendaftaran kamu tidak diterima. Catatan admin: ${catatan}`
+      : `Maaf ${nama}, pendaftaran kamu tidak diterima. Hubungi admin untuk informasi lebih lanjut.`,
+    type: 'error',
+  }),
+
+  // ── Pembayaran ──────────────────────────────────────────────────────────────
+
+  /** Notif ke ADMIN: ada bukti pembayaran baru dikirim siswa */
+  pembayaranBaru: (nama: string, jenis: string, nominal: number): NotifPayload => ({
+    title:   'Bukti Pembayaran Masuk 💰',
+    message: `${nama} mengirim bukti pembayaran ${jenis} sebesar Rp ${nominal.toLocaleString('id-ID')}. Segera konfirmasi.`,
+    type:    'info',
+  }),
+
+  /** Notif ke SISWA: pembayaran dikonfirmasi admin */
+  pembayaranDikonfirmasi: (jenis: string, nominal: number): NotifPayload => ({
+    title:   'Pembayaran Dikonfirmasi ✅',
+    message: `Pembayaran ${jenis} sebesar Rp ${nominal.toLocaleString('id-ID')} telah dikonfirmasi oleh admin.`,
+    type:    'success',
+  }),
+
+  /** Notif ke SISWA: pembayaran ditolak admin */
+  pembayaranDitolak: (jenis: string, catatan?: string | null): NotifPayload => ({
+    title:   'Pembayaran Ditolak ❌',
+    message: catatan
+      ? `Pembayaran ${jenis} ditolak. Alasan: ${catatan}`
+      : `Pembayaran ${jenis} ditolak. Silakan hubungi admin.`,
+    type: 'error',
+  }),
+
+  // ── Berkas / Dokumen ────────────────────────────────────────────────────────
+
+  /** Notif ke ADMIN: siswa upload dokumen */
+  berkasDikirim: (nama: string): NotifPayload => ({
+    title:   'Dokumen Baru Diunggah 📄',
+    message: `${nama} baru saja mengunggah dokumen persyaratan. Silakan periksa kelengkapannya.`,
+    type:    'info',
+  }),
+
+  /** Notif ke SISWA: berkas diterima */
+  berkasDiterima: (): NotifPayload => ({
+    title:   'Dokumen Berhasil Diunggah ✅',
+    message: 'Dokumen persyaratan kamu berhasil diunggah dan sedang dalam proses verifikasi.',
+    type:    'success',
+  }),
+
+  // ── Chat ────────────────────────────────────────────────────────────────────
+
+  /** Notif ke ADMIN: siswa mengirim pesan */
+  pesanBaruDariSiswa: (nama: string): NotifPayload => ({
+    title:   'Pesan Baru dari Siswa 💬',
+    message: `${nama} mengirim pesan baru. Segera balas untuk membantu.`,
+    type:    'info',
+  }),
+
+  /** Notif ke SISWA: admin membalas pesan */
+  pesanBalasanAdmin: (): NotifPayload => ({
+    title:   'Admin Membalas Pesan Kamu 💬',
+    message: 'Admin telah membalas pesan kamu. Buka chat untuk melihat balasannya.',
     type:    'info',
   }),
 }

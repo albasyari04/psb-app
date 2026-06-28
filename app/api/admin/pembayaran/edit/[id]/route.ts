@@ -1,119 +1,112 @@
 // app/api/admin/pembayaran/[id]/route.ts
-// Handles: GET (detail), PUT (update), DELETE
-// FIX: Next.js 15 — params adalah Promise, harus di-await
-
-import { getSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import { createNotification, NotifTemplate } from '@/lib/notifications'
 
-// ✅ FIX: type Params pakai Promise (Next.js 15)
-type Params = { params: Promise<{ id: string }> }
-
-export async function GET(_req: NextRequest, { params }: Params) {
-  // ✅ FIX: await params sebelum destructuring
-  const { id } = await params
-
-  const supabase = getSupabaseAdmin()
-
+// ── PATCH: Admin konfirmasi atau tolak pembayaran ─────────────────────────────
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { data, error } = await supabase
-      .from('pembayaran')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    if (!data) {
-      return NextResponse.json({ error: 'Data tidak ditemukan' }, { status: 404 })
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    return NextResponse.json({ data }, { status: 200 })
-  } catch (error) {
-    console.error('GET /api/admin/pembayaran/[id] error:', error)
-    return NextResponse.json(
-      { error: 'Gagal mengambil data pembayaran' },
-      { status: 500 }
-    )
-  }
-}
+    const body = await req.json()
+    const aksi: 'dikonfirmasi' | 'ditolak' = body.aksi
+    const catatan: string | null = body.catatan ?? null
 
-export async function PUT(request: NextRequest, { params }: Params) {
-  // ✅ FIX: await params sebelum destructuring
-  const { id } = await params
+    if (!['dikonfirmasi', 'ditolak'].includes(aksi)) {
+      return NextResponse.json({ error: 'Aksi tidak valid. Gunakan: dikonfirmasi | ditolak' }, { status: 400 })
+    }
 
-  const supabase = getSupabaseAdmin()
+    const supabase = getSupabaseAdmin()
 
-  try {
-    const body = await request.json()
-    const {
-      nama_siswa,
-      nominal,
-      jenis_pembayaran,
-      metode_pembayaran,
-      no_referensi,
-      status,
-      catatan,
-      tanggal_bayar,
-    } = body
+    // Ambil data pembayaran untuk notifikasi
+    const { data: pembayaran, error: fetchErr } = await supabase
+      .from('pembayaran')
+      .select('id, user_id, jenis_pembayaran, nominal, nama_siswa, status')
+      .eq('id', params.id)
+      .maybeSingle()
 
-    // Jika dikonfirmasi, catat waktu konfirmasi
-    const extraFields =
-      status === 'dikonfirmasi'
-        ? { confirmed_at: new Date().toISOString() }
-        : {}
+    if (fetchErr || !pembayaran) {
+      return NextResponse.json({ error: 'Pembayaran tidak ditemukan' }, { status: 404 })
+    }
 
+    if (pembayaran.status === 'dikonfirmasi') {
+      return NextResponse.json({ error: 'Pembayaran sudah dikonfirmasi sebelumnya' }, { status: 422 })
+    }
+
+    // Update status pembayaran
     const { data, error } = await supabase
       .from('pembayaran')
       .update({
-        nama_siswa,
-        nominal: nominal ? Number(nominal) : undefined,
-        jenis_pembayaran,
-        metode_pembayaran: metode_pembayaran || null,
-        no_referensi: no_referensi || null,
-        status,
-        catatan: catatan || null,
-        tanggal_bayar: tanggal_bayar || null,
-        updated_at: new Date().toISOString(),
-        ...extraFields,
+        status:       aksi,
+        catatan:      catatan,
+        confirmed_by: aksi === 'dikonfirmasi' ? session.user.id : null,
+        confirmed_at: aksi === 'dikonfirmasi' ? new Date().toISOString() : null,
+        updated_at:   new Date().toISOString(),
       })
-      .eq('id', id)
+      .eq('id', params.id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('[PATCH /api/admin/pembayaran/[id]]', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
-    return NextResponse.json({ data }, { status: 200 })
-  } catch (error) {
-    console.error('PUT /api/admin/pembayaran/[id] error:', error)
-    return NextResponse.json(
-      { error: 'Gagal memperbarui data pembayaran' },
-      { status: 500 }
-    )
+    // ── Notifikasi ke SISWA ──────────────────────────────────────────────────
+    if (aksi === 'dikonfirmasi') {
+      await createNotification({
+        userId: pembayaran.user_id,
+        ...NotifTemplate.pembayaranDikonfirmasi(
+          pembayaran.jenis_pembayaran,
+          pembayaran.nominal
+        ),
+      })
+    } else {
+      await createNotification({
+        userId: pembayaran.user_id,
+        ...NotifTemplate.pembayaranDitolak(pembayaran.jenis_pembayaran, catatan),
+      })
+    }
+
+    return NextResponse.json({ data })
+  } catch (err) {
+    console.error('[PATCH /api/admin/pembayaran/[id]] Unexpected:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
-  // ✅ FIX: await params sebelum destructuring
-  const { id } = await params
-
-  const supabase = getSupabaseAdmin()
-
+// ── GET: Detail 1 pembayaran (admin) ─────────────────────────────────────────
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { error } = await supabase
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = getSupabaseAdmin()
+    const { data, error } = await supabase
       .from('pembayaran')
-      .delete()
-      .eq('id', id)
+      .select('*')
+      .eq('id', params.id)
+      .maybeSingle()
 
-    if (error) throw error
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!data) return NextResponse.json({ error: 'Tidak ditemukan' }, { status: 404 })
 
-    return NextResponse.json(
-      { message: 'Data pembayaran berhasil dihapus' },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error('DELETE /api/admin/pembayaran/[id] error:', error)
-    return NextResponse.json(
-      { error: 'Gagal menghapus data pembayaran' },
-      { status: 500 }
-    )
+    return NextResponse.json({ data })
+  } catch (err) {
+    console.error('[GET /api/admin/pembayaran/[id]] Unexpected:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,13 +1,9 @@
-// app/api/admin/laporan/route.ts  (CONTOH INTEGRASI NOTIF — sesuaikan dengan route laporan kamu)
-// ─────────────────────────────────────────────────────────────────────────────
-// Perubahan dari versi sebelumnya ditandai: // ✅ NOTIF
-// ─────────────────────────────────────────────────────────────────────────────
-
+// app/api/admin/laporan/route.ts
 import { NextRequest, NextResponse }      from 'next/server'
 import { getServerSession }               from 'next-auth'
 import { authOptions }                    from '@/lib/auth'
 import { getSupabaseAdmin }               from '@/lib/supabase'
-import { createNotificationBulk }         from '@/lib/createNotification'  // ✅ NOTIF
+import { createNotificationBulk }         from '@/lib/createNotification'
 
 /* ── POST: Admin menerbitkan laporan baru ─────────────────────────────────── */
 export async function POST(req: NextRequest) {
@@ -30,11 +26,25 @@ export async function POST(req: NextRequest) {
       judul      : body.judul,
       deskripsi  : body.deskripsi  ?? null,
       tipe       : body.tipe       ?? 'khusus',
+      user_id    : body.user_id    ?? null,
       file_url   : body.file_url   ?? null,
       data_json  : body.data_json  ?? null,
       created_by : session.user.id,
     })
-    .select('*')
+    .select(`
+      *,
+      profiles:user_id (
+        id,
+        name,
+        email,
+        avatar_url
+      ),
+      creator:created_by (
+        id,
+        name,
+        email
+      )
+    `)
     .single()
 
   if (laporanErr || !laporan) {
@@ -42,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Gagal membuat laporan' }, { status: 500 })
   }
 
-  // ✅ NOTIF: kirim notifikasi ke semua siswa yang punya profil
+  // Kirim notifikasi ke semua siswa yang punya profil
   const { data: profiles } = await supabase
     .from('profiles')
     .select('id')
@@ -62,17 +72,42 @@ export async function POST(req: NextRequest) {
 }
 
 /* ── GET: Ambil daftar laporan ───────────────────────────────────────────── */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { searchParams } = new URL(req.url)
+  const limitParam = searchParams.get('limit')
+  const limit = limitParam ? parseInt(limitParam, 10) : null
+
   const supabase = getSupabaseAdmin()
-  const { data, error } = await supabase
+  // ✅ FIX: join profiles (siswa) & creator (admin pembuat) supaya tabel
+  //         Detail di halaman Laporan bisa menampilkan nama siswa & dibuat oleh.
+  let query = supabase
     .from('laporan')
-    .select('*')
+    .select(`
+      *,
+      profiles:user_id (
+        id,
+        name,
+        email,
+        avatar_url
+      ),
+      creator:created_by (
+        id,
+        name,
+        email
+      )
+    `)
     .order('created_at', { ascending: false })
+
+  if (limit && !Number.isNaN(limit)) {
+    query = query.limit(limit)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,9 +1,10 @@
+// app/api/siswa/chat/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { notifyAllAdmins, NotifTemplate } from '@/lib/notifications'
 
-// ✅ Definisikan tipe lokal agar TypeScript happy tanpa perlu Database types
 type ChatThread = {
   id: string
   siswa_id: string
@@ -29,6 +30,7 @@ type ChatMessage = {
   created_at: string
 }
 
+// ── GET: Ambil thread + pesan siswa ──────────────────────────────────────────
 export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'siswa') {
@@ -40,7 +42,6 @@ export async function GET() {
   const siswaNama = session.user.name ?? 'Santri'
   const siswaAvatarUrl = (session.user as { image?: string | null }).image ?? null
 
-  // ✅ Cast hasil query ke tipe yang sudah didefinisikan
   const { data: existingThread, error: threadErr } = await supabase
     .from('chat_threads')
     .select('*')
@@ -76,7 +77,7 @@ export async function GET() {
   const { data: messages, error: msgErr } = await supabase
     .from('chat_messages')
     .select('*')
-    .eq('thread_id', thread!.id)          // ✅ thread.id sudah dikenali
+    .eq('thread_id', thread!.id)
     .order('created_at', { ascending: true }) as { data: ChatMessage[] | null; error: unknown }
 
   if (msgErr) {
@@ -84,21 +85,23 @@ export async function GET() {
     return NextResponse.json({ error: 'Gagal memuat pesan' }, { status: 500 })
   }
 
+  // Tandai pesan admin sebagai sudah dibaca oleh siswa
   await supabase
     .from('chat_messages')
     .update({ is_read: true })
-    .eq('thread_id', thread!.id)          // ✅ thread.id sudah dikenali
+    .eq('thread_id', thread!.id)
     .eq('sender_role', 'admin')
     .eq('is_read', false)
 
   await supabase
     .from('chat_threads')
     .update({ unread_by_siswa: 0 })
-    .eq('id', thread!.id)                 // ✅ thread.id sudah dikenali
+    .eq('id', thread!.id)
 
   return NextResponse.json({ data: { thread, messages: messages ?? [] } })
 }
 
+// ── POST: Siswa kirim pesan baru → notifikasi ke admin ───────────────────────
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'siswa') {
@@ -107,7 +110,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => null)
   const message = (body?.message ?? '').toString().trim()
-  const attachmentUrl = body?.attachment_url ?? null
+  const attachmentUrl  = body?.attachment_url  ?? null
   const attachmentNama = body?.attachment_nama ?? null
 
   if (!message && !attachmentUrl) {
@@ -115,16 +118,16 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin()
-  const siswaId = session.user.id
-  const siswaNama = session.user.name ?? 'Santri'
+  const siswaId       = session.user.id
+  const siswaNama     = session.user.name ?? 'Santri'
   const siswaAvatarUrl = (session.user as { image?: string | null }).image ?? null
 
-  // ✅ Cast ke tipe partial (hanya field yang di-select)
+  // Cari atau buat thread
   const { data: existingThread } = await supabase
     .from('chat_threads')
-    .select('id, status')
+    .select('id, status, unread_by_admin')
     .eq('siswa_id', siswaId)
-    .maybeSingle() as { data: Pick<ChatThread, 'id' | 'status'> | null; error: unknown }
+    .maybeSingle() as { data: Pick<ChatThread, 'id' | 'status'> & { unread_by_admin: number } | null; error: unknown }
 
   let thread: Pick<ChatThread, 'id' | 'status'> | null = existingThread
 
@@ -149,15 +152,16 @@ export async function POST(req: NextRequest) {
     await supabase.from('chat_threads').update({ status: 'open' }).eq('id', thread.id)
   }
 
+  // Simpan pesan
   const { data: newMessage, error: insertErr } = await supabase
     .from('chat_messages')
     .insert({
-      thread_id: thread!.id,
-      sender_role: 'siswa',
-      sender_id: siswaId,
-      sender_nama: siswaNama,
-      message: message || (attachmentNama ? `Mengirim lampiran: ${attachmentNama}` : ''),
-      attachment_url: attachmentUrl,
+      thread_id:       thread!.id,
+      sender_role:     'siswa',
+      sender_id:       siswaId,
+      sender_nama:     siswaNama,
+      message:         message || (attachmentNama ? `Mengirim lampiran: ${attachmentNama}` : ''),
+      attachment_url:  attachmentUrl,
       attachment_nama: attachmentNama,
     })
     .select('*')
@@ -167,6 +171,24 @@ export async function POST(req: NextRequest) {
     console.error('Gagal mengirim pesan chat:', insertErr)
     return NextResponse.json({ error: 'Gagal mengirim pesan' }, { status: 500 })
   }
+
+  // Update metadata thread: last_message, unread_by_admin
+  const currentUnread = (existingThread as { unread_by_admin?: number } | null)?.unread_by_admin ?? 0
+  await supabase
+    .from('chat_threads')
+    .update({
+      last_message:      message || `[Lampiran: ${attachmentNama}]`,
+      last_message_at:   new Date().toISOString(),
+      last_sender_role:  'siswa',
+      unread_by_admin:   currentUnread + 1,
+      updated_at:        new Date().toISOString(),
+    })
+    .eq('id', thread!.id)
+
+  // ── Notifikasi ke ADMIN: ada pesan baru dari siswa ────────────────────────
+  // Hanya kirim notif jika pesan pertama (unread_by_admin === 0) atau tiap pesan
+  // Di sini kita kirim tiap pesan agar admin selalu aware
+  await notifyAllAdmins(NotifTemplate.pesanBaruDariSiswa(siswaNama))
 
   return NextResponse.json({ data: newMessage }, { status: 201 })
 }
