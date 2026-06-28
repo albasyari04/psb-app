@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import type { ReactElement, MouseEvent as ReactMouseEvent } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
@@ -835,6 +836,28 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   const [annLoading,       setAnnLoading      ] = useState(true)
   const [selectedAnn,      setSelectedAnn     ] = useState<Announcement | null>(null)
 
+  // ── Live avatar: fetch terbaru dari API agar sinkron setelah upload foto ──
+  const { update: updateSession } = useSession()
+  const [liveAvatarUrl, setLiveAvatarUrl] = useState<string | null>(avatarUrl)
+
+  useEffect(() => {
+    async function fetchAvatar() {
+      try {
+        const res  = await fetch('/api/siswa/profile')
+        const json = await res.json()
+        if (res.ok && json.profile?.avatar_url) {
+          setLiveAvatarUrl(json.profile.avatar_url)
+          // Sync ke session agar server component ikut ter-refresh
+          await updateSession({ avatar_url: json.profile.avatar_url })
+        }
+      } catch (e) {
+        console.error('Gagal sync avatar di dashboard:', e)
+      }
+    }
+    fetchAvatar()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const [peraturan] = useState<PeraturanItem[]>([
     { id: '1', judul: 'Tata Tertib Umum',         deskripsi: 'Seluruh santri wajib menjaga adab, disiplin dan ketertiban pondok.', kategori: 'Tata Tertib', tanggal: '2026-06-15' },
     { id: '2', judul: 'Larangan Membawa HP',       deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',       kategori: 'Larangan',    tanggal: '2026-06-08' },
@@ -908,8 +931,8 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
       <header className={styles.topHeader}>
         <div className={styles.topHeaderLeft}>
           <div className={styles.avatarWrap}>
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt={fullName} width={52} height={52}
+            {liveAvatarUrl ? (
+              <Image src={liveAvatarUrl} alt={fullName} width={52} height={52}
                 className={styles.avatarImg} referrerPolicy="no-referrer" unoptimized />
             ) : (
               <span className={styles.avatarInitialText}>{avatarInitial}</span>

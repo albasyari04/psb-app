@@ -36,6 +36,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -88,12 +89,7 @@ const IcArrowLeft = () => (
     <path d="M19 12H5M5 12l7-7M5 12l7 7" stroke={C.teal3} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const IcSettings = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="3" stroke={C.teal2} strokeWidth="1.8" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke={C.teal2} strokeWidth="1.8" />
-  </svg>
-)
+
 const IcUpload = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -240,44 +236,50 @@ export default function SiswaPembayaranPage() {
         * { box-sizing: border-box; }
       `}</style>
 
-      {/* Hero Header — background polos + wave tipis, bukan card gradient */}
-      <div style={{ padding: '20px 16px 4px', position: 'relative', overflow: 'hidden' }}>
-        {/* wave dekoratif tipis di kanan, sesuai desain */}
-        <svg
-          width="280" height="180" viewBox="0 0 280 180"
-          style={{ position: 'absolute', top: -10, right: -40, pointerEvents: 'none' }}
-          aria-hidden="true"
+      {/* ══ TOP BAR — sticky, gaya sama persis dgn halaman Notifikasi ══ */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        padding: '1rem 1.1rem 0.9rem',
+        background: C.bg,
+      }}>
+        {/* Tombol back */}
+        <button
+          onClick={() => router.back()}
+          aria-label="Kembali"
+          style={{
+            width: 42, height: 42, borderRadius: 13, flexShrink: 0,
+            background: '#fff', border: '1px solid #eef1f5',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 1px 2px rgba(15,23,42,0.04)', cursor: 'pointer',
+            color: C.teal1,
+          }}
         >
-          <path d="M40 90 C 100 40, 180 140, 280 70" stroke={C.teal1} strokeOpacity="0.12" strokeWidth="10" fill="none" strokeLinecap="round" />
-        </svg>
+          <IcArrowLeft />
+        </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-          <button
-            onClick={() => router.back()}
-            aria-label="Kembali"
-            style={{
-              width: 46, height: 46, borderRadius: 16, flexShrink: 0,
-              background: '#fff', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(15,46,34,0.06)', cursor: 'pointer',
-            }}
-          >
-            <IcArrowLeft />
-          </button>
+        {/* Title + subtitle */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.01em', fontFamily: 'inherit' }}>
+            Pembayaran
+          </h1>
+          <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.1rem 0 0', fontFamily: 'inherit' }}>
+            Kelola tagihan dan pembayaran Anda
+          </p>
         </div>
 
-        {/* Chip lunas / belum lunas */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 18, position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 999, padding: '8px 16px', border: `1px solid ${C.border}` }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: C.green, fontWeight: 700, fontFamily: 'inherit' }}>{lunasCount} lunas</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', borderRadius: 999, padding: '8px 16px', border: `1px solid ${C.border}` }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: C.amber, flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: C.amber, fontWeight: 700, fontFamily: 'inherit' }}>{belumLunasCount} belum lunas</span>
-          </div>
+        {/* Icon dompet kanan atas */}
+        <div style={{
+          width: 64, height: 64, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Image src="/icons/dompet-icon.png" alt="Dompet" width={64} height={64} style={{ objectFit: 'contain' }} />
         </div>
-      </div>
+      </header>
 
       {/* Content */}
       <div style={{ padding: '20px 16px 0', maxWidth: 520, margin: '0 auto' }}>
@@ -315,6 +317,18 @@ export default function SiswaPembayaranPage() {
 
             <div style={{ flexShrink: 0 }}>
               <IcWalletIllustration />
+            </div>
+          </div>
+
+          {/* Chip lunas / belum lunas — di dalam card, di bawah tombol */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 16, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.greenBg, borderRadius: 999, padding: '6px 14px', border: `1px solid ${C.greenLight}` }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: C.green, fontWeight: 700, fontFamily: 'inherit' }}>{lunasCount} lunas</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.amberBg, borderRadius: 999, padding: '6px 14px', border: `1px solid ${C.amberBorder}` }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.amber, flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: C.amber, fontWeight: 700, fontFamily: 'inherit' }}>{belumLunasCount} belum lunas</span>
             </div>
           </div>
         </div>
