@@ -933,6 +933,9 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
         </div>
       </header>
 
+      {/* Spacer: mengisi ruang yang ditinggalkan header karena position:fixed */}
+      <div className={styles.topHeaderSpacer} aria-hidden="true" />
+
       {/* ══ PAGE BODY ═══════════════════════════════════════════════════ */}
       <div className={styles.pageBody}>
         <HeroBanner />

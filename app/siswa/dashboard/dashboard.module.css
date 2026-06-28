@@ -38,12 +38,23 @@
    TOP HEADER
    ══════════════════════════════════════════════════════════════ */
 .topHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  z-index: 30;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1.1rem 1.1rem 0.65rem;
   background: #fff;
+}
+
+.topHeaderSpacer {
+  height: 84px;
 }
 .topHeaderLeft { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
 
