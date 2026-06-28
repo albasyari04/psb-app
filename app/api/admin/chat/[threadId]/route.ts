@@ -6,9 +6,11 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ── GET: Admin ambil detail 1 thread + pesannya ───────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(req: NextRequest, context: any) {
-  const { threadId } = context.params
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ threadId: string }> }
+) {
+  const { threadId } = await context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -54,9 +56,11 @@ export async function GET(req: NextRequest, context: any) {
 }
 
 // ── POST: Admin balas pesan → notifikasi ke siswa ─────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function POST(req: NextRequest, context: any) {
-  const { threadId } = context.params
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ threadId: string }> }
+) {
+  const { threadId } = await context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -124,4 +128,39 @@ export async function POST(req: NextRequest, context: any) {
   })
 
   return NextResponse.json({ data: newMessage }, { status: 201 })
+}
+
+// ── PATCH: Admin ubah status thread (open <-> closed) ─────────────────────────
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ threadId: string }> }
+) {
+  const { threadId } = await context.params
+  const session = await getServerSession(authOptions)
+  if (!session || session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await req.json().catch(() => null)
+  const status = body?.status
+
+  if (status !== 'open' && status !== 'closed') {
+    return NextResponse.json({ error: 'Status tidak valid' }, { status: 400 })
+  }
+
+  const supabase = getSupabaseAdmin()
+
+  const { data: updated, error: updateErr } = await supabase
+    .from('chat_threads')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', threadId)
+    .select('*')
+    .maybeSingle()
+
+  if (updateErr || !updated) {
+    console.error('[PATCH /api/admin/chat/[threadId]]', updateErr)
+    return NextResponse.json({ error: 'Gagal mengubah status percakapan' }, { status: 500 })
+  }
+
+  return NextResponse.json({ data: updated })
 }
