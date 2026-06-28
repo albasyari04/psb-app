@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/server'
-import { createNotificationForUsers } from '@/lib/notifications'
 
 export async function GET() {
   try {
@@ -95,14 +94,18 @@ export async function POST(req: NextRequest) {
           year: 'numeric',
         })
 
-        await createNotificationForUsers(
-          siswaList.map((s) => s.id),
-          {
-            title:   '🗓️ Jadwal Baru Ditambahkan',
-            message: `${label} dijadwalkan pada ${tanggalFormatted}. Pastikan kamu tidak melewatkannya.`,
-            type:    'info',
-          }
-        )
+        const notifications = siswaList.map((s) => ({
+          user_id: s.id,
+          title:   '🗓️ Jadwal Baru Ditambahkan',
+          message: `${label} dijadwalkan pada ${tanggalFormatted}. Pastikan kamu tidak melewatkannya.`,
+          type:    'info',
+          is_read: false,
+        }))
+
+        const { error: notifError } = await supabase.from('notifications').insert(notifications)
+        if (notifError) {
+          console.error('[jadwal] Gagal broadcast notifikasi:', notifError.message)
+        }
       }
     } catch (notifErr) {
       console.error('[jadwal] Gagal broadcast notifikasi:', notifErr)
