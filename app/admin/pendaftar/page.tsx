@@ -52,11 +52,6 @@ const IconArrowLeft = () => (
     <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
   </svg>
 )
-const IconMenu = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-  </svg>
-)
 const IconUsers = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -100,23 +95,6 @@ const IconEye = () => (
 const IconDots = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
-  </svg>
-)
-const IconBell = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-  </svg>
-)
-const IconBook = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-  </svg>
-)
-const IconArrowRight = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
   </svg>
 )
 
@@ -194,15 +172,16 @@ html, body {
 }
 
 .pnd-root {
-  min-height: 100vh;
+  height: 100dvh;
   background: #f0f2f8;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding-bottom: 80px;
   max-width: 430px;
   width: 100%;
   margin: 0 auto;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Topbar ── */
@@ -210,23 +189,40 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px 12px;
-  background: #f0f2f8;
-  position: sticky;
-  top: 0;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 0.85rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e9eef2;
+  box-shadow: 0 2px 12px rgba(109, 40, 217, 0.06);
+  flex-shrink: 0;
+}
+
+/* ── Sticky header wrapper ── */
+.pnd-sticky-header {
+  flex-shrink: 0;
+  background: #ffffff;
   z-index: 50;
+}
+
+/* ── Scrollable content ── */
+.pnd-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px;
 }
 .pnd-topbar-left { display: flex; align-items: center; gap: 12px; }
 .pnd-topbar-back-btn {
-  width: 38px; height: 38px; border-radius: 12px;
-  background: #fff;
-  border: none;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: #f5f3ff;
+  border: 1.5px solid #ede9fe;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #475569;
+  color: #6d28d9;
   text-decoration: none;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  transition: background 0.18s, transform 0.18s;
 }
+.pnd-topbar-back-btn:hover { background: #ede9fe; transform: translateX(-2px); }
 .pnd-topbar-menu-btn {
   width: 38px; height: 38px; border-radius: 12px;
   background: #fff;
@@ -236,8 +232,8 @@ html, body {
   color: #475569;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.pnd-topbar-title-wrap h1 { font-size: 16px; font-weight: 800; color: #0f172a; }
-.pnd-topbar-title-wrap p  { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+.pnd-topbar-title-wrap h1 { font-size: 1.05rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+.pnd-topbar-title-wrap p  { font-size: 0.68rem; color: #94a3b8; font-weight: 500; margin: 0.1rem 0 0; }
 .pnd-notif-btn {
   width: 38px; height: 38px; border-radius: 12px;
   background: #fff;
@@ -602,6 +598,9 @@ export default function PendaftarPage() {
       <style>{CSS}</style>
       <div className="pnd-root">
 
+        {/* ── STICKY HEADER (tidak ikut scroll) ── */}
+        <div className="pnd-sticky-header">
+
         {/* ── Topbar ── */}
         <div className="pnd-topbar">
           <div className="pnd-topbar-left">
@@ -613,7 +612,22 @@ export default function PendaftarPage() {
               <p>Kelola data pendaftar</p>
             </div>
           </div>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f8fafc',
+            border: '1.5px solid #e9eef2', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', color: '#6d28d9', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
         </div>
+
+        </div>{/* end pnd-sticky-header */}
+
+        {/* ── SCROLLABLE CONTENT ── */}
+        <div className="pnd-scroll-content">
 
         {/* ── Stats ── */}
         <div className="pnd-stats">
@@ -777,6 +791,8 @@ export default function PendaftarPage() {
             Profil
           </button>
         </nav>
+        </div>{/* end pnd-scroll-content */}
+
       </div>
     </>
   )

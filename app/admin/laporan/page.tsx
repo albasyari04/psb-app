@@ -1,7 +1,8 @@
 // app/admin/laporan/page.tsx
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -145,69 +146,43 @@ function LaporanIcon({ tipe, size = 44 }: { tipe: string; size?: number }) {
 }
 
 // ─────────────────────────────────────────────
-// Item Dropdown Menu
+// Inline Action Buttons (Edit + Delete langsung tampil)
 // ─────────────────────────────────────────────
 function ItemMenu({ laporan, onEdit, onDelete }: {
   laporan: Laporan; onEdit: (l: Laporan) => void; onDelete: (id: string) => void
 }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [])
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(v => !v)} style={{ background: '#f8fafc', border: '1px solid #f1f5f9',
-          padding: '6px 8px', borderRadius: 10, cursor: 'pointer', color: '#94a3b8',
-          display: 'flex', alignItems: 'center', transition: 'background 0.15s' }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <button
+        onClick={() => onEdit(laporan)}
+        title="Edit Laporan"
+        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
+          borderRadius: 10, cursor: 'pointer', fontSize: 12, fontWeight: 700,
+          color: '#7c3aed', background: '#f5f3ff', border: '1.5px solid #ede9fe',
+          transition: 'all 0.15s', whiteSpace: 'nowrap' as const }}
+        onMouseEnter={e => { e.currentTarget.style.background = '#ede9fe'; e.currentTarget.style.borderColor = '#c4b5fd' }}
+        onMouseLeave={e => { e.currentTarget.style.background = '#f5f3ff'; e.currentTarget.style.borderColor = '#ede9fe' }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Edit
+      </button>
+      <button
+        onClick={() => onDelete(laporan.id)}
+        title="Hapus Laporan"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 32, height: 32, borderRadius: 10, cursor: 'pointer',
+          color: '#ef4444', background: '#fff5f5', border: '1.5px solid #fee2e2',
+          transition: 'all 0.15s' }}
+        onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.borderColor = '#fca5a5' }}
+        onMouseLeave={e => { e.currentTarget.style.background = '#fff5f5'; e.currentTarget.style.borderColor = '#fee2e2' }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
         </svg>
       </button>
-      {open && (
-        <div style={{ position: 'absolute', right: 0, top: '110%', background: 'white',
-            border: '1px solid #f1f5f9', borderRadius: 14, boxShadow: '0 8px 28px rgba(0,0,0,0.12)',
-            zIndex: 99, minWidth: 150, overflow: 'hidden' }}>
-          <button onClick={() => { onEdit(laporan); setOpen(false) }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '11px 16px',
-              textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#374151' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            Edit Laporan
-          </button>
-          {laporan.file_url && (
-            <a href={laporan.file_url} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 16px',
-                fontSize: 13, color: '#374151', textDecoration: 'none' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-              </svg>
-              Lihat File
-            </a>
-          )}
-          <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
-          <button onClick={() => { onDelete(laporan.id); setOpen(false) }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '11px 16px',
-              textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#ef4444' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-              <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-            </svg>
-            Hapus
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -343,6 +318,7 @@ function SkeletonCard() {
 // Main Page
 // ─────────────────────────────────────────────
 export default function LaporanPage() {
+  const router = useRouter()
   const [laporanList, setLaporanList] = useState<Laporan[]>([])
   const [siswaList, setSiswaList] = useState<Siswa[]>([])
   const [loading, setLoading]         = useState(true)
@@ -482,18 +458,26 @@ export default function LaporanPage() {
     : 0
 
   return (
-    <div style={{ background: '#f6f5fa', minHeight: '100vh' }}>
+    <div style={{ background: '#f6f5fa', height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <style>{`
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes fadeUp  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin    { to{transform:rotate(360deg)} }
       `}</style>
 
+      {/* ── FIXED HEADER + TAB (tidak ikut scroll) ──────── */}
+      <div style={{
+        flexShrink: 0,
+        background: '#f6f5fa',
+        zIndex: 50,
+        boxShadow: '0 2px 12px rgba(15,23,42,0.06)',
+      }}>
+
       {/* ── HEADER ───────────────────────────────────────── */}
       <div style={{ padding: '24px 16px 18px', display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button onClick={() => window.history.back()} style={{ width: 44, height: 44, borderRadius: 16,
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 16,
               background: 'white', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center',
               justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
               boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
@@ -551,7 +535,10 @@ export default function LaporanPage() {
         </button>
       </div>
 
-      {/* ── CONTENT ─────────────────────────────────────── */}
+      </div>{/* end fixed header */}
+
+      {/* ── SCROLLABLE CONTENT ──────────────────────────── */}
+      <div style={{ flex: 1, overflowY: 'auto' as const, paddingTop: 16 }}>
       {activeTab === 'detail' ? (
         <div style={{ padding: '0 16px 32px' }}>
           <div style={{ background: 'white', borderRadius: 20, padding: '16px 14px',
@@ -622,7 +609,7 @@ export default function LaporanPage() {
                       <th style={thStyle}>Tanggal</th>
                       <th style={thStyle}>Lampiran</th>
                       <th style={thStyle}>Dibuat Oleh</th>
-                      <th style={{ ...thStyle, textAlign: 'right' as const }}>Aksi</th>
+                      <th style={{ ...thStyle }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -673,8 +660,8 @@ export default function LaporanPage() {
                               ? <span style={{ color: '#6b7280' }}>{laporan.creator.name}</span>
                               : <span style={{ color: '#cbd5e1' }}>—</span>}
                           </td>
-                          <td style={{ ...tdStyle, textAlign: 'right' as const }}>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <td style={{ ...tdStyle }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                               <ItemMenu laporan={laporan} onEdit={handleEdit} onDelete={handleDelete} />
                             </div>
                           </td>
@@ -934,6 +921,8 @@ export default function LaporanPage() {
 
       </div>
       )}
+
+      </div>{/* end scrollable content */}
 
       {/* Modal */}
       <LaporanModal

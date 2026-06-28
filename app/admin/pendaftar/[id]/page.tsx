@@ -289,15 +289,16 @@ export default function DetailPendaftarPage({
         /* ── Base ── */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .det-root {
-          min-height: 100vh;
+          height: 100dvh;
           background: #f0f1f8;
           font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          padding-bottom: 120px;
           max-width: 430px;
           width: 100%;
           margin: 0 auto;
           position: relative;
-          overflow-x: hidden;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
         }
 
         /* ── Splash ── */
@@ -326,41 +327,48 @@ export default function DetailPendaftarPage({
           cursor: pointer; font-family: inherit; margin-top: 8px;
         }
 
-        /* ── Topbar (terang, terpisah dari hero) ── */
+        /* ── Topbar (sticky, tidak ikut scroll) ── */
         .det-topbar {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 16px 16px 14px;
+          padding: 0.9rem 1rem 0.85rem;
           position: relative;
+          flex-shrink: 0;
+          background: #ffffff;
+          border-bottom: 1px solid #e9eef2;
+          box-shadow: 0 2px 12px rgba(109, 40, 217, 0.06);
+          z-index: 50;
         }
         .det-back-btn {
           display: inline-flex; align-items: center; gap: 6px;
-          background: #fff;
-          border: none;
+          width: 40px; height: 40px;
+          background: #f5f3ff;
+          border: 1.5px solid #ede9fe;
           border-radius: 12px;
-          color: #4338ca; font-size: 13.5px; font-weight: 700;
-          padding: 9px 16px 9px 12px;
+          color: #6d28d9;
+          padding: 0;
+          justify-content: center;
           cursor: pointer; font-family: inherit;
-          box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-          transition: box-shadow 0.15s;
+          flex-shrink: 0;
+          transition: background 0.18s, transform 0.18s;
         }
-        .det-back-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .det-back-btn:hover { background: #ede9fe; transform: translateX(-2px); }
         .det-topbar-title {
-          font-size: 16px; font-weight: 800; color: #1e1b3a;
-          position: absolute; left: 50%; transform: translateX(-50%);
+          font-size: 1.05rem; font-weight: 800; color: #0f172a;
+          letter-spacing: -0.02em; line-height: 1.2;
+          flex: 1; text-align: center;
         }
         .det-menu-btn {
-          width: 38px; height: 38px;
-          border-radius: 50%;
-          background: #fff;
-          border: none;
+          width: 40px; height: 40px;
+          border-radius: 12px;
+          background: #f8fafc;
+          border: 1.5px solid #e9eef2;
           display: flex; align-items: center; justify-content: center;
-          color: #6366f1;
+          color: #6d28d9;
           cursor: pointer;
-          box-shadow: 0 1px 6px rgba(0,0,0,0.07);
           flex-shrink: 0;
-          transition: box-shadow 0.15s;
+          transition: background 0.18s;
         }
-        .det-menu-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .det-menu-btn:hover { background: #ede9fe; }
 
         /* ── Hero Card ── */
         .det-hero {
@@ -438,6 +446,14 @@ export default function DetailPendaftarPage({
         }
 
         /* ── Content ── */
+        /* ── Scrollable area ── */
+        .det-scroll-content {
+          flex: 1;
+          overflow-y: auto;
+          padding-top: 16px;
+          padding-bottom: 120px;
+        }
+
         .det-content {
           padding: 16px 16px 0;
           display: flex; flex-direction: column; gap: 14px;
@@ -615,15 +631,23 @@ export default function DetailPendaftarPage({
 
         {/* ── Topbar ── */}
         <div className="det-topbar">
-          <button className="det-back-btn" onClick={() => router.back()}>
+          <button className="det-back-btn" onClick={() => router.back()} aria-label="Kembali">
             <IconChevronLeft />
-            Kembali
           </button>
           <span className="det-topbar-title">Detail Pendaftar</span>
-          <button className="det-menu-btn" aria-label="Menu lainnya">
-            <IconDotsVertical />
-          </button>
+          <div className="det-menu-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
         </div>
+
+        {/* ── SCROLLABLE CONTENT ── */}
+        <div className="det-scroll-content">
 
         {/* ── Hero Card ── */}
         <div className="det-hero">
@@ -764,6 +788,7 @@ export default function DetailPendaftarPage({
             </div>
           )}
         </div>
+        </div>{/* end det-scroll-content */}
       </div>
 
       {/* ── Confirm Bottom Sheet ── */}
