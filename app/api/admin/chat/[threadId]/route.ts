@@ -6,10 +6,8 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ── GET: Admin ambil detail 1 thread + pesannya ───────────────────────────────
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { threadId: string } }
-) {
+export async function GET(req: NextRequest, context: { params: { threadId: string } }) {
+  const { threadId } = context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -20,7 +18,7 @@ export async function GET(
   const { data: thread, error: threadErr } = await supabase
     .from('chat_threads')
     .select('*')
-    .eq('id', params.threadId)
+    .eq('id', threadId)
     .maybeSingle()
 
   if (threadErr || !thread) {
@@ -30,7 +28,7 @@ export async function GET(
   const { data: messages, error: msgErr } = await supabase
     .from('chat_messages')
     .select('*')
-    .eq('thread_id', params.threadId)
+    .eq('thread_id', threadId)
     .order('created_at', { ascending: true })
 
   if (msgErr) {
@@ -42,23 +40,21 @@ export async function GET(
   await supabase
     .from('chat_messages')
     .update({ is_read: true })
-    .eq('thread_id', params.threadId)
+    .eq('thread_id', threadId)
     .eq('sender_role', 'siswa')
     .eq('is_read', false)
 
   await supabase
     .from('chat_threads')
     .update({ unread_by_admin: 0 })
-    .eq('id', params.threadId)
+    .eq('id', threadId)
 
   return NextResponse.json({ data: { thread, messages: messages ?? [] } })
 }
 
 // ── POST: Admin balas pesan → notifikasi ke siswa ─────────────────────────────
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { threadId: string } }
-) {
+export async function POST(req: NextRequest, context: { params: { threadId: string } }) {
+  const { threadId } = context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -80,7 +76,7 @@ export async function POST(
   const { data: thread, error: threadErr } = await supabase
     .from('chat_threads')
     .select('id, siswa_id, siswa_nama, unread_by_siswa')
-    .eq('id', params.threadId)
+    .eq('id', threadId)
     .maybeSingle()
 
   if (threadErr || !thread) {
@@ -91,7 +87,7 @@ export async function POST(
   const { data: newMessage, error: insertErr } = await supabase
     .from('chat_messages')
     .insert({
-      thread_id:       params.threadId,
+      thread_id:       threadId,
       sender_role:     'admin',
       sender_id:       session.user.id,
       sender_nama:     adminNama,
@@ -117,7 +113,7 @@ export async function POST(
       unread_by_siswa:  (thread.unread_by_siswa ?? 0) + 1,
       updated_at:       new Date().toISOString(),
     })
-    .eq('id', params.threadId)
+    .eq('id', threadId)
 
   // ── Notifikasi ke SISWA: admin membalas pesan ────────────────────────────
   await createNotification({
