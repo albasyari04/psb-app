@@ -1,7 +1,6 @@
 // app/api/admin/announcements/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { createNotificationForUsers } from '@/lib/notifications'
 
 // ── GET /api/admin/announcements ──────────────────────────────────────────────
 // Query params: ?tipe=Penting&q=keyword&page=1&limit=20
@@ -96,23 +95,28 @@ export async function POST(req: NextRequest) {
       if (siswaErr) {
         console.error('[announcements] Gagal ambil daftar santri:', siswaErr.message)
       } else if (siswaList && siswaList.length > 0) {
-        const TIPE_TO_NOTIF_TYPE: Record<string, 'success' | 'error' | 'info' | 'warning'> = {
-          Penting:    'warning',
-          Peringatan: 'warning',
+        const TIPE_TO_NOTIF_TYPE: Record<string, 'success' | 'error' | 'info'> = {
+          Penting:    'info', // Atau 'warning' jika ada
+          Peringatan: 'info', // Atau 'warning'
           Informasi:  'info',
           Info:       'info',
         }
+        const notifType = TIPE_TO_NOTIF_TYPE[tipe] ?? 'info'
 
-        await createNotificationForUsers(
-          siswaList.map((s) => s.id),
-          {
-            title:   `📢 Pengumuman Baru: ${judul.trim()}`,
-            message: konten.trim().length > 140
-              ? `${konten.trim().slice(0, 140)}...`
-              : konten.trim(),
-            type: TIPE_TO_NOTIF_TYPE[tipe] ?? 'info',
-          }
-        )
+        const notifications = siswaList.map((s) => ({
+          user_id: s.id,
+          title:   `📢 Pengumuman Baru: ${judul.trim()}`,
+          message: konten.trim().length > 140
+            ? `${konten.trim().slice(0, 140)}...`
+            : konten.trim(),
+          type: notifType,
+          is_read: false,
+        }))
+
+        const { error: notifError } = await supabase.from('notifications').insert(notifications)
+        if (notifError) {
+          console.error('[announcements] Gagal broadcast notifikasi:', notifError.message)
+        }
       }
     } catch (notifErr) {
       console.error('[announcements] Gagal broadcast notifikasi:', notifErr)
