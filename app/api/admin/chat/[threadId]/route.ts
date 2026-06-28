@@ -6,7 +6,8 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ── GET: Admin ambil detail 1 thread + pesannya ───────────────────────────────
-export async function GET(req: NextRequest, context: { params: { threadId: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(req: NextRequest, context: any) {
   const { threadId } = context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
@@ -53,7 +54,8 @@ export async function GET(req: NextRequest, context: { params: { threadId: strin
 }
 
 // ── POST: Admin balas pesan → notifikasi ke siswa ─────────────────────────────
-export async function POST(req: NextRequest, context: { params: { threadId: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function POST(req: NextRequest, context: any) {
   const { threadId } = context.params
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'admin') {
