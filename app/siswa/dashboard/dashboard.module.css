@@ -86,7 +86,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.greetSchool { font-size: 0.71rem; color: var(--gray-light); font-weight: 500; margin: 0.12rem 0 0; }
+.greetSchool {
+  font-size: 0.71rem;
+  color: var(--gray-light);
+  font-weight: 500;
+  margin: 0.12rem 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .topHeaderRight { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .iconBtn {

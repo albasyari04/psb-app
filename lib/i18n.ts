@@ -43,7 +43,7 @@ export const translations = {
 
     // ── Dashboard Siswa ──────────────────────────────────────────
     dashboard_greeting:       'Assalamu\'alaikum,',
-    dashboard_school:         'Santri Pondok Pesantren Al-Istiqomah',
+    dashboard_school:         'Santri Pon-Pes Al-Istiqomah',
     dashboard_quick_access:   'Akses Cepat',
     dashboard_see_all:        'Lihat Semua →',
     dashboard_announcement:   'Pengumuman Terbaru',
