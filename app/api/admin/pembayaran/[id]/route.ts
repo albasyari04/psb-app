@@ -82,11 +82,100 @@ export async function PATCH(req: NextRequest, context: any) {
   }
 }
 
+// ── PUT: Admin update lengkap data pembayaran (dari halaman Edit) ────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function PUT(req: NextRequest, context: any) {
+  const { id } = context.params;
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const {
+      user_id,
+      nama_siswa,
+      nominal,
+      jenis_pembayaran,
+      metode_pembayaran,
+      no_referensi,
+      status,
+      catatan,
+      tanggal_bayar,
+    } = body
+
+    if (!user_id || !nama_siswa || !nominal) {
+      return NextResponse.json({ error: 'User ID, nama siswa, dan nominal wajib diisi.' }, { status: 400 })
+    }
+
+    const supabase = getSupabaseAdmin()
+
+    // Pastikan data ada
+    const { data: existing, error: fetchErr } = await supabase
+      .from('pembayaran')
+      .select('id, status')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (fetchErr || !existing) {
+      return NextResponse.json({ error: 'Pembayaran tidak ditemukan' }, { status: 404 })
+    }
+
+    const { data, error } = await supabase
+      .from('pembayaran')
+      .update({
+        user_id,
+        nama_siswa,
+        nominal: Number(nominal),
+        jenis_pembayaran,
+        metode_pembayaran,
+        no_referensi: no_referensi ?? null,
+        status,
+        catatan: catatan ?? null,
+        tanggal_bayar: tanggal_bayar || null,
+        confirmed_by: status === 'dikonfirmasi' ? session.user.id : null,
+        confirmed_at: status === 'dikonfirmasi' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[PUT /api/admin/pembayaran/[id]]', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // ── Notifikasi ke SISWA jika status berubah jadi dikonfirmasi/ditolak ───
+    if (existing.status !== 'dikonfirmasi' && status === 'dikonfirmasi') {
+      await createNotification({
+        userId: user_id,
+        ...NotifTemplate.pembayaranDikonfirmasi(jenis_pembayaran, Number(nominal)),
+      })
+    } else if (existing.status !== 'ditolak' && status === 'ditolak') {
+      await createNotification({
+        userId: user_id,
+        ...NotifTemplate.pembayaranDitolak(jenis_pembayaran, catatan ?? null),
+      })
+    }
+
+    return NextResponse.json({ data })
+  } catch (err) {
+    console.error('[PUT /api/admin/pembayaran/[id]] Unexpected:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 // ── GET: Detail 1 pembayaran (admin) ─────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(_req: NextRequest, context: any) {
   const { id } = context.params;
   try {
+    if (!id) {
+      return NextResponse.json({ error: 'Parameter ID tidak ditemukan' }, { status: 400 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

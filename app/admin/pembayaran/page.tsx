@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Pembayaran, PembayaranFormData } from '@/types'
 
 // ─── Konstanta ───────────────────────────────────────────────
@@ -468,29 +469,45 @@ export default function PembayaranPage() {
         position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-          {/* Icon header — matches design purple rounded square */}
-          <div style={{
-            width: 48, height: 48, borderRadius: 15,
-            background: 'linear-gradient(145deg, #7c3aed 0%, #5b21b6 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 6px 18px rgba(124,58,237,0.38)',
-            flexShrink: 0,
-          }}>
-            {/* Payment/wallet icon */}
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="5" width="20" height="14" rx="3"/>
-              <path d="M2 10h20"/>
-              <circle cx="17" cy="15" r="1.5" fill="white" stroke="none"/>
+          {/* Tombol Back */}
+          <button
+            onClick={() => router.back()}
+            style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: '#f5f3ff',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}
+            aria-label="Kembali"
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
             </svg>
-          </div>
+          </button>
           <div>
-            <h1 style={{ fontSize: 19, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>
+            <h1 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>
               Manajemen Pembayaran
             </h1>
             <p style={{ fontSize: 11.5, color: '#94a3b8', margin: '2px 0 0' }}>
               Kelola tagihan &amp; konfirmasi transaksi
             </p>
           </div>
+        </div>
+
+        {/* Icon dompet — pojok kanan atas, tanpa background, ukuran lebih besar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Image
+            src="/icons/dompet-icon.png"
+            alt="Dompet"
+            width={48}
+            height={48}
+            style={{ display: 'block', objectFit: 'contain' }}
+          />
         </div>
       </div>
 
@@ -519,7 +536,7 @@ export default function PembayaranPage() {
 
           {/* 3D Wallet illustration — diperbesar sesuai desain */}
           <div style={{ position: 'absolute', right: -6, bottom: -10 }}>
-            <img
+            <Image
               src="/icons/dompet-icon.png"
               alt=""
               width={148}
