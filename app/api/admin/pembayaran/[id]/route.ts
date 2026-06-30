@@ -5,14 +5,25 @@ import { authOptions } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
+// ✅ FIX: Di Next.js 15, `params` pada route handler dinamis ([id]) adalah
+// Promise<{ id: string }>, bukan object biasa lagi. Sebelumnya kode melakukan
+// `const { id } = context.params` (tanpa await), sehingga `id` selalu undefined
+// karena yang di-destructure adalah Promise itu sendiri, bukan isinya.
+// Itu sebabnya server selalu balas "Parameter ID tidak ditemukan" / 400,
+// padahal id-nya jelas ada di URL. Solusi: await context.params dulu.
+type RouteContext = { params: Promise<{ id: string }> }
+
 // ── PATCH: Admin konfirmasi atau tolak pembayaran ─────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function PATCH(req: NextRequest, context: any) {
-  const { id } = context.params;
+export async function PATCH(req: NextRequest, context: RouteContext) {
+  const { id } = await context.params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Parameter ID tidak ditemukan' }, { status: 400 })
     }
 
     const body = await req.json()
@@ -83,13 +94,16 @@ export async function PATCH(req: NextRequest, context: any) {
 }
 
 // ── PUT: Admin update lengkap data pembayaran (dari halaman Edit) ────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function PUT(req: NextRequest, context: any) {
-  const { id } = context.params;
+export async function PUT(req: NextRequest, context: RouteContext) {
+  const { id } = await context.params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Parameter ID tidak ditemukan' }, { status: 400 })
     }
 
     const body = await req.json()
@@ -168,9 +182,8 @@ export async function PUT(req: NextRequest, context: any) {
 }
 
 // ── GET: Detail 1 pembayaran (admin) ─────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(_req: NextRequest, context: any) {
-  const { id } = context.params;
+export async function GET(_req: NextRequest, context: RouteContext) {
+  const { id } = await context.params
   try {
     if (!id) {
       return NextResponse.json({ error: 'Parameter ID tidak ditemukan' }, { status: 400 })

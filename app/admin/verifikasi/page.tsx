@@ -27,55 +27,87 @@ export default async function VerifikasiPage() {
 
   const menungguCount = list.filter(p => p.status === 'menunggu').length
   const diprosesCount = list.filter(p => p.status === 'diproses').length
-  const totalPending  = menungguCount + diprosesCount
 
   return (
     <div className="app-shell vrk-page-bg">
 
-      {/* ── Hero Header ───────────────────────────────────────────────────── */}
-      <div className="vrk-hero">
-        <div className="vrk-orb vrk-orb-1" />
-        <div className="vrk-orb vrk-orb-2" />
-        <div className="vrk-orb vrk-orb-3" />
-        <div className="vrk-grid-overlay" />
+      {/* ── Header (putih, garis lurus, FIXED — tidak ikut ter-scroll) ── */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: 430,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '20px 16px 18px',
+          background: '#ffffff',
+          borderBottom: '1px solid #EDEAF6',
+          boxShadow: '0 6px 20px rgba(109,61,245,0.08)',
+        }}
+      >
+        {/* Tombol back + judul */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          <Link
+            href="/admin/dashboard"
+            aria-label="Kembali"
+            className="no-underline"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 16,
+              background: '#F5F0FF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M19 12H5M5 12L12 19M5 12L12 5"
+                stroke="#6D3DF5"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
 
-        <div className="vrk-hero-content">
-          <div className="vrk-eyebrow">
-            <span className="vrk-eyebrow-dot" />
-            <span>ADMIN · PSB 2025/2026</span>
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 22,
+                fontWeight: 800,
+                color: '#1e1b2e',
+                letterSpacing: '-0.3px',
+              }}
+            >
+              Verifikasi Pendaftaran
+            </h1>
+            <p
+              style={{
+                margin: '4px 0 0',
+                fontSize: 13.5,
+                color: '#8b86a3',
+              }}
+            >
+              Kelola status verifikasi pendaftaran Anda
+            </p>
           </div>
-
-          <h1 className="vrk-hero-title">
-            Verifikasi<br />
-            <span className="vrk-hero-title-accent">Pendaftar</span>
-          </h1>
-          <p className="vrk-hero-subtitle">
-            {list.length > 0
-              ? `${list.length} pendaftar perlu ditinjau`
-              : 'Semua pendaftar sudah diverifikasi ✓'}
-          </p>
-
-          {list.length > 0 && (
-            <div className="vrk-stats-row">
-              <div className="vrk-stat-chip vrk-stat-chip-white">
-                <span className="vrk-stat-chip-num">{totalPending}</span>
-                <span className="vrk-stat-chip-lbl">Total Antrian</span>
-              </div>
-              <div className="vrk-stat-divider" />
-              <div className="vrk-stat-chip">
-                <span className="vrk-stat-indicator vrk-ind-amber" />
-                <span className="vrk-stat-chip-num">{menungguCount}</span>
-                <span className="vrk-stat-chip-lbl">Menunggu</span>
-              </div>
-              <div className="vrk-stat-chip">
-                <span className="vrk-stat-indicator vrk-ind-blue" />
-                <span className="vrk-stat-chip-num">{diprosesCount}</span>
-                <span className="vrk-stat-chip-lbl">Diproses</span>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Ikon shield di pojok kanan atas sudah dihapus sesuai permintaan */}
       </div>
+
+      {/* Spacer pengganti tinggi header fixed di atas, supaya body tidak ketutupan */}
+      <div style={{ height: 90 }} />
 
       {/* ── Body ─────────────────────────────────────────────────────────── */}
       <div className="vrk-body">

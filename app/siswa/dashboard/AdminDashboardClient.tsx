@@ -149,54 +149,6 @@ function AktivitasIcon({ type }: { type: AktivitasItem['type'] }) {
   )
 }
 
-// ── Bottom Nav Icons ──────────────────────────────────────────────────────────
-const NavHome = ({ active }: { active: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      fill={active ? '#ede9fe' : 'none'}/>
-    <polyline points="9 22 9 12 15 12 15 22"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-const NavPendaftar = ({ active }: { active: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="9" cy="7" r="4" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-const NavVerifikasi = ({ active }: { active: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="3" width="20" height="14" rx="2"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2"/>
-    <path d="M8 21h8M12 17v4"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round"/>
-    <path d="M7 10l3 3 6-6"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-const NavLaporan = ({ active }: { active: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <polyline points="14 2 14 8 20 8"
-      stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="8" y1="13" x2="16" y2="13" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round"/>
-    <line x1="8" y1="17" x2="12" y2="17" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-)
-const NavProfil = ({ active }: { active: boolean }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="8" r="4" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2"/>
-    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-
 // ── Quick Menu SVG Icons (inline SVG, tidak bergantung file gambar) ────────────
 const IconVerifikasi = () => (
   <div style={{
@@ -325,7 +277,9 @@ export default function AdminDashboardClient({
 
   // Tinggi top bar (perkiraan aman): padding atas 16 + padding bawah 18 + tinggi avatar 52
   // Dipakai sebagai spacer pengganti supaya konten di bawah tidak ketutup top bar yang fixed.
-  const TOPBAR_HEIGHT = 86
+  // + 10px extra gap supaya ada jarak napas antara teks topbar & banner di bawahnya
+  // (sebelumnya terlalu mepet, lihat area yang ditandai).
+  const TOPBAR_HEIGHT = 86 + 10
 
   return (
     <div style={{
@@ -420,7 +374,7 @@ export default function AdminDashboardClient({
       <div style={{ height: TOPBAR_HEIGHT }} />
 
       {/* ═══════════════ HERO BANNER ═══════════════ */}
-      <div style={{ padding: '12px 16px 0' }}>
+      <div style={{ padding: '20px 16px 0' }}>
         <Link
           href="/admin/laporan"
           style={{
@@ -432,21 +386,27 @@ export default function AdminDashboardClient({
             style={{
               position: 'relative',
               width: '100%',
-              aspectRatio: '16 / 8',
               borderRadius: 24,
               overflow: 'hidden',
               background: '#F5F3FF',
               boxShadow: '0 12px 30px rgba(109,61,245,.16)',
+              // Tidak pakai aspectRatio yang dipaksa lagi — tinggi container
+              // sekarang mengikuti rasio asli gambar (lewat width/height di
+              // bawah), jadi tidak ada bagian banner yang kepotong di atas/bawah.
             }}
           >
             <Image
-              src="/icons/beranda-admin-banner.png"
+              src="/icons/banner-penerimaan-santri-baru.png"
               alt="Beranda Admin Banner"
-              fill
+              width={1200}
+              height={600}
               priority
               sizes="100vw"
               style={{
-                objectFit: 'cover',
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                objectFit: 'contain',
               }}
             />
           </div>
@@ -883,47 +843,17 @@ export default function AdminDashboardClient({
         </div>
       </div>
 
-      {/* Spacer for bottom nav */}
-      <div style={{ height: 90 }}/>
-
-      {/* ══ BOTTOM NAVIGATION ════════════════════════════════════════════════ */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 430,
-        background: p.navBg,
-        backdropFilter: 'blur(20px)',
-        borderTop: `1px solid ${p.navBorder}`,
-        display: 'grid', gridTemplateColumns: 'repeat(5,1fr)',
-        padding: '10px 4px 28px',
-        zIndex: 100,
-        boxShadow: '0 -4px 24px rgba(0,0,0,0.06)',
-      }}>
-        {([
-          { icon: (a: boolean) => <NavHome active={a}/>,       label: 'Beranda',    active: true,  href: '/admin/dashboard'  },
-          { icon: (a: boolean) => <NavPendaftar active={a}/>,  label: 'Pendaftar',  active: false, href: '/admin/pendaftar'  },
-          { icon: (a: boolean) => <NavVerifikasi active={a}/>, label: 'Verifikasi', active: false, href: '/admin/verifikasi' },
-          { icon: (a: boolean) => <NavLaporan active={a}/>,    label: 'Laporan',    active: false, href: '/admin/laporan'    },
-          { icon: (a: boolean) => <NavProfil active={a}/>,     label: 'Profil',     active: false, href: '/admin/profil'     },
-        ] as const).map(item => (
-          <Link key={item.label} href={item.href} style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, position: 'relative', paddingTop: 4 }}>
-              {item.active && (
-                <div style={{
-                  position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                  width: 28, height: 3, borderRadius: 2,
-                  background: 'linear-gradient(90deg,#6D3DF5,#8B5CF6)',
-                }}/>
-              )}
-              {item.icon(item.active)}
-              <p style={{
-                fontSize: 9.5, margin: 0,
-                fontWeight: item.active ? 700 : 500,
-                color: item.active ? '#6D3DF5' : p.navInactive,
-              }}>{item.label}</p>
-            </div>
-          </Link>
-        ))}
-      </nav>
+      {/*
+        Catatan: bottom navigation TIDAK dirender di sini.
+        Nav bawah sudah disediakan secara global oleh komponen <AdminBottomNav />
+        (lihat app/admin/layout.tsx), lengkap dengan spacer-nya sendiri.
+        Dulu di sini ada nav + spacer versi kedua yang di-hardcode —
+        itu penyebab area kosong di bawah dashboard, karena dua spacer
+        (90px di sini + 80px dari AdminBottomNav) numpuk jadi satu.
+        Cukup beri sedikit jarak penutup di sini, sisanya biar AdminBottomNav
+        yang urus.
+      */}
+      <div style={{ height: 16 }}/>
     </div>
   )
 }

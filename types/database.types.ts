@@ -288,7 +288,7 @@ export type Database = {
           file_url: string | null
           data_json: Json | null
           created_by: string | null
-          user_id: string | null  // ← TAMBAHKAN INI
+          user_id: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -300,7 +300,7 @@ export type Database = {
           file_url?: string | null
           data_json?: Json | null
           created_by?: string | null
-          user_id?: string | null  // ← TAMBAHKAN INI
+          user_id?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -312,7 +312,7 @@ export type Database = {
           file_url?: string | null
           data_json?: Json | null
           created_by?: string | null
-          user_id?: string | null  // ← TAMBAHKAN INI
+          user_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -425,6 +425,35 @@ export type Database = {
           attachment_url?: string | null
           attachment_nama?: string | null
           is_read?: boolean
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          user_agent?: string | null
         }
         Relationships: []
       }

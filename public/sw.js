@@ -1,15 +1,13 @@
 // public/sw.js
 //
-// Service Worker minimal untuk PSMB - Pon-Pes Al Istiqomah.
-// Tujuannya HANYA memenuhi syarat "installable PWA" (dibutuhkan agar
-// Bubblewrap/PWABuilder bisa generate TWA dengan kualitas baik) —
-// bukan untuk membuat seluruh app bisa dipakai offline penuh, karena
-// PSB adalah app berbasis data live (pendaftaran, status, dashboard)
-// yang memang butuh koneksi internet.
+// Service Worker untuk PSMB - Pon-Pes Al Istiqomah.
 //
-// Strategi: cache aset statis ringan (manifest, icon) saat install,
-// lalu network-first untuk semua request lain — jika offline & ada
-// di cache, baru fallback ke cache.
+// Punya 2 tanggung jawab:
+// 1. (Sudah ada sebelumnya) Caching aset ringan agar memenuhi syarat
+//    "installable PWA" — network-first, fallback ke cache saat offline.
+// 2. (BARU) Menerima & menampilkan Web Push notification — popup yang
+//    muncul di HP user walau app/tab sedang tidak dibuka, misal saat
+//    admin membalas chat atau siswa mengirim pesan baru.
 
 const CACHE_NAME = 'psmb-shell-v1'
 
@@ -57,5 +55,51 @@ self.addEventListener('fetch', (event) => {
         return response
       })
       .catch(() => caches.match(event.request))
+  )
+})
+
+// ── PUSH — terima notifikasi dari server & tampilkan sebagai popup ─────────
+self.addEventListener('push', (event) => {
+  let data = {}
+
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    data = { title: 'PSMB - Pon-Pes Al Istiqomah', message: event.data ? event.data.text() : '' }
+  }
+
+  const title = data.title || 'PSMB - Pon-Pes Al Istiqomah'
+  const options = {
+    body: data.message || '',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-96.png',
+    vibrate: [120, 60, 120],
+    // Disimpan di sini supaya bisa dibaca lagi saat user klik notifikasinya
+    data: { url: data.url || '/' },
+  }
+
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+// ── NOTIFICATIONCLICK — saat popup di-klik, buka/fokus halaman terkait ─────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/'
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Kalau tab dengan URL itu sudah terbuka, fokuskan saja (jangan buka tab baru)
+        for (const client of clientList) {
+          if (client.url.includes(targetUrl) && 'focus' in client) {
+            return client.focus()
+          }
+        }
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl)
+        }
+      })
   )
 })

@@ -375,7 +375,9 @@ function EditForm({ id }: { id: string }) {
         top: 0, left: 0, right: 0,
         maxWidth: 480, margin: '0 auto',
         height: HEADER_HEIGHT,
-        background: '#f7f8fb',
+        background: '#ffffff',
+        borderBottom: '1px solid #EDEAF6',
+        boxShadow: '0 6px 20px rgba(109,61,245,0.06)',
         padding: '20px 18px 8px',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         gap: 12,
@@ -408,9 +410,7 @@ function EditForm({ id }: { id: string }) {
             </p>
           </div>
         </div>
-        <div style={{ flexShrink: 0, marginTop: -4 }}>
-          <WalletEditIcon size={76} />
-        </div>
+        {/* Icon dompet ungu (WalletEditIcon) sudah dihapus sesuai permintaan */}
       </div>
 
       <div style={{ height: HEADER_HEIGHT }} />

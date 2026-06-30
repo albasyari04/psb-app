@@ -2,9 +2,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper terpusat untuk membuat notifikasi ke user atau semua admin.
 // Import dan panggil dari route mana pun setelah aksi berhasil.
+//
+// ✅ UPDATE: sekarang setiap createNotification() / notifyAllAdmins() juga
+// otomatis mengirim Web Push (popup notifikasi sistem di HP user), lewat
+// lib/webpush.ts — selain tetap menyimpan baris ke tabel `notifications`
+// (untuk lonceng/drawer di dalam app, NotificationBell.tsx).
+//
+// Route-route chat (app/api/siswa/chat, app/api/admin/chat/[threadId]) TIDAK
+// perlu diubah — karena mereka sudah memanggil createNotification /
+// notifyAllAdmins, push-nya otomatis ikut jalan.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { sendPushToUser, sendPushToUsers } from '@/lib/webpush'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -15,12 +25,16 @@ export interface CreateNotificationPayload {
   title: string
   message: string
   type?: NotifType
+  /** URL tujuan saat notifikasi (push) di-klik. Default: '/' */
+  url?: string
 }
 
 export interface NotifPayload {
   title: string
   message: string
   type?: NotifType
+  /** URL tujuan saat notifikasi (push) di-klik */
+  url?: string
 }
 
 // ── Core: Buat 1 notifikasi ke 1 user ────────────────────────────────────────
@@ -30,6 +44,7 @@ export async function createNotification({
   title,
   message,
   type = 'info',
+  url,
 }: CreateNotificationPayload): Promise<void> {
   try {
     const supabase = getSupabaseAdmin()
@@ -46,12 +61,22 @@ export async function createNotification({
   } catch (err) {
     console.error('[notifications] createNotification unexpected error:', err)
   }
+
+  // Push tidak boleh menggagalkan alur utama — dibungkus try/catch sendiri
+  // dan tidak di-await secara blocking terhadap response API.
+  try {
+    await sendPushToUser(userId, { title, message, url })
+  } catch (err) {
+    console.error('[notifications] sendPushToUser unexpected error:', err)
+  }
 }
 
 // ── Core: Kirim notifikasi ke SEMUA admin ─────────────────────────────────────
 // Admin diambil dari tabel `profiles` dengan role = 'admin'
 
 export async function notifyAllAdmins(payload: NotifPayload): Promise<void> {
+  let adminIds: string[] = []
+
   try {
     const supabase = getSupabaseAdmin()
 
@@ -64,6 +89,8 @@ export async function notifyAllAdmins(payload: NotifPayload): Promise<void> {
       console.warn('[notifications] Tidak ada admin ditemukan:', fetchErr?.message)
       return
     }
+
+    adminIds = admins.map((admin) => admin.id)
 
     const rows = admins.map((admin) => ({
       user_id: admin.id,
@@ -80,6 +107,18 @@ export async function notifyAllAdmins(payload: NotifPayload): Promise<void> {
   } catch (err) {
     console.error('[notifications] notifyAllAdmins unexpected error:', err)
   }
+
+  if (adminIds.length > 0) {
+    try {
+      await sendPushToUsers(adminIds, {
+        title:   payload.title,
+        message: payload.message,
+        url:     payload.url,
+      })
+    } catch (err) {
+      console.error('[notifications] sendPushToUsers (admins) unexpected error:', err)
+    }
+  }
 }
 
 // ── Template Notifikasi ───────────────────────────────────────────────────────
@@ -94,6 +133,7 @@ export const NotifTemplate = {
     title:   'Pendaftaran Berhasil Dikirim ✅',
     message: `Halo ${nama}, pendaftaran kamu sudah kami terima dan sedang dalam proses verifikasi.`,
     type:    'success',
+    url:     '/siswa/status',
   }),
 
   /** Notif ke ADMIN: ada pendaftar baru */
@@ -101,6 +141,7 @@ export const NotifTemplate = {
     title:   'Pendaftar Baru 🎉',
     message: `${nama} baru saja mengisi formulir pendaftaran. Segera lakukan verifikasi.`,
     type:    'info',
+    url:     '/admin/pendaftar',
   }),
 
   /** Notif ke SISWA: pendaftaran diterima oleh admin */
@@ -108,6 +149,7 @@ export const NotifTemplate = {
     title:   'Selamat! Pendaftaran Diterima 🎊',
     message: `Halo ${nama}, pendaftaran kamu telah DITERIMA. Silakan selesaikan proses selanjutnya.`,
     type:    'success',
+    url:     '/siswa/status',
   }),
 
   /** Notif ke SISWA: pendaftaran ditolak oleh admin */
@@ -117,6 +159,7 @@ export const NotifTemplate = {
       ? `Maaf ${nama}, pendaftaran kamu tidak diterima. Catatan admin: ${catatan}`
       : `Maaf ${nama}, pendaftaran kamu tidak diterima. Hubungi admin untuk informasi lebih lanjut.`,
     type: 'error',
+    url:  '/siswa/status',
   }),
 
   // ── Pembayaran ──────────────────────────────────────────────────────────────
@@ -126,6 +169,7 @@ export const NotifTemplate = {
     title:   'Bukti Pembayaran Masuk 💰',
     message: `${nama} mengirim bukti pembayaran ${jenis} sebesar Rp ${nominal.toLocaleString('id-ID')}. Segera konfirmasi.`,
     type:    'info',
+    url:     '/admin/pembayaran',
   }),
 
   /** Notif ke SISWA: pembayaran dikonfirmasi admin */
@@ -133,6 +177,7 @@ export const NotifTemplate = {
     title:   'Pembayaran Dikonfirmasi ✅',
     message: `Pembayaran ${jenis} sebesar Rp ${nominal.toLocaleString('id-ID')} telah dikonfirmasi oleh admin.`,
     type:    'success',
+    url:     '/siswa/pembayaran',
   }),
 
   /** Notif ke SISWA: pembayaran ditolak admin */
@@ -142,6 +187,7 @@ export const NotifTemplate = {
       ? `Pembayaran ${jenis} ditolak. Alasan: ${catatan}`
       : `Pembayaran ${jenis} ditolak. Silakan hubungi admin.`,
     type: 'error',
+    url:  '/siswa/pembayaran',
   }),
 
   // ── Berkas / Dokumen ────────────────────────────────────────────────────────
@@ -151,6 +197,7 @@ export const NotifTemplate = {
     title:   'Dokumen Baru Diunggah 📄',
     message: `${nama} baru saja mengunggah dokumen persyaratan. Silakan periksa kelengkapannya.`,
     type:    'info',
+    url:     '/admin/berkas',
   }),
 
   /** Notif ke SISWA: berkas diterima */
@@ -158,6 +205,7 @@ export const NotifTemplate = {
     title:   'Dokumen Berhasil Diunggah ✅',
     message: 'Dokumen persyaratan kamu berhasil diunggah dan sedang dalam proses verifikasi.',
     type:    'success',
+    url:     '/siswa/berkas',
   }),
 
   // ── Chat ────────────────────────────────────────────────────────────────────
@@ -167,6 +215,7 @@ export const NotifTemplate = {
     title:   'Pesan Baru dari Siswa 💬',
     message: `${nama} mengirim pesan baru. Segera balas untuk membantu.`,
     type:    'info',
+    url:     '/admin/chat',
   }),
 
   /** Notif ke SISWA: admin membalas pesan */
@@ -174,5 +223,6 @@ export const NotifTemplate = {
     title:   'Admin Membalas Pesan Kamu 💬',
     message: 'Admin telah membalas pesan kamu. Buka chat untuk melihat balasannya.',
     type:    'info',
+    url:     '/siswa/chat',
   }),
 }
