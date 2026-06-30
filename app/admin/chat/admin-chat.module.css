@@ -20,6 +20,18 @@
 }
 
 /* ── Header card ─────────────────────────────────────────────────── */
+.headerCardWrap {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 200;
+  background: var(--bg);
+  padding: 14px 14px 10px;
+  box-sizing: border-box;
+}
 .headerCard {
   display: flex;
   align-items: center;
@@ -27,7 +39,7 @@
   background: #fff;
   border-radius: 22px;
   padding: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 .backBtn {
@@ -301,6 +313,7 @@
 
 /* ── Dark mode ──────────────────────────────────────────────────── */
 :global([data-theme='dark']) .page { --bg: #0b1220; }
+:global([data-theme='dark']) .headerCardWrap { background: #0b1220; }
 :global([data-theme='dark']) .headerCard,
 :global([data-theme='dark']) .searchBar,
 :global([data-theme='dark']) .filterBtn,

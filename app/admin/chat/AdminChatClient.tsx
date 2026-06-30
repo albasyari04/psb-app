@@ -84,6 +84,10 @@ function avatarColorClass(id: string): string {
 
 type FilterKey = 'semua' | 'belum_dibaca' | 'ditutup'
 
+// Tinggi headerCardWrap (perkiraan aman): padding atas 14 + tinggi headerCard (~72) + padding bawah 10
+// Dipakai sebagai spacer pengganti supaya konten di bawah tidak ketutup header yang fixed.
+const HEADER_HEIGHT = 96
+
 export default function AdminChatClient() {
   const [threads, setThreads] = useState<ChatThread[]>([])
   const [loading, setLoading] = useState(true)
@@ -125,21 +129,27 @@ export default function AdminChatClient() {
 
   return (
     <div className={styles.page}>
-      {/* ══ HEADER CARD ═══════════════════════════════════════════ */}
-      <div className={styles.headerCard}>
-        <Link href="/admin" className={styles.backBtn} aria-label="Kembali">
-          <IconBack />
-        </Link>
-        <div className={styles.headerTextWrap}>
-          <p className={styles.headerTitle}>Chat Santri</p>
-          <div className={styles.headerSubtitleRow}>
-            <p className={styles.headerSubtitle}>
-              {unreadTotal > 0 ? `${unreadTotal} pesan belum dibaca` : 'Semua pesan sudah dibalas'}
-            </p>
-            {unreadTotal === 0 && <span className={styles.headerVerifiedIcon}><IconVerified /></span>}
+      {/* ══ HEADER CARD — FIXED, tidak ikut ter-scroll ═══════════════ */}
+      <div className={styles.headerCardWrap}>
+        <div className={styles.headerCard}>
+          <Link href="/admin" className={styles.backBtn} aria-label="Kembali">
+            <IconBack />
+          </Link>
+          <div className={styles.headerTextWrap}>
+            <p className={styles.headerTitle}>Chat Santri</p>
+            <div className={styles.headerSubtitleRow}>
+              <p className={styles.headerSubtitle}>
+                {unreadTotal > 0 ? `${unreadTotal} pesan belum dibaca` : 'Semua pesan sudah dibalas'}
+              </p>
+              {unreadTotal === 0 && <span className={styles.headerVerifiedIcon}><IconVerified /></span>}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Spacer pengganti — mengisi tempat headerCardWrap yang sekarang fixed,
+          supaya search bar & list di bawah tidak ketutup / "loncat" ke atas. */}
+      <div style={{ height: HEADER_HEIGHT }} />
 
       {/* ══ SEARCH & FILTER BUTTON ════════════════════════════════ */}
       <div className={styles.searchRow}>
