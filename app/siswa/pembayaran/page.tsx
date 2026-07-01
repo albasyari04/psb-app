@@ -36,7 +36,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -236,7 +235,7 @@ export default function SiswaPembayaranPage() {
         * { box-sizing: border-box; }
       `}</style>
 
-      {/* ══ TOP BAR — sticky, gaya sama persis dgn halaman Notifikasi ══ */}
+      {/* ══ TOP BAR — sticky, gaya sama persis dgn halaman Pengaturan ══ */}
       <header style={{
         position: 'sticky',
         top: 0,
@@ -246,6 +245,7 @@ export default function SiswaPembayaranPage() {
         gap: '0.75rem',
         padding: '1rem 1.1rem 0.9rem',
         background: C.bg,
+        borderBottom: `1px solid ${C.border}`,
       }}>
         {/* Tombol back */}
         <button
@@ -268,16 +268,8 @@ export default function SiswaPembayaranPage() {
             Pembayaran
           </h1>
           <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.1rem 0 0', fontFamily: 'inherit' }}>
-            Kelola tagihan dan pembayaran Anda
+            Kelola pembayaran Anda
           </p>
-        </div>
-
-        {/* Icon dompet kanan atas */}
-        <div style={{
-          width: 64, height: 64, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Image src="/icons/dompet-icon.png" alt="Dompet" width={64} height={64} style={{ objectFit: 'contain' }} />
         </div>
       </header>
 

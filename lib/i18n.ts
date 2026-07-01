@@ -127,6 +127,41 @@ export const translations = {
     siswa_settings_font_large:   'Besar',
     siswa_settings_light:        'Terang',
     siswa_settings_dark:         'Gelap',
+
+    // ── Notifikasi (Admin) ────────────────────────────────────────
+    notif_tab_all:              'Semua',
+    notif_tab_unread:           'Belum Dibaca',
+    notif_mark_all_read:        'Baca Semua',
+    notif_empty_title:          'Belum ada notifikasi',
+    notif_empty_unread_title:   'Semua sudah dibaca!',
+    notif_empty_sub:            'Notifikasi pendaftaran akan muncul di sini setelah ada aktivitas terbaru.',
+    notif_update_title:         'Tetap update',
+    notif_update_sub:           'Kami akan mengirimkan informasi penting seputar pendaftaran dan aktivitas Anda.',
+
+    // ── Verifikasi Pendaftaran (Admin) ───────────────────────────
+    verifikasi_title:           'Verifikasi Pendaftaran',
+    verifikasi_sub:             'Kelola status verifikasi pendaftaran Anda',
+    verifikasi_empty_title:     'Semua sudah diverifikasi!',
+    verifikasi_empty_sub:       'Tidak ada pendaftar yang sedang menunggu review saat ini',
+    verifikasi_see_all:         'Lihat Semua Pendaftar',
+    verifikasi_waiting_label:   'Menunggu Review',
+    verifikasi_processing_label:'Sedang Diproses',
+    verifikasi_badge_waiting:   'Menunggu',
+    verifikasi_badge_processing:'Diproses',
+    verifikasi_review_cta:      'Tinjau →',
+
+    // ── Semua Fitur / Menu (Admin) ───────────────────────────────
+    allmenu_title:      'Semua Fitur',
+    allmenu_sub:         'Kelola semua fitur sistem',
+    allmenu_cat_pendaftaran: 'PENDAFTARAN',
+    allmenu_cat_keuangan:    'KEUANGAN',
+    allmenu_cat_obrolan:     'OBROLAN',
+    allmenu_cat_informasi:   'INFORMASI',
+    allmenu_cat_akun:        'AKUN',
+    menu_pendaftar_sub:  'Lihat siapa saja yang mendaftarkan diri',
+    menu_status_sub:     'Pantau seleksi pendaftaran',
+    menu_profil_sub:     'Data & pengaturan akun',
+    menu_pengaturan_sub: 'Pengaturan aplikasi',
   },
 
   en: {
@@ -251,6 +286,41 @@ export const translations = {
     siswa_settings_font_large:   'Large',
     siswa_settings_light:        'Light',
     siswa_settings_dark:         'Dark',
+
+    // ── Notifikasi (Admin) ────────────────────────────────────────
+    notif_tab_all:              'All',
+    notif_tab_unread:           'Unread',
+    notif_mark_all_read:        'Mark All Read',
+    notif_empty_title:          'No notifications yet',
+    notif_empty_unread_title:   'All caught up!',
+    notif_empty_sub:            'Registration notifications will appear here once there is new activity.',
+    notif_update_title:         'Stay updated',
+    notif_update_sub:           'We will send you important updates about registration and your activity.',
+
+    // ── Verifikasi Pendaftaran (Admin) ───────────────────────────
+    verifikasi_title:           'Registration Verification',
+    verifikasi_sub:             'Manage the verification status of registrations',
+    verifikasi_empty_title:     'All verified!',
+    verifikasi_empty_sub:       'No applicants are currently waiting for review',
+    verifikasi_see_all:         'View All Applicants',
+    verifikasi_waiting_label:   'Awaiting Review',
+    verifikasi_processing_label:'In Progress',
+    verifikasi_badge_waiting:   'Waiting',
+    verifikasi_badge_processing:'In Progress',
+    verifikasi_review_cta:      'Review →',
+
+    // ── Semua Fitur / Menu (Admin) ───────────────────────────────
+    allmenu_title:      'All Features',
+    allmenu_sub:         'Manage all system features',
+    allmenu_cat_pendaftaran: 'REGISTRATION',
+    allmenu_cat_keuangan:    'FINANCE',
+    allmenu_cat_obrolan:     'CHAT',
+    allmenu_cat_informasi:   'INFORMATION',
+    allmenu_cat_akun:        'ACCOUNT',
+    menu_pendaftar_sub:  'See who has registered',
+    menu_status_sub:     'Track the selection process',
+    menu_profil_sub:     'Account info & settings',
+    menu_pengaturan_sub: 'Application settings',
   },
 } as const
 

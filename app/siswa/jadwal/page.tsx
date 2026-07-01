@@ -98,23 +98,29 @@ export default function JadwalPage() {
   const tabs: FilterType[] = ['Semua', 'Berlangsung', 'Akan Datang', 'Selesai']
 
   return (
+    // ══════ APP SHELL — tinggi dikunci 100dvh + overflow hidden ══════
+    // Header & bottom nav ada di FLOW NORMAL (bukan fixed/sticky) sehingga
+    // tidak mungkin ikut ter-scroll, apapun environment render-nya
+    // (browser asli, iframe, mobile simulator, dsb). Yang scroll hanya
+    // <main> di tengah.
     <div style={{
-      minHeight: '100dvh',
+      height: '100dvh',
       backgroundColor: '#F5F3FF',
       fontFamily: "'Inter', 'Segoe UI', sans-serif",
       maxWidth: 430,
       margin: '0 auto',
       position: 'relative',
-      overflowX: 'hidden',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
 
-      {/* ══════ TOP BAR (STICKY) — persis gaya Upload Berkas Santri ══════ */}
+      {/* ══════ TOP BAR (STATIS — bagian dari shell, tidak scroll) ══════ */}
       <div style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 30,
+        flexShrink: 0,
         background: '#fff',
         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+        zIndex: 30,
       }}>
         <div style={{
           display: 'flex',
@@ -137,58 +143,62 @@ export default function JadwalPage() {
             </svg>
           </Link>
           <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontSize: 23, fontWeight: 800, color: '#1F2937', margin: '0 0 3px', letterSpacing: -0.3, lineHeight: 1.2 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: '#1F2937', margin: '0 0 3px', letterSpacing: -0.3, lineHeight: 1.2 }}>
               Jadwal Penting
             </h1>
-            <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
-              PSMB 2025/2026 - PON PES AL ISTIQOMAH
+            <p style={{ fontSize: 10, color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
+              Jadwal Pon-Pes Al Istiqomah
             </p>
           </div>
         </div>
       </div>
 
-      {/* ─── FILTER TABS ─── persis desain: pill aktif ungu, sisanya teks biasa */}
-      <div style={{
-        background: '#fff',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        position: 'sticky',
-        top: 88,
-        zIndex: 20,
-        padding: '12px 16px',
+      {/* ══════ AREA SCROLL — HANYA INI YANG BOLEH SCROLL ══════ */}
+      <main style={{
+        flex: 1,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        padding: '0 16px 120px',
       }}>
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {tabs.map((tab) => {
-            const isActive = filter === tab
-            return (
-              <button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                style={{
-                  padding: '8px 18px',
-                  fontSize: 13,
-                  fontWeight: isActive ? 700 : 500,
-                  color: isActive ? '#fff' : '#64748B',
-                  background: isActive ? '#5B21B6' : 'none',
-                  borderTop: 'none',
-                  borderRight: 'none',
-                  borderLeft: 'none',
-                  borderBottom: 'none',
-                  borderRadius: isActive ? 20 : 20,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s',
-                  flexShrink: 0,
-                }}
-              >
-                {tab}
-              </button>
-            )
-          })}
-        </div>
-      </div>
 
-      {/* ─── CONTENT ─── */}
-      <div style={{ padding: '16px 16px 120px' }}>
+        {/* ─── FILTER TABS (ikut scroll bersama konten) ─── */}
+        <div style={{
+          background: '#fff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          borderRadius: 16,
+          padding: '12px 16px',
+          margin: '16px 0',
+        }}>
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {tabs.map((tab) => {
+              const isActive = filter === tab
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setFilter(tab)}
+                  style={{
+                    padding: '8px 18px',
+                    fontSize: 13,
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? '#fff' : '#64748B',
+                    background: isActive ? '#5B21B6' : 'none',
+                    borderTop: 'none',
+                    borderRight: 'none',
+                    borderLeft: 'none',
+                    borderBottom: 'none',
+                    borderRadius: isActive ? 20 : 20,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s',
+                    flexShrink: 0,
+                  }}
+                >
+                  {tab}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Section header */}
         {!loading && filtered.length > 0 && (
@@ -411,13 +421,11 @@ export default function JadwalPage() {
             )}
           </div>
         )}
-      </div>
+      </main>
 
-      {/* ─── BOTTOM NAV ─── */}
+      {/* ─── BOTTOM NAV (STATIS — bagian dari shell, tidak scroll) ─── */}
       <nav style={{
-        position: 'fixed', bottom: 0, left: '50%',
-        transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 430,
+        flexShrink: 0,
         background: '#fff',
         borderTop: '1px solid #F1F5F9',
         display: 'flex',

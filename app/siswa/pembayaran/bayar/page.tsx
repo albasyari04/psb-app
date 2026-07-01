@@ -814,111 +814,66 @@ export default function SiswaPembayaranBayarPage() {
         </div>
       )}
 
-      {/* ── Hero Header ──────────────────────────────────────────────────────── */}
+      {/* ── Hero Header ── SAMA PERSIS DENGAN HALAMAN PENGATURAN ── */}
       <div style={{
-        background: 'linear-gradient(135deg, #2D1FA3 0%, #4338CA 40%, #5B21B6 100%)',
-        padding: '32px 20px 32px',
+        background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%)',
+        padding: '28px 20px 28px',
         position: 'relative',
-        overflow: 'hidden',               /* clip ilustrasi agar rapi dalam header */
-        minHeight: 150,
+        overflow: 'hidden',
+        minHeight: 120,
       }}>
-
-        {/* ── Background ilustrasi berkas-admin.png di sisi kanan ── */}
-        {/* Ini yang ditandai: gambar jadi latar belakang di area kanan hero */}
+        {/* Dekorasi blur */}
         <div style={{
-          position: 'absolute',
-          right: -10,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: 170,
-          height: 170,
-          zIndex: 0,
-          pointerEvents: 'none',
-          opacity: 1,
-        }}>
-          <Image
-            src="/icons/berkas-admin.png"
-            alt=""
-            fill
-            style={{ objectFit: 'contain', objectPosition: 'right center' }}
-            priority
-          />
-        </div>
-
-        {/* Blur overlay di kanan agar teks kiri tetap terbaca */}
+          position: 'absolute', top: -60, right: -40,
+          width: 180, height: 180, borderRadius: '50%',
+          background: 'rgba(99,102,241,0.15)',
+          filter: 'blur(40px)', zIndex: 0, pointerEvents: 'none',
+        }} />
         <div style={{
-          position: 'absolute', right: 0, top: 0, bottom: 0,
-          width: '55%',
-          background: 'linear-gradient(to right, rgba(67,56,202,0.85) 0%, rgba(67,56,202,0) 100%)',
-          zIndex: 1, pointerEvents: 'none',
+          position: 'absolute', bottom: -40, left: -30,
+          width: 140, height: 140, borderRadius: '50%',
+          background: 'rgba(139,92,246,0.12)',
+          filter: 'blur(35px)', zIndex: 0, pointerEvents: 'none',
         }} />
 
-        {/* Dekorasi lingkaran blur pojok kiri bawah */}
-        <div style={{
-          position: 'absolute', bottom: -50, left: -50,
-          width: 160, height: 160, borderRadius: '50%',
-          background: 'rgba(99,102,241,0.20)',
-          filter: 'blur(28px)', zIndex: 0, pointerEvents: 'none',
-        }} />
-
-        {/* ── Konten kiri: icon box + teks + chips ── */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, position: 'relative', zIndex: 2 }}>
-
-          {/* Icon box — menggunakan pembayaran_icon.png */}
-          <div style={{
-            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '1.5px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.22)',
-            overflow: 'hidden',
+        {/* Konten - Tanpa icon box, hanya teks */}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <h1 style={{
+            color: '#fff', fontWeight: 800, fontSize: 22,
+            margin: 0, letterSpacing: -0.3, fontFamily: 'inherit', lineHeight: 1.2,
           }}>
-            <Image
-              src="/icons/pembayaran icon.png"
-              alt="Pembayaran"
-              width={36}
-              height={36}
-              style={{ objectFit: 'contain' }}
-              priority
-            />
-          </div>
+            Pembayaran
+          </h1>
+          <p style={{
+            color: 'rgba(255,255,255,0.6)', fontWeight: 400, fontSize: 13,
+            margin: '4px 0 0', fontFamily: 'inherit',
+          }}>
+            Kelola transaksi pembayaran
+          </p>
 
-          {/* Teks + chips */}
-          <div style={{ paddingTop: 2 }}>
-            <h1 style={{
-              color: '#fff', fontWeight: 800, fontSize: 24,
-              margin: 0, letterSpacing: -0.5, fontFamily: 'inherit', lineHeight: 1.1,
+          {/* Status chips - lebih simple */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(255,255,255,0.08)',
+              borderRadius: 20, padding: '4px 12px',
+              border: '1px solid rgba(255,255,255,0.06)',
             }}>
-              Pembayaran
-            </h1>
-
-            {/* Status chips */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: 'rgba(255,255,255,0.13)',
-                borderRadius: 20, padding: '6px 14px',
-                backdropFilter: 'blur(4px)',
-                border: '1px solid rgba(255,255,255,0.18)',
-              }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-                <span style={{ fontSize: 11, color: '#fff', fontWeight: 700, fontFamily: 'inherit' }}>
-                  {dikonfirmasiCount} dikonfirmasi
-                </span>
-              </div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: 'rgba(255,255,255,0.13)',
-                borderRadius: 20, padding: '6px 14px',
-                backdropFilter: 'blur(4px)',
-                border: '1px solid rgba(255,255,255,0.18)',
-              }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#FBBF24', boxShadow: '0 0 6px #FBBF24' }} />
-                <span style={{ fontSize: 11, color: '#fff', fontWeight: 700, fontFamily: 'inherit' }}>
-                  {menungguCount} menunggu
-                </span>
-              </div>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontFamily: 'inherit' }}>
+                {dikonfirmasiCount} dikonfirmasi
+              </span>
+            </div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(255,255,255,0.08)',
+              borderRadius: 20, padding: '4px 12px',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FBBF24' }} />
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontFamily: 'inherit' }}>
+                {menungguCount} menunggu
+              </span>
             </div>
           </div>
         </div>
@@ -926,25 +881,6 @@ export default function SiswaPembayaranBayarPage() {
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
       <div style={{ padding: '22px 16px', maxWidth: 520, margin: '0 auto' }}>
-
-        {/* ── Banner pembayaran-banner.png — full visible, tidak terpotong ── */}
-        <div style={{
-          borderRadius: 20,
-          overflow: 'hidden',
-          marginBottom: 24,
-          boxShadow: '0 8px 28px rgba(79,70,229,0.22)',
-          background: 'linear-gradient(135deg, #3730A3 0%, #6D28D9 100%)',
-          width: '100%',
-          lineHeight: 0,               /* hapus white-space bawah img */
-        }}>
-          {/* Gunakan <img> biasa agar height auto mengikuti rasio asli gambar */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/icons/pembayaran-banner.png"
-            alt="Bayar mudah, aman & terpercaya"
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        </div>
 
         {/* ── Tujuan Transfer ─────────────────────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -1096,8 +1032,7 @@ export default function SiswaPembayaranBayarPage() {
         <PilihPembayaranModal onClose={() => setShowPilihModal(false)} onSelect={handlePilihItem} />
       )}
       {showUploadModal && (
-        <UploadBuktiModal
-          onClose={() => { setShowUploadModal(false); setSelectedItem(null) }}
+        <UploadBuktiModal          onClose={() => { setShowUploadModal(false); setSelectedItem(null) }}
           onSubmit={handleSubmitBukti}
           loading={uploadLoading}
           selectedItem={selectedItem}
