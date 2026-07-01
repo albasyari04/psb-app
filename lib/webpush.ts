@@ -28,10 +28,16 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   vapidConfigured = true
 } else {
   // Jangan throw — supaya build/dev server tidak crash kalau env belum di-set.
-  // Cukup warning di console, dan sendPush* di bawah akan no-op.
-  console.warn(
-    '[webpush] VAPID keys belum di-set (NEXT_PUBLIC_VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY). ' +
-    'Push notification TIDAK akan terkirim sampai env ini diisi.'
+  // Tapi WARNING ini akan muncul di Vercel > Project > Logs (Runtime Logs)
+  // kalau env var belum ditambahkan di sana — cek di situ kalau push masih
+  // tidak jalan setelah deploy.
+  console.error(
+    '[webpush] ❌ VAPID keys TIDAK ditemukan di environment ini. ' +
+    `NEXT_PUBLIC_VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY ? 'ADA' : 'KOSONG'}, ` +
+    `VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY ? 'ADA' : 'KOSONG'}. ` +
+    'Kalau ini di production (Vercel), tambahkan env var ini di ' +
+    'Project Settings > Environment Variables, lalu REDEPLOY. ' +
+    'Push notification TIDAK akan terkirim sampai ini diperbaiki.'
   )
 }
 
@@ -57,7 +63,10 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
 
 // ── Kirim push ke BANYAK user sekaligus (dipakai notifyAllAdmins) ──────────
 export async function sendPushToUsers(userIds: string[], payload: PushPayload): Promise<void> {
-  if (!vapidConfigured) return
+  if (!vapidConfigured) {
+    console.error('[webpush] sendPushToUsers dibatalkan — VAPID belum dikonfigurasi.')
+    return
+  }
   if (userIds.length === 0) return
 
   const supabase = getSupabaseAdmin()
@@ -73,8 +82,11 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload): 
   }
   if (!subs || subs.length === 0) {
     // Wajar terjadi kalau user belum pernah buka app / belum izinkan notifikasi.
+    console.warn(`[webpush] Tidak ada subscription ditemukan untuk userIds: ${userIds.join(', ')}`)
     return
   }
+
+  console.log(`[webpush] Mengirim push ke ${subs.length} device untuk ${userIds.length} user...`)
 
   const notificationPayload = JSON.stringify({
     title:   payload.title,
@@ -98,17 +110,24 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload): 
   )
 
   const expiredIds: string[] = []
+  let successCount = 0
   results.forEach((result, idx) => {
-    if (result.status === 'rejected') {
-      const err = result.reason as { statusCode?: number }
+    if (result.status === 'fulfilled') {
+      successCount++
+    } else {
+      const err = result.reason as { statusCode?: number; body?: string }
       // 404/410 = subscription sudah tidak valid lagi (user uninstall, clear data, dll)
       if (err?.statusCode === 404 || err?.statusCode === 410) {
         expiredIds.push(subs[idx].id)
       } else {
-        console.error('[webpush] Gagal kirim push ke salah satu device:', err)
+        console.error(
+          `[webpush] Gagal kirim push ke device ${subs[idx].id} (statusCode: ${err?.statusCode}):`,
+          err?.body || err
+        )
       }
     }
   })
+  console.log(`[webpush] Push terkirim: ${successCount}/${subs.length} berhasil.`)
 
   if (expiredIds.length > 0) {
     await supabase.from('push_subscriptions').delete().in('id', expiredIds)

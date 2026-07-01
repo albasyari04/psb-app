@@ -40,6 +40,20 @@ export const translations = {
     settings_saved_toast:      'Pengaturan tersimpan',
     settings_back_home:        '← Kembali ke Beranda',
     settings_admin_label:      'ADMIN · PSB 2025/2026',
+    settings_admin_topbar_sub: 'Preferensi aplikasi sistem',
+    settings_display_row_sub:  'Atur mode tampilan, tema, dan ukuran teks',
+    settings_close:            'Tutup',
+
+    // ── Pengaturan Admin: section tambahan ───────────────────────
+    settings_section_account:  'Akun & Profil',
+    settings_account_title:    'Pengaturan Akun & Profil',
+    settings_account_sub:      'Kelola informasi akun, keamanan, dan profil Anda',
+    settings_section_notif:    'Notifikasi',
+    settings_notif_title:      'Notifikasi',
+    settings_notif_sub:        'Kelola preferensi notifikasi dan pengingat',
+    settings_section_help:     'Bantuan & Informasi',
+    settings_help_title:       'Bantuan & Informasi Aplikasi',
+    settings_help_sub:         'Temukan bantuan, panduan, dan informasi aplikasi',
 
     // ── Dashboard Siswa ──────────────────────────────────────────
     dashboard_greeting:       'Assalamu\'alaikum,',
@@ -150,6 +164,20 @@ export const translations = {
     settings_saved_toast:      'Settings saved',
     settings_back_home:        '← Back to Home',
     settings_admin_label:      'ADMIN · PSB 2025/2026',
+    settings_admin_topbar_sub: 'System app preferences',
+    settings_display_row_sub:  'Set display mode, theme, and text size',
+    settings_close:            'Close',
+
+    // ── Admin Settings: extra sections ───────────────────────────
+    settings_section_account:  'Account & Profile',
+    settings_account_title:    'Account & Profile Settings',
+    settings_account_sub:      'Manage your account info, security, and profile',
+    settings_section_notif:    'Notifications',
+    settings_notif_title:      'Notifications',
+    settings_notif_sub:        'Manage notification and reminder preferences',
+    settings_section_help:     'Help & Information',
+    settings_help_title:       'App Help & Information',
+    settings_help_sub:         'Find help, guides, and app information',
 
     // ── Dashboard Siswa ──────────────────────────────────────────
     dashboard_greeting:       'Assalamu\'alaikum,',

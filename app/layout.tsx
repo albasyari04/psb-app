@@ -1,14 +1,9 @@
 // app/layout.tsx
-//
-// CATATAN: Sesuaikan import lain (metadata, font, dll) dengan isi file
-// app/layout.tsx Anda yang sebenarnya kalau ada bagian lain yang berbeda.
-// Yang penting: <SettingsProvider> membungkus {children} di DALAM
-// <Providers>, dan Providers di-import sebagai named import sesuai
-// export aslinya di app/providers.tsx.
 
 import type { Metadata } from 'next'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import { Providers } from './providers'
+import RegisterServiceWorker from '@/app/RegisterServiceWorker'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -21,7 +16,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id">
       <body>
         <Providers>
-          <SettingsProvider>{children}</SettingsProvider>
+          <SettingsProvider>
+            {/* Mendaftarkan service worker (public/sw.js) agar:
+                1. Push notification bisa diterima walau app tidak dibuka
+                2. App bisa di-install sebagai PWA (Add to Home Screen)
+                Harus ada di RootLayout supaya jalan di semua halaman (siswa & admin) */}
+            <RegisterServiceWorker />
+            {children}
+          </SettingsProvider>
         </Providers>
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSettings, type FontSize, type Theme } from '@/contexts/SettingsContext'
-import type { Language } from '@/lib/i18n'
+import type { Language, TranslationKey } from '@/lib/i18n'
 import styles from './pengaturan.module.css'
 
 /* ════════════════════════════════════════════════════════════════
@@ -205,17 +205,19 @@ function ModalBahasa({
   language,
   onSelect,
   onClose,
+  t,
 }: {
   language: Language
   onSelect: (v: Language) => void
   onClose: () => void
+  t: (key: TranslationKey) => string
 }) {
   return (
     <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className={styles.modalSheet}>
         <div className={styles.modalHandle} />
-        <p className={styles.modalTitle}>Pilih Bahasa</p>
-        <p className={styles.modalSub}>Ubah bahasa tampilan seluruh aplikasi</p>
+        <p className={styles.modalTitle}>{t('siswa_settings_lang_title')}</p>
+        <p className={styles.modalSub}>{t('siswa_settings_lang_sub')}</p>
         <div className={styles.modalDivider} />
         <div className={styles.segment}>
           {(['id', 'en'] as Language[]).map((lang) => (
@@ -231,7 +233,7 @@ function ModalBahasa({
             </button>
           ))}
         </div>
-        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+        <button className={styles.modalCloseBtn} onClick={onClose}>{t('settings_close')}</button>
       </div>
     </div>
   )
@@ -244,17 +246,19 @@ function ModalTampilan({
   theme,
   onSelect,
   onClose,
+  t,
 }: {
   theme: Theme
   onSelect: (v: Theme) => void
   onClose: () => void
+  t: (key: TranslationKey) => string
 }) {
   return (
     <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className={styles.modalSheet}>
         <div className={styles.modalHandle} />
-        <p className={styles.modalTitle}>Mode Tampilan</p>
-        <p className={styles.modalSub}>Pilih antara tema terang atau gelap</p>
+        <p className={styles.modalTitle}>{t('settings_theme_title')}</p>
+        <p className={styles.modalSub}>{t('siswa_settings_theme_sub')}</p>
         <div className={styles.modalDivider} />
         <div className={styles.themeGrid}>
           {/* Light */}
@@ -277,7 +281,7 @@ function ModalTampilan({
               )}
             </div>
             <div className={styles.themeCardLabel}>
-              <IconSun /><span>Terang</span>
+              <IconSun /><span>{t('settings_theme_light')}</span>
             </div>
           </button>
           {/* Dark */}
@@ -300,11 +304,11 @@ function ModalTampilan({
               )}
             </div>
             <div className={styles.themeCardLabel}>
-              <IconMoon /><span>Gelap</span>
+              <IconMoon /><span>{t('settings_theme_dark')}</span>
             </div>
           </button>
         </div>
-        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+        <button className={styles.modalCloseBtn} onClick={onClose}>{t('settings_close')}</button>
       </div>
     </div>
   )
@@ -317,21 +321,23 @@ function ModalTeks({
   fontSize,
   onSelect,
   onClose,
+  t,
 }: {
   fontSize: FontSize
   onSelect: (v: FontSize) => void
   onClose: () => void
+  t: (key: TranslationKey) => string
 }) {
   return (
     <div className={styles.modalBackdrop} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className={styles.modalSheet}>
         <div className={styles.modalHandle} />
-        <p className={styles.modalTitle}>Ukuran Teks</p>
-        <p className={styles.modalSub}>Sesuaikan ukuran huruf agar nyaman dibaca</p>
+        <p className={styles.modalTitle}>{t('siswa_settings_font_title')}</p>
+        <p className={styles.modalSub}>{t('siswa_settings_font_sub')}</p>
         <div className={styles.modalDivider} />
         <div className={styles.fontGroup}>
           {(['small', 'medium', 'large'] as FontSize[]).map((size) => {
-            const label = size === 'small' ? 'Kecil' : size === 'large' ? 'Besar' : 'Sedang'
+            const label = size === 'small' ? t('settings_font_small') : size === 'large' ? t('settings_font_large') : t('settings_font_medium')
             const glyphClass = size === 'small' ? styles.fontGlyphSm : size === 'large' ? styles.fontGlyphLg : styles.fontGlyphMd
             return (
               <button
@@ -347,7 +353,7 @@ function ModalTeks({
             )
           })}
         </div>
-        <button className={styles.modalCloseBtn} onClick={onClose}>Tutup</button>
+        <button className={styles.modalCloseBtn} onClick={onClose}>{t('settings_close')}</button>
       </div>
     </div>
   )
@@ -366,6 +372,7 @@ export default function AdminPengaturanPage() {
     setFontSize,
     resetSettings,
     ready,
+    t,
   } = useSettings()
 
   const [showToast, setShowToast] = useState(false)
@@ -403,12 +410,12 @@ export default function AdminPengaturanPage() {
 
       {/* ══ TOP BAR ════════════════════════════════════════════════ */}
       <header className={styles.topBar}>
-        <Link href="/admin/dashboard" className={styles.backBtn} aria-label="Kembali ke Beranda">
+        <Link href="/admin/dashboard" className={styles.backBtn} aria-label={t('settings_back_home')}>
           <IconArrowLeft />
         </Link>
         <div className={styles.topBarCenter}>
-          <h1 className={styles.topBarTitle}>Pengaturan</h1>
-          <p className={styles.topBarSub}>Preferensi aplikasi sistem</p>
+          <h1 className={styles.topBarTitle}>{t('settings_title')}</h1>
+          <p className={styles.topBarSub}>{t('settings_admin_topbar_sub')}</p>
         </div>
         <div className={styles.topBarIconBtn}>
           <IconGear />
@@ -420,12 +427,12 @@ export default function AdminPengaturanPage() {
 
         {/* ── SECTION: AKUN & PROFIL ─────────────────────────────── */}
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>Akun &amp; Profil</p>
+          <p className={styles.sectionLabel}>{t('settings_section_account')}</p>
           <div className={styles.card}>
             <SettingRow
               icon={<IconPerson />}
-              title="Pengaturan Akun & Profil"
-              sub="Kelola informasi akun, keamanan, dan profil Anda"
+              title={t('settings_account_title')}
+              sub={t('settings_account_sub')}
               href="/admin/profile"
               isLast
             />
@@ -434,26 +441,26 @@ export default function AdminPengaturanPage() {
 
         {/* ── SECTION: PREFERENSI & TAMPILAN ───────────────────────── */}
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>Preferensi &amp; Tampilan</p>
+          <p className={styles.sectionLabel}>{t('settings_section_language')} &amp; {t('settings_section_display')}</p>
           <div className={styles.card}>
             <SettingRow
               icon={<IconGlobe />}
               title="Bahasa / Language"
-              sub="Ubah bahasa tampilan aplikasi"
+              sub={t('siswa_settings_lang_sub')}
               onClick={() => setModal('bahasa')}
             />
             <div className={styles.rowDivider} />
             <SettingRow
               icon={<IconMonitor />}
-              title="Tampilan"
-              sub="Atur mode tampilan, tema, dan ukuran teks"
+              title={t('settings_section_display')}
+              sub={t('settings_display_row_sub')}
               onClick={() => setModal('tampilan')}
             />
             <div className={styles.rowDivider} />
             <SettingRow
               icon={<IconTextSize />}
-              title="Teks"
-              sub="Sesuaikan ukuran huruf agar nyaman dibaca"
+              title={t('settings_section_text')}
+              sub={t('siswa_settings_font_sub')}
               onClick={() => setModal('teks')}
               isLast
             />
@@ -462,12 +469,12 @@ export default function AdminPengaturanPage() {
 
         {/* ── SECTION: NOTIFIKASI ────────────────────────────────────── */}
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>Notifikasi</p>
+          <p className={styles.sectionLabel}>{t('settings_section_notif')}</p>
           <div className={styles.card}>
             <SettingRow
               icon={<IconBell />}
-              title="Notifikasi"
-              sub="Kelola preferensi notifikasi dan pengingat"
+              title={t('settings_notif_title')}
+              sub={t('settings_notif_sub')}
               href="/admin/notifikasi"
               isLast
             />
@@ -476,12 +483,12 @@ export default function AdminPengaturanPage() {
 
         {/* ── SECTION: BANTUAN & INFORMASI ──────────────────────────── */}
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>Bantuan &amp; Informasi</p>
+          <p className={styles.sectionLabel}>{t('settings_section_help')}</p>
           <div className={styles.card}>
             <SettingRow
               icon={<IconHelp />}
-              title="Bantuan & Informasi Aplikasi"
-              sub="Temukan bantuan, panduan, dan informasi aplikasi"
+              title={t('settings_help_title')}
+              sub={t('settings_help_sub')}
               href="/admin/bantuan"
               isLast
             />
@@ -519,6 +526,7 @@ export default function AdminPengaturanPage() {
           language={language}
           onSelect={handle.language}
           onClose={() => setModal(null)}
+          t={t}
         />
       )}
       {modal === 'tampilan' && (
@@ -526,6 +534,7 @@ export default function AdminPengaturanPage() {
           theme={theme}
           onSelect={handle.theme}
           onClose={() => setModal(null)}
+          t={t}
         />
       )}
       {modal === 'teks' && (
@@ -533,6 +542,7 @@ export default function AdminPengaturanPage() {
           fontSize={fontSize}
           onSelect={handle.fontSize}
           onClose={() => setModal(null)}
+          t={t}
         />
       )}
 
