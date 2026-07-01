@@ -1,7 +1,6 @@
 'use client'
 import { useState, useRef } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ── Document Types ─────────────────────────────────────────────────────────
 const DOCUMENT_TYPES = [
@@ -167,23 +166,17 @@ export default function BerkasPage() {
         </div>
       )}
 
-      {/* ══════ HERO HEADER ══════ */}
-      <div className="up-header">
-        <div className="up-hero">
-          <div className="up-hero-text">
-            <h1 className="up-hero-title">Upload Berkas<br />Santri</h1>
-            <p className="up-hero-sub">
-              Unggah dokumen yang diperlukan sesuai persyaratan dengan mudah, cepat dan aman.
-            </p>
-          </div>
-          <div className="up-hero-img">
-            <Image
-              src="/icons/berkas-admin.png"
-              alt="Upload Berkas"
-              width={180}
-              height={180}
-              style={{ width: '200%', height: '75%', objectFit: 'contain' }}
-            />
+      {/* ══════ TOP BAR (STICKY) ══════ */}
+      <div className="up-topbar-wrap">
+        <div className="up-topbar">
+          <Link href="/siswa/dashboard" className="up-back-btn" aria-label="Kembali">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+          </Link>
+          <div className="up-topbar-text">
+            <h1 className="up-topbar-title">Upload Berkas Santri</h1>
+            <p className="up-topbar-sub">Preferensi aplikasi santri</p>
           </div>
         </div>
       </div>
@@ -351,15 +344,50 @@ export default function BerkasPage() {
               </>
             )}
           </button>
-          <Link href="/siswa/dashboard" className="up-btn-back">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Kembali ke Dashboard
-          </Link>
         </div>
 
       </div>
+
+      {/* ══════ BOTTOM NAVIGATION ══════ */}
+      <nav className="up-bottomnav">
+        <Link href="/siswa/dashboard" className="up-navitem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+          </svg>
+          <span className="up-navlabel">Beranda</span>
+        </Link>
+        <Link href="/siswa/berkas" className="up-navitem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="3" width="14" height="18" rx="2"/>
+            <line x1="8" y1="8" x2="16" y2="8"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+            <line x1="8" y1="16" x2="12" y2="16"/>
+          </svg>
+          <span className="up-navlabel">Daftar</span>
+        </Link>
+        <Link href="/siswa/bayar" className="up-navitem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="6" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+          <span className="up-navlabel">Bayar</span>
+        </Link>
+        <Link href="/siswa/status" className="up-navitem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 17 9 11 13 15 21 7"/>
+            <polyline points="14 7 21 7 21 14"/>
+          </svg>
+          <span className="up-navlabel">Status</span>
+        </Link>
+        <Link href="/siswa/profil" className="up-navitem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+          </svg>
+          <span className="up-navlabel">Profil</span>
+        </Link>
+      </nav>
     </div>
   )
 }
@@ -393,58 +421,41 @@ const css = `
 .up-toast-ok  { background:#ECFDF5; color:#065F46; border:1px solid #BBF7D0; }
 .up-toast-err { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
 
-/* ══════ HERO HEADER ══════ */
-.up-header {
-  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%);
-  position: relative;
-  overflow: hidden;
-  padding-top: 48px;
+/* ══════ TOP BAR (STICKY) ══════ */
+.up-topbar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
-.up-header::before {
-  content: '';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 200px; height: 200px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 50%;
+.up-topbar {
+  background: #fff;
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 20px 22px;
+  max-width: 480px; margin: 0 auto;
 }
-.up-header::after {
-  content: '';
-  position: absolute;
-  bottom: -40px; left: -40px;
-  width: 150px; height: 150px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 50%;
+.up-back-btn {
+  width: 52px; height: 52px; border-radius: 16px;
+  background: #DCFCE7; color: #16A34A;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; text-decoration: none;
+  transition: background .15s;
 }
-
-.up-hero {
-  display: flex;
-  align-items: flex-end;
-  padding: 20px 20px 0;
-  gap: 8px;
-  min-height: 160px;
-  position: relative;
-  z-index: 1;
+.up-back-btn:hover { background: #BBF7D0; }
+.up-topbar-text { min-width: 0; }
+.up-topbar-title {
+  font-size: 23px; font-weight: 800; color: #1F2937;
+  margin: 0 0 3px; letter-spacing: -.3px; line-height: 1.2;
 }
-.up-hero-text { flex: 1; padding-bottom: 20px; }
-.up-hero-title {
-  font-size: 28px; font-weight: 900; color: #fff;
-  margin: 0 0 10px; letter-spacing: -.5px; line-height: 1.15;
-}
-.up-hero-sub {
-  font-size: 12.5px; color: rgba(255,255,255,0.8); margin: 0;
-  line-height: 1.6; font-weight: 500; max-width: 200px;
-}
-.up-hero-img {
-  flex-shrink: 0; width: 140px; height: 140px;
-  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
-  align-self: flex-end;
+.up-topbar-sub {
+  font-size: 13px; color: #9CA3AF; margin: 0; font-weight: 500;
 }
 
 /* ══════ BODY ══════ */
 .up-body {
   max-width: 480px; margin: 0 auto;
-  padding: 0 14px 100px;
+  padding: 0 14px 110px;
   display: flex; flex-direction: column; gap: 14px;
 }
 
@@ -684,15 +695,24 @@ const css = `
 }
 @keyframes upSpin { to { transform: rotate(360deg); } }
 
-.up-btn-back {
-  background: #fff; border: 1.5px solid #E4E8F2;
-  border-radius: 14px; padding: 15px;
-  color: #374151; font-size: 13px; font-weight: 700;
-  text-align: center; text-decoration: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  transition: all .15s;
+/* ══════ BOTTOM NAVIGATION ══════ */
+.up-bottomnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: #fff;
+  border-top: 1px solid #EEF1F6;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+  max-width: 480px; margin: 0 auto;
 }
-.up-btn-back:hover { background: #F4F6FB; border-color: #86EFAC; }
+.up-navitem {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: #9CA3AF; text-decoration: none;
+  padding: 4px 10px; border-radius: 10px;
+  transition: color .15s;
+}
+.up-navitem:hover { color: #16A34A; }
+.up-navlabel {
+  font-size: 10.5px; font-weight: 600;
+}
 `

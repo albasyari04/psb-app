@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Jadwal {
@@ -75,7 +74,6 @@ export default function JadwalPage() {
   const [jadwalList, setJadwalList] = useState<Jadwal[]>([])
   const [loading, setLoading]       = useState(true)
   const [filter, setFilter]         = useState<FilterType>('Semua')
-  const [jadwalIconErr, setJadwalIconErr] = useState(false)
   const [bannerErr, setBannerErr]   = useState(false)
 
   useEffect(() => {
@@ -99,12 +97,6 @@ export default function JadwalPage() {
 
   const tabs: FilterType[] = ['Semua', 'Berlangsung', 'Akan Datang', 'Selesai']
 
-  const counts = {
-    total:       jadwalList.length,
-    berlangsung: jadwalList.filter(j => j.status === 'Berlangsung').length,
-    selesai:     jadwalList.filter(j => j.status === 'Selesai').length,
-  }
-
   return (
     <div style={{
       minHeight: '100dvh',
@@ -116,69 +108,43 @@ export default function JadwalPage() {
       overflowX: 'hidden',
     }}>
 
-      {/* ─── HERO BANNER ─── */}
+      {/* ══════ TOP BAR (STICKY) — persis gaya Upload Berkas Santri ══════ */}
       <div style={{
-        background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #6D28D9 100%)',
-        padding: '52px 20px 24px',
-        position: 'relative',
-        overflow: 'hidden',
-        /* Lurus — tidak ada border radius bawah */
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
+        background: '#fff',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
-        <div style={{ position: 'absolute', bottom: 10, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-
-        {/* Row: Title + Icon 3D */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, position: 'relative', zIndex: 1 }}>
-          <div style={{ flex: 1, paddingTop: 8 }}>
-            <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 800, margin: '0 0 6px', letterSpacing: -0.5 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          padding: '18px 20px 18px',
+        }}>
+          <Link
+            href="/siswa"
+            aria-label="Kembali"
+            style={{
+              width: 52, height: 52, borderRadius: 16,
+              background: '#DCFCE7', color: '#16A34A',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, textDecoration: 'none',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+          </Link>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: 23, fontWeight: 800, color: '#1F2937', margin: '0 0 3px', letterSpacing: -0.3, lineHeight: 1.2 }}>
               Jadwal Penting
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, margin: 0 }}>
+            <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
               PSMB 2025/2026 - PON PES AL ISTIQOMAH
             </p>
           </div>
-
-          {/* Icon 3D jadwal — lebih besar, tanpa background/border */}
-          <div style={{ width: 130, height: 120, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            {jadwalIconErr ? (
-              <span style={{ fontSize: 80 }}>📅</span>
-            ) : (
-              <Image
-                src="/icons/jadwal icon.png"
-                alt="Jadwal"
-                width={125}
-                height={115}
-                style={{ objectFit: 'contain', filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.35))' }}
-                onError={() => setJadwalIconErr(true)}
-              />
-            )}
-          </div>
         </div>
-
-        {/* Stats boxes — kotak putih transparan, angka besar, persis desain */}
-        {!loading && (
-          <div style={{ display: 'flex', gap: 10, position: 'relative', zIndex: 1 }}>
-            {[
-              { count: counts.total,        label: 'Telah',        numColor: '#fff',     bg: 'rgba(255,255,255,0.18)' },
-              { count: counts.berlangsung,  label: 'Berlangsung',  numColor: '#fff',     bg: 'rgba(255,255,255,0.18)' },
-              { count: counts.selesai,      label: 'Selesai',      numColor: '#4ADE80',  bg: 'rgba(255,255,255,0.18)' },
-            ].map((s) => (
-              <div key={s.label} style={{
-                flex: 1,
-                background: s.bg,
-                borderRadius: 14,
-                padding: '12px 8px',
-                textAlign: 'center',
-                backdropFilter: 'blur(6px)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}>
-                <div style={{ color: s.numColor, fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{s.count}</div>
-                <div style={{ color: 'rgba(255,255,255,0.82)', fontSize: 11, marginTop: 5, fontWeight: 500 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ─── FILTER TABS ─── persis desain: pill aktif ungu, sisanya teks biasa */}
@@ -186,7 +152,7 @@ export default function JadwalPage() {
         background: '#fff',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         position: 'sticky',
-        top: 0,
+        top: 88,
         zIndex: 20,
         padding: '12px 16px',
       }}>
