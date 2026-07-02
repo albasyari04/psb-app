@@ -108,6 +108,11 @@ const DATA_BIAYA: BiayaItem[] = [
   { no: 31, jenis: 'Administrasi Bangunan (SMA)',          jumlah: 'Rp. 600.000,-/1 Tahun',   nominal: 600000,  kategori: 'SMA' },
 ]
 
+// ─── Layout Constants ────────────────────────────────────────────────────────
+// ✅ FIX: header sekarang position:fixed (lihat render utama), jadi butuh
+// tinggi pasti untuk spacer di bawahnya supaya konten tidak ketutupan.
+const HEADER_HEIGHT = 92
+
 // ─── Utils ─────────────────────────────────────────────────────────────────────
 
 function formatRupiah(n: number) {
@@ -175,6 +180,13 @@ const IcReceipt = () => (
     <line x1="9" y1="17" x2="13" y2="17" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 )
+// ✅ FIX: ikon untuk header baru (back & settings), sesuai bayar_desain.png
+const IcBack = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M15 18l-6-6 6-6" stroke="#0F766E" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+
 
 // ─── Copy Button ────────────────────────────────────────────────────────────────
 
@@ -230,7 +242,7 @@ function RekeningCard({ item }: { item: typeof REKENING_INFO[0] }) {
       </p>
       {/* Nama */}
       <p style={{ fontSize: 10, color: '#64748B', margin: '0 0 12px', fontWeight: 500, fontFamily: 'inherit' }}>
-        a.n {item.name}
+        {item.name}
       </p>
       {/* Tombol salin dengan label "Salin Nomor" */}
       <CopyButton text={item.numberRaw} />
@@ -814,70 +826,48 @@ export default function SiswaPembayaranBayarPage() {
         </div>
       )}
 
-      {/* ── Hero Header ── SAMA PERSIS DENGAN HALAMAN PENGATURAN ── */}
+      {/* ── Header ── FIXED, sama persis dengan bayar_desain.png ──────────── */}
+      {/* ✅ FIX: position:fixed supaya header tetap di tempat saat konten di-scroll.
+          Pola ini sama dengan yang dipakai di halaman-halaman lain (position:fixed
+          + spacer div di bawahnya untuk mengisi ruang yang ditinggalkan). */}
       <div style={{
-        background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%)',
-        padding: '28px 20px 28px',
-        position: 'relative',
-        overflow: 'hidden',
-        minHeight: 120,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        background: '#fff',
+        borderBottom: '1px solid #F1F5F9',
+        padding: '18px 20px',
+        display: 'flex', alignItems: 'center', gap: 14,
+        maxWidth: 520, margin: '0 auto',
       }}>
-        {/* Dekorasi blur */}
-        <div style={{
-          position: 'absolute', top: -60, right: -40,
-          width: 180, height: 180, borderRadius: '50%',
-          background: 'rgba(99,102,241,0.15)',
-          filter: 'blur(40px)', zIndex: 0, pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -40, left: -30,
-          width: 140, height: 140, borderRadius: '50%',
-          background: 'rgba(139,92,246,0.12)',
-          filter: 'blur(35px)', zIndex: 0, pointerEvents: 'none',
-        }} />
+        <button
+          type="button"
+          onClick={() => router.back()}
+          aria-label="Kembali"
+          style={{
+            width: 40, height: 40, borderRadius: 14, flexShrink: 0,
+            background: '#ECFDF5', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <IcBack />
+        </button>
 
-        {/* Konten - Tanpa icon box, hanya teks */}
-        <div style={{ position: 'relative', zIndex: 2 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{
-            color: '#fff', fontWeight: 800, fontSize: 22,
-            margin: 0, letterSpacing: -0.3, fontFamily: 'inherit', lineHeight: 1.2,
+            color: '#0F172A', fontWeight: 800, fontSize: 20,
+            margin: 0, letterSpacing: -0.3, fontFamily: 'inherit', lineHeight: 1.25,
           }}>
             Pembayaran
           </h1>
           <p style={{
-            color: 'rgba(255,255,255,0.6)', fontWeight: 400, fontSize: 13,
-            margin: '4px 0 0', fontFamily: 'inherit',
+            color: '#94A3B8', fontWeight: 500, fontSize: 12.5,
+            margin: '2px 0 0', fontFamily: 'inherit',
           }}>
             Kelola transaksi pembayaran
           </p>
-
-          {/* Status chips - lebih simple */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: 20, padding: '4px 12px',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontFamily: 'inherit' }}>
-                {dikonfirmasiCount} dikonfirmasi
-              </span>
-            </div>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: 20, padding: '4px 12px',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FBBF24' }} />
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontFamily: 'inherit' }}>
-                {menungguCount} menunggu
-              </span>
-            </div>
-          </div>
         </div>
       </div>
+      {/* Spacer: mengisi ruang yang ditinggalkan header fixed di atas */}
+      <div style={{ height: HEADER_HEIGHT, flexShrink: 0 }} />
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
       <div style={{ padding: '22px 16px', maxWidth: 520, margin: '0 auto' }}>

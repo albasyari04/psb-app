@@ -11,12 +11,37 @@ const BUCKET         = 'avatars' // nama bucket di Supabase Storage
 export async function POST(req: NextRequest) {
   try {
     // ── 1. Auth check ──────────────────────────────────────────────────────
+    // Akun admin diidentifikasi via email (selaras dengan /api/profile/update
+    // yang meng-update tabel `admin` berdasarkan email, bukan id).
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // ── 2. Parse form data ─────────────────────────────────────────────────
+    // ── 2. Validasi Content-Type SEBELUM parsing ───────────────────────────
+    // ✅ FIX: sebelumnya langsung `await req.formData()`. Kalau Content-Type
+    // yang diterima server bukan multipart/form-data (misal karena diubah
+    // oleh Service Worker / middleware di tengah jalan), formData() akan
+    // throw error generik yang membingungkan. Di sini kita cek dulu secara
+    // eksplisit dan kasih pesan yang jelas + Content-Type asli yang diterima,
+    // supaya kalau masalah ini muncul lagi langsung ketahuan akar masalahnya
+    // tanpa perlu debug ulang dari nol.
+    const contentType = req.headers.get('content-type') ?? ''
+    if (!contentType.toLowerCase().includes('multipart/form-data')) {
+      console.error('[upload] Content-Type tidak sesuai. Diterima server:', contentType || '(kosong)')
+      return NextResponse.json(
+        {
+          error:
+            `Content-Type request tidak valid (diterima server: "${contentType || 'kosong'}"). ` +
+            `Ini biasanya bukan bug di form, tapi ada Service Worker atau middleware yang mengubah ` +
+            `request sebelum sampai ke server. Coba: DevTools → Application → Service Workers → Unregister, ` +
+            `lalu hard refresh dan coba lagi.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // ── 3. Parse form data ─────────────────────────────────────────────────
     const formData = await req.formData()
     const file     = formData.get('file') as File | null
 
@@ -24,7 +49,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File tidak ditemukan' }, { status: 400 })
     }
 
-    // ── 3. Validasi ukuran & tipe ──────────────────────────────────────────
+    // ── 4. Validasi ukuran & tipe file ─────────────────────────────────────
     if (file.size > MAX_SIZE_BYTES) {
       return NextResponse.json(
         { error: 'Ukuran file maksimal 2 MB' },
@@ -39,16 +64,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // ── 4. Upload ke Supabase Storage ──────────────────────────────────────
+    // ── 5. Upload ke Supabase Storage ──────────────────────────────────────
     const ext      = file.type.split('/')[1].replace('jpeg', 'jpg')
-    const filePath = `${session.user.id}/avatar.${ext}`
+    const safeId   = session.user.email.replace(/[^a-zA-Z0-9]/g, '_')
+    const filePath = `${safeId}/avatar.${ext}`
     const buffer   = Buffer.from(await file.arrayBuffer())
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET)
       .upload(filePath, buffer, {
-        contentType:  file.type,
-        upsert:       true, // overwrite jika sudah ada
+        contentType: file.type,
+        upsert:      true, // overwrite jika sudah ada
       })
 
     if (uploadError) {
@@ -56,19 +82,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: uploadError.message }, { status: 500 })
     }
 
-    // ── 5. Ambil public URL ────────────────────────────────────────────────
+    // ── 6. Ambil public URL ─────────────────────────────────────────────────
     const { data: urlData } = supabaseAdmin.storage
       .from(BUCKET)
       .getPublicUrl(filePath)
 
-    // Tambah cache-bust agar browser reload foto baru
+    // Cache-bust agar browser reload foto baru
     const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
 
-    // ── 6. Update avatar_url di tabel profiles ─────────────────────────────
+    // ── 7. Update avatar_url di tabel admin (berdasarkan email) ────────────
     const { error: dbError } = await supabaseAdmin
-      .from('profiles')
+      .from('admin')
       .update({ avatar_url: publicUrl })
-      .eq('id', session.user.id)
+      .eq('email', session.user.email)
 
     if (dbError) {
       console.error('[upload] DB update error:', dbError)
