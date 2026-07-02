@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -46,7 +47,7 @@ const IconArrowLeft = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <path
       d="M19 12H5M12 19l-7-7 7-7"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -56,10 +57,10 @@ const IconArrowLeft = () => (
 
 const IconGear = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="3" stroke="#7C3AED" strokeWidth="1.8" />
+    <circle cx="12" cy="12" r="3" stroke="var(--purple)" strokeWidth="1.8" />
     <path
       d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -101,27 +102,27 @@ const IconUser = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
     <path
       d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.9"
       strokeLinecap="round"
     />
-    <circle cx="12" cy="7" r="4" stroke="#7C3AED" strokeWidth="1.9" />
+    <circle cx="12" cy="7" r="4" stroke="var(--purple)" strokeWidth="1.9" />
   </svg>
 )
 
 const IconMail = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="4" width="20" height="16" rx="2" stroke="#7C3AED" strokeWidth="1.9" />
-    <path d="M2 8l10 6 10-6" stroke="#7C3AED" strokeWidth="1.9" strokeLinecap="round" />
+    <rect x="2" y="4" width="20" height="16" rx="2" stroke="var(--purple)" strokeWidth="1.9" />
+    <path d="M2 8l10 6 10-6" stroke="var(--purple)" strokeWidth="1.9" strokeLinecap="round" />
   </svg>
 )
 
 const IconBadge = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="8" r="5" stroke="#7C3AED" strokeWidth="1.9" />
+    <circle cx="12" cy="8" r="5" stroke="var(--purple)" strokeWidth="1.9" />
     <path
       d="M8.5 13.5L7 22l5-2.5 5 2.5-1.5-8.5"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.9"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -133,13 +134,13 @@ const IconHome = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <path
       d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
     <path
       d="M9 22V12h6v10"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -149,8 +150,8 @@ const IconHome = () => (
 
 const IconLock = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <rect x="5" y="11" width="14" height="10" rx="2" stroke="#7C3AED" strokeWidth="1.8" />
-    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" />
+    <rect x="5" y="11" width="14" height="10" rx="2" stroke="var(--purple)" strokeWidth="1.8" />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 )
 
@@ -158,18 +159,18 @@ const IconBell = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
     <path
       d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"
-      stroke="#7C3AED"
+      stroke="var(--purple)"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 )
 
 const IconChevronRight = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M9 6l6 6-6 6" stroke="#C4B5FD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 6l6 6-6 6" stroke="var(--violet-2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
@@ -194,16 +195,16 @@ const IconLogout = () => (
 
 const IconLayers = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M12 2l9 5-9 5-9-5z" stroke="#7C3AED" strokeWidth="1.8" strokeLinejoin="round" />
-    <path d="M3 12l9 5 9-5" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M3 16.5l9 5 9-5" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 2l9 5-9 5-9-5z" stroke="var(--purple)" strokeWidth="1.8" strokeLinejoin="round" />
+    <path d="M3 12l9 5 9-5" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M3 16.5l9 5 9-5" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
 const IconClock = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="9" stroke="#7C3AED" strokeWidth="1.8" />
-    <path d="M12 7v5l3.5 2" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="9" stroke="var(--purple)" strokeWidth="1.8" />
+    <path d="M12 7v5l3.5 2" stroke="var(--purple)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
@@ -212,13 +213,13 @@ const IconNavHome = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <path
       d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-      stroke={active ? '#7C3AED' : '#94A3B8'}
+      stroke={active ? 'var(--purple)' : 'var(--gray-light)'}
       strokeWidth="1.8"
       strokeLinejoin="round"
     />
     <path
       d="M9 22V12h6v10"
-      stroke={active ? '#7C3AED' : '#94A3B8'}
+      stroke={active ? 'var(--purple)' : 'var(--gray-light)'}
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -228,17 +229,17 @@ const IconNavHome = ({ active }: { active?: boolean }) => (
 
 const IconNavClipboard = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="5" y="3" width="14" height="18" rx="2" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" />
-    <path d="M9 3h6v2H9z" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" />
-    <path d="M9 10h6M9 14h4" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" strokeLinecap="round" />
+    <rect x="5" y="3" width="14" height="18" rx="2" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" />
+    <path d="M9 3h6v2H9z" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" />
+    <path d="M9 10h6M9 14h4" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 )
 
 const IconNavCard = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="5" width="20" height="14" rx="2" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" />
-    <path d="M2 10h20" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" />
-    <path d="M6 15h4" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" strokeLinecap="round" />
+    <rect x="2" y="5" width="20" height="14" rx="2" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" />
+    <path d="M2 10h20" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" />
+    <path d="M6 15h4" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 )
 
@@ -246,7 +247,7 @@ const IconNavBarChart = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <path
       d="M18 20V10M12 20V4M6 20v-6"
-      stroke={active ? '#7C3AED' : '#94A3B8'}
+      stroke={active ? 'var(--purple)' : 'var(--gray-light)'}
       strokeWidth="1.8"
       strokeLinecap="round"
     />
@@ -255,10 +256,10 @@ const IconNavBarChart = ({ active }: { active?: boolean }) => (
 
 const IconNavProfile = ({ active }: { active?: boolean }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="8" r="4" stroke={active ? '#7C3AED' : '#94A3B8'} strokeWidth="1.8" />
+    <circle cx="12" cy="8" r="4" stroke={active ? 'var(--purple)' : 'var(--gray-light)'} strokeWidth="1.8" />
     <path
       d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
-      stroke={active ? '#7C3AED' : '#94A3B8'}
+      stroke={active ? 'var(--purple)' : 'var(--gray-light)'}
       strokeWidth="1.8"
       strokeLinecap="round"
     />
@@ -271,6 +272,7 @@ const IconNavProfile = ({ active }: { active?: boolean }) => (
 export default function AdminProfilePage() {
   const router = useRouter()
   const { status } = useSession()
+  const { t } = useSettings()
 
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<AdminProfileData | null>(null)
@@ -329,10 +331,10 @@ export default function AdminProfilePage() {
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={s.page}>
+      <div style={s.page} className="admin-zoom-scope">
         <div style={s.loadingWrap}>
           <div style={s.spinner} />
-          <p style={s.loadingText}>Memuat profil…</p>
+          <p style={s.loadingText}>{t('profile_loading')}</p>
         </div>
         <style>{globalCss}</style>
       </div>
@@ -341,7 +343,7 @@ export default function AdminProfilePage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={s.page}>
+    <div style={s.page} className="admin-zoom-scope">
 
       {/* ── HEADER (putih simpel, sama pola dgn halaman Pengaturan) ───────── */}
       <div style={s.header}>
@@ -349,21 +351,21 @@ export default function AdminProfilePage() {
           onClick={() => router.back()}
           style={s.iconBtn}
           type="button"
-          aria-label="Kembali"
+          aria-label={t('chat_back')}
         >
           <IconArrowLeft />
         </button>
 
         <div style={s.headerCenter}>
-          <h1 style={s.headerTitle}>Profil Saya</h1>
-          <p style={s.headerSub}>Panel Admin</p>
+          <h1 style={s.headerTitle}>{t('profile_header_title')}</h1>
+          <p style={s.headerSub}>{t('profile_header_sub')}</p>
         </div>
 
         <button
           onClick={() => router.push('/admin/profile/edit')}
           style={s.iconBtn}
           type="button"
-          aria-label="Edit Profil"
+          aria-label={t('profile_edit_aria')}
         >
           <IconGear />
         </button>
@@ -386,7 +388,7 @@ export default function AdminProfilePage() {
             <button
               style={s.avatarCameraBtn}
               type="button"
-              aria-label="Ganti foto profil"
+              aria-label={t('profile_photo_aria')}
               onClick={() => router.push('/admin/profile/edit')}
             >
               <IconCamera />
@@ -406,26 +408,26 @@ export default function AdminProfilePage() {
             onClick={() => router.push('/admin/profile/edit')}
             style={s.editProfileBtn}
             type="button"
-            aria-label="Edit Profil"
+            aria-label={t('profile_edit_aria')}
           >
             <IconEdit />
           </button>
         </div>
 
         {/* ── INFORMASI AKUN ─────────────────────────────────────────────── */}
-        <p style={s.sectionLabel}>INFORMASI AKUN</p>
+        <p style={s.sectionLabel}>{t('profile_section_akun')}</p>
         <div style={s.card}>
-          <InfoRow icon={<IconUser />} label="Nama Lengkap" value={name} />
-          <InfoRow icon={<IconMail />} label="Email" value={email} />
-          <InfoRow icon={<IconBadge />} label="Peran" value={<span style={s.pillViolet}>{role}</span>} />
-          <InfoRow icon={<IconLayers />} label="Sistem" value={system} />
-          <InfoRow icon={<IconClock />} label="Terakhir Login" value={lastLogin} />
+          <InfoRow icon={<IconUser />} label={t('profile_label_nama')} value={name} />
+          <InfoRow icon={<IconMail />} label={t('profile_label_email')} value={email} />
+          <InfoRow icon={<IconBadge />} label={t('profile_label_peran')} value={<span style={s.pillViolet}>{role}</span>} />
+          <InfoRow icon={<IconLayers />} label={t('profile_label_sistem')} value={system} />
+          <InfoRow icon={<IconClock />} label={t('profile_label_login')} value={lastLogin} />
           <InfoRow
             icon={<IconShield />}
-            label="Status Akun"
+            label={t('profile_label_status')}
             value={
               <span style={isActive ? s.pillGreen : s.pillGray}>
-                {isActive ? 'Aktif' : 'Nonaktif'}
+                {isActive ? t('profile_status_aktif') : t('profile_status_nonaktif')}
               </span>
             }
             isLast
@@ -433,30 +435,30 @@ export default function AdminProfilePage() {
         </div>
 
         {/* ── MENU UTAMA (sama struktur dgn "Menu Utama" siswa) ──────────── */}
-        <p style={s.sectionLabel}>MENU UTAMA</p>
+        <p style={s.sectionLabel}>{t('profile_section_menu')}</p>
         <div style={s.card}>
           <MenuRow
             icon={<IconHome />}
-            title="Beranda"
-            subtitle="Kembali ke dashboard utama"
+            title={t('nav_beranda')}
+            subtitle={t('profile_menu_beranda_sub')}
             onClick={() => router.push('/admin/dashboard')}
           />
           <MenuRow
             icon={<IconEdit />}
-            title="Ubah Profil"
-            subtitle="Perbarui informasi profil Anda"
+            title={t('profile_menu_ubahprofil')}
+            subtitle={t('profile_menu_ubahprofil_sub')}
             onClick={() => router.push('/admin/profile/edit')}
           />
           <MenuRow
             icon={<IconLock />}
-            title="Ubah Password"
-            subtitle="Atur ulang password akun"
+            title={t('profile_menu_ubahpassword')}
+            subtitle={t('profile_menu_ubahpassword_sub')}
             onClick={() => router.push('/admin/profile/password')}
           />
           <MenuRow
             icon={<IconBell />}
-            title="Notifikasi"
-            subtitle="Kelola preferensi notifikasi"
+            title={t('settings_notif_title')}
+            subtitle={t('profile_menu_notifikasi_sub')}
             onClick={() => router.push('/admin/notifikasi')}
             isLast
           />
@@ -465,7 +467,7 @@ export default function AdminProfilePage() {
         {/* ── LOGOUT ──────────────────────────────────────────────────────── */}
         <button onClick={handleLogout} style={s.logoutBtn} type="button">
           <IconLogout />
-          <span>Keluar dari Akun</span>
+          <span>{t('profile_logout')}</span>
         </button>
 
         <p style={s.footerVersion}>PSB App v1.0 &middot; Admin Panel</p>
@@ -578,7 +580,7 @@ const s: Record<string, React.CSSProperties> = {
   /* ── Page shell ── */
   page: {
     minHeight: '100vh',
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
     maxWidth: 430,
     margin: '0 auto',
     position: 'relative',
@@ -598,14 +600,14 @@ const s: Record<string, React.CSSProperties> = {
     width: 32,
     height: 32,
     borderRadius: '50%',
-    border: '3px solid #EDE9FE',
-    borderTopColor: '#7C3AED',
+    border: '3px solid var(--purple-light)',
+    borderTopColor: 'var(--purple)',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: 13,
     fontWeight: 600,
-    color: '#6B7280',
+    color: 'var(--gray)',
     margin: 0,
   },
 
@@ -619,14 +621,14 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     gap: 12,
     padding: '20px 20px 16px',
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
   },
   iconBtn: {
     width: 42,
     height: 42,
     borderRadius: 12,
-    border: '1.5px solid #EDE9FE',
-    background: '#FFFFFF',
+    border: '1.5px solid var(--purple-light)',
+    background: 'var(--white)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -641,14 +643,14 @@ const s: Record<string, React.CSSProperties> = {
   headerTitle: {
     fontSize: 18.5,
     fontWeight: 800,
-    color: '#1F2937',
+    color: 'var(--ink)',
     margin: 0,
     letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 12,
     fontWeight: 500,
-    color: '#9CA3AF',
+    color: 'var(--gray-light)',
     margin: '2px 0 0',
   },
 
@@ -657,7 +659,7 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: 14,
-    background: '#FFFFFF',
+    background: 'var(--white)',
     borderRadius: 18,
     padding: '18px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(109,40,217,0.06)',
@@ -671,8 +673,8 @@ const s: Record<string, React.CSSProperties> = {
     width: 60,
     height: 60,
     borderRadius: '50%',
-    background: '#F5F3FF',
-    border: '2px solid #EDE9FE',
+    background: 'var(--purple-lighter)',
+    border: '2px solid var(--purple-light)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -686,7 +688,7 @@ const s: Record<string, React.CSSProperties> = {
   avatarInitials: {
     fontSize: 21,
     fontWeight: 800,
-    color: '#7C3AED',
+    color: 'var(--purple)',
   },
   avatarCameraBtn: {
     position: 'absolute',
@@ -695,8 +697,8 @@ const s: Record<string, React.CSSProperties> = {
     width: 22,
     height: 22,
     borderRadius: '50%',
-    background: '#7C3AED',
-    border: '2px solid #FFFFFF',
+    background: 'var(--purple)',
+    border: '2px solid var(--white)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -709,7 +711,7 @@ const s: Record<string, React.CSSProperties> = {
   identityName: {
     fontSize: 15.5,
     fontWeight: 800,
-    color: '#1F2937',
+    color: 'var(--ink)',
     margin: 0,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -718,7 +720,7 @@ const s: Record<string, React.CSSProperties> = {
   identityEmail: {
     fontSize: 12,
     fontWeight: 500,
-    color: '#9CA3AF',
+    color: 'var(--gray-light)',
     margin: '2px 0 7px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -728,20 +730,20 @@ const s: Record<string, React.CSSProperties> = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
     borderRadius: 20,
     padding: '4px 10px',
     fontSize: 11,
     fontWeight: 700,
-    color: '#7C3AED',
+    color: 'var(--purple)',
   },
   editProfileBtn: {
     width: 38,
     height: 38,
     borderRadius: 11,
     border: 'none',
-    background: '#F5F3FF',
-    color: '#7C3AED',
+    background: 'var(--purple-lighter)',
+    color: 'var(--purple)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -759,7 +761,7 @@ const s: Record<string, React.CSSProperties> = {
   quickStatsCard: {
     display: 'flex',
     alignItems: 'center',
-    background: '#FFFFFF',
+    background: 'var(--white)',
     borderRadius: 20,
     padding: '18px 8px',
     boxShadow: '0 4px 20px rgba(109,40,217,0.12)',
@@ -776,7 +778,7 @@ const s: Record<string, React.CSSProperties> = {
     width: 40,
     height: 40,
     borderRadius: 12,
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -784,31 +786,31 @@ const s: Record<string, React.CSSProperties> = {
   quickStatValue: {
     fontSize: 13,
     fontWeight: 800,
-    color: '#1F2937',
+    color: 'var(--ink)',
   },
   quickStatLabel: {
     fontSize: 10.5,
     fontWeight: 600,
-    color: '#9CA3AF',
+    color: 'var(--gray-light)',
   },
   quickStatDivider: {
     width: 1,
     height: 38,
-    background: '#EDE9FE',
+    background: 'var(--purple-light)',
   },
 
   /* ── Section label ── */
   sectionLabel: {
     fontSize: 11.5,
     fontWeight: 800,
-    color: '#7C3AED',
+    color: 'var(--purple)',
     letterSpacing: 0.6,
     margin: '0 4px 10px',
   },
 
   /* ── Card ── */
   card: {
-    background: '#FFFFFF',
+    background: 'var(--white)',
     borderRadius: 18,
     padding: '4px 18px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 6px 18px rgba(109,40,217,0.06)',
@@ -821,13 +823,13 @@ const s: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 14,
     padding: '15px 0',
-    borderBottom: '1px solid #F3F0FF',
+    borderBottom: '1px solid var(--purple-lighter)',
   },
   infoRowIconWrap: {
     width: 38,
     height: 38,
     borderRadius: 11,
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -844,12 +846,12 @@ const s: Record<string, React.CSSProperties> = {
   infoRowLabel: {
     fontSize: 12.5,
     fontWeight: 500,
-    color: '#9CA3AF',
+    color: 'var(--gray-light)',
   },
   infoRowValue: {
     fontSize: 13.5,
     fontWeight: 700,
-    color: '#1F2937',
+    color: 'var(--ink)',
     textAlign: 'right' as const,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -858,8 +860,8 @@ const s: Record<string, React.CSSProperties> = {
 
   pillViolet: {
     display: 'inline-block',
-    background: '#EDE9FE',
-    color: '#6D28D9',
+    background: 'var(--purple-light)',
+    color: 'var(--violet-1)',
     fontSize: 12,
     fontWeight: 700,
     borderRadius: 20,
@@ -876,8 +878,8 @@ const s: Record<string, React.CSSProperties> = {
   },
   pillGray: {
     display: 'inline-block',
-    background: '#F3F4F6',
-    color: '#6B7280',
+    background: 'var(--border)',
+    color: 'var(--gray)',
     fontSize: 12,
     fontWeight: 700,
     borderRadius: 20,
@@ -891,7 +893,7 @@ const s: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 14,
     padding: '14px 0',
-    borderBottom: '1px solid #F3F0FF',
+    borderBottom: '1px solid var(--purple-lighter)',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
@@ -901,7 +903,7 @@ const s: Record<string, React.CSSProperties> = {
     width: 40,
     height: 40,
     borderRadius: 12,
-    background: '#F5F3FF',
+    background: 'var(--purple-lighter)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -917,12 +919,12 @@ const s: Record<string, React.CSSProperties> = {
   menuRowTitle: {
     fontSize: 14,
     fontWeight: 700,
-    color: '#1F2937',
+    color: 'var(--ink)',
   },
   menuRowSubtitle: {
     fontSize: 11.5,
     fontWeight: 500,
-    color: '#9CA3AF',
+    color: 'var(--gray-light)',
   },
 
   /* ── Logout button ── */
@@ -947,7 +949,7 @@ const s: Record<string, React.CSSProperties> = {
     textAlign: 'center' as const,
     fontSize: 11.5,
     fontWeight: 500,
-    color: '#B7AEDB',
+    color: 'var(--purple-light)',
     marginBottom: 8,
   },
 
@@ -959,8 +961,8 @@ const s: Record<string, React.CSSProperties> = {
     transform: 'translateX(-50%)',
     width: '100%',
     maxWidth: 430,
-    background: '#FFFFFF',
-    borderTop: '1px solid #EDE9FE',
+    background: 'var(--white)',
+    borderTop: '1px solid var(--purple-light)',
     display: 'flex',
     padding: '10px 0 14px',
     zIndex: 10,
@@ -979,9 +981,9 @@ const s: Record<string, React.CSSProperties> = {
   navLabel: {
     fontSize: 10.5,
     fontWeight: 600,
-    color: '#94A3B8',
+    color: 'var(--gray-light)',
   },
   navLabelActive: {
-    color: '#7C3AED',
+    color: 'var(--purple)',
   },
 }

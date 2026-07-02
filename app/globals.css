@@ -78,6 +78,36 @@
   /* ensure admin topbar uses same translucent overlay as siswa */
   --topbar-bg-trans: rgba(255, 255, 255, 0.12);
   --topbar-border-trans: rgba(255, 255, 255, 0.25);
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ADMIN THEME TOKENS — GLOBAL
+     Dulu token warna ini (--violet-1, --white, --ink, dst) hanya di-scope
+     ke class `.shell` di dalam pengaturan.module.css, jadi TIDAK exist di
+     halaman admin lain (dashboard, notifikasi, verifikasi, dst). Sekarang
+     didefinisikan di :root supaya SEMUA halaman admin bisa pakai
+     var(--nama-token) dan otomatis ikut berubah saat data-theme="dark"
+     di-set oleh SettingsContext ke <html>.
+     ══════════════════════════════════════════════════════════════════════ */
+  --violet-1:       #6d28d9;
+  --violet-2:       #5b21b6;
+  --violet-3:       #4c1d95;
+  --purple:         #7c3aed;
+  --purple-light:   #ede9fe;
+  --purple-lighter: #f5f3ff;
+  --amber:          #d97706;
+  --amber-light:    #fef3c7;
+  --ink:            #0f172a;
+  --slate:          #475569;
+  --gray:           #64748b;
+  --gray-light:     #94a3b8;
+  --white:          #ffffff;
+  /* background konten halaman admin (dashboard, notifikasi, verifikasi, dst) */
+  --admin-page-bg:  #f4f3fa;
+
+  /* Glassmorphism bottom nav — butuh alpha, jadi token terpisah dari --white */
+  --nav-glass-bg:     rgba(255, 255, 255, 0.82);
+  --nav-glass-border: rgba(255, 255, 255, 0.9);
+  --nav-active-glow:  rgba(124, 58, 237, 0.18);
 }
 
 /* ── Reset ────────────────────────────────────────────────────────────────── */
@@ -3892,12 +3922,51 @@ h1, h2, h3, h4, h5 {
   border-top-color: rgba(124, 58, 237, 0.2);
 }
 
-/* NOTE: Override untuk halaman /admin/pengaturan TIDAK ditulis di sini.
-   CSS Module (pengaturan.module.css) menghasilkan nama class yang di-hash
-   saat build, sehingga selector global di file ini tidak bisa menarget
-   class-class tersebut secara langsung. Override dark mode untuk halaman
-   itu sekarang ditulis DI DALAM pengaturan.module.css sendiri, memakai
-   selector :global([data-theme='dark']) .card { ... } dst. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADMIN THEME TOKENS — DARK MODE OVERRIDE (GLOBAL)
+   Ini yang sebelumnya HANYA ditulis di dalam pengaturan.module.css
+   (:global([data-theme='dark']) .shell { ... }), makanya cuma halaman
+   Pengaturan yang berubah gelap. Sekarang override-nya di :root supaya
+   SEMUA halaman yang pakai var(--violet-1), var(--white), var(--ink), dst
+   ikut berubah juga.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme='dark'] {
+  --white:          #1e1b2e;
+  --border:         #2e2a40;
+  --ink:            #f1f0f5;
+  --slate:          #c9c5d8;
+  --gray:           #9892af;
+  --gray-light:     #8b86a3;
+  --purple-light:   #2e2740;
+  --purple-lighter: #241f36;
+  --admin-page-bg:  #15131f;
+  --card:           #1e1b2e;
+  --text:           #f1f0f5;
+  --muted:          #9892af;
+
+  --nav-glass-bg:     rgba(30, 27, 46, 0.85);
+  --nav-glass-border: rgba(46, 42, 64, 0.9);
+  --nav-active-glow:  rgba(124, 58, 237, 0.30);
+  color-scheme: dark;
+}
+
+/* Halaman yang masih pakai class lama (bukan var) tetap kebagian dark mode
+   selama mereka pakai class generik di bawah ini. */
+[data-theme='dark'] .admin-page-bg {
+  background: var(--admin-page-bg);
+}
+
+/* ── Halaman Verifikasi (.vrk-*) — dark mode ─────────────────────────── */
+[data-theme='dark'] .vrk-empty-title { color: var(--ink); }
+[data-theme='dark'] .vrk-empty-sub   { color: var(--gray-light); }
+[data-theme='dark'] .vrk-cards       { background: var(--white); border-color: var(--border); }
+[data-theme='dark'] .vrk-card:hover  { background: var(--purple-lighter); }
+[data-theme='dark'] .vrk-card:active { background: var(--purple-light); }
+[data-theme='dark'] .vrk-card-divider { border-bottom-color: var(--border); }
+[data-theme='dark'] .vrk-card-name   { color: var(--ink); }
+[data-theme='dark'] .vrk-card-jurusan,
+[data-theme='dark'] .vrk-meta-date   { color: var(--gray); }
+[data-theme='dark'] .vrk-btn-outline { background: var(--purple-light); color: var(--violet-1); border-color: var(--violet-2); }
 
 /* ── Form elements / inputs (fallback umum) ──────────────────────────── */
 [data-theme='dark'] input,
@@ -3931,4 +4000,20 @@ html {
 
 [data-font-size='large'] body {
   font-size: 1.1rem;
+}
+
+/* Banyak halaman admin masih menulis fontSize dalam px langsung di inline
+   style={{ fontSize: 14 }}, bukan rem — nilai px itu TIDAK relatif
+   terhadap root font-size di atas, jadi setting "Ukuran Font" efeknya nol
+   di halaman-halaman itu. `zoom` men-scale seluruh rendering (px maupun
+   rem, termasuk padding & icon) secara uniform tanpa perlu refactor semua
+   inline style satu-satu. Didukung luas di Chrome/Edge/Safari & WebView
+   Android (target utama app ini berdasarkan screenshot).
+   Halaman yang SUDAH pakai rem (mis. Pengaturan) sengaja dikecualikan
+   supaya tidak di-scale dua kali (rem scaling + zoom scaling). */
+[data-font-size='small'] .admin-zoom-scope {
+  zoom: 0.9;
+}
+[data-font-size='large'] .admin-zoom-scope {
+  zoom: 1.12;
 }

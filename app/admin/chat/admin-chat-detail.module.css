@@ -3,25 +3,26 @@
    ================================================================ */
 
 .shell {
-  --indigo-1: #6366F1;
-  --indigo-2: #4338CA;
-  --indigo-light: #EEF2FF;
+  /* Warna ungu/indigo, ink, slate, gray, border, bg dipakai dari token GLOBAL
+     (:root di globals.css) supaya otomatis ikut dark mode via
+     [data-theme='dark'] — TIDAK didefinisikan ulang lokal di sini seperti
+     sebelumnya (itu penyebab dark mode tidak pernah nyambung ke halaman ini). */
+  --indigo-1: var(--violet-2);
+  --indigo-2: var(--violet-1);
+  --indigo-light: var(--purple-lighter);
   --green: #16a34a;
   --green-light: #dcfce7;
   --green-lighter: #ecfdf5;
-  --amber: #d97706;
-  --amber-light: #fef3c7;
-  --ink: #111827;
-  --slate: #475569;
-  --gray: #64748b;
-  --gray-light: #94a3b8;
-  --border: #e2e8f0;
-  --bg: #f6f8fa;
-  --bubble-siswa: #ffffff;
-  --bubble-admin: linear-gradient(135deg, #6366F1, #4338CA);
+  /* --amber & --amber-light SENGAJA tidak didefinisikan ulang di sini —
+     biarkan cascade dari :root (globals.css) apa adanya. Redeklarasi lokal
+     var(--amber, fallback) di dalam .shell itu self-referential dan
+     menurut spec CSS jadi invalid (bukan jatuh ke fallback-nya). */
+  --bubble-siswa: var(--white);
+  --bubble-admin: linear-gradient(135deg, var(--indigo-1), var(--indigo-2));
 
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--bg);
+  background: var(--admin-page-bg);
+  color: var(--ink);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -98,7 +99,7 @@
   position: absolute;
   top: 46px;
   right: 0;
-  background: #fff;
+  background: var(--white);
   border-radius: 14px;
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
   padding: 6px;
@@ -120,7 +121,7 @@
   color: var(--ink);
   cursor: pointer;
 }
-.dropdownItem:hover { background: #f8fafc; }
+.dropdownItem:hover { background: var(--purple-lighter); }
 .dropdownItemDanger { color: #dc2626; }
 
 /* ══════════════════════════════════════════════════════════════
@@ -136,7 +137,7 @@
   background:
     radial-gradient(circle at 15% 8%, rgba(99, 102, 241, 0.05), transparent 40%),
     radial-gradient(circle at 85% 92%, rgba(99, 102, 241, 0.05), transparent 40%),
-    var(--bg);
+    var(--admin-page-bg);
 }
 .messageList::-webkit-scrollbar { width: 4px; }
 .messageList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -243,7 +244,7 @@
   align-items: flex-end;
   gap: 0.5rem;
   padding: 0.65rem 0.9rem;
-  background: #fff;
+  background: var(--white);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
   padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
@@ -254,12 +255,12 @@
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; cursor: pointer; transition: background 0.15s;
 }
-.attachBtn:hover { background: #e0e3ff; }
+.attachBtn:hover { background: var(--purple-light); }
 .attachBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .textareaWrap {
   flex: 1; display: flex; align-items: center;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 1.4rem;
+  background: var(--admin-page-bg); border: 1px solid var(--border); border-radius: 1.4rem;
   padding: 0.5rem 0.4rem 0.5rem 0.95rem;
 }
 .textarea {

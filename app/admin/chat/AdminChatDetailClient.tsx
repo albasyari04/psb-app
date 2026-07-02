@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import styles from './admin-chat-detail.module.css'
 import { useChatRealtime } from '@/lib/useChatRealtime'
+import { useSettings } from '@/contexts/SettingsContext'
 import type { ChatMessage, ChatThread } from '@/types/chat'
 
 /* ════════════════════════════════════════════════════════════════
@@ -97,22 +98,22 @@ function IconUnlock() {
 function formatTime(iso: string): string {
   try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } catch { return '' }
 }
-function formatDateLabel(iso: string): string {
+function formatDateLabel(iso: string, t: (key: import('@/lib/i18n').TranslationKey) => string): string {
   try {
     const d = new Date(iso)
     const today = new Date()
     const yesterday = new Date()
     yesterday.setDate(today.getDate() - 1)
     const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
-    if (sameDay(d, today)) return 'Hari ini'
-    if (sameDay(d, yesterday)) return 'Kemarin'
+    if (sameDay(d, today)) return t('chat_today')
+    if (sameDay(d, yesterday)) return t('chat_yesterday')
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
   } catch { return '' }
 }
-function groupByDate(messages: ChatMessage[]): { dateLabel: string; items: ChatMessage[] }[] {
+function groupByDate(messages: ChatMessage[], t: (key: import('@/lib/i18n').TranslationKey) => string): { dateLabel: string; items: ChatMessage[] }[] {
   const groups: { dateLabel: string; items: ChatMessage[] }[] = []
   for (const msg of messages) {
-    const label = formatDateLabel(msg.created_at)
+    const label = formatDateLabel(msg.created_at, t)
     const last = groups[groups.length - 1]
     if (last && last.dateLabel === label) last.items.push(msg)
     else groups.push({ dateLabel: label, items: [msg] })
@@ -125,6 +126,7 @@ function initials(name: string): string {
 
 export default function AdminChatDetailClient({ threadId }: { threadId: string }) {
   const router = useRouter()
+  const { t } = useSettings()
   const [thread, setThread] = useState<ChatThread | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(true)
@@ -180,7 +182,7 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
-      alert('Ukuran file maksimal 5MB.')
+      alert(t('chat_err_file_too_large'))
       return
     }
     setUploadingAttachment(true)
@@ -190,10 +192,10 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
       const res = await fetch('/api/admin/chat/upload', { method: 'POST', body: formData })
       const json = await res.json()
       if (res.ok) setAttachment({ url: json.data.url, nama: file.name })
-      else alert(json.error || 'Gagal mengunggah lampiran.')
+      else alert(json.error || t('chat_err_upload'))
     } catch (err) {
       console.error('Gagal upload lampiran:', err)
-      alert('Gagal mengunggah lampiran.')
+      alert(t('chat_err_upload'))
     } finally {
       setUploadingAttachment(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -272,13 +274,13 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
   }
 
   const isClosed = thread?.status === 'closed'
-  const grouped = groupByDate(messages)
+  const grouped = groupByDate(messages, t)
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} admin-zoom-scope`}>
       {/* ══ HEADER ══════════════════════════════════════════════════ */}
       <header className={styles.header}>
-        <Link href="/admin/chat" className={styles.backBtn} aria-label="Kembali">
+        <Link href="/admin/chat" className={styles.backBtn} aria-label={t('chat_back')}>
           <IconBack />
         </Link>
         <div className={styles.headerAvatar}>
@@ -290,18 +292,18 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
           )}
         </div>
         <div className={styles.headerText}>
-          <p className={styles.headerName}>{thread?.siswa_nama ?? 'Memuat...'}</p>
-          <p className={styles.headerStatus}>{isClosed ? 'Percakapan ditutup' : 'Santri terdaftar'}</p>
+          <p className={styles.headerName}>{thread?.siswa_nama ?? t('chat_loading_name')}</p>
+          <p className={styles.headerStatus}>{isClosed ? t('chat_status_closed') : t('chat_status_open')}</p>
         </div>
         <div className={styles.dropdownWrap}>
-          <button type="button" className={styles.headerMenuBtn} onClick={() => setMenuOpen((v) => !v)} aria-label="Menu">
+          <button type="button" className={styles.headerMenuBtn} onClick={() => setMenuOpen((v) => !v)} aria-label={t('chat_menu')}>
             <IconMore />
           </button>
           {menuOpen && (
             <div className={styles.dropdownMenu}>
               <button type="button" className={styles.dropdownItem} onClick={handleToggleStatus}>
                 {isClosed ? <IconUnlock /> : <IconLock />}
-                {isClosed ? 'Buka kembali chat' : 'Tutup percakapan'}
+                {isClosed ? t('chat_reopen') : t('chat_close_conv')}
               </button>
             </div>
           )}
@@ -318,8 +320,8 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
       ) : messages.length === 0 ? (
         <div className={styles.emptyWrap}>
           <div className={styles.emptyIconWrap}><IconChatBubble /></div>
-          <p className={styles.emptyTitle}>Belum ada pesan</p>
-          <p className={styles.emptyText}>Mulai percakapan dengan {thread?.siswa_nama ?? 'santri ini'}.</p>
+          <p className={styles.emptyTitle}>{t('chat_empty_title')}</p>
+          <p className={styles.emptyText}>{t('chat_empty_sub')} {thread?.siswa_nama ?? t('chat_empty_sub_fallback')}.</p>
         </div>
       ) : (
         <div className={styles.messageList} ref={listRef}>
@@ -348,7 +350,7 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
                         {msg.attachment_url && (
                           <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className={styles.bubbleAttachment}>
                             <IconDocument />
-                            <span>{msg.attachment_nama || 'Lampiran'}</span>
+                            <span>{msg.attachment_nama || t('chat_attachment_fallback')}</span>
                           </a>
                         )}
                         {msg.message}
@@ -369,7 +371,7 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
       {isClosed && (
         <div className={styles.closedBanner}>
           <IconAlert />
-          <span>Percakapan ini ditutup. Balasan akan otomatis membuka kembali chat.</span>
+          <span>{t('chat_closed_banner')}</span>
         </div>
       )}
 
@@ -377,7 +379,7 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
         <div className={styles.attachPreview}>
           <span className={styles.attachPreviewIcon}><IconDocument /></span>
           <span className={styles.attachPreviewName}>{attachment.nama}</span>
-          <button type="button" className={styles.attachPreviewRemove} onClick={() => setAttachment(null)} aria-label="Hapus lampiran">
+          <button type="button" className={styles.attachPreviewRemove} onClick={() => setAttachment(null)} aria-label={t('chat_remove_attachment')}>
             <IconClose />
           </button>
         </div>
@@ -390,14 +392,14 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
           className={styles.attachBtn}
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadingAttachment || sending}
-          aria-label="Lampirkan file"
+          aria-label={t('chat_attach_file')}
         >
           <IconPaperclip />
         </button>
         <div className={styles.textareaWrap}>
           <textarea
             className={styles.textarea}
-            placeholder="Tulis balasan..."
+            placeholder={t('chat_input_placeholder')}
             rows={1}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -410,7 +412,7 @@ export default function AdminChatDetailClient({ threadId }: { threadId: string }
           className={styles.sendBtn}
           onClick={handleSend}
           disabled={sending || uploadingAttachment || (!draft.trim() && !attachment)}
-          aria-label="Kirim balasan"
+          aria-label={t('chat_send')}
         >
           <IconSend />
         </button>

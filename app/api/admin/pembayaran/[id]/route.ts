@@ -6,12 +6,55 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import { createNotification, NotifTemplate } from '@/lib/notifications'
 
 // ✅ FIX: Di Next.js 15, `params` pada route handler dinamis ([id]) adalah
-// Promise<{ id: string }>, bukan object biasa lagi. Sebelumnya kode melakukan
-// `const { id } = context.params` (tanpa await), sehingga `id` selalu undefined
-// karena yang di-destructure adalah Promise itu sendiri, bukan isinya.
-// Itu sebabnya server selalu balas "Parameter ID tidak ditemukan" / 400,
-// padahal id-nya jelas ada di URL. Solusi: await context.params dulu.
+// Promise<{ id: string }>, bukan object biasa lagi.
 type RouteContext = { params: Promise<{ id: string }> }
+
+// ── FIX: kode error Postgres untuk foreign key violation ─────────────────────
+const PG_FOREIGN_KEY_VIOLATION = '23503'
+
+/**
+ * ✅ FIX: Root cause error "violates foreign key constraint
+ * pembayaran_confirmed_by_fkey" adalah kolom `confirmed_by` di tabel
+ * `pembayaran` mereferensikan tabel lain (mis. auth.users / admins), tapi
+ * `session.user.id` berasal dari NextAuth — bukan dari tabel yang
+ * direferensikan itu — sehingga ID-nya tidak pernah cocok dan Postgres
+ * menolak insert/update.
+ *
+ * Sambil constraint di database dibetulkan (lihat catatan di bawah),
+ * fungsi ini jadi lapisan aman: cek dulu apakah admin id yang login
+ * benar-benar ada di tabel yang dijadikan referensi FK. Kalau tidak ada,
+ * fallback ke null supaya UPDATE status pembayaran tetap berhasil
+ * (hanya kolom audit confirmed_by yang dikosongkan), bukan gagal total.
+ *
+ * ✅ Sudah dikonfirmasi lewat query information_schema di Supabase SQL Editor:
+ * pembayaran_confirmed_by_fkey → pembayaran.confirmed_by REFERENCES admin(id)
+ *
+ * Jadi akar masalahnya: session.user.id dari NextAuth tidak cocok dengan
+ * baris manapun di tabel `admin` (mis. login pakai email tapi id session
+ * berasal dari provider/JWT yang beda format dari admin.id di Supabase).
+ * Fungsi resolveConfirmedBy() di bawah memverifikasi dulu ke tabel `admin`
+ * sebelum dipakai, dan fallback ke null kalau tidak ketemu — supaya UPDATE
+ * pembayaran tidak gagal total.
+ */
+async function resolveConfirmedBy(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  adminId: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('admin') // ✅ FIX: FK pembayaran_confirmed_by_fkey merujuk ke tabel "admin" (bukan "admins")
+    .select('id')
+    .eq('id', adminId)
+    .maybeSingle()
+
+  if (error || !data) {
+    console.warn(
+      `[resolveConfirmedBy] Admin id "${adminId}" tidak ditemukan di tabel referensi FK. ` +
+      `confirmed_by akan diset null agar update tidak gagal.`
+    )
+    return null
+  }
+  return adminId
+}
 
 // ── PATCH: Admin konfirmasi atau tolak pembayaran ─────────────────────────────
 export async function PATCH(req: NextRequest, context: RouteContext) {
@@ -51,13 +94,17 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Pembayaran sudah dikonfirmasi sebelumnya' }, { status: 422 })
     }
 
+    // ✅ FIX: validasi admin id dulu sebelum dipakai sebagai confirmed_by
+    const confirmedBy =
+      aksi === 'dikonfirmasi' ? await resolveConfirmedBy(supabase, session.user.id) : null
+
     // Update status pembayaran
     const { data, error } = await supabase
       .from('pembayaran')
       .update({
         status:       aksi,
         catatan:      catatan,
-        confirmed_by: aksi === 'dikonfirmasi' ? session.user.id : null,
+        confirmed_by: confirmedBy,
         confirmed_at: aksi === 'dikonfirmasi' ? new Date().toISOString() : null,
         updated_at:   new Date().toISOString(),
       })
@@ -67,6 +114,13 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
     if (error) {
       console.error('[PATCH /api/admin/pembayaran/[id]]', error)
+      // ✅ FIX: pesan lebih jelas khusus untuk foreign key violation
+      if (error.code === PG_FOREIGN_KEY_VIOLATION) {
+        return NextResponse.json(
+          { error: 'Gagal menyimpan: data admin/referensi tidak valid (foreign key). Hubungi developer untuk cek constraint pembayaran_confirmed_by_fkey.' },
+          { status: 409 }
+        )
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -136,6 +190,11 @@ export async function PUT(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Pembayaran tidak ditemukan' }, { status: 404 })
     }
 
+    // ✅ FIX: validasi admin id dulu sebelum dipakai sebagai confirmed_by,
+    // supaya UPDATE tidak gagal dengan pembayaran_confirmed_by_fkey.
+    const confirmedBy =
+      status === 'dikonfirmasi' ? await resolveConfirmedBy(supabase, session.user.id) : null
+
     const { data, error } = await supabase
       .from('pembayaran')
       .update({
@@ -148,7 +207,7 @@ export async function PUT(req: NextRequest, context: RouteContext) {
         status,
         catatan: catatan ?? null,
         tanggal_bayar: tanggal_bayar || null,
-        confirmed_by: status === 'dikonfirmasi' ? session.user.id : null,
+        confirmed_by: confirmedBy,
         confirmed_at: status === 'dikonfirmasi' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       })
@@ -158,6 +217,13 @@ export async function PUT(req: NextRequest, context: RouteContext) {
 
     if (error) {
       console.error('[PUT /api/admin/pembayaran/[id]]', error)
+      // ✅ FIX: pesan lebih jelas khusus untuk foreign key violation
+      if (error.code === PG_FOREIGN_KEY_VIOLATION) {
+        return NextResponse.json(
+          { error: 'Gagal menyimpan: data admin/referensi tidak valid (foreign key). Hubungi developer untuk cek constraint pembayaran_confirmed_by_fkey.' },
+          { status: 409 }
+        )
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

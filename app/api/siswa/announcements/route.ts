@@ -1,8 +1,3 @@
-// app/api/siswa/announcements/route.ts
-// ── GET /api/siswa/announcements ─────────────────────────────────────────────
-// Read-only endpoint — tidak butuh autentikasi admin.
-// Siswa hanya bisa melihat pengumuman, tidak bisa CRUD.
-// Query params: ?tipe=Penting&q=keyword&limit=10
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
