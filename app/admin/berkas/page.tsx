@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type BerkasStatus = 'pending' | 'diverifikasi' | 'ditolak'
@@ -61,10 +62,11 @@ function initials(name: string) {
 
 // ── Badge ──────────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: BerkasStatus }) {
+  const { t } = useSettings()
   const map = {
-    pending:      { label: 'Menunggu',    bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
-    diverifikasi: { label: 'Diverifikasi', bg: '#DCFCE7', color: '#14532D', dot: '#16A34A' },
-    ditolak:      { label: 'Ditolak',     bg: '#FEE2E2', color: '#991B1B', dot: '#DC2626' },
+    pending:      { label: t('berkas_status_pending'),  bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
+    diverifikasi: { label: t('berkas_status_verified'), bg: '#DCFCE7', color: '#14532D', dot: '#16A34A' },
+    ditolak:      { label: t('berkas_status_rejected'), bg: '#FEE2E2', color: '#991B1B', dot: '#DC2626' },
   }
   const s = map[status] ?? map.pending
   return (
@@ -151,7 +153,7 @@ function DetailModal({
                 width: 32, 
                 height: 32,
                 borderRadius: '50%', 
-                background: '#fff', 
+                background: 'var(--white)', 
                 border: 'none', 
                 cursor: 'pointer',
                 fontSize: 16, 
@@ -170,7 +172,7 @@ function DetailModal({
                   height: '80vh', 
                   border: 'none', 
                   borderRadius: 12,
-                  background: '#fff',
+                  background: 'var(--white)',
                 }} 
               />
             ) : (
@@ -183,7 +185,7 @@ function DetailModal({
                   maxHeight: '85vh', 
                   borderRadius: 12, 
                   objectFit: 'contain',
-                  background: '#fff',
+                  background: 'var(--white)',
                 }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/icons/file-placeholder.png'
@@ -205,7 +207,7 @@ function DetailModal({
         pointerEvents: 'none',
       }}>
         <div style={{
-          background: '#fff', 
+          background: 'var(--white)', 
           borderRadius: 20, 
           width: '100%', 
           maxWidth: 620,
@@ -230,7 +232,7 @@ function DetailModal({
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                color: '#fff', 
+                color: 'var(--white)', 
                 fontWeight: 800, 
                 fontSize: 16,
                 flexShrink: 0,
@@ -238,10 +240,10 @@ function DetailModal({
                 {initials(item.users?.name ?? 'U')}
               </div>
               <div>
-                <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#111827' }}>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: 'var(--ink)' }}>
                   {item.users?.name ?? 'Nama tidak tersedia'}
                 </p>
-                <p style={{ margin: 0, fontSize: 12, color: '#6B7280', fontWeight: 500 }}>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--gray)', fontWeight: 500 }}>
                   {item.users?.email ?? '-'} &nbsp;·&nbsp; Dikirim {formatDate(item.updated_at)}
                 </p>
               </div>
@@ -249,7 +251,7 @@ function DetailModal({
             <button 
               onClick={onClose} 
               style={{
-                background: '#F3F4F6', 
+                background: 'var(--border)', 
                 border: 'none', 
                 borderRadius: 10,
                 width: 34, 
@@ -266,11 +268,11 @@ function DetailModal({
 
           <div style={{ padding: '20px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Status saat ini:</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--slate)' }}>Status saat ini:</span>
               <StatusBadge status={item.status ?? 'pending'} />
             </div>
 
-            <p style={{ fontSize: 13, fontWeight: 800, color: '#111827', margin: '0 0 10px' }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', margin: '0 0 10px' }}>
               Dokumen Diunggah ({uploaded.length}/{DOC_KEYS.length})
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
@@ -314,7 +316,7 @@ function DetailModal({
                   <button
                     onClick={() => setPreview(d.url!)}
                     style={{
-                      background: '#fff', 
+                      background: 'var(--white)', 
                       border: '1.5px solid #86EFAC',
                       borderRadius: 7, 
                       padding: '3px 9px',
@@ -332,7 +334,7 @@ function DetailModal({
 
             {missing.length > 0 && (
               <>
-                <p style={{ fontSize: 12, fontWeight: 700, color: '#9CA3AF', margin: '0 0 8px' }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--gray-light)', margin: '0 0 8px' }}>
                   Belum Diunggah ({missing.length})
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
@@ -352,7 +354,7 @@ function DetailModal({
             )}
 
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#374151', display: 'block', marginBottom: 6 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--slate)', display: 'block', marginBottom: 6 }}>
                 Catatan Admin (opsional)
               </label>
               <textarea
@@ -363,7 +365,7 @@ function DetailModal({
                 style={{
                   width: '100%', 
                   borderRadius: 12, 
-                  border: '1.5px solid #E5E7EB',
+                  border: '1.5px solid var(--border)',
                   padding: '10px 12px', 
                   fontSize: 13, 
                   fontFamily: 'inherit',
@@ -371,10 +373,10 @@ function DetailModal({
                   outline: 'none', 
                   boxSizing: 'border-box',
                   transition: 'border-color .2s',
-                  color: '#374151',
+                  color: 'var(--slate)',
                 }}
                 onFocus={e => e.target.style.borderColor = '#16A34A'}
-                onBlur={e => e.target.style.borderColor = '#E5E7EB'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
 
@@ -407,8 +409,8 @@ function DetailModal({
                   padding: '13px', 
                   borderRadius: 12, 
                   border: 'none',
-                  background: uploaded.length === 0 ? '#E5E7EB' : 'linear-gradient(135deg,#16A34A,#4ADE80)',
-                  color: uploaded.length === 0 ? '#9CA3AF' : '#fff',
+                  background: uploaded.length === 0 ? 'var(--border)' : 'linear-gradient(135deg,#16A34A,#4ADE80)',
+                  color: uploaded.length === 0 ? 'var(--gray-light)' : 'var(--white)',
                   fontWeight: 800, 
                   fontSize: 13,
                   cursor: (loading || uploaded.length === 0) ? 'not-allowed' : 'pointer',
@@ -430,6 +432,7 @@ function DetailModal({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function AdminBerkasPage() {
+  const { t } = useSettings()
   const [data, setData]       = useState<SiswaBerkas[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState<string | null>(null)
@@ -509,7 +512,10 @@ export default function AdminBerkasPage() {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100vh', background: '#F5F7FA' }}>
+    <div
+      className="admin-zoom-scope"
+      style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100vh', background: 'var(--admin-page-bg)' }}
+    >
       <style>{adminCss}</style>
 
       {toast && (
@@ -532,8 +538,8 @@ export default function AdminBerkasPage() {
           <div className="ab-header-content">
             <div className="ab-header-left">
               <div>
-                <h1 className="ab-title">Berkas Santri</h1>
-                <p className="ab-subtitle">Kelola dan verifikasi dokumen yang dikirim santri</p>
+                <h1 className="ab-title">{t('berkas_title')}</h1>
+                <p className="ab-subtitle">{t('berkas_sub')}</p>
               </div>
             </div>
             <div className="ab-header-right">
@@ -554,19 +560,19 @@ export default function AdminBerkasPage() {
         {/* Stats Cards - Sederhana seperti desain */}
         <div className="ab-stats">
           <div className="ab-stat-card">
-            <div className="ab-stat-label-top">Total Pengirim</div>
+            <div className="ab-stat-label-top">{t('berkas_stat_total')}</div>
             <div className="ab-stat-value-large">{stats.total}</div>
           </div>
           <div className="ab-stat-card">
-            <div className="ab-stat-label-top">Menunggu</div>
+            <div className="ab-stat-label-top">{t('berkas_stat_pending')}</div>
             <div className="ab-stat-value-large" style={{ color: '#F59E0B' }}>{stats.pending}</div>
           </div>
           <div className="ab-stat-card">
-            <div className="ab-stat-label-top">Diverifikasi</div>
+            <div className="ab-stat-label-top">{t('berkas_stat_verified')}</div>
             <div className="ab-stat-value-large" style={{ color: '#10B981' }}>{stats.verified}</div>
           </div>
           <div className="ab-stat-card">
-            <div className="ab-stat-label-top">Ditolak</div>
+            <div className="ab-stat-label-top">{t('berkas_stat_rejected')}</div>
             <div className="ab-stat-value-large" style={{ color: '#EF4444' }}>{stats.rejected}</div>
           </div>
         </div>
@@ -574,12 +580,12 @@ export default function AdminBerkasPage() {
         {/* Filter Bar */}
         <div className="ab-filter-bar">
           <div className="ab-search-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.2" strokeLinecap="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-light)" strokeWidth="2.2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input
               type="text"
-              placeholder="Cari nama atau email santri..."
+              placeholder={t('berkas_search_ph')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="ab-search-input"
@@ -595,7 +601,7 @@ export default function AdminBerkasPage() {
                 onClick={() => setFilter(f)}
                 className={`ab-filter-tab ${filter === f ? 'ab-filter-tab-active' : ''}`}
               >
-                {f === 'semua' ? 'Semua' : f === 'pending' ? 'Menunggu' : f === 'diverifikasi' ? 'Diverifikasi' : 'Ditolak'}
+                {f === 'semua' ? t('berkas_filter_all') : f === 'pending' ? t('berkas_status_pending') : f === 'diverifikasi' ? t('berkas_status_verified') : t('berkas_status_rejected')}
                 <span className="ab-tab-count">
                   {f === 'semua' ? stats.total : f === 'pending' ? stats.pending : f === 'diverifikasi' ? stats.verified : stats.rejected}
                 </span>
@@ -608,20 +614,20 @@ export default function AdminBerkasPage() {
         {loading ? (
           <div className="ab-loading">
             <div className="ab-spinner" />
-            <p>Memuat data berkas santri...</p>
+            <p>{t('berkas_loading')}</p>
           </div>
         ) : error ? (
           <div className="ab-error">
             <span style={{ fontSize: 32 }}>⚠️</span>
             <p style={{ fontWeight: 700, color: '#991B1B' }}>{error}</p>
-            <button onClick={fetchData} className="ab-retry-btn">Coba Lagi</button>
+            <button onClick={fetchData} className="ab-retry-btn">{t('berkas_retry')}</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="ab-empty">
             <span style={{ fontSize: 48 }}>📭</span>
-            <p style={{ fontWeight: 700, color: '#374151', margin: '8px 0 4px' }}>Tidak ada data</p>
-            <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>
-              {search ? `Tidak ditemukan hasil untuk "${search}"` : 'Belum ada santri yang mengirim berkas'}
+            <p style={{ fontWeight: 700, color: 'var(--slate)', margin: '8px 0 4px' }}>{t('berkas_empty')}</p>
+            <p style={{ fontSize: 13, color: 'var(--gray-light)', margin: 0 }}>
+              {search ? `${t('berkas_empty_search')} "${search}"` : t('berkas_empty_default')}
             </p>
           </div>
         ) : (
@@ -634,7 +640,7 @@ export default function AdminBerkasPage() {
                 <div
                   key={item.user_id}
                   className="ab-row"
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid #E5E7EB' : 'none' }}
+                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}
                 >
                   <div className="ab-row-left">
                     <div className="ab-row-info">
@@ -646,7 +652,7 @@ export default function AdminBerkasPage() {
                   <div className="ab-row-center">
                     <div className="ab-docs-info">
                       <span className="ab-docs-number">{docCount}</span>
-                      <span className="ab-docs-label">dari 6 dok</span>
+                      <span className="ab-docs-label">{t('berkas_row_docs')}</span>
                     </div>
                   </div>
 
@@ -663,7 +669,7 @@ export default function AdminBerkasPage() {
                       onClick={() => setSelected(item)}
                       className="ab-detail-btn"
                     >
-                      Detail
+                      {t('berkas_row_detail')}
                     </button>
                   </div>
                 </div>
@@ -756,7 +762,7 @@ const adminCss = `
 .ab-title {
   font-size: 22px;
   font-weight: 800;
-  color: #fff;
+  color: var(--white);
   margin: 0 0 2px;
   letter-spacing: -0.3px;
 }
@@ -784,12 +790,12 @@ const adminCss = `
   gap: 14px;
 }
 .ab-stat-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
   padding: 16px 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   text-align: center;
-  border: 1px solid #F0F0F0;
+  border: 1px solid var(--border);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .ab-stat-card:hover {
@@ -798,24 +804,24 @@ const adminCss = `
 }
 .ab-stat-label-top {
   font-size: 12px;
-  color: #6B7280;
+  color: var(--gray);
   font-weight: 600;
   margin-bottom: 4px;
 }
 .ab-stat-value-large {
   font-size: 28px;
   font-weight: 900;
-  color: #111827;
+  color: var(--ink);
   line-height: 1.2;
 }
 
 /* ── Filter Bar ── */
 .ab-filter-bar {
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
   padding: 14px 18px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border: 1px solid #F0F0F0;
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -824,8 +830,8 @@ const adminCss = `
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #F9FAFB;
-  border: 1.5px solid #E5E7EB;
+  background: var(--admin-page-bg);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 8px 12px;
   transition: border-color 0.2s;
@@ -839,17 +845,17 @@ const adminCss = `
   background: transparent;
   font-size: 13px;
   font-family: 'Inter', sans-serif;
-  color: #111827;
+  color: var(--ink);
   outline: none;
 }
 .ab-search-input::placeholder {
-  color: #9CA3AF;
+  color: var(--gray-light);
 }
 .ab-search-clear {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9CA3AF;
+  color: var(--gray-light);
   font-size: 13px;
   padding: 0 4px;
   display: flex;
@@ -866,11 +872,11 @@ const adminCss = `
   gap: 6px;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1.5px solid #E5E7EB;
-  background: #F9FAFB;
+  border: 1.5px solid var(--border);
+  background: var(--admin-page-bg);
   font-size: 12px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--gray);
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   transition: all 0.2s;
@@ -886,8 +892,8 @@ const adminCss = `
   font-weight: 700;
 }
 .ab-tab-count {
-  background: #E5E7EB;
-  color: #6B7280;
+  background: var(--border);
+  color: var(--gray);
   font-size: 10px;
   font-weight: 700;
   padding: 1px 7px;
@@ -900,10 +906,10 @@ const adminCss = `
 
 /* ── Card / Row ── */
 .ab-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border: 1px solid #F0F0F0;
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 .ab-row {
@@ -926,14 +932,14 @@ const adminCss = `
 .ab-row-name {
   font-size: 14px;
   font-weight: 700;
-  color: #111827;
+  color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .ab-row-email {
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--gray-light);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -954,11 +960,11 @@ const adminCss = `
 .ab-docs-number {
   font-size: 18px;
   font-weight: 900;
-  color: #111827;
+  color: var(--ink);
 }
 .ab-docs-label {
   font-size: 10px;
-  color: #9CA3AF;
+  color: var(--gray-light);
   font-weight: 600;
 }
 .ab-row-status {
@@ -969,7 +975,7 @@ const adminCss = `
 .ab-row-date {
   flex: 1.2;
   font-size: 12px;
-  color: #6B7280;
+  color: var(--gray);
   font-weight: 500;
 }
 .ab-row-action {
@@ -982,7 +988,7 @@ const adminCss = `
   border: none;
   border-radius: 8px;
   padding: 7px 18px;
-  color: #fff;
+  color: var(--white);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -998,13 +1004,13 @@ const adminCss = `
 .ab-footer-info {
   text-align: center;
   font-size: 12px;
-  color: #9CA3AF;
+  color: var(--gray-light);
   margin: 4px 0 0;
 }
 
 /* ── Loading / Empty / Error ── */
 .ab-loading, .ab-empty, .ab-error {
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
   padding: 60px 24px;
   display: flex;
@@ -1012,9 +1018,9 @@ const adminCss = `
   align-items: center;
   gap: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border: 1px solid #F0F0F0;
+  border: 1px solid var(--border);
   text-align: center;
-  color: #6B7280;
+  color: var(--gray);
   font-size: 13px;
   font-weight: 600;
 }
