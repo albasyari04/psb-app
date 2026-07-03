@@ -278,10 +278,23 @@ export default function AdminProfilePage() {
   const [profile, setProfile] = useState<AdminProfileData | null>(null)
 
   // ── Fetch profil admin ───────────────────────────────────────────────────
+  // ✅ FIX: root cause data tidak berubah setelah edit adalah Next.js App
+  // Router "Client-side Router Cache" — saat pindah dari /admin/profile/edit
+  // kembali ke /admin/profile, Next.js bisa menampilkan versi halaman yang
+  // sudah di-cache (default staleTime ~30 detik untuk route dinamis) TANPA
+  // menjalankan ulang useEffect ini, sehingga data lama tetap tampil.
+  //
+  // Perbaikan di sisi halaman ini (defense in depth, tidak bergantung pada
+  // halaman edit melakukan hal yang benar):
+  //   1) fetch pakai { cache: 'no-store' } supaya request tidak pernah
+  //      diambil dari cache HTTP.
+  //   2) fetchProfile dijalankan ulang setiap kali tab/halaman ini kembali
+  //      terlihat (event 'focus' & 'visibilitychange'), bukan hanya saat
+  //      mount pertama. Ini menutup celah Router Cache di atas.
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/admin/profile')
+      const res = await fetch('/api/admin/profile', { cache: 'no-store' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Gagal memuat profil')
       setProfile(data.profile)
@@ -297,6 +310,25 @@ export default function AdminProfilePage() {
     if (status === 'authenticated') fetchProfile()
     else if (status === 'unauthenticated') router.replace('/login')
   }, [status, fetchProfile, router])
+
+  // ✅ FIX: refetch otomatis saat halaman ini kembali difokus/terlihat.
+  // Ini yang membuat data langsung ter-update setelah kembali dari
+  // /admin/profile/edit, walaupun Next.js sempat menyajikan versi cache.
+  useEffect(() => {
+    if (status !== 'authenticated') return
+
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') fetchProfile()
+    }
+
+    window.addEventListener('focus', fetchProfile)
+    document.addEventListener('visibilitychange', handleVisible)
+
+    return () => {
+      window.removeEventListener('focus', fetchProfile)
+      document.removeEventListener('visibilitychange', handleVisible)
+    }
+  }, [status, fetchProfile])
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' })

@@ -4,6 +4,8 @@ import { getServerSession }          from 'next-auth'
 import { authOptions }               from '@/lib/auth'
 import { supabaseAdmin }             from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 interface UpdateBody {
   name?: string
   avatar_url?: string
@@ -17,15 +19,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // ✅ FIX: normalize email (lowercase + trim). Kalau email di tabel `admin`
+    // tersimpan dengan kapitalisasi berbeda dari session.user.email (misal
+    // dari provider OAuth), .eq('email', session.user.email) akan cocok
+    // dengan 0 baris — dan Supabase TIDAK menganggap itu error.
+    const sessionEmail = session.user.email.trim().toLowerCase()
+
     // ── 2. Parse body ────────────────────────────────────────────────────
-    // ✅ FIX UTAMA: sebelumnya route ini kemungkinan memanggil req.formData(),
-    // padahal client (app/admin/profile/edit/page.tsx) mengirim:
-    //   headers: { 'Content-Type': 'application/json' }
-    //   body: JSON.stringify({ name, avatar_url })
-    // req.formData() akan throw "Content-Type was not one of 'multipart/
-    // form-data' or 'application/x-www-form-urlencoded'" kalau Content-Type
-    // request bukan salah satu dari itu — persis pesan error yang muncul di
-    // UI. Solusinya: baca body sebagai JSON, bukan FormData.
     let body: UpdateBody
     try {
       body = await req.json()
@@ -46,17 +46,50 @@ export async function POST(req: NextRequest) {
     if (body.avatar_url) updateData.avatar_url = body.avatar_url
 
     // ── 4. Update tabel `admin` berdasarkan email ───────────────────────────
-    const { error: dbError } = await supabaseAdmin
+    // ✅ FIX UTAMA: sebelumnya `.update().eq('email', ...)` TANPA `.select()`.
+    // Supabase-js hanya melempar `error` kalau ada masalah koneksi/permission
+    // (misal RLS), BUKAN kalau kondisi `.eq()` cocok dengan 0 baris. Jadi
+    // sebelum ini, kalau email tidak match, API tetap balas `success: true`
+    // padahal tidak ada apa pun yang berubah di database — persis gejala
+    // "sudah disimpan tapi tetap sama" yang dilaporkan.
+    //
+    // Dengan menambahkan `.select()`, kita dapat array baris yang benar-benar
+    // ter-update. Kalau array-nya kosong, berarti email tidak cocok dengan
+    // baris manapun di tabel `admin` → kita balas error yang jelas, bukan
+    // pura-pura sukses. `ilike` dipakai (bukan `eq`) supaya matching email
+    // tidak sensitif huruf besar/kecil.
+    const { data: updatedRows, error: dbError } = await supabaseAdmin
       .from('admin')
       .update(updateData)
-      .eq('email', session.user.email)
+      .ilike('email', sessionEmail)
+      .select('email, name, avatar_url')
 
     if (dbError) {
       console.error('[profile/update] DB update error:', dbError)
       return NextResponse.json({ error: dbError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    if (!updatedRows || updatedRows.length === 0) {
+      // Ini kasus utama yang sebelumnya "silent fail". Sekarang kita
+      // laporkan dengan jelas ke frontend + log server supaya langsung
+      // ketahuan akar masalahnya (mismatch email antara session & tabel admin).
+      console.error(
+        '[profile/update] 0 baris ter-update. session email:',
+        sessionEmail,
+        '— cek apakah email ini benar-benar ada persis di tabel `admin`.'
+      )
+      return NextResponse.json(
+        {
+          error:
+            `Tidak ada data admin yang cocok dengan email "${sessionEmail}". ` +
+            `Cek kembali apakah kolom "email" di tabel admin persis sama ` +
+            `(tanpa spasi/beda kapitalisasi) dengan email akun ini.`,
+        },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ success: true, profile: updatedRows[0] }, { status: 200 })
 
   } catch (err: unknown) {
     console.error('[profile/update] Unhandled error:', err)

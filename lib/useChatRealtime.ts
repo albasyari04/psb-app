@@ -25,7 +25,10 @@ function getBrowserSupabase() {
  */
 export function useChatRealtime(threadId: string | null, onInsert: (msg: ChatMessage) => void) {
   const callbackRef = useRef(onInsert)
-  callbackRef.current = onInsert
+
+  useEffect(() => {
+    callbackRef.current = onInsert
+  }, [onInsert])
 
   useEffect(() => {
     if (!threadId) return
@@ -54,7 +57,10 @@ export function useChatRealtime(threadId: string | null, onInsert: (msg: ChatMes
  */
 export function useChatThreadsRealtime(onChange: () => void) {
   const callbackRef = useRef(onChange)
-  callbackRef.current = onChange
+
+  useEffect(() => {
+    callbackRef.current = onChange
+  }, [onChange])
 
   useEffect(() => {
     const supabase = getBrowserSupabase()

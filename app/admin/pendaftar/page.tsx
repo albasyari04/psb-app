@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type StatusFilter = 'semua' | 'menunggu' | 'diproses' | 'diterima' | 'ditolak'
@@ -26,11 +27,11 @@ interface StatsData {
 }
 
 // ─── Status Config ────────────────────────────────────────────────────────────
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string; border: string }> = {
-  menunggu: { label: 'Menunggu',  color: '#d97706', bg: '#fffbeb', dot: '#f59e0b', border: '#fde68a' },
-  diproses: { label: 'Diproses',  color: '#2563eb', bg: '#eff6ff', dot: '#3b82f6', border: '#bfdbfe' },
-  diterima: { label: 'Diterima',  color: '#059669', bg: '#f0fdf4', dot: '#10b981', border: '#a7f3d0' },
-  ditolak:  { label: 'Ditolak',   color: '#dc2626', bg: '#fff5f5', dot: '#ef4444', border: '#fca5a5' },
+const STATUS_CONFIG: Record<string, { label: string; labelEn: string; color: string; bg: string; dot: string; border: string }> = {
+  menunggu: { label: 'Menunggu', labelEn: 'Pending', color: '#d97706', bg: '#fffbeb', dot: '#f59e0b', border: '#fde68a' },
+  diproses: { label: 'Diproses', labelEn: 'Processing', color: '#2563eb', bg: '#eff6ff', dot: '#3b82f6', border: '#bfdbfe' },
+  diterima: { label: 'Diterima', labelEn: 'Accepted', color: '#059669', bg: '#f0fdf4', dot: '#10b981', border: '#a7f3d0' },
+  ditolak:  { label: 'Ditolak', labelEn: 'Rejected', color: '#dc2626', bg: '#fff5f5', dot: '#ef4444', border: '#fca5a5' },
 }
 
 // ─── Avatar Colors ────────────────────────────────────────────────────────────
@@ -137,11 +138,11 @@ const NavProfil = ({ active }: { active?: boolean }) => (
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({
-  label, sub, value, icon, iconBg, iconColor, borderColor, onClick, active,
+  label, sub, value, icon, iconBg, iconColor, borderColor, onClick, active, dark = false,
 }: {
   label: string; sub: string; value: number
   icon: React.ReactNode; iconBg: string; iconColor: string; borderColor: string
-  onClick?: () => void; active?: boolean
+  onClick?: () => void; active?: boolean; dark?: boolean
 }) {
   return (
     <button
@@ -166,14 +167,12 @@ const CSS = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  background: #f0f2f8;
   overflow-x: hidden;
   width: 100%;
 }
 
 .pnd-root {
   height: 100dvh;
-  background: #f0f2f8;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   max-width: 430px;
   width: 100%;
@@ -182,6 +181,221 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* ── Dark mode overrides ── */
+[data-theme='dark'] .pnd-root {
+  background: #15131f !important;
+}
+
+[data-theme='dark'] .pnd-topbar {
+  background: #1e1b2e !important;
+  border-bottom-color: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-topbar-title-wrap h1 {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .pnd-topbar-title-wrap p {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-sticky-header {
+  background: #1e1b2e !important;
+}
+
+[data-theme='dark'] .stat-card {
+  background: #1e1b2e !important;
+  border-color: #2e2a40 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+[data-theme='dark'] .stat-value {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .stat-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .stat-sub {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-search-box {
+  background: #1e1b2e !important;
+  border-color: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-search-box input {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .pnd-search-box input::placeholder {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-tab--off {
+  background: #1e1b2e !important;
+  color: #94a3b8 !important;
+  border-color: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-tab--off:hover {
+  border-color: #6366f1 !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-tab--off .pnd-tab-badge {
+  background: #2e2a40 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-tab--diterima-on {
+  background: #1e1b2e !important;
+  color: #6ee7b7 !important;
+  border-color: #065f46 !important;
+}
+
+[data-theme='dark'] .pnd-tab--diterima-on .pnd-tab-badge {
+  background: #065f46 !important;
+  color: #6ee7b7 !important;
+}
+
+[data-theme='dark'] .pnd-tab--ditolak-on {
+  background: #1e1b2e !important;
+  color: #fca5a5 !important;
+  border-color: #7f1d1d !important;
+}
+
+[data-theme='dark'] .pnd-tab--ditolak-on .pnd-tab-badge {
+  background: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme='dark'] .pnd-result-text {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-sort-btn {
+  background: #1e1b2e !important;
+  border-color: #2e2a40 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-sort-btn:hover {
+  border-color: #6366f1 !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-sort-dropdown {
+  background: #1e1b2e !important;
+  border-color: #2e2a40 !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4) !important;
+}
+
+[data-theme='dark'] .pnd-sort-opt {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .pnd-sort-opt:hover {
+  background: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-sort-opt--on {
+  color: #a5b4fc !important;
+  background: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-card {
+  background: #1e1b2e !important;
+  border-color: #2e2a40 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+}
+
+[data-theme='dark'] .pnd-card:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4) !important;
+}
+
+[data-theme='dark'] .pnd-card-name {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .pnd-card-school {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-card-date {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-card-nisn {
+  background: #2e2a40 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-detail-btn {
+  background: #2e2a40 !important;
+  border-color: #3d3655 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-detail-btn:hover {
+  background: #3d3655 !important;
+  border-color: #6366f1 !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-dots-btn {
+  background: #2e2a40 !important;
+  border-color: #3d3655 !important;
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-dots-btn:hover {
+  background: #3d3655 !important;
+  border-color: #6366f1 !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-empty h3 {
+  color: #94a3b8 !important;
+}
+
+[data-theme='dark'] .pnd-empty p {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-loading-text {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-bottom-nav {
+  background: #1e1b2e !important;
+  border-top-color: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-nav-btn {
+  color: #6b6885 !important;
+}
+
+[data-theme='dark'] .pnd-nav-btn--active {
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-nav-btn--active .pnd-nav-icon {
+  background: #2e2a40 !important;
+}
+
+[data-theme='dark'] .pnd-topbar-back-btn {
+  background: #2e2a40 !important;
+  border-color: #3d3655 !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme='dark'] .pnd-topbar-back-btn:hover {
+  background: #3d3655 !important;
 }
 
 /* ── Topbar ── */
@@ -209,7 +423,13 @@ html, body {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 80px;
+  background: #f0f2f8;
 }
+
+[data-theme='dark'] .pnd-scroll-content {
+  background: #15131f;
+}
+
 .pnd-topbar-left { display: flex; align-items: center; gap: 12px; }
 .pnd-topbar-back-btn {
   width: 40px; height: 40px; border-radius: 12px;
@@ -526,6 +746,8 @@ html, body {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function PendaftarPage() {
   const router = useRouter()
+  const { theme, language, t } = useSettings()
+  const isDark = theme === 'dark'
 
   const [items,     setItems]     = useState<PendaftarItem[]>([])
   const [stats,     setStats]     = useState<StatsData>({ total: 0, menunggu: 0, diproses: 0, diterima: 0, ditolak: 0 })
@@ -579,11 +801,18 @@ export default function PendaftarPage() {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
+  // ── Status labels dengan i18n ──
+  const getStatusLabel = (status: string) => {
+    const config = STATUS_CONFIG[status]
+    if (!config) return status
+    return language === 'en' ? config.labelEn : config.label
+  }
+
   const tabs: { key: StatusFilter; label: string; count: number }[] = [
-    { key: 'semua',    label: 'Semua',    count: stats.total    },
-    { key: 'menunggu', label: 'Menunggu', count: stats.menunggu },
-    { key: 'diterima', label: 'Diterima', count: stats.diterima },
-    { key: 'ditolak',  label: 'Ditolak',  count: stats.ditolak  },
+    { key: 'semua',    label: language === 'en' ? 'All' : 'Semua', count: stats.total    },
+    { key: 'menunggu', label: language === 'en' ? 'Pending' : 'Menunggu', count: stats.menunggu },
+    { key: 'diterima', label: language === 'en' ? 'Accepted' : 'Diterima', count: stats.diterima },
+    { key: 'ditolak',  label: language === 'en' ? 'Rejected' : 'Ditolak', count: stats.ditolak  },
   ]
 
   function tabCls(key: StatusFilter) {
@@ -593,29 +822,58 @@ export default function PendaftarPage() {
     return 'pnd-tab pnd-tab--on'
   }
 
+  // ── Stat card labels dengan i18n ──
+  const statLabels = {
+    total: {
+      label: language === 'en' ? 'Total Applicants' : 'Total Pendaftar',
+      sub: language === 'en' ? 'All data' : 'Semua data'
+    },
+    menunggu: {
+      label: language === 'en' ? 'Pending' : 'Menunggu Verifikasi',
+      sub: language === 'en' ? 'Needs review' : 'Perlu diperiksa'
+    },
+    diterima: {
+      label: language === 'en' ? 'Accepted' : 'Diterima',
+      sub: language === 'en' ? 'Passed' : 'Pendaftar lulus'
+    },
+    ditolak: {
+      label: language === 'en' ? 'Rejected' : 'Ditolak',
+      sub: language === 'en' ? 'Declined' : 'Pendaftar ditolak'
+    }
+  }
+
   return (
     <>
       <style>{CSS}</style>
-      <div className="pnd-root">
+      <div className="pnd-root" style={{ background: isDark ? '#15131f' : '#f0f2f8' }}>
 
-        {/* ── STICKY HEADER (tidak ikut scroll) ── */}
-        <div className="pnd-sticky-header">
+        {/* ── STICKY HEADER ── */}
+        <div className="pnd-sticky-header" style={{ background: isDark ? '#1e1b2e' : '#ffffff' }}>
 
         {/* ── Topbar ── */}
-        <div className="pnd-topbar">
+        <div className="pnd-topbar" style={{ background: isDark ? '#1e1b2e' : '#ffffff', borderBottomColor: isDark ? '#2e2a40' : '#e9eef2' }}>
           <div className="pnd-topbar-left">
-            <Link href="/admin" className="pnd-topbar-back-btn">
+            <Link href="/admin" className="pnd-topbar-back-btn" style={{ background: isDark ? '#2e2a40' : '#f5f3ff', borderColor: isDark ? '#3d3655' : '#ede9fe', color: isDark ? '#a5b4fc' : '#6d28d9' }}>
               <IconArrowLeft />
             </Link>
             <div className="pnd-topbar-title-wrap">
-              <h1>Pendaftar</h1>
-              <p>Kelola data pendaftar</p>
+              <h1 style={{ color: isDark ? '#f1f0f5' : '#0f172a' }}>
+                {language === 'en' ? 'Applicants' : 'Pendaftar'}
+              </h1>
+              <p style={{ color: isDark ? '#94a3b8' : '#94a3b8' }}>
+                {language === 'en' ? 'Manage applicant data' : 'Kelola data pendaftar'}
+              </p>
             </div>
           </div>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f8fafc',
-            border: '1.5px solid #e9eef2', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', color: '#6d28d9', flexShrink: 0 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ 
+            width: 40, height: 40, borderRadius: 12,
+            background: isDark ? '#2e2a40' : '#f8fafc',
+            border: isDark ? '1.5px solid #3d3655' : '1.5px solid #e9eef2',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center', color: isDark ? '#a5b4fc' : '#6d28d9',
+            flexShrink: 0 
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#6d28d9'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -627,45 +885,50 @@ export default function PendaftarPage() {
         </div>{/* end pnd-sticky-header */}
 
         {/* ── SCROLLABLE CONTENT ── */}
-        <div className="pnd-scroll-content">
+        <div className="pnd-scroll-content" style={{ background: isDark ? '#15131f' : '#f0f2f8' }}>
 
         {/* ── Stats ── */}
         <div className="pnd-stats">
           <StatCard
-            label="Total Pendaftar" sub="Semua data"
+            label={statLabels.total.label} sub={statLabels.total.sub}
             value={stats.total} icon={<IconUsers />}
             iconBg="#ede9fe" iconColor="#7c3aed" borderColor="#a78bfa"
             onClick={() => setStatusTab('semua')} active={statusTab === 'semua'}
+            dark={isDark}
           />
           <StatCard
-            label="Menunggu Verifikasi" sub="Perlu diperiksa"
+            label={statLabels.menunggu.label} sub={statLabels.menunggu.sub}
             value={stats.menunggu} icon={<IconClock />}
             iconBg="#fef3c7" iconColor="#d97706" borderColor="#fbbf24"
             onClick={() => setStatusTab('menunggu')} active={statusTab === 'menunggu'}
+            dark={isDark}
           />
           <StatCard
-            label="Diterima" sub="Pendaftar lulus"
+            label={statLabels.diterima.label} sub={statLabels.diterima.sub}
             value={stats.diterima} icon={<IconCheckCircle />}
             iconBg="#d1fae5" iconColor="#059669" borderColor="#34d399"
             onClick={() => setStatusTab('diterima')} active={statusTab === 'diterima'}
+            dark={isDark}
           />
           <StatCard
-            label="Ditolak" sub="Pendaftar ditolak"
+            label={statLabels.ditolak.label} sub={statLabels.ditolak.sub}
             value={stats.ditolak} icon={<IconXCircle />}
             iconBg="#fee2e2" iconColor="#dc2626" borderColor="#f87171"
             onClick={() => setStatusTab('ditolak')} active={statusTab === 'ditolak'}
+            dark={isDark}
           />
         </div>
 
         {/* ── Search Row ── */}
         <div className="pnd-search-row">
-          <div className="pnd-search-box">
+          <div className="pnd-search-box" style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#e8ecf2' }}>
             <IconSearch />
             <input
               type="text"
-              placeholder="Cari nama, NISN, atau sekolah"
+              placeholder={language === 'en' ? 'Search by name, NISN, or school' : 'Cari nama, NISN, atau sekolah'}
               value={search}
               onChange={e => setSearch(e.target.value)}
+              style={{ color: isDark ? '#f1f0f5' : '#0f172a' }}
             />
           </div>
         </div>
@@ -682,20 +945,27 @@ export default function PendaftarPage() {
 
         {/* ── Sort Bar ── */}
         <div className="pnd-sort-bar">
-          <span className="pnd-result-text">
-            {loading ? '—' : `${sorted.length} pendaftar ditemukan`}
+          <span className="pnd-result-text" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+            {loading ? '—' : `${sorted.length} ${language === 'en' ? 'applicants found' : 'pendaftar ditemukan'}`}
           </span>
           <div className="pnd-sort-wrap">
-            <button className="pnd-sort-btn" onClick={() => setShowSort(v => !v)}>
-              {sort === 'terbaru' ? 'Terbaru' : sort === 'terlama' ? 'Terlama' : 'Nama A–Z'}
+            <button className="pnd-sort-btn" onClick={() => setShowSort(v => !v)} style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#e8ecf2', color: isDark ? '#94a3b8' : '#475569' }}>
+              {sort === 'terbaru' ? (language === 'en' ? 'Newest' : 'Terbaru') : 
+               sort === 'terlama' ? (language === 'en' ? 'Oldest' : 'Terlama') : 
+               (language === 'en' ? 'Name A–Z' : 'Nama A–Z')}
               <IconChevronDown />
             </button>
             {showSort && (
-              <div className="pnd-sort-dropdown">
-                {([['terbaru', 'Terbaru'], ['terlama', 'Terlama'], ['nama', 'Nama A–Z']] as [SortOrder, string][]).map(([k, l]) => (
+              <div className="pnd-sort-dropdown" style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#e8ecf2' }}>
+                {([
+                  ['terbaru', language === 'en' ? 'Newest' : 'Terbaru'],
+                  ['terlama', language === 'en' ? 'Oldest' : 'Terlama'],
+                  ['nama', language === 'en' ? 'Name A–Z' : 'Nama A–Z']
+                ] as [SortOrder, string][]).map(([k, l]) => (
                   <button
                     key={k}
                     className={`pnd-sort-opt${sort === k ? ' pnd-sort-opt--on' : ''}`}
+                    style={{ color: isDark ? '#f1f0f5' : '#1e293b', background: isDark && sort === k ? '#2e2a40' : '' }}
                     onClick={() => { setSort(k); setShowSort(false) }}
                   >
                     {l}
@@ -711,33 +981,43 @@ export default function PendaftarPage() {
           {loading ? (
             <div className="pnd-loading-wrap">
               <div className="pnd-spinner" />
-              <span className="pnd-loading-text">Memuat data...</span>
+              <span className="pnd-loading-text" style={{ color: isDark ? '#6b6885' : '#94a3b8' }}>
+                {language === 'en' ? 'Loading data...' : 'Memuat data...'}
+              </span>
             </div>
           ) : sorted.length === 0 ? (
             <div className="pnd-empty">
               <div className="pnd-empty-icon">📭</div>
-              <h3>Tidak ada pendaftar</h3>
-              <p>Belum ada data yang sesuai filter ini</p>
+              <h3 style={{ color: isDark ? '#94a3b8' : '#475569' }}>
+                {language === 'en' ? 'No applicants' : 'Tidak ada pendaftar'}
+              </h3>
+              <p style={{ color: isDark ? '#6b6885' : '#94a3b8' }}>
+                {language === 'en' ? 'No data matches this filter' : 'Belum ada data yang sesuai filter ini'}
+              </p>
             </div>
           ) : sorted.map(item => {
             const sc  = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.menunggu
             const av  = getAvatarColor(item.nama_lengkap ?? 'A')
             const d   = item.created_at ? new Date(item.created_at) : null
             const dateStr = d
-              ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-                + '\n' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+              ? d.toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                + '\n' + d.toLocaleTimeString(language === 'en' ? 'en-US' : 'id-ID', { hour: '2-digit', minute: '2-digit' })
               : '—'
 
             return (
-              <div key={item.id} className="pnd-card">
+              <div key={item.id} className="pnd-card" style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#f1f5f9' }}>
                 <div className="pnd-card-av" style={{ background: av.bg, color: av.text }}>
                   {item.nama_lengkap?.charAt(0)?.toUpperCase() ?? '?'}
                 </div>
                 <div className="pnd-card-body">
                   <div className="pnd-card-top-row">
                     <div className="pnd-card-name-wrap">
-                      <div className="pnd-card-name">{item.nama_lengkap}</div>
-                      <div className="pnd-card-school">{item.asal_sekolah ?? '—'}</div>
+                      <div className="pnd-card-name" style={{ color: isDark ? '#f1f0f5' : '#0f172a' }}>
+                        {item.nama_lengkap}
+                      </div>
+                      <div className="pnd-card-school" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+                        {item.asal_sekolah ?? '—'}
+                      </div>
                     </div>
                     <div className="pnd-card-right-col">
                       <div
@@ -745,21 +1025,28 @@ export default function PendaftarPage() {
                         style={{ background: sc.bg, color: sc.color, borderColor: sc.border }}
                       >
                         <div className="pnd-status-pill-dot" style={{ background: sc.dot }} />
-                        {sc.label}
+                        {getStatusLabel(item.status)}
                       </div>
-                      <div className="pnd-card-date">{dateStr}</div>
+                      <div className="pnd-card-date" style={{ color: isDark ? '#6b6885' : '#94a3b8' }}>
+                        {dateStr}
+                      </div>
                     </div>
                   </div>
                   <div className="pnd-card-bottom-row">
-                    <div className="pnd-card-nisn">NISN: {item.nisn ?? '—'}</div>
+                    <div className="pnd-card-nisn" style={{ background: isDark ? '#2e2a40' : '#f4f6fa', color: isDark ? '#94a3b8' : '#475569' }}>
+                      NISN: {item.nisn ?? '—'}
+                    </div>
                     <div className="pnd-card-actions">
                       <button
                         className="pnd-detail-btn"
+                        style={{ background: isDark ? '#2e2a40' : '#f4f6fa', borderColor: isDark ? '#3d3655' : '#e8ecf2', color: isDark ? '#94a3b8' : '#475569' }}
                         onClick={() => router.push(`/admin/pendaftar/${item.id}`)}
                       >
-                        <IconEye /> Lihat Detail
+                        <IconEye /> {language === 'en' ? 'View Details' : 'Lihat Detail'}
                       </button>
-                      <div className="pnd-dots-btn"><IconDots /></div>
+                      <div className="pnd-dots-btn" style={{ background: isDark ? '#2e2a40' : '#f4f6fa', borderColor: isDark ? '#3d3655' : '#e8ecf2', color: isDark ? '#6b6885' : '#94a3b8' }}>
+                        <IconDots />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -769,26 +1056,26 @@ export default function PendaftarPage() {
         </div>
 
         {/* ── Bottom Nav ── */}
-        <nav className="pnd-bottom-nav">
+        <nav className="pnd-bottom-nav" style={{ background: isDark ? '#1e1b2e' : '#fff', borderTopColor: isDark ? '#2e2a40' : '#f1f5f9' }}>
           <button className="pnd-nav-btn" onClick={() => router.push('/admin')}>
             <div className="pnd-nav-icon"><NavHome /></div>
-            Beranda
+            {language === 'en' ? 'Home' : 'Beranda'}
           </button>
           <button className="pnd-nav-btn pnd-nav-btn--active" onClick={() => router.push('/admin/pendaftar')}>
             <div className="pnd-nav-icon"><NavPendaftar active /></div>
-            Pendaftar
+            {language === 'en' ? 'Applicants' : 'Pendaftar'}
           </button>
           <button className="pnd-nav-btn" onClick={() => router.push('/admin/pendaftaran')}>
             <div className="pnd-nav-icon"><NavPendaftaran /></div>
-            Pendaftaran
+            {language === 'en' ? 'Registration' : 'Pendaftaran'}
           </button>
           <button className="pnd-nav-btn" onClick={() => router.push('/admin/laporan')}>
             <div className="pnd-nav-icon"><NavLaporan /></div>
-            Laporan
+            {language === 'en' ? 'Reports' : 'Laporan'}
           </button>
           <button className="pnd-nav-btn" onClick={() => router.push('/admin/profil')}>
             <div className="pnd-nav-icon"><NavProfil /></div>
-            Profil
+            {language === 'en' ? 'Profile' : 'Profil'}
           </button>
         </nav>
         </div>{/* end pnd-scroll-content */}

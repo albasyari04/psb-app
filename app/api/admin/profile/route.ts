@@ -21,6 +21,12 @@ import { supabaseAdmin }    from '@/lib/supabase'
 //
 // (Solusi jangka panjang yang lebih benar: tambahkan definisi tabel `admin`
 // ke database.types.ts, biasanya lewat `supabase gen types typescript`.)
+// ✅ FIX tambahan: pastikan route ini TIDAK PERNAH di-cache secara statis oleh
+// Next.js (Full Route Cache), apa pun kondisinya. getServerSession sebenarnya
+// sudah membuat route ini dinamis secara otomatis (karena baca cookies), tapi
+// baris ini membuatnya eksplisit dan aman dari perubahan Next.js di masa depan.
+export const dynamic = 'force-dynamic'
+
 interface AdminRow {
   name?: string | null
   email: string

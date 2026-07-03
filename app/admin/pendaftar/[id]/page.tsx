@@ -3,24 +3,25 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Pendaftaran } from '@/types'
+import { useSettings } from '@/contexts/SettingsContext'
 
 type Action = 'diterima' | 'ditolak' | 'diproses' | null
 
 // ─── Status Config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, {
-  label: string; color: string; bg: string; dot: string;
+  label: string; labelEn: string; color: string; bg: string; dot: string;
   borderColor: string;
 }> = {
-  menunggu: { label: 'Menunggu Verifikasi', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b', borderColor: '#fde68a' },
-  diproses: { label: 'Sedang Diproses',     color: '#2563eb', bg: '#dbeafe', dot: '#3b82f6', borderColor: '#bfdbfe' },
-  diterima: { label: 'Diterima',            color: '#059669', bg: '#d1fae5', dot: '#10b981', borderColor: '#a7f3d0' },
-  ditolak:  { label: 'Ditolak',             color: '#dc2626', bg: '#fee2e2', dot: '#ef4444', borderColor: '#fca5a5' },
+  menunggu: { label: 'Menunggu Verifikasi', labelEn: 'Pending Verification', color: '#d97706', bg: '#fef3c7', dot: '#f59e0b', borderColor: '#fde68a' },
+  diproses: { label: 'Sedang Diproses', labelEn: 'Processing', color: '#2563eb', bg: '#dbeafe', dot: '#3b82f6', borderColor: '#bfdbfe' },
+  diterima: { label: 'Diterima', labelEn: 'Accepted', color: '#059669', bg: '#d1fae5', dot: '#10b981', borderColor: '#a7f3d0' },
+  ditolak:  { label: 'Ditolak', labelEn: 'Rejected', color: '#dc2626', bg: '#fee2e2', dot: '#ef4444', borderColor: '#fca5a5' },
 }
 
-const CONFIRM_CONFIG: Record<string, { label: string; icon: string; btnBg: string; btnText: string }> = {
-  diterima: { label: 'Terima Pendaftar',   icon: '🎉', btnBg: 'linear-gradient(135deg,#059669,#10b981)', btnText: '#fff' },
-  ditolak:  { label: 'Tolak Pendaftar',    icon: '❌', btnBg: 'linear-gradient(135deg,#dc2626,#ef4444)', btnText: '#fff' },
-  diproses: { label: 'Tandai Diproses',    icon: '🔄', btnBg: 'linear-gradient(135deg,#2563eb,#3b82f6)', btnText: '#fff' },
+const CONFIRM_CONFIG: Record<string, { label: string; labelEn: string; icon: string; btnBg: string; btnText: string }> = {
+  diterima: { label: 'Terima Pendaftar', labelEn: 'Accept Applicant', icon: '🎉', btnBg: 'linear-gradient(135deg,#059669,#10b981)', btnText: '#fff' },
+  ditolak:  { label: 'Tolak Pendaftar', labelEn: 'Reject Applicant', icon: '❌', btnBg: 'linear-gradient(135deg,#dc2626,#ef4444)', btnText: '#fff' },
+  diproses: { label: 'Tandai Diproses', labelEn: 'Mark as Processing', icon: '🔄', btnBg: 'linear-gradient(135deg,#2563eb,#3b82f6)', btnText: '#fff' },
 }
 
 const AV_BG = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
@@ -128,7 +129,7 @@ const IconCheckCircleFill = () => (
 
 // ─── Info Row ─────────────────────────────────────────────────────────────────
 function InfoRow({
-  label, value, valueIcon, valueIconBg, valueIconColor, multiline,
+  label, value, valueIcon, valueIconBg, valueIconColor, multiline, dark = false,
 }: {
   label: string
   value?: string | number | null
@@ -136,11 +137,14 @@ function InfoRow({
   valueIconBg?: string
   valueIconColor?: string
   multiline?: boolean
+  dark?: boolean
 }) {
   return (
     <div className={`det-info-row${multiline ? ' det-info-row--multiline' : ''}`}>
-      <span className="det-info-label">{label}</span>
-      <span className="det-info-val">
+      <span className="det-info-label" style={{ color: dark ? '#94a3b8' : '#94a3b8' }}>
+        {label}
+      </span>
+      <span className="det-info-val" style={{ color: dark ? '#f1f0f5' : '#1e293b' }}>
         {valueIcon && (
           <span
             className="det-info-val-icon"
@@ -157,17 +161,19 @@ function InfoRow({
 
 // ─── Section Card ─────────────────────────────────────────────────────────────
 function SectionCard({
-  icon, title, accent, children,
+  icon, title, accent, children, dark = false,
 }: {
-  icon: React.ReactNode; title: string; accent: string; children: React.ReactNode
+  icon: React.ReactNode; title: string; accent: string; children: React.ReactNode; dark?: boolean
 }) {
   return (
-    <div className="det-section-card">
-      <div className="det-section-header">
+    <div className="det-section-card" style={{ background: dark ? '#1e1b2e' : '#fff', borderColor: dark ? '#2e2a40' : '#f1f5f9' }}>
+      <div className="det-section-header" style={{ borderBottomColor: dark ? '#2e2a40' : '#f1f5f9' }}>
         <div className="det-section-icon" style={{ background: accent + '1c', color: accent }}>
           {icon}
         </div>
-        <span className="det-section-title">{title}</span>
+        <span className="det-section-title" style={{ color: dark ? '#f1f0f5' : '#1e293b' }}>
+          {title}
+        </span>
         <span className="det-section-chevron" style={{ color: accent }}>
           <IconChevronDown />
         </span>
@@ -187,6 +193,8 @@ export default function DetailPendaftarPage({
 }) {
   const { id }   = use(params)
   const router   = useRouter()
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
 
   const [data,     setData]     = useState<Pendaftaran | null>(null)
   const [catatan,  setCatatan]  = useState('')
@@ -224,20 +232,39 @@ export default function DetailPendaftarPage({
     finally { setLoading(false) }
   }
 
+  // ── Helper: get status label based on language ──
+  const getStatusLabel = (status: string) => {
+    const config = STATUS_CONFIG[status]
+    if (!config) return status
+    return language === 'en' ? config.labelEn : config.label
+  }
+
+  // ── Helper: get confirm label based on language ──
+  const getConfirmLabel = (action: Action) => {
+    if (!action) return ''
+    const config = CONFIRM_CONFIG[action]
+    if (!config) return ''
+    return language === 'en' ? config.labelEn : config.label
+  }
+
   // ── Loading ──
   if (!data && !fetchErr) return (
-    <div className="det-splash">
+    <div className="det-splash" style={{ background: isDark ? '#15131f' : '#f0f1f8' }}>
       <div className="det-spinner" />
-      <p className="det-splash-text">Memuat data pendaftar...</p>
+      <p className="det-splash-text" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+        {language === 'en' ? 'Loading applicant data...' : 'Memuat data pendaftar...'}
+      </p>
     </div>
   )
 
   // ── Error ──
   if (fetchErr) return (
-    <div className="det-splash">
+    <div className="det-splash" style={{ background: isDark ? '#15131f' : '#f0f1f8' }}>
       <div style={{ fontSize: 48 }}>⚠️</div>
-      <p className="det-splash-text">{fetchErr}</p>
-      <button className="det-back-link" onClick={() => router.back()}>← Kembali</button>
+      <p className="det-splash-text" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{fetchErr}</p>
+      <button className="det-back-link" onClick={() => router.back()}>
+        {language === 'en' ? '← Back' : '← Kembali'}
+      </button>
     </div>
   )
 
@@ -248,33 +275,33 @@ export default function DetailPendaftarPage({
   const isLaki         = jenisKelamin.startsWith('l')
   const jenisKelaminLabel =
     !data!.jenis_kelamin ? undefined :
-    isLaki ? 'Laki-laki' : 'Perempuan'
+    isLaki ? (language === 'en' ? 'Male' : 'Laki-laki') : (language === 'en' ? 'Female' : 'Perempuan')
 
   const infoRowsTop: [string, string | number | undefined | null][] = [
     ['NISN',          data!.nisn],
     ['NIK',           data!.nik],
-    ['Tempat Lahir',  data!.tempat_lahir],
-    ['Tanggal Lahir', data!.tanggal_lahir
-      ? new Date(data!.tanggal_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    [language === 'en' ? 'Place of Birth' : 'Tempat Lahir', data!.tempat_lahir],
+    [language === 'en' ? 'Date of Birth' : 'Tanggal Lahir', data!.tanggal_lahir
+      ? new Date(data!.tanggal_lahir).toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
       : undefined],
   ]
   const infoRowsBottom: [string, string | number | undefined | null][] = [
-    ['Agama',       data!.agama],
-    ['No. HP / WA', data!.no_hp],
+    [language === 'en' ? 'Religion' : 'Agama', data!.agama],
+    [language === 'en' ? 'Phone / WA' : 'No. HP / WA', data!.no_hp],
   ]
 
   const akademikRows: [string, string | number | undefined | null][] = [
-    ['Asal Sekolah',    data!.asal_sekolah],
+    [language === 'en' ? 'School Origin' : 'Asal Sekolah', data!.asal_sekolah],
     ['NPSN',            data!.npsn],
-    ['Jurusan Pilihan', (data as Pendaftaran & { jurusan_pilihan?: string }).jurusan_pilihan],
+    [language === 'en' ? 'Major Choice' : 'Jurusan Pilihan', (data as Pendaftaran & { jurusan_pilihan?: string }).jurusan_pilihan],
   ]
 
   const orangtuaRows: [string, string | number | undefined | null][] = [
-    ['Nama Ayah',        data!.nama_ayah],
-    ['Nama Ibu',         data!.nama_ibu],
-    ['Pekerjaan Ayah',   data!.pekerjaan_ayah],
-    ['Pekerjaan Ibu',    data!.pekerjaan_ibu],
-    ['No. HP Orang Tua', data!.no_hp_ortu],
+    [language === 'en' ? "Father's Name" : 'Nama Ayah', data!.nama_ayah],
+    [language === 'en' ? "Mother's Name" : 'Nama Ibu', data!.nama_ibu],
+    [language === 'en' ? "Father's Occupation" : 'Pekerjaan Ayah', data!.pekerjaan_ayah],
+    [language === 'en' ? "Mother's Occupation" : 'Pekerjaan Ibu', data!.pekerjaan_ibu],
+    [language === 'en' ? "Parent's Phone" : 'No. HP Orang Tua', data!.no_hp_ortu],
   ]
 
   return (
@@ -284,7 +311,6 @@ export default function DetailPendaftarPage({
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .det-root {
           height: 100dvh;
-          background: #f0f1f8;
           font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           max-width: 430px;
           width: 100%;
@@ -295,16 +321,117 @@ export default function DetailPendaftarPage({
           overflow: hidden;
         }
 
+        /* ── Dark mode overrides ── */
+        [data-theme='dark'] .det-root {
+          background: #15131f;
+        }
+        [data-theme='dark'] .det-topbar {
+          background: #1e1b2e !important;
+          border-bottom-color: #2e2a40 !important;
+        }
+        [data-theme='dark'] .det-topbar-title {
+          color: #f1f0f5 !important;
+        }
+        [data-theme='dark'] .det-back-btn {
+          background: #2e2a40 !important;
+          border-color: #3d3655 !important;
+          color: #a5b4fc !important;
+        }
+        [data-theme='dark'] .det-back-btn:hover {
+          background: #3d3655 !important;
+        }
+        [data-theme='dark'] .det-menu-btn {
+          background: #2e2a40 !important;
+          border-color: #3d3655 !important;
+          color: #a5b4fc !important;
+        }
+        [data-theme='dark'] .det-menu-btn:hover {
+          background: #3d3655 !important;
+        }
+        [data-theme='dark'] .det-section-card {
+          background: #1e1b2e !important;
+          border: 1px solid #2e2a40 !important;
+        }
+        [data-theme='dark'] .det-section-header {
+          border-bottom-color: #2e2a40 !important;
+        }
+        [data-theme='dark'] .det-section-title {
+          color: #f1f0f5 !important;
+        }
+        [data-theme='dark'] .det-info-row {
+          border-bottom: 1px solid #2e2a40;
+        }
+        [data-theme='dark'] .det-info-label {
+          color: #94a3b8 !important;
+        }
+        [data-theme='dark'] .det-info-val {
+          color: #f1f0f5 !important;
+        }
+        [data-theme='dark'] .det-textarea {
+          background: #1e1b2e !important;
+          border-color: #2e2a40 !important;
+          color: #f1f0f5 !important;
+        }
+        [data-theme='dark'] .det-textarea:focus {
+          border-color: #6366f1 !important;
+        }
+        [data-theme='dark'] .det-textarea::placeholder {
+          color: #6b6885 !important;
+        }
+        [data-theme='dark'] .det-catatan-info {
+          background: #2e2a40 !important;
+          border-color: #3d3655 !important;
+          color: #94a3b8 !important;
+        }
+        [data-theme='dark'] .det-catatan-readonly {
+          background: #2e2a40 !important;
+          border-color: #3d3655 !important;
+          color: #94a3b8 !important;
+        }
+        [data-theme='dark'] .det-sheet {
+          background: #1e1b2e !important;
+        }
+        [data-theme='dark'] .det-sheet-title {
+          color: #f1f0f5 !important;
+        }
+        [data-theme='dark'] .det-sheet-sub {
+          color: #94a3b8 !important;
+        }
+        [data-theme='dark'] .det-sheet-cancel {
+          background: #2e2a40 !important;
+          color: #94a3b8 !important;
+        }
+        [data-theme='dark'] .det-sheet-handle {
+          background: #3d3655 !important;
+        }
+        [data-theme='dark'] .det-id-name {
+          color: #1e1b3a !important;
+        }
+        [data-theme='dark'] .det-id-school {
+          color: rgba(30,27,58,0.65) !important;
+        }
+        [data-theme='dark'] .det-hero {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #a78bfa 100%) !important;
+        }
+        [data-theme='dark'] .det-final-banner {
+          background: rgba(255,255,255,0.55) !important;
+        }
+        [data-theme='dark'] .det-final-banner-title {
+          color: #4338ca !important;
+        }
+        [data-theme='dark'] .det-final-banner-sub {
+          color: #4b4470 !important;
+        }
+
         /* ── Splash ── */
         .det-splash {
           min-height: 100vh;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           gap: 16px;
-          background: #f0f1f8;
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .det-splash-text { font-size: 15px; font-weight: 600; color: #64748b; }
+        .det-splash-text { font-size: 15px; font-weight: 600; }
         .det-spinner {
           width: 42px; height: 42px;
           border: 3px solid #e2e8f0;
@@ -321,7 +448,7 @@ export default function DetailPendaftarPage({
           cursor: pointer; font-family: inherit; margin-top: 8px;
         }
 
-        /* ── Topbar (sticky, tidak ikut scroll) ── */
+        /* ── Topbar (sticky) ── */
         .det-topbar {
           display: flex; align-items: center; justify-content: space-between;
           padding: 0.9rem 1rem 0.85rem;
@@ -440,7 +567,6 @@ export default function DetailPendaftarPage({
         }
 
         /* ── Content ── */
-        /* ── Scrollable area ── */
         .det-scroll-content {
           flex: 1;
           overflow-y: auto;
@@ -459,6 +585,7 @@ export default function DetailPendaftarPage({
           border-radius: 18px;
           overflow: hidden;
           box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          border: 1px solid #f1f5f9;
         }
         .det-section-header {
           display: flex; align-items: center; gap: 10px;
@@ -486,6 +613,10 @@ export default function DetailPendaftarPage({
           display: flex; align-items: center; justify-content: space-between;
           padding: 10px 16px;
           gap: 16px;
+          border-bottom: 1px solid #f5f6fa;
+        }
+        .det-info-row:last-child {
+          border-bottom: none;
         }
         .det-info-row--multiline { align-items: flex-start; }
         .det-info-label {
@@ -621,16 +752,23 @@ export default function DetailPendaftarPage({
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
       `}</style>
 
-      <div className="det-root">
+      <div className="det-root" style={{ background: isDark ? '#15131f' : '#f0f1f8' }}>
 
         {/* ── Topbar ── */}
-        <div className="det-topbar">
-          <button className="det-back-btn" onClick={() => router.back()} aria-label="Kembali">
+        <div className="det-topbar" style={{ background: isDark ? '#1e1b2e' : '#ffffff', borderBottomColor: isDark ? '#2e2a40' : '#e9eef2' }}>
+          <button 
+            className="det-back-btn" 
+            onClick={() => router.back()} 
+            aria-label={language === 'en' ? 'Back' : 'Kembali'}
+            style={{ background: isDark ? '#2e2a40' : '#f5f3ff', borderColor: isDark ? '#3d3655' : '#ede9fe', color: isDark ? '#a5b4fc' : '#6d28d9' }}
+          >
             <IconChevronLeft />
           </button>
-          <span className="det-topbar-title">Detail Pendaftar</span>
-          <div className="det-menu-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <span className="det-topbar-title" style={{ color: isDark ? '#f1f0f5' : '#0f172a' }}>
+            {language === 'en' ? 'Applicant Details' : 'Detail Pendaftar'}
+          </span>
+          <div className="det-menu-btn" style={{ background: isDark ? '#2e2a40' : '#f8fafc', borderColor: isDark ? '#3d3655' : '#e9eef2', color: isDark ? '#a5b4fc' : '#6d28d9' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/>
@@ -663,7 +801,7 @@ export default function DetailPendaftarPage({
                 style={{ background: '#fff', color: sc.color, borderColor: sc.borderColor }}
               >
                 <IconCheckCircleFill />
-                {sc.label}
+                {getStatusLabel(data!.status)}
               </div>
             </div>
           </div>
@@ -673,8 +811,12 @@ export default function DetailPendaftarPage({
             <div className="det-final-banner">
               <div className="det-final-banner-icon">🎉</div>
               <div>
-                <div className="det-final-banner-title">Pendaftar Diterima</div>
-                <div className="det-final-banner-sub">Keputusan sudah final dan tidak dapat diubah</div>
+                <div className="det-final-banner-title">
+                  {language === 'en' ? 'Applicant Accepted' : 'Pendaftar Diterima'}
+                </div>
+                <div className="det-final-banner-sub">
+                  {language === 'en' ? 'Final decision cannot be changed' : 'Keputusan sudah final dan tidak dapat diubah'}
+                </div>
               </div>
             </div>
           )}
@@ -682,8 +824,12 @@ export default function DetailPendaftarPage({
             <div className="det-final-banner">
               <div className="det-final-banner-icon">📋</div>
               <div>
-                <div className="det-final-banner-title">Pendaftar Ditolak</div>
-                <div className="det-final-banner-sub">Keputusan sudah final dan tidak dapat diubah</div>
+                <div className="det-final-banner-title">
+                  {language === 'en' ? 'Applicant Rejected' : 'Pendaftar Ditolak'}
+                </div>
+                <div className="det-final-banner-sub">
+                  {language === 'en' ? 'Final decision cannot be changed' : 'Keputusan sudah final dan tidak dapat diubah'}
+                </div>
               </div>
             </div>
           )}
@@ -693,47 +839,77 @@ export default function DetailPendaftarPage({
         <div className="det-content">
 
           {/* Data Pribadi */}
-          <SectionCard icon={<IconUser />} title="Data Pribadi" accent="#6366f1">
+          <SectionCard 
+            icon={<IconUser />} 
+            title={language === 'en' ? 'Personal Data' : 'Data Pribadi'} 
+            accent="#6366f1" 
+            dark={isDark}
+          >
             {infoRowsTop.map(([k, v]) => (
-              <InfoRow key={String(k)} label={String(k)} value={v} />
+              <InfoRow key={String(k)} label={String(k)} value={v} dark={isDark} />
             ))}
             <InfoRow
-              label="Jenis Kelamin"
+              label={language === 'en' ? 'Gender' : 'Jenis Kelamin'}
               value={jenisKelaminLabel}
               valueIcon={isLaki ? <IconMars /> : <IconVenus />}
               valueIconBg={isLaki ? '#eef2ff' : '#fce7f3'}
               valueIconColor={isLaki ? '#6366f1' : '#db2777'}
+              dark={isDark}
             />
             {infoRowsBottom.map(([k, v]) => (
-              <InfoRow key={String(k)} label={String(k)} value={v} />
+              <InfoRow key={String(k)} label={String(k)} value={v} dark={isDark} />
             ))}
-            <InfoRow label="Alamat" value={data!.alamat} multiline />
+            <InfoRow 
+              label={language === 'en' ? 'Address' : 'Alamat'} 
+              value={data!.alamat} 
+              multiline 
+              dark={isDark} 
+            />
           </SectionCard>
 
           {/* Akademik */}
-          <SectionCard icon={<IconBook />} title="Informasi Akademik" accent="#10b981">
+          <SectionCard 
+            icon={<IconBook />} 
+            title={language === 'en' ? 'Academic Information' : 'Informasi Akademik'} 
+            accent="#10b981" 
+            dark={isDark}
+          >
             {akademikRows.map(([k, v]) => (
-              <InfoRow key={String(k)} label={String(k)} value={v} />
+              <InfoRow key={String(k)} label={String(k)} value={v} dark={isDark} />
             ))}
           </SectionCard>
 
           {/* Orang Tua */}
-          <SectionCard icon={<IconUsers />} title="Data Orang Tua" accent="#8b5cf6">
+          <SectionCard 
+            icon={<IconUsers />} 
+            title={language === 'en' ? "Parent's Data" : 'Data Orang Tua'} 
+            accent="#8b5cf6" 
+            dark={isDark}
+          >
             {orangtuaRows.map(([k, v]) => (
-              <InfoRow key={String(k)} label={String(k)} value={v} />
+              <InfoRow key={String(k)} label={String(k)} value={v} dark={isDark} />
             ))}
           </SectionCard>
 
           {/* Catatan */}
-          <SectionCard icon={<IconEdit />} title="Catatan Panitia" accent="#f59e0b">
+          <SectionCard 
+            icon={<IconEdit />} 
+            title={language === 'en' ? 'Committee Notes' : 'Catatan Panitia'} 
+            accent="#f59e0b" 
+            dark={isDark}
+          >
             <div className="det-catatan-inner">
               {isFinished ? (
                 catatan ? (
-                  <p className="det-catatan-readonly">{catatan}</p>
+                  <p className="det-catatan-readonly" style={{ background: isDark ? '#2e2a40' : '#f8fafc', borderColor: isDark ? '#3d3655' : '#f1f5f9', color: isDark ? '#94a3b8' : '#475569' }}>
+                    {catatan}
+                  </p>
                 ) : (
-                  <div className="det-catatan-info">
+                  <div className="det-catatan-info" style={{ background: isDark ? '#2e2a40' : '#f8fafc', borderColor: isDark ? '#3d3655' : '#e2e8f0', color: isDark ? '#94a3b8' : '#94a3b8' }}>
                     <IconInfoCircle />
-                    <span>Tidak dapat diubah setelah keputusan final.</span>
+                    <span>
+                      {language === 'en' ? 'Cannot be changed after final decision.' : 'Tidak dapat diubah setelah keputusan final.'}
+                    </span>
                   </div>
                 )
               ) : (
@@ -742,7 +918,8 @@ export default function DetailPendaftarPage({
                   value={catatan}
                   onChange={e => setCatatan(e.target.value)}
                   rows={3}
-                  placeholder="Tambahkan catatan untuk pendaftar ini..."
+                  placeholder={language === 'en' ? 'Add notes for this applicant...' : 'Tambahkan catatan untuk pendaftar ini...'}
+                  style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#e2e8f0', color: isDark ? '#f1f0f5' : '#1e293b' }}
                 />
               )}
             </div>
@@ -758,7 +935,7 @@ export default function DetailPendaftarPage({
                   onClick={() => setConfirm('diproses')}
                 >
                   <IconRefresh />
-                  Tandai Sedang Diproses
+                  {language === 'en' ? 'Mark as Processing' : 'Tandai Sedang Diproses'}
                 </button>
               )}
               <div className="det-act-grid">
@@ -768,7 +945,7 @@ export default function DetailPendaftarPage({
                   onClick={() => setConfirm('diterima')}
                 >
                   <IconCheck />
-                  Terima
+                  {language === 'en' ? 'Accept' : 'Terima'}
                 </button>
                 <button
                   className="det-act-btn det-act-reject"
@@ -776,7 +953,7 @@ export default function DetailPendaftarPage({
                   onClick={() => setConfirm('ditolak')}
                 >
                   <IconX />
-                  Tolak
+                  {language === 'en' ? 'Reject' : 'Tolak'}
                 </button>
               </div>
             </div>
@@ -788,23 +965,37 @@ export default function DetailPendaftarPage({
       {/* ── Confirm Bottom Sheet ── */}
       {confirm && (() => {
         const cc = CONFIRM_CONFIG[confirm]
+        const actionLabels = {
+          diterima: language === 'en' ? 'accept' : 'menerima',
+          ditolak: language === 'en' ? 'reject' : 'menolak',
+          diproses: language === 'en' ? 'process' : 'memproses',
+        }
         return (
           <div className="det-overlay" onClick={() => setConfirm(null)}>
-            <div className="det-sheet" onClick={e => e.stopPropagation()}>
-              <div className="det-sheet-handle" />
+            <div className="det-sheet" onClick={e => e.stopPropagation()} style={{ background: isDark ? '#1e1b2e' : '#fff' }}>
+              <div className="det-sheet-handle" style={{ background: isDark ? '#3d3655' : '#e2e8f0' }} />
               <div className="det-sheet-emoji">{cc.icon}</div>
-              <div className="det-sheet-title">{cc.label}</div>
-              <div className="det-sheet-sub">
-                Apakah Anda yakin ingin{' '}
-                <strong>
-                  {confirm === 'diterima' ? 'menerima' : confirm === 'ditolak' ? 'menolak' : 'memproses'}
-                </strong>{' '}
-                pendaftaran <strong>{data!.nama_lengkap}</strong>?
-                {confirm !== 'diproses' && ' Keputusan ini tidak dapat diubah.'}
+              <div className="det-sheet-title" style={{ color: isDark ? '#f1f0f5' : '#1e293b' }}>
+                {getConfirmLabel(confirm)}
+              </div>
+              <div className="det-sheet-sub" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+                {language === 'en' 
+                  ? `Are you sure you want to ${actionLabels[confirm]} the registration of ` 
+                  : `Apakah Anda yakin ingin ${actionLabels[confirm]} pendaftaran `}
+                <strong>{data!.nama_lengkap}</strong>?
+                {confirm !== 'diproses' && (
+                  language === 'en' 
+                    ? ' This decision cannot be undone.'
+                    : ' Keputusan ini tidak dapat diubah.'
+                )}
               </div>
               <div className="det-sheet-btns">
-                <button className="det-sheet-cancel" onClick={() => setConfirm(null)}>
-                  Batal
+                <button 
+                  className="det-sheet-cancel" 
+                  onClick={() => setConfirm(null)}
+                  style={{ background: isDark ? '#2e2a40' : '#f1f5f9', color: isDark ? '#94a3b8' : '#64748b' }}
+                >
+                  {language === 'en' ? 'Cancel' : 'Batal'}
                 </button>
                 <button
                   className="det-sheet-confirm"
@@ -812,7 +1003,9 @@ export default function DetailPendaftarPage({
                   disabled={loading}
                   onClick={() => updateStatus(confirm)}
                 >
-                  {loading ? 'Menyimpan...' : 'Ya, Konfirmasi'}
+                  {loading 
+                    ? (language === 'en' ? 'Saving...' : 'Menyimpan...') 
+                    : (language === 'en' ? 'Yes, Confirm' : 'Ya, Konfirmasi')}
                 </button>
               </div>
             </div>
