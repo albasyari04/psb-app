@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_TYPES  = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-const BUCKET         = 'avatars' // nama bucket di Supabase Storage
+const BUCKET         = 'avatars'
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
     const sessionEmail = session.user.email.trim().toLowerCase()
 
-    // ── 2. Validasi Content-Type SEBELUM parsing ───────────────────────────
+    // ── 2. Validasi Content-Type ────────────────────────────────────────────
     const contentType = req.headers.get('content-type') ?? ''
     if (!contentType.toLowerCase().includes('multipart/form-data')) {
       console.error('[upload] Content-Type tidak sesuai. Diterima server:', contentType || '(kosong)')
@@ -27,9 +27,7 @@ export async function POST(req: NextRequest) {
         {
           error:
             `Content-Type request tidak valid (diterima server: "${contentType || 'kosong'}"). ` +
-            `Ini biasanya bukan bug di form, tapi ada Service Worker atau middleware yang mengubah ` +
-            `request sebelum sampai ke server. Coba: DevTools → Application → Service Workers → Unregister, ` +
-            `lalu hard refresh dan coba lagi.`,
+            `Coba: DevTools → Application → Service Workers → Unregister, lalu hard refresh.`,
         },
         { status: 400 }
       )
@@ -38,7 +36,6 @@ export async function POST(req: NextRequest) {
     // ── 3. Parse form data ─────────────────────────────────────────────────
     const formData = await req.formData()
     const file     = formData.get('file') as File | null
-
     if (!file) {
       return NextResponse.json({ error: 'File tidak ditemukan' }, { status: 400 })
     }
@@ -59,28 +56,17 @@ export async function POST(req: NextRequest) {
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET)
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        upsert:      true, // overwrite jika sudah ada
-      })
+      .upload(filePath, buffer, { contentType: file.type, upsert: true })
 
     if (uploadError) {
       console.error('[upload] Storage error:', uploadError)
       return NextResponse.json({ error: uploadError.message }, { status: 500 })
     }
 
-    // ── 6. Ambil public URL ─────────────────────────────────────────────────
-    const { data: urlData } = supabaseAdmin.storage
-      .from(BUCKET)
-      .getPublicUrl(filePath)
-
-    // Cache-bust agar browser reload foto baru
+    const { data: urlData } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(filePath)
     const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
 
-    // ── 7. Update avatar_url di tabel admin (berdasarkan email) ────────────
-    // ✅ FIX UTAMA (sama seperti /api/profile/update): tambahkan `.select()`
-    // supaya kita tahu pasti apakah ada baris yang benar-benar ter-update,
-    // dan pakai `.ilike()` supaya tidak gagal karena beda kapitalisasi email.
+    // ── 6. Update avatar_url di tabel admin ─────────────────────────────────
     const { data: updatedRows, error: dbError } = await supabaseAdmin
       .from('admin')
       .update({ avatar_url: publicUrl })
@@ -93,16 +79,31 @@ export async function POST(req: NextRequest) {
     }
 
     if (!updatedRows || updatedRows.length === 0) {
+      // ✅ DEBUG TAMBAHAN: kalau 0 baris ter-update, cek 2 kemungkinan
+      // penyebab sekaligus supaya root cause langsung kelihatan di log:
+      //   (a) baris memang tidak ada / email beda persis
+      //   (b) RLS memblokir UPDATE (service_role key salah / RLS policy salah)
+      const { data: allAdmins, error: debugError } = await supabaseAdmin
+        .from('admin')
+        .select('email')
+
       console.error(
-        '[upload] 0 baris ter-update untuk avatar_url. session email:',
-        sessionEmail
+        '[upload] 0 baris ter-update untuk avatar_url.\n' +
+        '  session email (normalized):', JSON.stringify(sessionEmail), '\n' +
+        '  daftar email di tabel admin (raw):', debugError ? `query gagal: ${debugError.message}` : JSON.stringify(allAdmins?.map(a => a.email)), '\n' +
+        '  → Kalau daftar di atas KOSONG padahal ada data di tabel admin,\n' +
+        '    berarti supabaseAdmin kena RLS (cek: apakah lib/supabase.ts pakai\n' +
+        '    SUPABASE_SERVICE_ROLE_KEY, bukan anon key?).\n' +
+        '  → Kalau daftar TIDAK kosong tapi email tidak ada yang cocok,\n' +
+        '    berarti ada perbedaan string (spasi/typo) di kolom email.'
       )
+
       return NextResponse.json(
         {
           error:
             `File berhasil di-upload ke storage, tapi tidak ada baris admin yang ` +
             `cocok dengan email "${sessionEmail}" untuk disimpan avatar_url-nya. ` +
-            `Cek kolom "email" di tabel admin.`,
+            `Cek server log untuk detail diagnosis (kemungkinan RLS atau email tidak cocok).`,
         },
         { status: 404 }
       )

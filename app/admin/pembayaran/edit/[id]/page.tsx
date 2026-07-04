@@ -6,18 +6,21 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Pembayaran, PembayaranFormData } from '@/types'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ─── Konstanta ───────────────────────────────────────────────
 const HEADER_HEIGHT = 98
 
 const JENIS_OPTIONS = ['Formulir', 'SPP', 'Seragam', 'Pendaftaran Anama', 'Lainnya']
+const JENIS_OPTIONS_EN = ['Registration Form', 'Tuition', 'Uniform', 'Registration Fee', 'Others']
 const METODE_OPTIONS = ['Transfer Bank', 'Tunai', 'QRIS']
+const METODE_OPTIONS_EN = ['Bank Transfer', 'Cash', 'QRIS']
 const STATUS_OPTIONS = ['menunggu', 'dikonfirmasi', 'ditolak']
 
-const STATUS_LABEL: Record<string, string> = {
-  menunggu: 'Menunggu',
-  dikonfirmasi: 'Dikonfirmasi',
-  ditolak: 'Ditolak',
+const STATUS_LABEL: Record<string, { id: string; en: string }> = {
+  menunggu: { id: 'Menunggu', en: 'Pending' },
+  dikonfirmasi: { id: 'Dikonfirmasi', en: 'Confirmed' },
+  ditolak: { id: 'Ditolak', en: 'Rejected' },
 }
 
 const EMPTY_FORM: PembayaranFormData = {
@@ -49,7 +52,6 @@ async function safeFetchJson(url: string, options?: RequestInit) {
   const res = await fetch(url, options)
   const contentType = res.headers.get('content-type') ?? ''
 
-  // Jika bukan JSON (misal Next.js mengembalikan HTML 404), lempar error yang jelas
   if (!contentType.includes('application/json')) {
     const text = await res.text()
     throw new Error(
@@ -95,11 +97,10 @@ function PersonIcon() {
   )
 }
 
-// ─── FIX: LoadingSpinner dengan inline keyframes via style tag di <head> ──────
-function LoadingCard() {
+// ─── LoadingSpinner ──────────────────────────────────────────
+function LoadingCard({ dark = false }: { dark?: boolean }) {
   return (
     <>
-      {/* Inject CSS animation ke dalam document head agar @keyframes dikenali */}
       <style>{`
         @keyframes psb-spin {
           0%   { transform: rotate(0deg); }
@@ -121,26 +122,25 @@ function LoadingCard() {
       `}</style>
 
       <div style={{
-        background: '#fff',
+        background: dark ? '#1e1b2e' : '#fff',
         borderRadius: 24,
         padding: '36px 24px 40px',
         textAlign: 'center',
-        boxShadow: '0 2px 14px rgba(15,23,42,0.06)',
+        boxShadow: dark ? '0 2px 14px rgba(0,0,0,0.3)' : '0 2px 14px rgba(15,23,42,0.06)',
+        border: dark ? '1px solid #2e2a40' : 'none',
       }}>
-        {/* Spinner lingkaran */}
         <div style={{
           width: 56, height: 56,
           borderRadius: '50%',
-          border: '3.5px solid #e2e8f0',
+          border: `3.5px solid ${dark ? '#2e2a40' : '#e2e8f0'}`,
           borderTopColor: '#6366f1',
           margin: '0 auto 18px',
         }} className="psb-spinner" />
 
-        <p style={{ fontWeight: 700, fontSize: 14.5, color: '#64748b', margin: '0 0 20px' }}>
-          Memuat data...
+        <p style={{ fontWeight: 700, fontSize: 14.5, color: dark ? '#94a3b8' : '#64748b', margin: '0 0 20px' }}>
+          Loading data...
         </p>
 
-        {/* Skeleton fields */}
         {[100, 80, 60, 90, 70].map((w, i) => (
           <div
             key={i}
@@ -154,52 +154,61 @@ function LoadingCard() {
 }
 
 // ─── UI Components ────────────────────────────────────────────
-function FieldRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
+function FieldRow({ icon, label, children, dark = false }: { 
+  icon: React.ReactNode; 
+  label: string; 
+  children: React.ReactNode;
+  dark?: boolean;
+}) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
       <div style={{
         width: 44, height: 44, borderRadius: '50%',
-        background: '#eef0fb',
+        background: dark ? '#2e2a40' : '#eef0fb',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
         {icon}
       </div>
       <div style={{ flex: 1 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 8px' }}>{label}</p>
+        <p style={{ fontSize: 13, fontWeight: 700, color: dark ? '#94a3b8' : '#475569', margin: '0 0 8px' }}>{label}</p>
         {children}
       </div>
     </div>
   )
 }
 
-function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+function FormField({ label, children, dark = false }: { 
+  label: string; 
+  children: React.ReactNode;
+  dark?: boolean;
+}) {
   return (
     <div>
-      <p style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: '0 0 8px' }}>{label}</p>
+      <p style={{ fontSize: 13, fontWeight: 700, color: dark ? '#94a3b8' : '#475569', margin: '0 0 8px' }}>{label}</p>
       {children}
     </div>
   )
 }
 
-const inputBaseStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '13px 16px',
-  borderRadius: 14,
-  border: '1.5px solid #e6e9f2',
-  fontSize: 14.5,
-  color: '#0f172a',
-  background: '#f8fafc',
-  outline: 'none',
-  boxSizing: 'border-box',
-  fontFamily: 'inherit',
+function getInputStyle(dark: boolean): React.CSSProperties {
+  return {
+    width: '100%',
+    padding: '13px 16px',
+    borderRadius: 14,
+    border: `1.5px solid ${dark ? '#2e2a40' : '#e6e9f2'}`,
+    fontSize: 14.5,
+    color: dark ? '#f1f0f5' : '#0f172a',
+    background: dark ? '#1e1b2e' : '#f8fafc',
+    outline: 'none',
+    boxSizing: 'border-box',
+    fontFamily: 'inherit',
+  }
 }
 
-const selectWrapperStyle: React.CSSProperties = { position: 'relative' }
-
-function SelectChevron() {
+function SelectChevron({ dark = false }: { dark?: boolean }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.3"
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={dark ? '#6b6885' : '#94a3b8'} strokeWidth="2.3"
       strokeLinecap="round" strokeLinejoin="round"
       style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
     >
@@ -208,12 +217,12 @@ function SelectChevron() {
   )
 }
 
-function InlineIcon({ children }: { children: React.ReactNode }) {
+function InlineIcon({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
     <div style={{
       position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#6366f1', pointerEvents: 'none',
+      color: dark ? '#a5b4fc' : '#6366f1', pointerEvents: 'none',
     }}>
       {children}
     </div>
@@ -221,50 +230,36 @@ function InlineIcon({ children }: { children: React.ReactNode }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────
-
-// =================================================================================
-// KOMPONEN INDUK (PARENT) - Mengambil ID dari URL
-// Ini adalah komponen yang diekspor sebagai halaman default.
-// =================================================================================
 export default function EditPembayaranPage() {
   const params = useParams()
   const id = params?.id as string
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
 
-  // Triknya ada di sini: kita tunda rendering form sampai `id` benar-benar ada.
-  // Selama `id` belum ada (saat render pertama di client), kita tampilkan loading.
   if (!id) {
-    // Menggunakan beberapa style inline dari file asli untuk konsistensi UI
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#f7f8fb',
+        background: isDark ? '#15131f' : '#f7f8fb',
         padding: '14px 18px 40px',
         maxWidth: 480,
         margin: '0 auto',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}>
-        <div style={{ height: HEADER_HEIGHT, background: '#f7f8fb' }} />
-        <LoadingCard />
+        <div style={{ height: HEADER_HEIGHT, background: isDark ? '#15131f' : '#f7f8fb' }} />
+        <LoadingCard dark={isDark} />
       </div>
     )
   }
 
-  // Setelah `id` tersedia, kita render komponen form dan memberikannya `id` sebagai prop.
-  // `id` di sini dijamin valid.
   return <EditForm id={id} />
 }
 
-
-// =================================================================================
-// KOMPONEN ANAK (CHILD) - Form UI dan Logika
-// Komponen ini sekarang menerima `id` sebagai prop yang stabil.
-// =================================================================================
 function EditForm({ id }: { id: string }) {
   const router = useRouter()
-
-  // `useParams` dan `id` dari params sudah tidak ada di sini.
-  // Kita menggunakan `id` dari props.
-  console.log('RENDER: Form dirender dengan prop id:', id);
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
+  const isEn = language === 'en'
 
   const [form, setForm] = useState<PembayaranFormData>(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
@@ -272,12 +267,26 @@ function EditForm({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // ─── Helper: get status label based on language ──
+  const getStatusLabel = (status: string) => {
+    const config = STATUS_LABEL[status]
+    if (!config) return status
+    return isEn ? config.en : config.id
+  }
+
+  // ─── Helper: get jenis options based on language ──
+  const getJenisOptions = () => {
+    return isEn ? JENIS_OPTIONS_EN : JENIS_OPTIONS
+  }
+
+  // ─── Helper: get metode options based on language ──
+  const getMetodeOptions = () => {
+    return isEn ? METODE_OPTIONS_EN : METODE_OPTIONS
+  }
+
   useEffect(() => {
-    console.log('EFFECT: id:', id);
-    // Pastikan `id` ada sebelum fetch, karena `params` bisa kosong di render awal
     if (id) {
       const fetchDetail = async () => {
-        console.log('EFFECT: Mulai fetch untuk id:', id);
         setLoading(true)
         setError(null)
         try {
@@ -298,17 +307,15 @@ function EditForm({ id }: { id: string }) {
           if (err instanceof Error) {
             setError(err.message)
           } else {
-            setError('Terjadi kesalahan yang tidak diketahui')
+            setError(isEn ? 'An unknown error occurred' : 'Terjadi kesalahan yang tidak diketahui')
           }
         } finally {
           setLoading(false)
         }
       }
       fetchDetail()
-    } else {
-      console.log('EFFECT: id tidak ditemukan, fetch dibatalkan.');
     }
-  }, [id])
+  }, [id, isEn])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -329,7 +336,7 @@ function EditForm({ id }: { id: string }) {
 
   const handleSubmit = async () => {
     if (!form.nama_siswa || !form.nominal || !form.user_id) {
-      setError('User ID, nama siswa, dan nominal wajib diisi.')
+      setError(isEn ? 'User ID, student name, and amount are required.' : 'User ID, nama siswa, dan nominal wajib diisi.')
       return
     }
     setLoadingSubmit(true)
@@ -342,22 +349,30 @@ function EditForm({ id }: { id: string }) {
       })
       router.push('/admin/pembayaran')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+      setError(err instanceof Error ? err.message : (isEn ? 'An error occurred' : 'Terjadi kesalahan'))
     } finally {
       setLoadingSubmit(false)
     }
   }
 
+  const inputStyle = getInputStyle(isDark)
+  const bgColor = isDark ? '#15131f' : '#f7f8fb'
+  const cardBg = isDark ? '#1e1b2e' : '#fff'
+  const cardBorder = isDark ? '1px solid #2e2a40' : '1px solid #f1f3f9'
+  const textColor = isDark ? '#f1f0f5' : '#0f172a'
+  const mutedColor = isDark ? '#94a3b8' : '#94a3b8'
+  const headerBg = isDark ? '#1e1b2e' : '#ffffff'
+  const headerBorder = isDark ? '1px solid #2e2a40' : '1px solid #EDEAF6'
+
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#f7f8fb',
+      background: bgColor,
       paddingBottom: 40,
       maxWidth: 480,
       margin: '0 auto',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }}>
-      {/* ── Global styles (date picker, dll) ── */}
       <style>{`
         input[type="date"]::-webkit-calendar-picker-indicator {
           opacity: 0;
@@ -367,6 +382,12 @@ function EditForm({ id }: { id: string }) {
           height: 100%;
           cursor: pointer;
         }
+        input[type="date"]::-webkit-datetime-edit {
+          color: ${isDark ? '#f1f0f5' : '#0f172a'};
+        }
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+          color: ${isDark ? '#f1f0f5' : '#0f172a'};
+        }
       `}</style>
 
       {/* ── Header fixed ── */}
@@ -375,9 +396,9 @@ function EditForm({ id }: { id: string }) {
         top: 0, left: 0, right: 0,
         maxWidth: 480, margin: '0 auto',
         height: HEADER_HEIGHT,
-        background: '#ffffff',
-        borderBottom: '1px solid #EDEAF6',
-        boxShadow: '0 6px 20px rgba(109,61,245,0.06)',
+        background: headerBg,
+        borderBottom: headerBorder,
+        boxShadow: isDark ? '0 6px 20px rgba(0,0,0,0.2)' : '0 6px 20px rgba(109,61,245,0.06)',
         padding: '20px 18px 8px',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         gap: 12,
@@ -389,28 +410,29 @@ function EditForm({ id }: { id: string }) {
             onClick={() => router.push('/admin/pembayaran')}
             style={{
               width: 42, height: 42, borderRadius: 14,
-              background: '#fff', border: '1.5px solid #eef0f5',
+              background: isDark ? '#2e2a40' : '#fff',
+              border: isDark ? '1.5px solid #3d3655' : '1.5px solid #eef0f5',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', flexShrink: 0,
-              boxShadow: '0 1px 4px rgba(15,23,42,0.05)',
+              boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 4px rgba(15,23,42,0.05)',
+              color: isDark ? '#a5b4fc' : '#1e293b',
             }}
-            aria-label="Kembali"
+            aria-label={isEn ? 'Back' : 'Kembali'}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </button>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>
-              Edit Pembayaran
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: textColor, margin: 0, letterSpacing: '-0.3px' }}>
+              {isEn ? 'Edit Payment' : 'Edit Pembayaran'}
             </h1>
-            <p style={{ fontSize: 13, color: '#94a3b8', margin: '3px 0 0' }}>
-              Perbarui detail pembayaran siswa
+            <p style={{ fontSize: 13, color: mutedColor, margin: '3px 0 0' }}>
+              {isEn ? 'Update student payment details' : 'Perbarui detail pembayaran siswa'}
             </p>
           </div>
         </div>
-        {/* Icon dompet ungu (WalletEditIcon) sudah dihapus sesuai permintaan */}
       </div>
 
       <div style={{ height: HEADER_HEIGHT }} />
@@ -433,37 +455,39 @@ function EditForm({ id }: { id: string }) {
           </div>
         )}
 
-        {/* ── FIX: gunakan komponen LoadingCard yang animasinya benar ── */}
         {loading ? (
-          <LoadingCard />
+          <LoadingCard dark={isDark} />
         ) : (
           <>
             {/* Card utama */}
             <div style={{
-              background: '#fff', borderRadius: 24, padding: '24px 20px',
-              boxShadow: '0 2px 16px rgba(15,23,42,0.05)', border: '1px solid #f1f3f9',
+              background: cardBg,
+              borderRadius: 24,
+              padding: '24px 20px',
+              boxShadow: isDark ? '0 2px 16px rgba(0,0,0,0.3)' : '0 2px 16px rgba(15,23,42,0.05)',
+              border: cardBorder,
             }}>
               {/* User ID */}
-              <FieldRow icon={<PersonIcon />} label="User ID Siswa">
+              <FieldRow icon={<PersonIcon />} label={isEn ? 'Student User ID' : 'User ID Siswa'} dark={isDark}>
                 <div style={{ position: 'relative' }}>
                   <input
                     name="user_id"
                     value={form.user_id}
                     onChange={handleChange}
-                    placeholder="UUID dari tabel auth.users"
-                    style={{ ...inputBaseStyle, paddingRight: 46 }}
+                    placeholder={isEn ? 'UUID from auth.users table' : 'UUID dari tabel auth.users'}
+                    style={{ ...inputStyle, paddingRight: 46 }}
                   />
                   <button
                     type="button"
                     onClick={handleCopyUserId}
-                    title="Salin User ID"
+                    title={isEn ? 'Copy User ID' : 'Salin User ID'}
                     style={{
                       position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
                       width: 34, height: 34, borderRadius: 10,
-                      background: copied ? '#ecfdf5' : '#eef0fb',
+                      background: copied ? '#ecfdf5' : (isDark ? '#2e2a40' : '#eef0fb'),
                       border: 'none', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: copied ? '#059669' : '#6366f1',
+                      color: copied ? '#059669' : (isDark ? '#a5b4fc' : '#6366f1'),
                     }}
                   >
                     {copied ? (
@@ -483,13 +507,13 @@ function EditForm({ id }: { id: string }) {
               <div style={{ height: 20 }} />
 
               {/* Nama Siswa */}
-              <FieldRow icon={<PersonIcon />} label="Nama Siswa">
+              <FieldRow icon={<PersonIcon />} label={isEn ? 'Student Name' : 'Nama Siswa'} dark={isDark}>
                 <input
                   name="nama_siswa"
                   value={form.nama_siswa}
                   onChange={handleChange}
-                  placeholder="Nama lengkap siswa"
-                  style={inputBaseStyle}
+                  placeholder={isEn ? 'Student full name' : 'Nama lengkap siswa'}
+                  style={inputStyle}
                 />
               </FieldRow>
 
@@ -497,110 +521,158 @@ function EditForm({ id }: { id: string }) {
 
               {/* Nominal */}
               <FieldRow
-                icon={<span style={{ fontSize: 13, fontWeight: 800, color: '#6366f1' }}>Rp</span>}
-                label="Nominal Pembayaran"
+                icon={<span style={{ fontSize: 13, fontWeight: 800, color: isDark ? '#a5b4fc' : '#6366f1' }}>Rp</span>}
+                label={isEn ? 'Payment Amount' : 'Nominal Pembayaran'}
+                dark={isDark}
               >
                 <input
                   inputMode="numeric"
                   value={formatNominalDisplay(form.nominal)}
                   onChange={handleNominalChange}
                   placeholder="150.000"
-                  style={inputBaseStyle}
+                  style={inputStyle}
                 />
               </FieldRow>
             </div>
 
             {/* Card detail tambahan */}
             <div style={{
-              background: '#fff', borderRadius: 24, padding: '22px 20px',
-              marginTop: 16, boxShadow: '0 2px 16px rgba(15,23,42,0.05)',
-              border: '1px solid #f1f3f9', display: 'grid', gap: 18,
+              background: cardBg,
+              borderRadius: 24,
+              padding: '22px 20px',
+              marginTop: 16,
+              boxShadow: isDark ? '0 2px 16px rgba(0,0,0,0.3)' : '0 2px 16px rgba(15,23,42,0.05)',
+              border: cardBorder,
+              display: 'grid', gap: 18,
             }}>
               {/* Jenis & Metode */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FormField label="Jenis Pembayaran">
-                  <div style={selectWrapperStyle}>
-                    <InlineIcon>
+                <FormField label={isEn ? 'Payment Type' : 'Jenis Pembayaran'} dark={isDark}>
+                  <div style={{ position: 'relative' }}>
+                    <InlineIcon dark={isDark}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="2" y="5" width="20" height="14" rx="3" /><path d="M2 10h20" />
                       </svg>
                     </InlineIcon>
-                    <select name="jenis_pembayaran" value={form.jenis_pembayaran} onChange={handleChange}
-                      style={{ ...inputBaseStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}>
-                      {JENIS_OPTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
+                    <select 
+                      name="jenis_pembayaran" 
+                      value={form.jenis_pembayaran} 
+                      onChange={handleChange}
+                      style={{ ...inputStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}
+                    >
+                      {getJenisOptions().map((j, idx) => (
+                        <option key={j} value={isEn ? j : JENIS_OPTIONS[idx]}>
+                          {j}
+                        </option>
+                      ))}
                     </select>
-                    <SelectChevron />
+                    <SelectChevron dark={isDark} />
                   </div>
                 </FormField>
 
-                <FormField label="Metode Pembayaran">
-                  <div style={selectWrapperStyle}>
-                    <InlineIcon>
+                <FormField label={isEn ? 'Payment Method' : 'Metode Pembayaran'} dark={isDark}>
+                  <div style={{ position: 'relative' }}>
+                    <InlineIcon dark={isDark}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="3" y1="21" x2="21" y2="21" /><path d="M5 21V10M19 21V10M3 10l9-6 9 6" />
                       </svg>
                     </InlineIcon>
-                    <select name="metode_pembayaran" value={form.metode_pembayaran} onChange={handleChange}
-                      style={{ ...inputBaseStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}>
-                      {METODE_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+                    <select 
+                      name="metode_pembayaran" 
+                      value={form.metode_pembayaran} 
+                      onChange={handleChange}
+                      style={{ ...inputStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}
+                    >
+                      {getMetodeOptions().map((m, idx) => (
+                        <option key={m} value={isEn ? m : METODE_OPTIONS[idx]}>
+                          {m}
+                        </option>
+                      ))}
                     </select>
-                    <SelectChevron />
+                    <SelectChevron dark={isDark} />
                   </div>
                 </FormField>
               </div>
 
               {/* No Referensi & Tanggal */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FormField label="No. Referensi">
-                  <div style={selectWrapperStyle}>
-                    <InlineIcon><span style={{ fontSize: 14, fontWeight: 800 }}>#</span></InlineIcon>
-                    <input name="no_referensi" value={form.no_referensi} onChange={handleChange}
-                      placeholder="Opsional" style={{ ...inputBaseStyle, paddingLeft: 40 }} />
+                <FormField label={isEn ? 'Reference No.' : 'No. Referensi'} dark={isDark}>
+                  <div style={{ position: 'relative' }}>
+                    <InlineIcon dark={isDark}>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: isDark ? '#a5b4fc' : '#6366f1' }}>#</span>
+                    </InlineIcon>
+                    <input 
+                      name="no_referensi" 
+                      value={form.no_referensi} 
+                      onChange={handleChange}
+                      placeholder={isEn ? 'Optional' : 'Opsional'} 
+                      style={{ ...inputStyle, paddingLeft: 40 }} 
+                    />
                   </div>
                 </FormField>
 
-                <FormField label="Tanggal Bayar">
-                  <div style={selectWrapperStyle}>
-                    <InlineIcon>
+                <FormField label={isEn ? 'Payment Date' : 'Tanggal Bayar'} dark={isDark}>
+                  <div style={{ position: 'relative' }}>
+                    <InlineIcon dark={isDark}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="3" />
                         <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
                       </svg>
                     </InlineIcon>
-                    <input type="date" name="tanggal_bayar" value={form.tanggal_bayar} onChange={handleChange}
-                      style={{ ...inputBaseStyle, paddingLeft: 40 }} />
+                    <input 
+                      type="date" 
+                      name="tanggal_bayar" 
+                      value={form.tanggal_bayar} 
+                      onChange={handleChange}
+                      style={{ ...inputStyle, paddingLeft: 40 }} 
+                    />
                   </div>
                 </FormField>
               </div>
 
               {/* Status */}
-              <FormField label="Status Pembayaran">
-                <div style={selectWrapperStyle}>
-                  <InlineIcon>
+              <FormField label={isEn ? 'Payment Status' : 'Status Pembayaran'} dark={isDark}>
+                <div style={{ position: 'relative' }}>
+                  <InlineIcon dark={isDark}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" />
                     </svg>
                   </InlineIcon>
-                  <select name="status" value={form.status} onChange={handleChange}
-                    style={{ ...inputBaseStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}>
-                    {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{STATUS_LABEL[s] ?? s}</option>)}
+                  <select 
+                    name="status" 
+                    value={form.status} 
+                    onChange={handleChange}
+                    style={{ ...inputStyle, paddingLeft: 40, paddingRight: 32, appearance: 'none' }}
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>{getStatusLabel(s)}</option>
+                    ))}
                   </select>
-                  <SelectChevron />
+                  <SelectChevron dark={isDark} />
                 </div>
               </FormField>
 
               {/* Catatan */}
-              <FormField label="Catatan">
+              <FormField label={isEn ? 'Notes' : 'Catatan'} dark={isDark}>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: 14, top: 14, color: '#6366f1', pointerEvents: 'none' }}>
+                  <div style={{ 
+                    position: 'absolute', left: 14, top: 14, 
+                    color: isDark ? '#a5b4fc' : '#6366f1', 
+                    pointerEvents: 'none' 
+                  }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 2h6a1 1 0 0 1 1 1v1H8V3a1 1 0 0 1 1-1z" /><rect x="5" y="4" width="14" height="18" rx="2" />
                       <line x1="9" y1="11" x2="15" y2="11" /><line x1="9" y1="15" x2="15" y2="15" />
                     </svg>
                   </div>
-                  <textarea name="catatan" value={form.catatan} onChange={handleChange}
-                    placeholder="Catatan tambahan (opsional)" rows={3}
-                    style={{ ...inputBaseStyle, paddingLeft: 40, resize: 'vertical', lineHeight: 1.6 }} />
+                  <textarea 
+                    name="catatan" 
+                    value={form.catatan} 
+                    onChange={handleChange}
+                    placeholder={isEn ? 'Additional notes (optional)' : 'Catatan tambahan (opsional)'} 
+                    rows={3}
+                    style={{ ...inputStyle, paddingLeft: 40, resize: 'vertical', lineHeight: 1.6 }} 
+                  />
                 </div>
               </FormField>
             </div>
@@ -630,7 +702,7 @@ function EditForm({ id }: { id: string }) {
                     borderTopColor: '#fff',
                     borderRadius: '50%',
                   }} className="psb-spinner" />
-                  Menyimpan...
+                  {isEn ? 'Saving...' : 'Menyimpan...'}
                 </>
               ) : (
                 <>
@@ -639,7 +711,7 @@ function EditForm({ id }: { id: string }) {
                     <polyline points="17 21 17 13 7 13 7 21" />
                     <polyline points="7 3 7 8 15 8" />
                   </svg>
-                  Update Pembayaran
+                  {isEn ? 'Update Payment' : 'Update Pembayaran'}
                 </>
               )}
             </button>

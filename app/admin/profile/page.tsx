@@ -55,19 +55,6 @@ const IconArrowLeft = () => (
   </svg>
 )
 
-const IconGear = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="3" stroke="var(--purple)" strokeWidth="1.8" />
-    <path
-      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-      stroke="var(--purple)"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-)
-
 const IconCamera = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
     <path
@@ -392,15 +379,6 @@ export default function AdminProfilePage() {
           <h1 style={s.headerTitle}>{t('profile_header_title')}</h1>
           <p style={s.headerSub}>{t('profile_header_sub')}</p>
         </div>
-
-        <button
-          onClick={() => router.push('/admin/profile/edit')}
-          style={s.iconBtn}
-          type="button"
-          aria-label={t('profile_edit_aria')}
-        >
-          <IconGear />
-        </button>
       </div>
 
       {/* ── BODY ────────────────────────────────────────────────────────── */}
@@ -430,10 +408,6 @@ export default function AdminProfilePage() {
           <div style={s.identityText}>
             <h2 style={s.identityName}>{name}</h2>
             <p style={s.identityEmail}>{email}</p>
-            <span style={s.roleBadge}>
-              <IconShield />
-              {role} &middot; {system}
-            </span>
           </div>
 
           <button
@@ -501,8 +475,6 @@ export default function AdminProfilePage() {
           <IconLogout />
           <span>{t('profile_logout')}</span>
         </button>
-
-        <p style={s.footerVersion}>PSB App v1.0 &middot; Admin Panel</p>
       </div>
 
       {/* ── BOTTOM NAV ──────────────────────────────────────────────────── */}
@@ -650,7 +622,6 @@ const s: Record<string, React.CSSProperties> = {
     zIndex: 20,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 12,
     padding: '20px 20px 16px',
     background: 'var(--purple-lighter)',
@@ -669,8 +640,7 @@ const s: Record<string, React.CSSProperties> = {
     boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
   },
   headerCenter: {
-    flex: 1,
-    textAlign: 'center' as const,
+    textAlign: 'left' as const,
   },
   headerTitle: {
     fontSize: 18.5,

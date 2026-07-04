@@ -135,11 +135,18 @@ export default function AdminProfileEditPage() {
         return
       }
 
-      // 3. Update session
+      // 3. Update session (NextAuth JWT) — supaya avatar/nama di navbar dsb ikut berubah
       await update({ name: name.trim(), ...(avatarUrl ? { avatar_url: avatarUrl } : {}) })
 
       setSuccess(true)
       setPendingFile(null)
+
+      // ✅ FIX: router.refresh() memaksa Next.js membuang client-side router
+      // cache untuk halaman ini & halaman tujuan, supaya saat pindah ke
+      // /admin/profile, halaman itu fetch ulang data terbaru dari
+      // /api/admin/profile — bukan menampilkan versi lama yang sempat
+      // di-cache sebelum edit ini disimpan.
+      router.refresh()
       setTimeout(() => router.push('/admin/profile'), 1200)
 
     } catch {
