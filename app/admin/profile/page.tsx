@@ -426,8 +426,6 @@ export default function AdminProfilePage() {
           <InfoRow icon={<IconUser />} label={t('profile_label_nama')} value={name} />
           <InfoRow icon={<IconMail />} label={t('profile_label_email')} value={email} />
           <InfoRow icon={<IconBadge />} label={t('profile_label_peran')} value={<span style={s.pillViolet}>{role}</span>} />
-          <InfoRow icon={<IconLayers />} label={t('profile_label_sistem')} value={system} />
-          <InfoRow icon={<IconClock />} label={t('profile_label_login')} value={lastLogin} />
           <InfoRow
             icon={<IconShield />}
             label={t('profile_label_status')}

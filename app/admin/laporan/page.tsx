@@ -97,6 +97,43 @@ function LineChart({ data, dark = false }: { data: ChartData[]; dark?: boolean }
 }
 
 // ─────────────────────────────────────────────
+// Mini Sparkline untuk Stat Card
+// ─────────────────────────────────────────────
+function MiniSparkline({ color, seed = 0 }: { color: string; seed?: number }) {
+  const W = 160, H = 46
+  // pola naik dengan sedikit variasi acak berdasarkan seed, murni dekoratif
+  const base = [0.55, 0.4, 0.62, 0.3, 0.5, 0.2, 0.35, 0.08]
+  const shifted = base.map((v, i) => {
+    const wiggle = Math.sin((i + seed) * 1.7) * 0.06
+    return Math.max(0.04, Math.min(0.95, v + wiggle))
+  })
+  const pts = shifted.map((v, i) => ({
+    x: (i / (shifted.length - 1)) * W,
+    y: v * H,
+  }))
+  const line = pts.reduce((acc, p, i) => {
+    if (i === 0) return `M ${p.x} ${p.y}`
+    const cp = (pts[i - 1].x + p.x) / 2
+    return `${acc} C ${cp} ${pts[i - 1].y}, ${cp} ${p.y}, ${p.x} ${p.y}`
+  }, '')
+  const area = `${line} L ${W} ${H} L 0 ${H} Z`
+  const gradId = `spark-${color.replace('#', '')}-${seed}`
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="46" preserveAspectRatio="none"
+      style={{ display: 'block' }}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradId})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Tipe Config
 // ─────────────────────────────────────────────
 const TIPE_CFG: Record<string, { bg: string; bgDark: string; color: string; iconBg: string; iconBgDark: string; label: string; labelEn: string }> = {
@@ -435,6 +472,67 @@ function SkeletonCard({ dark = false }: { dark?: boolean }) {
 }
 
 // ─────────────────────────────────────────────
+// Tab Toggle Ringkasan / Detail
+// ─────────────────────────────────────────────
+function TabToggle({ 
+  activeTab, setActiveTab, isDark = false, isEn = false 
+}: {
+  activeTab: 'ringkasan' | 'detail'
+  setActiveTab: (t: 'ringkasan' | 'detail') => void
+  isDark?: boolean; isEn?: boolean
+}) {
+  return (
+    <div style={{ display: 'flex', gap: 10 }}>
+      <button onClick={() => setActiveTab('ringkasan')} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+        padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
+        fontSize: 14, fontWeight: 700, flex: 1,
+        background: activeTab === 'ringkasan' 
+          ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
+          : (isDark ? '#1e1b2e' : 'white'),
+        color: activeTab === 'ringkasan' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
+        boxShadow: activeTab === 'ringkasan' 
+          ? '0 4px 14px rgba(124,58,237,0.35)' 
+          : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
+        border: activeTab === 'ringkasan' 
+          ? 'none' 
+          : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
+      }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke={activeTab === 'ringkasan' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
+          strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        {isEn ? 'Summary' : 'Ringkasan Laporan'}
+      </button>
+      <button onClick={() => setActiveTab('detail')} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+        padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
+        fontSize: 14, fontWeight: 700, flex: 1,
+        background: activeTab === 'detail' 
+          ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
+          : (isDark ? '#1e1b2e' : 'white'),
+        color: activeTab === 'detail' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
+        boxShadow: activeTab === 'detail' 
+          ? '0 4px 14px rgba(124,58,237,0.35)' 
+          : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
+        border: activeTab === 'detail' 
+          ? 'none' 
+          : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
+      }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke={activeTab === 'detail' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        {isEn ? 'Details' : 'Detail Laporan'}
+      </button>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────
 export default function LaporanPage() {
@@ -549,10 +647,19 @@ export default function LaporanPage() {
 
   const pctOf = (n: number) => total > 0 ? Math.round((n / total) * 100) : 0
 
+  const buildDelta = (value: number, subKey: 'bulan' | 'tahun') => {
+    const sub = subKey === 'bulan'
+      ? (isEn ? 'from last month' : 'dari bulan lalu')
+      : (isEn ? 'from last year' : 'dari tahun lalu')
+    if (value === 0) return { text: '~0%', sub, positive: false }
+    return { text: `+${Math.max(pctOf(value), 1)}%`, sub, positive: true }
+  }
+
   const statsConfig = [
     { key: 'semua', label: isEn ? 'Total Reports' : 'Total Laporan', value: total, 
       iconBg: isDark ? '#2e2a40' : '#f5f3ff', numColor: isDark ? '#a5b4fc' : '#7c3aed',
-      delta: `+${Math.max(pctOf(total), 1)}%`, deltaSub: isEn ? 'from last month' : 'dari bulan lalu',
+      sparkColor: isDark ? '#a5b4fc' : '#7c3aed', seed: 1,
+      ...buildDelta(total, 'bulan'),
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#7c3aed'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
@@ -560,20 +667,23 @@ export default function LaporanPage() {
             </svg> },
     { key: 'bulanan', label: isEn ? 'This Month' : 'Bulan Ini', value: bulanan, 
       iconBg: isDark ? '#1e2a3d' : '#eff6ff', numColor: isDark ? '#60a5fa' : '#2563eb',
-      delta: `+${Math.max(pctOf(bulanan), 1)}%`, deltaSub: isEn ? 'from last month' : 'dari bulan lalu',
+      sparkColor: isDark ? '#60a5fa' : '#2563eb', seed: 2,
+      ...buildDelta(bulanan, 'bulan'),
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#60a5fa' : '#2563eb'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg> },
     { key: 'tahunan', label: isEn ? 'This Year' : 'Tahun Ini', value: tahunan, 
       iconBg: isDark ? '#1a2e1a' : '#ecfdf5', numColor: isDark ? '#34d399' : '#16a34a',
-      delta: `+${Math.max(pctOf(tahunan), 1)}%`, deltaSub: isEn ? 'from last year' : 'dari tahun lalu',
+      sparkColor: isDark ? '#34d399' : '#16a34a', seed: 3,
+      ...buildDelta(tahunan, 'tahun'),
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#34d399' : '#16a34a'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
             </svg> },
     { key: 'khusus', label: isEn ? 'Special' : 'Khusus', value: khusus, 
       iconBg: isDark ? '#2e2a1a' : '#fffbeb', numColor: isDark ? '#fbbf24' : '#d97706',
-      delta: `+${Math.max(pctOf(khusus), 1)}%`, deltaSub: isEn ? 'from last month' : 'dari bulan lalu',
+      sparkColor: isDark ? '#fbbf24' : '#d97706', seed: 4,
+      ...buildDelta(khusus, 'bulan'),
       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#fbbf24' : '#d97706'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg> },
@@ -635,12 +745,17 @@ export default function LaporanPage() {
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
-          <h1 style={{ 
-            margin: 0, fontSize: 28, fontWeight: 900, 
-            color: textColor, letterSpacing: '-0.03em' 
-          }}>
-            {isEn ? 'Reports' : 'Laporan'}
-          </h1>
+          <div>
+            <h1 style={{ 
+              margin: 0, fontSize: 28, fontWeight: 900, 
+              color: textColor, letterSpacing: '-0.03em' 
+            }}>
+              {isEn ? 'Reports' : 'Laporan'}
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: mutedColor, fontWeight: 500 }}>
+              {isEn ? 'System app preferences' : 'Preferensi aplikasi sistem'}
+            </p>
+          </div>
         </div>
         <button style={{ 
           width: 44, height: 44, borderRadius: 16, 
@@ -656,55 +771,6 @@ export default function LaporanPage() {
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
           </svg>
-        </button>
-      </div>
-
-      {/* ── TAB Ringkasan / Detail ───────────────────────── */}
-      <div style={{ padding: '0 16px 18px', display: 'flex', gap: 10 }}>
-        <button onClick={() => setActiveTab('ringkasan')} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-          padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
-          fontSize: 14, fontWeight: 700, flex: 1,
-          background: activeTab === 'ringkasan' 
-            ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
-            : (isDark ? '#1e1b2e' : 'white'),
-          color: activeTab === 'ringkasan' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
-          boxShadow: activeTab === 'ringkasan' 
-            ? '0 4px 14px rgba(124,58,237,0.35)' 
-            : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
-          border: activeTab === 'ringkasan' 
-            ? 'none' 
-            : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
-        }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-            stroke={activeTab === 'ringkasan' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
-            strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-          {isEn ? 'Summary' : 'Ringkasan'}
-        </button>
-        <button onClick={() => setActiveTab('detail')} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-          padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
-          fontSize: 14, fontWeight: 700, flex: 1,
-          background: activeTab === 'detail' 
-            ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
-            : (isDark ? '#1e1b2e' : 'white'),
-          color: activeTab === 'detail' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
-          boxShadow: activeTab === 'detail' 
-            ? '0 4px 14px rgba(124,58,237,0.35)' 
-            : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
-          border: activeTab === 'detail' 
-            ? 'none' 
-            : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
-        }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-            stroke={activeTab === 'detail' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
-            strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          {isEn ? 'Details' : 'Detail'}
         </button>
       </div>
 
@@ -902,10 +968,11 @@ export default function LaporanPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
           {statsConfig.map((s, i) => (
             <div key={s.key} style={{ 
-              background: cardBg, borderRadius: 20, padding: '16px 16px',
+              background: cardBg, borderRadius: 20, padding: '16px 16px 0',
               boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(15,23,42,0.06)',
               border: cardBorder,
-              animation: 'fadeUp 0.4s ease both', animationDelay: `${i*70}ms` 
+              animation: 'fadeUp 0.4s ease both', animationDelay: `${i*70}ms`,
+              overflow: 'hidden', display: 'flex', flexDirection: 'column' 
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div style={{ 
@@ -921,7 +988,7 @@ export default function LaporanPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
                 }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    <polyline points="9 6 15 12 9 18"/>
                   </svg>
                 </span>
               </div>
@@ -932,9 +999,20 @@ export default function LaporanPage() {
               }}>
                 {s.value}
               </p>
-              <p style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, margin: '6px 0 0' }}>
-                {s.delta} <span style={{ color: mutedColor, fontWeight: 600 }}>{s.deltaSub}</span>
+              <p style={{ 
+                fontSize: 11, fontWeight: 700, margin: '6px 0 0', display: 'flex', alignItems: 'center', gap: 3,
+                color: s.positive ? '#16a34a' : mutedColor 
+              }}>
+                {s.positive && (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>
+                  </svg>
+                )}
+                {s.text} <span style={{ color: mutedColor, fontWeight: 600 }}>{s.sub}</span>
               </p>
+              <div style={{ marginTop: 10, marginLeft: -16, marginRight: -16 }}>
+                <MiniSparkline color={s.sparkColor} seed={s.seed} />
+              </div>
             </div>
           ))}
         </div>
