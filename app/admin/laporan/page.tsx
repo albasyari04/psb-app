@@ -747,13 +747,13 @@ export default function LaporanPage() {
           </button>
           <div>
             <h1 style={{ 
-              margin: 0, fontSize: 28, fontWeight: 900, 
+              margin: 0, fontSize: 20, fontWeight: 600, 
               color: textColor, letterSpacing: '-0.03em' 
             }}>
               {isEn ? 'Reports' : 'Laporan'}
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: 13, color: mutedColor, fontWeight: 500 }}>
-              {isEn ? 'System app preferences' : 'Preferensi aplikasi sistem'}
+            <p style={{ margin: '1px 0 0', fontSize: 10, color: mutedColor, fontWeight: 500 }}>
+              {isEn ? 'System app preferences' : 'Buat Laporan untuk santri'}
             </p>
           </div>
         </div>

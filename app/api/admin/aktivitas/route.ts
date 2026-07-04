@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = getSupabaseAdmin()
-  const limit = parseInt(new URL(req.url).searchParams.get('limit') ?? '10')
+  const rawLimit = parseInt(new URL(req.url).searchParams.get('limit') ?? '10')
+  const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 10, 1), 200)
 
   // ── 1. Pendaftaran terbaru ──────────────────────────────────────────────────
   const { data: pendaftaran } = await admin
