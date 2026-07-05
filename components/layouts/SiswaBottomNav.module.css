@@ -1,12 +1,22 @@
 /* ================================================================
    SiswaBottomNav.module.css
-   Design: Premium Glassmorphism • Violet Theme
-   Identik dengan AdminBottomNav — unified look
+   Design: Solid Surface • Violet Theme
+   Background nav dibuat solid opaque (bukan kaca transparan) agar
+   selalu identik dengan --bg halaman di light & dark mode.
    ================================================================ */
 
 /* ── Safe area spacer ─────────────────────────────────────────── */
+/* .spacer TIDAK bisa mewarisi --bg dari .shell (di pengaturan.module.css)
+   karena SiswaBottomNav dirender di layout.tsx, di luar .shell — beda
+   cabang DOM. Makanya warnanya di-set eksplisit di sini, disamakan
+   dengan --bg milik .shell (light: #f6f8fa, dark: #0d0d16). */
 .spacer {
   height: 5rem;
+  background: #f6f8fa;
+}
+
+:global([data-theme='dark']) .spacer {
+  background: #0d0d16;
 }
 
 /* ── Fixed nav container ──────────────────────────────────────── */
@@ -21,20 +31,23 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ── Glassmorphism background layer ──────────────────────────── */
+/* ── Background layer ────────────────────────────────────────────
+   Sebelumnya pakai kaca transparan (rgba + backdrop-filter blur).
+   Efek blur/saturate itu ikut membaurkan warna konten DI BALIK nav
+   (teks, kartu terang), jadi hasil akhirnya selalu sedikit lebih
+   terang/pudar dari warna solid halaman — makanya kelihatan "beda"
+   walau base color-nya sama. Diganti solid opaque, identik persis
+   dengan --bg milik .shell (light: #f6f8fa, dark: #0d0d16). ─────── */
 .navBg {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.82);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
+  background: #f6f8fa;
   border-top-left-radius: 28px;
   border-top-right-radius: 28px;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-top: 1.5px solid rgba(15, 23, 42, 0.06);
   box-shadow:
-    0 -6px 32px rgba(109, 40, 217, 0.10),
-    0 -1px 0 rgba(124, 58, 237, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    0 -6px 24px rgba(15, 23, 42, 0.08),
+    0 -1px 0 rgba(124, 58, 237, 0.06);
 }
 
 /* ── Inner row ────────────────────────────────────────────────── */
@@ -201,5 +214,42 @@
   }
   .navItem:hover .navLabel:not(.navLabelActive) {
     color: #6d28d9;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE
+   navBg disamakan SOLID OPAQUE persis dengan --bg milik .shell
+   (#0d0d16) — bukan rgba tembus pandang lagi, supaya tidak ada
+   warna konten di baliknya yang ikut membaurkan hasil akhir.
+   ══════════════════════════════════════════════════════════════ */
+:global([data-theme='dark']) .navBg {
+  background: #0d0d16;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 -6px 24px rgba(0, 0, 0, 0.45),
+    0 -1px 0 rgba(124, 58, 237, 0.12);
+}
+
+:global([data-theme='dark']) .iconWrapActive {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, rgba(139, 92, 246, 0.16) 100%);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.32);
+}
+
+:global([data-theme='dark']) .navLabelInactive {
+  color: #6b6680;
+}
+
+:global([data-theme='dark']) .badge {
+  border-color: #15131f;
+}
+
+@media (hover: hover) {
+  :global([data-theme='dark']) .navItem:hover .iconWrap:not(.iconWrapActive) {
+    background: rgba(124, 58, 237, 0.12);
+    transform: translateY(-1px);
+  }
+  :global([data-theme='dark']) .navItem:hover .navLabel:not(.navLabelActive) {
+    color: #a78bfa;
   }
 }

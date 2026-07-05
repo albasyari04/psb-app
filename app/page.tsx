@@ -49,6 +49,46 @@ export default function SplashPage() {
           flexDirection: 'column',
         }}
       >
+        {/* ── Badge versi (kanan atas) ───────────────────────────── */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+            right: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#e8fbef',
+            borderRadius: '20px',
+            padding: '6px 8px 6px 14px',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#0f172a',
+            }}
+          >
+            V1.0.0
+          </span>
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#ffffff',
+              background: '#16a34a',
+              borderRadius: '14px',
+              padding: '3px 10px',
+              letterSpacing: '0.02em',
+            }}
+          >
+            BARU
+          </span>
+        </div>
+
         {/* ── Konten tengah: Logo + Nama App ─────────────────────── */}
         <div
           style={{

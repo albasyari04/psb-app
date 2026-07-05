@@ -585,8 +585,13 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>{t('dashboard_jadwal_title')}</p>
-        <Link href="/siswa/jadwal" className={styles.miniCardLink}>{t('dashboard_jadwal_link')}</Link>
+        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconJadwal}`}>
+          <Image src="/icons/jadwal icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
+        </div>
+        <div className={styles.miniCardHeadText}>
+          <p className={styles.miniCardTitle}>{t('dashboard_jadwal_title')}</p>
+          <Link href="/siswa/jadwal" className={styles.miniCardLink}>{t('dashboard_jadwal_link')}</Link>
+        </div>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
@@ -620,6 +625,12 @@ function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: b
           ))}
         </ol>
       )}
+      {!loading && (
+        <Link href="/siswa/jadwal" className={`${styles.miniCardFooter} ${styles.miniCardFooterJadwal}`}>
+          <IconNotifCalendar />
+          <span>Lihat Kalender</span>
+        </Link>
+      )}
     </div>
   )
 }
@@ -632,8 +643,13 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>{t('dashboard_payment_title')}</p>
-        <Link href="/siswa/pembayaran" className={styles.miniCardLink}>{t('dashboard_payment_link')}</Link>
+        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconPembayaran}`}>
+          <Image src="/icons/pembayaran icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
+        </div>
+        <div className={styles.miniCardHeadText}>
+          <p className={styles.miniCardTitle}>{t('dashboard_payment_title')}</p>
+          <Link href="/siswa/pembayaran" className={styles.miniCardLink}>{t('dashboard_payment_link')}</Link>
+        </div>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
@@ -669,6 +685,12 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
           )}
         </>
       )}
+      {!loading && (
+        <Link href="/siswa/pembayaran" className={`${styles.miniCardFooter} ${styles.miniCardFooterPembayaran}`}>
+          <IconNotifCard />
+          <span>Riwayat Pembayaran</span>
+        </Link>
+      )}
     </div>
   )
 }
@@ -681,8 +703,13 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <p className={styles.miniCardTitle}>{t('dashboard_laporan_title')}</p>
-        <Link href="/siswa/laporan" className={styles.miniCardLink}>{t('dashboard_laporan_link')}</Link>
+        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconLaporan}`}>
+          <Image src="/icons/laporan icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
+        </div>
+        <div className={styles.miniCardHeadText}>
+          <p className={styles.miniCardTitle}>{t('dashboard_laporan_title')}</p>
+          <Link href="/siswa/laporan" className={styles.miniCardLink}>{t('dashboard_laporan_link')}</Link>
+        </div>
       </div>
       {loading ? (
         <div className={styles.miniSkeleton}>
@@ -705,6 +732,12 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
             )
           })}
         </div>
+      )}
+      {!loading && (
+        <Link href="/siswa/laporan" className={`${styles.miniCardFooter} ${styles.miniCardFooterLaporan}`}>
+          <IconNotifDoc />
+          <span>Lihat Laporan</span>
+        </Link>
       )}
     </div>
   )
@@ -982,11 +1015,17 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
           </div>
         </div>
 
-        {/* 3 Kartu */}
-        <div className={styles.threeColGrid}>
-          <JadwalHariIniCard  items={jadwal}    loading={jadwalLoading}    />
-          <PembayaranCard     data={pembayaran} loading={pembayaranLoading} />
-          <LaporanCard        data={laporan}    loading={laporanLoading}    />
+        {/* Ringkasan Aktivitas — 3 kartu (Jadwal / Pembayaran / Reports) */}
+        <div className={styles.sectionWrap}>
+          <div className={styles.sectionRow}>
+            <p className={styles.sectionTitle}>Ringkasan Aktivitas</p>
+            <Link href="/siswa/menu" className={styles.sectionLink}>Lihat Semua →</Link>
+          </div>
+          <div className={styles.threeColGrid}>
+            <JadwalHariIniCard  items={jadwal}    loading={jadwalLoading}    />
+            <PembayaranCard     data={pembayaran} loading={pembayaranLoading} />
+            <LaporanCard        data={laporan}    loading={laporanLoading}    />
+          </div>
         </div>
 
         {/* Pengumuman Terbaru */}

@@ -360,13 +360,15 @@
      yang sebelumnya mendorong kartu ke-3 (Laporan) terpotong di kanan. */
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
-  padding: 0 1.1rem;
+  /* Padding horizontal SUDAH disediakan oleh .sectionWrap pembungkusnya —
+     dulu di sini juga ada padding:0 1.1rem sehingga dobel (total 2.2rem),
+     bikin 3 kolom makin sempit dan judul kepotong ("Paym...", "S. View..."). */
   align-items: stretch;
 }
 .miniCard {
   background: #fff;
   border-radius: 1.25rem;
-  padding: 0.85rem 0.6rem;
+  padding: 0.9rem 0.7rem;
   border: 1px solid var(--border);
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   display: flex;
@@ -374,16 +376,41 @@
   min-width: 0; /* FIX: izinkan kartu menyusut sesuai lebar kolom */
   overflow: hidden; /* FIX: jaring pengaman, klip konten yg masih kepanjangan */
 }
+
+/* ── Header: icon kotak warna + judul/​link bertumpuk ─────────────
+   Sebelumnya judul & link "Lihat Semua" sejajar di baris yang sama →
+   di kolom sempit judul kepotong ("Paym... See All"). Sekarang icon
+   di kiri, judul + link ditumpuk vertikal di kanannya (sesuai
+   ringkasan_aktivitas_desain.png). ────────────────────────────────── */
 .miniCardHeader {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.25rem;
-  margin-bottom: 0.7rem;
-  min-width: 0; /* FIX: agar title di bawah bisa truncate, bukan dorong lebar */
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  min-width: 0;
+}
+.miniCardIconWrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.miniCardIconImg { width: 20px; height: 20px; object-fit: contain; }
+.miniCardIconJadwal     { background: #ede9fe; }
+.miniCardIconPembayaran { background: var(--green-lighter, #ecfdf5); }
+.miniCardIconLaporan    { background: #dbeafe; }
+
+.miniCardHeadText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.1rem;
 }
 .miniCardTitle {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: var(--ink);
   line-height: 1.25;
@@ -391,17 +418,40 @@
   overflow: hidden; /* FIX: truncate dgn ellipsis, bukan melebarkan kolom */
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1 1 auto;
 }
 .miniCardLink {
-  font-size: 0.55rem;
+  font-size: 0.56rem;
   font-weight: 700;
   color: var(--green);
   text-decoration: none;
   white-space: nowrap;
-  margin-top: 0.1rem;
-  flex-shrink: 0; /* FIX: link selalu utuh, title yg menyusut/truncate */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* ── Footer link bawah kartu (Lihat Kalender / Riwayat Pembayaran / Lihat Laporan) ── */
+.miniCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+}
+.miniCardFooter svg { width: 13px; height: 13px; flex-shrink: 0; }
+.miniCardFooter span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.miniCardFooterJadwal     { color: #7c3aed; }
+.miniCardFooterPembayaran { color: var(--green); }
+.miniCardFooterLaporan    { color: #2563eb; }
 
 /* Skeleton generik untuk mini card */
 .miniSkeleton { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -592,6 +642,15 @@
 :global([data-theme='dark']) .payItem {
   border-top-color: #2a2640;
 }
+
+:global([data-theme='dark']) .miniCardIconJadwal     { background: rgba(124, 58, 237, 0.18); }
+:global([data-theme='dark']) .miniCardIconPembayaran { background: rgba(22, 163, 74, 0.16); }
+:global([data-theme='dark']) .miniCardIconLaporan    { background: rgba(37, 99, 235, 0.18); }
+
+:global([data-theme='dark']) .miniCardFooter { border-top-color: #2a2640; }
+:global([data-theme='dark']) .miniCardFooterJadwal     { color: #a78bfa; }
+:global([data-theme='dark']) .miniCardFooterPembayaran { color: #4ade80; }
+:global([data-theme='dark']) .miniCardFooterLaporan    { color: #60a5fa; }
 
 :global([data-theme='dark']) .annCard {
   background: #15131f;
