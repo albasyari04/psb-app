@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,16 +13,8 @@ export default function SplashPage() {
   const [fadeOut, setFadeOut] = useState(false)
 
   useEffect(() => {
-    // Mulai fade out di detik ke-2
-    const fadeTimer = setTimeout(() => {
-      setFadeOut(true)
-    }, 2000)
-
-    // Sembunyikan splash di detik ke-2.5
-    const splashTimer = setTimeout(() => {
-      setShowSplash(false)
-    }, 2500)
-
+    const fadeTimer = setTimeout(() => setFadeOut(true), 2000)
+    const splashTimer = setTimeout(() => setShowSplash(false), 2500)
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(splashTimer)
@@ -34,11 +27,7 @@ export default function SplashPage() {
 
     if (status === 'authenticated') {
       const role = session?.user?.role
-      if (role === 'admin') {
-        router.replace('/admin/dashboard')
-      } else {
-        router.replace('/siswa/dashboard')
-      }
+      router.replace(role === 'admin' ? '/admin/dashboard' : '/siswa/dashboard')
     } else {
       router.replace('/login')
     }
@@ -55,70 +44,118 @@ export default function SplashPage() {
           overflow: 'hidden',
           opacity: fadeOut ? 0 : 1,
           transition: 'opacity 0.5s ease-in-out',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        {/* Splash background image */}
-        <Image
-          src="/icons/splash.png"
-          alt="PSMB Splash"
-          fill
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          priority
-        />
-
-        {/* Overlay gelap tipis agar spinner terlihat */}
+        {/* ── Konten tengah: Logo + Nama App ─────────────────────── */}
         <div
           style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.25)',
-          }}
-        />
-
-        {/* Spinner di tengah bawah */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
+            justifyContent: 'center',
+            gap: '20px',
+            paddingBottom: '60px',
           }}
         >
-          {/* Spinner */}
-          <div
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '50%',
-              border: '4px solid rgba(255, 255, 255, 0.3)',
-              borderTop: '4px solid #ffffff',
-              animation: 'spin 0.8s linear infinite',
-            }}
-          />
+          <div className="splash-logo-wrap">
+            <Image
+              src="/icons/logo.png"
+              alt="Logo PSMB"
+              width={140}
+              height={140}
+              priority
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
 
-          {/* Teks loading */}
-          <p
-            style={{
-              color: 'rgba(255, 255, 255, 0.85)',
-              fontSize: '13px',
-              fontFamily: 'sans-serif',
-              letterSpacing: '0.05em',
-              margin: 0,
-            }}
-          >
-            Memuat aplikasi...
-          </p>
+          <div style={{ textAlign: 'center' }}>
+            <h1
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: '28px',
+                fontWeight: 800,
+                color: '#0f172a',
+                margin: 0,
+                letterSpacing: '0.02em',
+              }}
+            >
+              PSMB
+            </h1>
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '15px',
+                color: '#475569',
+                margin: '4px 0 0',
+              }}
+            >
+              Pon-Pes Al Istiqomah
+            </p>
+          </div>
+        </div>
+
+        {/* ── Loading bar ala Donghive ──────────────────────────── */}
+        <div
+          style={{
+            paddingBottom: '56px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '14px',
+          }}
+        >
+          <div className="splash-progress-track">
+            <div className="splash-progress-fill" />
+          </div>
+          <p className="splash-status-text">Memeriksa status aplikasi…</p>
         </div>
       </div>
 
       <style>{`
-        @keyframes spin {
-          0%   { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        .splash-logo-wrap {
+          animation: splashPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes splashPulse {
+          0%, 100% { transform: scale(1);   opacity: 1;   }
+          50%      { transform: scale(1.04); opacity: 0.92; }
+        }
+
+        .splash-progress-track {
+          width: 200px;
+          height: 4px;
+          border-radius: 4px;
+          background: rgba(15, 23, 42, 0.08);
+          overflow: hidden;
+          position: relative;
+        }
+
+        .splash-progress-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 40%;
+          border-radius: 4px;
+          background: linear-gradient(90deg, #d4af37, #f0c96b, #d4af37);
+          animation: splashSlide 1.3s cubic-bezier(.4,0,.2,1) infinite;
+        }
+
+        @keyframes splashSlide {
+          0%   { left: -40%; }
+          100% { left: 100%; }
+        }
+
+        .splash-status-text {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12.5px;
+          color: #94a3b8;
+          letter-spacing: 0.04em;
+          margin: 0;
         }
       `}</style>
     </>
