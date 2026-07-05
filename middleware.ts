@@ -10,31 +10,40 @@ export async function middleware(req: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   })
 
-  // Belum login → redirect ke /login
-  if (!token) {
+  const isAuthPage = pathname === '/login' || pathname === '/register'
+
+  // Sudah login tapi buka /login atau /register -> lempar ke dashboard sesuai role
+  if (token && isAuthPage) {
+    const role = token.role as string | undefined
+    const dest = role === 'admin' ? '/admin/dashboard' : '/siswa/dashboard'
+    return NextResponse.redirect(new URL(dest, req.url))
+  }
+
+  // Belum login & bukan halaman auth -> redirect ke /login
+  if (!token && !isAuthPage) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  const role = token.role as string | undefined
+  if (token) {
+    const role = token.role as string | undefined
 
-  // Akses /admin/* tapi bukan admin → ke dashboard siswa
-  if (pathname.startsWith('/admin') && role !== 'admin') {
-    return NextResponse.redirect(new URL('/siswa/dashboard', req.url))
-  }
+    if (pathname.startsWith('/admin') && role !== 'admin') {
+      return NextResponse.redirect(new URL('/siswa/dashboard', req.url))
+    }
 
-  // Akses /siswa/* tapi bukan siswa → ke dashboard admin
-  if (pathname.startsWith('/siswa') && role !== 'siswa') {
-    return NextResponse.redirect(new URL('/admin/dashboard', req.url))
+    if (pathname.startsWith('/siswa') && role !== 'siswa') {
+      return NextResponse.redirect(new URL('/admin/dashboard', req.url))
+    }
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  // ✅ Hanya proteksi halaman admin & siswa saja
-  // /login, /register, /api/auth — TIDAK disentuh middleware
   matcher: [
     '/admin/:path*',
     '/siswa/:path*',
+    '/login',
+    '/register',
   ],
 }
