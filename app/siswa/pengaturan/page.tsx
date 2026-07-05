@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSettings, type FontSize, type Theme } from '@/contexts/SettingsContext'
 import type { Language } from '@/lib/i18n'
 import styles from './pengaturan.module.css'
@@ -80,13 +79,6 @@ function IconHelp() {
     </svg>
   )
 }
-function IconReset() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 function IconCheck() {
   return (
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
@@ -106,40 +98,6 @@ function IconMoon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
       <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" fill="#6366f1" stroke="#6366f1" strokeWidth="1" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function IconHomeFilled() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg>
-  )
-}
-function IconWalletOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-      <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
-    </svg>
-  )
-}
-function IconDocumentOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="9" y1="13" x2="15" y2="13" />
-      <line x1="9" y1="17" x2="15" y2="17" />
-    </svg>
-  )
-}
-function IconPersonOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }
@@ -363,7 +321,6 @@ export default function SiswaPengaturanPage() {
     setTheme,
     setLanguage,
     setFontSize,
-    resetSettings,
     ready,
   } = useSettings()
 
@@ -383,10 +340,6 @@ export default function SiswaPengaturanPage() {
     theme: (v: Theme) => { setHasInteracted(true); setTheme(v) },
     language: (v: Language) => { setHasInteracted(true); setLanguage(v) },
     fontSize: (v: FontSize) => { setHasInteracted(true); setFontSize(v) },
-    reset: () => {
-      setHasInteracted(true)
-      resetSettings()
-    },
   }
 
   if (!ready) {
@@ -413,6 +366,9 @@ export default function SiswaPengaturanPage() {
           <IconGear />
         </div>
       </header>
+
+      {/* Spacer: mengisi ruang yang ditinggalkan topBar karena position:fixed */}
+      <div className={styles.topBarSpacer} aria-hidden="true" />
 
       {/* ══ PAGE BODY ══════════════════════════════════════════════ */}
       <div className={styles.pageBody}>
@@ -487,75 +443,7 @@ export default function SiswaPengaturanPage() {
           </div>
         </div>
 
-        {/* ── INFO BANNER — Perubahan Otomatis Tersimpan ─────────────── */}
-        <div className={styles.infoBanner}>
-          <img
-            src="/icons/pengaturan-kata-banner.png"
-            alt="Perubahan Otomatis Tersimpan"
-            className={styles.infoBannerImg}
-          />
-        </div>
-
-        {/* ── RESET BUTTON ──────────────────────────────────────────── */}
-        <div className={styles.card}>
-          <button type="button" className={styles.resetRow} onClick={handle.reset}>
-            <div className={styles.rowIconWrap} style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <IconReset />
-            </div>
-            <div className={styles.rowText}>
-              <p className={styles.resetTitle}>Reset ke Pengaturan Awal</p>
-              <p className={styles.rowSub}>Kembalikan semua pengaturan ke default</p>
-            </div>
-            <span className={styles.rowChevron} style={{ color: '#ef4444' }}>
-              <IconChevronRight />
-            </span>
-          </button>
-        </div>
-
-        {/* ── APP VERSION ───────────────────────────────────────────── */}
-        <div className={styles.versionRow}>
-          <div className={styles.versionBadge}>
-            <Image
-              src="/icons/icon-48.png"
-              alt="App Icon"
-              width={32}
-              height={32}
-              className={styles.versionAppIcon}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
-            <div>
-              <p className={styles.versionAppName}>PSMB Al-Istiqomah</p>
-              <p className={styles.versionAppCaption}>Aplikasi Resmi Santri</p>
-            </div>
-          </div>
-          <span className={styles.versionText}>v1.0.0</span>
-        </div>
-
       </div>
-
-      {/* ══ BOTTOM NAV ════════════════════════════════════════════ */}
-      <nav className={styles.bottomNav}>
-        <Link href="/siswa" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconHomeFilled /></div>
-          <span>Beranda</span>
-        </Link>
-        <Link href="/siswa/pendaftaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconDocumentOutline /></div>
-          <span>Daftar</span>
-        </Link>
-        <Link href="/siswa/pembayaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconWalletOutline /></div>
-          <span>Bayar</span>
-        </Link>
-        <Link href="/siswa/laporan" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconDocumentOutline /></div>
-          <span>Status</span>
-        </Link>
-        <Link href="/siswa/profile" className={`${styles.navItem} ${styles.navItemActive}`}>
-          <div className={styles.navIconWrap}><IconPersonOutline /></div>
-          <span>Profil</span>
-        </Link>
-      </nav>
 
       {/* ══ MODALS ════════════════════════════════════════════════ */}
       {modal === 'bahasa' && (

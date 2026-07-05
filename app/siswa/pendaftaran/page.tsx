@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ── Icon set (SVG line-style — profesional, elegant, modern) ───────────────────
 type IconProps = { size?: number; color?: string; strokeWidth?: number }
@@ -168,23 +168,28 @@ interface FormState {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const AGAMA     = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu']
+const AGAMA_EN  = ['Islam', 'Christian', 'Catholic', 'Hindu', 'Buddha', 'Confucian']
 const PEKERJAAN = [
   'Petani', 'Nelayan', 'PNS', 'TNI/Polri', 'Guru', 'Pengusaha',
   'Pedagang', 'Tukang', 'Karyawan Swasta', 'Profesional', 'Tidak Bekerja', 'Lainnya',
 ]
-
-const STEPS = [
-  { label: 'Data Diri',       Icon: IconUser },
-  { label: 'Asal Sekolah',    Icon: IconSchool },
-  { label: 'Alamat & Kontak', Icon: IconPin },
-  { label: 'Data Orang Tua',  Icon: IconFamily },
-  { label: 'Konfirmasi',      Icon: IconCheckCircle },
+const PEKERJAAN_EN = [
+  'Farmer', 'Fisherman', 'Civil Servant', 'Military/Police', 'Teacher', 'Entrepreneur',
+  'Trader', 'Craftsman', 'Private Employee', 'Professional', 'Unemployed', 'Others',
 ]
 
-// ── Ukuran layout tetap (untuk header/footer fixed) ────────────────────────────
-const HEADER_HEIGHT = 88      // tinggi header fixed (judul + subtitle + icon), termasuk buffer aman
-const ACTION_BAR_HEIGHT = 76  // tinggi bar tombol Lanjut/Kembali, termasuk buffer aman
-const SISWA_NAV_HEIGHT = 68   // perkiraan tinggi SiswaBottomNav dari layout induk — SESUAIKAN jika beda
+const STEPS = [
+  { label: 'Data Diri', labelEn: 'Personal Data', Icon: IconUser },
+  { label: 'Asal Sekolah', labelEn: 'School Origin', Icon: IconSchool },
+  { label: 'Alamat & Kontak', labelEn: 'Address & Contact', Icon: IconPin },
+  { label: 'Data Orang Tua', labelEn: 'Parent Data', Icon: IconFamily },
+  { label: 'Konfirmasi', labelEn: 'Confirmation', Icon: IconCheckCircle },
+]
+
+// ── Ukuran layout tetap ────────────────────────────────────────────────────────
+const HEADER_HEIGHT = 88
+const ACTION_BAR_HEIGHT = 76
+const SISWA_NAV_HEIGHT = 68
 
 const INIT: FormState = {
   nama_lengkap: '', nik: '', nisn: '',
@@ -199,7 +204,6 @@ const INIT: FormState = {
 }
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
-// Key di-suffix dengan userId agar draft tidak tercampur antar akun
 const getDraftKey = (userId: string) => `pendaftaran_draft_${userId}`
 const getStepKey  = (userId: string) => `pendaftaran_step_${userId}`
 
@@ -231,24 +235,20 @@ function clearDraft(userId: string) {
   } catch { /* abaikan */ }
 }
 
-// ── Validasi hanya saat final submit ──────────────────────────────────────────
+// ── Validasi ────────────────────────────────────────────────────────────────────
 function validateAll(form: FormState): string | null {
-  // Step 1
   if (!form.nama_lengkap.trim()) return 'Nama lengkap wajib diisi'
   if (!form.nik.trim())          return 'NIK wajib diisi'
   if (!form.nisn.trim())         return 'NISN wajib diisi'
   if (!form.tempat_lahir.trim()) return 'Tempat lahir wajib diisi'
   if (!form.tanggal_lahir)       return 'Tanggal lahir wajib diisi'
-  // Step 2
   if (!form.asal_sekolah.trim()) return 'Nama asal sekolah wajib diisi'
   if (!form.npsn.trim())         return 'NPSN wajib diisi'
-  // Step 3
   if (!form.alamat.trim())           return 'Alamat wajib diisi'
   if (!form.alamat_kota.trim())      return 'Kota wajib diisi'
   if (!form.alamat_kecamatan.trim()) return 'Kecamatan wajib diisi'
   if (!form.alamat_rt_rw.trim())     return 'RT/RW wajib diisi'
   if (!form.no_hp.trim())            return 'No. HP wajib diisi'
-  // Step 4
   if (!form.nama_ayah.trim())  return 'Nama ayah wajib diisi'
   if (!form.nama_ibu.trim())   return 'Nama ibu wajib diisi'
   if (!form.pekerjaan_ayah)    return 'Pekerjaan ayah wajib dipilih'
@@ -257,7 +257,6 @@ function validateAll(form: FormState): string | null {
   return null
 }
 
-// ── Hitung field yang sudah diisi per step (untuk indikator) ──────────────────
 function getStepCompletion(form: FormState): Record<number, boolean> {
   return {
     1: !!(form.nama_lengkap && form.nik && form.nisn && form.tempat_lahir && form.tanggal_lahir),
@@ -268,67 +267,103 @@ function getStepCompletion(form: FormState): Record<number, boolean> {
   }
 }
 
-// ── Style constants (inline, mengikuti konvensi proyek) ────────────────────────
-const styles = {
-  field: { marginBottom: 16 } as React.CSSProperties,
-  label: {
-    display: 'block',
-    fontSize: 13,
-    fontWeight: 700,
-    color: '#1E2233',
-    marginBottom: 6,
-  } as React.CSSProperties,
-  input: {
+function getInputStyle(isDark: boolean): React.CSSProperties {
+  return {
     width: '100%',
     boxSizing: 'border-box',
-    background: '#F4F6FA',
-    border: '1px solid #E6E9F0',
+    background: isDark ? '#1e1b2e' : '#F4F6FA',
+    border: isDark ? '1px solid #2e2a40' : '1px solid #E6E9F0',
     borderRadius: 12,
     padding: '12px 14px',
     fontSize: 14,
-    color: '#1E2233',
+    color: isDark ? '#f1f0f5' : '#1E2233',
     outline: 'none',
-  } as React.CSSProperties,
-  grid2: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 12,
-  } as React.CSSProperties,
-  card: {
-    background: '#FFFFFF',
-    border: '1px solid #EEF1F6',
+  }
+}
+
+function getSelectStyle(isDark: boolean): React.CSSProperties {
+  return {
+    width: '100%',
+    boxSizing: 'border-box',
+    background: isDark ? '#1e1b2e' : '#F4F6FA',
+    border: isDark ? '1px solid #2e2a40' : '1px solid #E6E9F0',
+    borderRadius: 12,
+    padding: '12px 14px',
+    fontSize: 14,
+    color: isDark ? '#f1f0f5' : '#1E2233',
+    outline: 'none',
+    appearance: 'auto',
+  }
+}
+
+function getCardStyle(isDark: boolean): React.CSSProperties {
+  return {
+    background: isDark ? '#1e1b2e' : '#FFFFFF',
+    border: isDark ? '1px solid #2e2a40' : '1px solid #EEF1F6',
     borderRadius: 18,
     padding: 18,
-  } as React.CSSProperties,
-  cardTitle: {
+  }
+}
+
+function getCardTitleStyle(isDark: boolean): React.CSSProperties {
+  return {
     margin: '0 0 16px',
     fontSize: 14,
     fontWeight: 800,
-    color: '#1E2233',
+    color: isDark ? '#f1f0f5' : '#1E2233',
     letterSpacing: 0.3,
-  } as React.CSSProperties,
-  summaryRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  }
+}
+
+function getLabelStyle(isDark: boolean): React.CSSProperties {
+  return {
+    display: 'block',
+    fontSize: 13,
+    fontWeight: 700,
+    color: isDark ? '#94a3b8' : '#1E2233',
+    marginBottom: 6,
+  }
+}
+
+function getSummaryKeyStyle(isDark: boolean): React.CSSProperties {
+  return {
+    color: isDark ? '#6b6885' : '#9AA1B1',
+    fontWeight: 500,
+    flexShrink: 0,
+  }
+}
+
+function getSummaryValStyle(isDark: boolean): React.CSSProperties {
+  return {
+    color: isDark ? '#f1f0f5' : '#1E2233',
+    fontWeight: 600,
+    textAlign: 'right',
+  }
+}
+
+function getSummaryRowStyle(): React.CSSProperties {
+  return {
     display: 'flex',
     justifyContent: 'space-between',
     gap: 12,
     padding: '8px 0',
     fontSize: 13.5,
-  } as React.CSSProperties,
-  summaryKey: {
-    color: '#9AA1B1',
-    fontWeight: 500,
-    flexShrink: 0,
-  } as React.CSSProperties,
-  summaryVal: {
-    color: '#1E2233',
-    fontWeight: 600,
-    textAlign: 'right',
-  } as React.CSSProperties,
+  }
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ─── Sub-components ────────────────────────────────────────────────────────────
 function Field({
-  label, value, onChange, placeholder = '', type = 'text', disabled = false,
+  label,
+  value,
+  onChange,
+  placeholder = '',
+  type = 'text',
+  disabled = false,
+  isDark = false,
+  isEn = false,
 }: {
   label: string
   value: string
@@ -336,40 +371,58 @@ function Field({
   placeholder?: string
   type?: string
   disabled?: boolean
+  isDark?: boolean
+  isEn?: boolean
 }) {
+  const inputStyle = getInputStyle(isDark)
   return (
-    <div style={styles.field}>
-      <label style={styles.label}>{label}</label>
+    <div style={{ marginBottom: 16 }}>
+      <label style={getLabelStyle(isDark)}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        style={{ ...styles.input, opacity: disabled ? 0.6 : 1, cursor: disabled ? 'not-allowed' : 'text' }}
+        style={{
+          ...inputStyle,
+          opacity: disabled ? 0.6 : 1,
+          cursor: disabled ? 'not-allowed' : 'text',
+        }}
       />
     </div>
   )
 }
 
 function SelectField({
-  label, value, options, onChange, disabled = false,
+  label,
+  value,
+  options,
+  onChange,
+  disabled = false,
+  isDark = false,
 }: {
   label: string
   value: string
   options: string[]
   onChange: (v: string) => void
   disabled?: boolean
+  isDark?: boolean
 }) {
+  const selectStyle = getSelectStyle(isDark)
   return (
-    <div style={styles.field}>
-      <label style={styles.label}>{label}</label>
+    <div style={{ marginBottom: 16 }}>
+      <label style={getLabelStyle(isDark)}>{label}</label>
       <select
         aria-label={label}
         value={value}
         onChange={e => onChange(e.target.value)}
         disabled={disabled}
-        style={{ ...styles.input, opacity: disabled ? 0.6 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+        style={{
+          ...selectStyle,
+          opacity: disabled ? 0.6 : 1,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}
       >
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
@@ -377,28 +430,61 @@ function SelectField({
   )
 }
 
-function CardTitle({ icon: Icon, children }: { icon: React.ComponentType<IconProps>; children: React.ReactNode }) {
+function CardTitle({ 
+  icon: Icon, 
+  children, 
+  isDark = false 
+}: { 
+  icon: React.ComponentType<IconProps>; 
+  children: React.ReactNode;
+  isDark?: boolean;
+}) {
+  const color = isDark ? '#a5b4fc' : '#4F46E5'
   return (
-    <p style={{ ...styles.cardTitle, display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ display: 'flex', color: '#4F46E5' }}><Icon size={16} /></span>
+    <p style={{
+      ...getCardTitleStyle(isDark),
+      color: isDark ? '#f1f0f5' : '#1E2233',
+    }}>
+      <span style={{ display: 'flex', color }}><Icon size={16} /></span>
       {children}
     </p>
   )
 }
 
-function SectionLabel({ icon: Icon, children, color = '#4F46E5' }: { icon: React.ComponentType<IconProps>; children: React.ReactNode; color?: string }) {
+function SectionLabel({ 
+  icon: Icon, 
+  children, 
+  color = '#4F46E5',
+  isDark = false 
+}: { 
+  icon: React.ComponentType<IconProps>; 
+  children: React.ReactNode; 
+  color?: string;
+  isDark?: boolean;
+}) {
+  const textColor = isDark ? '#f1f0f5' : color
   return (
-    <p style={{ fontWeight: 700, marginBottom: '1rem', color, display: 'flex', alignItems: 'center', gap: 8 }}>
+    <p style={{ 
+      fontWeight: 700, 
+      marginBottom: '1rem', 
+      color: textColor, 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 8 
+    }}>
       <span style={{ display: 'flex' }}><Icon size={15} /></span>
       {children}
     </p>
   )
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function PendaftaranPage() {
   const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
+  const isEn = language === 'en'
 
   const [step,        setStep]       = useState(1)
   const [loading,     setLoading]    = useState(false)
@@ -407,13 +493,25 @@ export default function PendaftaranPage() {
   const [form,        setForm]       = useState<FormState>(INIT)
   const [errorMsg,    setErrorMsg]   = useState<string | null>(null)
   const [successMsg,  setSuccessMsg] = useState<string | null>(null)
-  const [draftLoaded, setDraftLoaded] = useState(false) // flag agar auto-save tidak override sebelum load
-  const [draftBanner, setDraftBanner] = useState(false) // tampilkan banner "draft dimuat"
-
-  // ── Ref untuk track apakah form sudah di-init dari server/draft ───────────
+  const [draftLoaded, setDraftLoaded] = useState(false)
+  const [draftBanner, setDraftBanner] = useState(false)
   const initializedRef = useRef(false)
 
-  // ── Fetch data existing via API Route ──────────────────────────────────────
+  // ── Get i18n labels ──
+  const getAgamaOptions = () => isEn ? AGAMA_EN : AGAMA
+  const getPekerjaanOptions = () => isEn ? PEKERJAAN_EN : PEKERJAAN
+  const getStepLabel = (s: typeof STEPS[0]) => isEn ? s.labelEn : s.label
+  const getStatusLabel = (status: string) => {
+    const map: Record<string, { id: string; en: string }> = {
+      menunggu: { id: 'Menunggu', en: 'Pending' },
+      diproses: { id: 'Diproses', en: 'Processing' },
+      diterima: { id: 'Diterima', en: 'Accepted' },
+      ditolak: { id: 'Ditolak', en: 'Rejected' },
+    }
+    return isEn ? map[status]?.en ?? status : map[status]?.id ?? status
+  }
+
+  // ── Fetch data existing ──────────────────────────────────────────────────────
   useEffect(() => {
     if (sessionStatus === 'loading') return
     if (!session?.user?.id) {
@@ -428,7 +526,6 @@ export default function PendaftaranPage() {
         const json = await res.json()
 
         if (json.data) {
-          // Ada data di server → pakai data server, buang draft lokal
           const d = json.data as PendaftaranData
           setExisting(d)
           const serverForm: FormState = {
@@ -453,10 +550,8 @@ export default function PendaftaranPage() {
             no_hp_ortu:       d.no_hp_ortu        ?? '',
           }
           setForm(serverForm)
-          // Bersihkan draft karena sudah ada data server
           clearDraft(session.user.id!)
         } else {
-          // Belum ada data di server → cek apakah ada draft lokal
           const draft = loadDraft(session.user.id!)
           if (draft) {
             setForm(draft.form)
@@ -466,7 +561,6 @@ export default function PendaftaranPage() {
         }
       } catch (err) {
         console.error('Fetch existing error:', err)
-        // Gagal fetch server → tetap coba load draft
         if (session?.user?.id) {
           const draft = loadDraft(session.user.id)
           if (draft) {
@@ -485,12 +579,11 @@ export default function PendaftaranPage() {
     fetchExisting()
   }, [session, sessionStatus])
 
-  // ── Auto-save draft ke localStorage setiap kali form/step berubah ──────────
-  // Hanya aktif jika: user belum punya data server (existing === null) DAN draft sudah selesai di-load
+  // ── Auto-save draft ──────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!draftLoaded)           return  // tunggu sampai load selesai
+    if (!draftLoaded)           return
     if (!session?.user?.id)     return
-    if (existing)               return  // sudah ada data server, tidak perlu draft
+    if (existing)               return
     if (!initializedRef.current) return
 
     saveDraft(session.user.id, form, step)
@@ -500,20 +593,17 @@ export default function PendaftaranPage() {
   const set = (key: keyof FormState, val: string) =>
     setForm(f => ({ ...f, [key]: val }))
 
-  // ── Pindah step TANPA validasi wajib — user bebas lanjut meski belum lengkap ──
   const handleNextStep = () => {
     setErrorMsg(null)
     setStep(s => s + 1)
   }
 
-  // ── Submit: validasi lengkap baru di sini ─────────────────────────────────
   const handleSubmit = async () => {
     if (!isEditable || loading) return
 
     const err = validateAll(form)
     if (err) {
       setErrorMsg(err)
-      // Arahkan user ke step yang bermasalah
       if (['Nama lengkap', 'NIK', 'NISN', 'Tempat lahir', 'Tanggal lahir'].some(k => err.includes(k.toLowerCase()) || err.toLowerCase().includes(k.toLowerCase()))) setStep(1)
       else if (err.includes('sekolah') || err.includes('NPSN')) setStep(2)
       else if (err.includes('Alamat') || err.includes('Kota') || err.includes('Kecamatan') || err.includes('RT/RW') || err.includes('No. HP wajib')) setStep(3)
@@ -546,19 +636,18 @@ export default function PendaftaranPage() {
       const json = await res.json()
 
       if (!res.ok) {
-        setErrorMsg(json.error ?? 'Terjadi kesalahan. Silakan coba lagi.')
+        setErrorMsg(json.error ?? (isEn ? 'An error occurred. Please try again.' : 'Terjadi kesalahan. Silakan coba lagi.'))
         return
       }
 
-      // Berhasil → hapus draft lokal
       if (session?.user?.id) clearDraft(session.user.id)
 
-      setSuccessMsg('Pendaftaran berhasil dikirim!')
+      setSuccessMsg(isEn ? 'Registration submitted successfully!' : 'Pendaftaran berhasil dikirim!')
       setTimeout(() => router.push('/siswa/status'), 1000)
 
     } catch (err) {
       console.error('Submit error:', err)
-      setErrorMsg('Gagal mengirim data. Periksa koneksi internet Anda.')
+      setErrorMsg(isEn ? 'Failed to send data. Check your internet connection.' : 'Gagal mengirim data. Periksa koneksi internet Anda.')
     } finally {
       setLoading(false)
     }
@@ -568,6 +657,8 @@ export default function PendaftaranPage() {
 
   // ── Loading state ─────────────────────────────────────────────────────────
   if (sessionStatus === 'loading' || fetching) {
+    const bgColor = isDark ? '#15131f' : '#F8FAFC'
+    const textColor = isDark ? '#94a3b8' : '#94A3B8'
     return (
       <div style={{
         minHeight: '100vh',
@@ -575,24 +666,42 @@ export default function PendaftaranPage() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#F8FAFC',
+        background: bgColor,
         gap: 12,
       }}>
         <div style={{
           width: 44,
           height: 44,
-          border: '4px solid #E2E8F0',
+          borderWidth: 4,
+          borderStyle: 'solid',
+          borderColor: isDark ? '#2e2a40' : '#E2E8F0',
           borderTopColor: '#6366F1',
           borderRadius: '50%',
           animation: 'spin .8s linear infinite',
         }} />
-        <p style={{ color: '#94A3B8', fontSize: 13, fontWeight: 500 }}>
-          Memuat data pendaftaran...
+        <p style={{ color: textColor, fontSize: 13, fontWeight: 500 }}>
+          {isEn ? 'Loading registration data...' : 'Memuat data pendaftaran...'}
         </p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
+
+  // ── Styles ──────────────────────────────────────────────────────────────────
+  const bgColor = isDark ? '#15131f' : '#F8FAFC'
+  const textColor = isDark ? '#f1f0f5' : '#1E2233'
+  const mutedColor = isDark ? '#94a3b8' : '#9AA1B1'
+  const cardBg = isDark ? '#1e1b2e' : '#FFFFFF'
+  const cardBorder = isDark ? '1px solid #2e2a40' : '1px solid #EEF1F6'
+  const headerBg = isDark ? '#1e1b2e' : '#FFFFFF'
+  const headerBorder = isDark ? '1px solid #2e2a40' : '1px solid #EEF1F6'
+  const inputStyle = getInputStyle(isDark)
+  const selectStyle = getSelectStyle(isDark)
+  const cardStyle = getCardStyle(isDark)
+  const labelStyle = getLabelStyle(isDark)
+  const summaryKeyStyle = getSummaryKeyStyle(isDark)
+  const summaryValStyle = getSummaryValStyle(isDark)
+  const summaryRowStyle = getSummaryRowStyle()
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -601,12 +710,12 @@ export default function PendaftaranPage() {
         position: 'relative',
         maxWidth: 430,
         margin: '0 auto',
-        background: '#F8FAFC',
+        background: bgColor,
         minHeight: '100dvh',
       }}
     >
 
-      {/* ══ HEADER (FIXED — tidak ikut scroll, lepas dari scroll context manapun) ══ */}
+      {/* ══ HEADER (FIXED) ══ */}
       <div
         style={{
           position: 'fixed',
@@ -616,8 +725,8 @@ export default function PendaftaranPage() {
           width: '100%',
           maxWidth: 430,
           zIndex: 40,
-          background: '#FFFFFF',
-          borderBottom: '1px solid #EEF1F6',
+          background: headerBg,
+          borderBottom: headerBorder,
           padding: '18px 16px 16px',
           boxSizing: 'border-box',
         }}
@@ -631,11 +740,11 @@ export default function PendaftaranPage() {
                 height: 40,
                 minWidth: 40,
                 borderRadius: 12,
-                background: '#F1F0FE',
+                background: isDark ? '#2e2a40' : '#F1F0FE',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#4F46E5',
+                color: isDark ? '#a5b4fc' : '#4F46E5',
                 textDecoration: 'none',
                 flexShrink: 0,
               }}
@@ -648,49 +757,40 @@ export default function PendaftaranPage() {
                   margin: 0,
                   fontSize: 20,
                   fontWeight: 800,
-                  color: '#1E2233',
+                  color: textColor,
                   lineHeight: 1.25,
                 }}
               >
-                Formulir Pendaftaran
+                {isEn ? 'Registration Form' : 'Formulir Pendaftaran'}
               </h1>
               <p
                 style={{
                   margin: '2px 0 0',
                   fontSize: 13,
-                  color: '#9AA1B1',
+                  color: mutedColor,
                   fontWeight: 500,
                 }}
               >
-                Lengkapi data diri Anda untuk mendaftar
+                {isEn ? 'Complete your personal data to register' : 'Lengkapi data diri Anda untuk mendaftar'}
               </p>
             </div>
           </div>
-
-          {/* Icon Formulir — pojok kanan atas */}
-          <Image
-            src="/icons/formulir icon.png"
-            alt="Formulir"
-            width={40}
-            height={40}
-            style={{ flexShrink: 0, borderRadius: 10, objectFit: 'contain' }}
-          />
         </div>
       </div>
 
-      {/* ══ AREA KONTEN (mengalir natural — discroll oleh dokumen/body) ════════ */}
+      {/* ══ AREA KONTEN ════════════════════════════════════════════════════════ */}
       <div
         style={{
           paddingTop: HEADER_HEIGHT,
-          paddingBottom: ACTION_BAR_HEIGHT + SISWA_NAV_HEIGHT,
+          paddingBottom: SISWA_NAV_HEIGHT + 16,
         }}
       >
         {/* ── STEP INDICATOR ── */}
         <div style={{ padding: '14px 16px 0' }}>
           <div
             style={{
-              background: '#FFFFFF',
-              border: '1px solid #EEF1F6',
+              background: cardBg,
+              border: cardBorder,
               borderRadius: 16,
               padding: '14px 8px',
               display: 'flex',
@@ -703,9 +803,9 @@ export default function PendaftaranPage() {
               const isDone   = idx < step || (idx !== step && stepCompletion[idx])
               const isActive = idx === step
               const state    = isDone ? 'done' : isActive ? 'active' : 'pending'
-              const circleBg = state === 'active' ? '#4F46E5' : state === 'done' ? '#4F46E5' : '#EFF1F5'
-              const circleColor = state === 'pending' ? '#A6ACBC' : '#FFFFFF'
-              const labelColor = state === 'active' ? '#4F46E5' : state === 'done' ? '#4F46E5' : '#A6ACBC'
+              const circleBg = state === 'active' ? '#4F46E5' : state === 'done' ? '#4F46E5' : (isDark ? '#2e2a40' : '#EFF1F5')
+              const circleColor = state === 'pending' ? (isDark ? '#6b6885' : '#A6ACBC') : '#FFFFFF'
+              const labelColor = state === 'active' ? '#4F46E5' : state === 'done' ? '#4F46E5' : (isDark ? '#6b6885' : '#A6ACBC')
               return (
                 <div key={s.label} style={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
                   <button
@@ -753,7 +853,7 @@ export default function PendaftaranPage() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {s.label}
+                      {getStepLabel(s)}
                     </span>
                   </button>
                   {i < STEPS.length - 1 && (
@@ -762,7 +862,7 @@ export default function PendaftaranPage() {
                         height: 2,
                         flex: 1,
                         marginTop: 16,
-                        background: state === 'done' ? '#4F46E5' : '#EFF1F5',
+                        background: state === 'done' ? '#4F46E5' : (isDark ? '#2e2a40' : '#EFF1F5'),
                       }}
                     />
                   )}
@@ -777,11 +877,11 @@ export default function PendaftaranPage() {
           <div
             style={{
               margin: '14px 16px 0',
-              background: '#EEF2FF',
-              border: '1px solid #6366F1',
+              background: isDark ? '#1e1b2e' : '#EEF2FF',
+              border: `1px solid ${isDark ? '#2e2a40' : '#6366F1'}`,
               borderRadius: 12,
               padding: '12px 14px',
-              color: '#4338CA',
+              color: isDark ? '#a5b4fc' : '#4338CA',
               fontSize: 13,
               display: 'flex',
               alignItems: 'center',
@@ -791,12 +891,19 @@ export default function PendaftaranPage() {
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <IconSave size={16} />
-              Draft tersimpan sebelumnya telah dimuat. Lanjutkan mengisi formulir.
+              {isEn ? 'Previously saved draft loaded. Continue filling the form.' : 'Draft tersimpan sebelumnya telah dimuat. Lanjutkan mengisi formulir.'}
             </span>
             <button
               type="button"
               onClick={() => setDraftBanner(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4338CA', display: 'flex', flexShrink: 0 }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                cursor: 'pointer', 
+                color: isDark ? '#a5b4fc' : '#4338CA', 
+                display: 'flex', 
+                flexShrink: 0 
+              }}
             >
               <IconX size={14} />
             </button>
@@ -808,22 +915,22 @@ export default function PendaftaranPage() {
           <div
             style={{
               margin: '14px 16px 0',
-              background: '#FEF3D9',
-              border: '1px solid #F4D58D',
+              background: isDark ? '#2e2a1a' : '#FEF3D9',
+              border: isDark ? '1px solid #4a3a1a' : '1px solid #F4D58D',
               borderRadius: 14,
               padding: '14px 16px',
               display: 'flex',
               alignItems: 'flex-start',
               gap: 10,
-              color: '#92660B',
+              color: isDark ? '#fbbf24' : '#92660B',
               fontSize: 13.5,
               lineHeight: 1.5,
             }}
           >
             <span style={{ flexShrink: 0, marginTop: 1 }}><IconAlertTriangle size={18} /></span>
             <span>
-              Formulir tidak dapat diedit karena status pendaftaran sudah&nbsp;
-              <strong>{existing?.status}</strong>.
+              {isEn ? 'Form cannot be edited because registration status is' : 'Formulir tidak dapat diedit karena status pendaftaran sudah'}
+              &nbsp;<strong>{getStatusLabel(existing?.status ?? '')}</strong>.
             </span>
           </div>
         )}
@@ -833,14 +940,14 @@ export default function PendaftaranPage() {
           <div
             style={{
               margin: '14px 16px 0',
-              background: '#FEECEC',
-              border: '1px solid #F5A9A9',
+              background: isDark ? '#2e1a1a' : '#FEECEC',
+              border: isDark ? '1px solid #4a1a1a' : '1px solid #F5A9A9',
               borderRadius: 14,
               padding: '14px 16px',
               display: 'flex',
               alignItems: 'flex-start',
               gap: 10,
-              color: '#B42318',
+              color: isDark ? '#fca5a5' : '#B42318',
               fontSize: 13.5,
             }}
           >
@@ -852,14 +959,14 @@ export default function PendaftaranPage() {
           <div
             style={{
               margin: '14px 16px 0',
-              background: '#E7F8EE',
-              border: '1px solid #86E0AB',
+              background: isDark ? '#1a2e1a' : '#E7F8EE',
+              border: isDark ? '1px solid #1a4a2e' : '1px solid #86E0AB',
               borderRadius: 14,
               padding: '14px 16px',
               display: 'flex',
               alignItems: 'flex-start',
               gap: 10,
-              color: '#067647',
+              color: isDark ? '#6ee7b7' : '#067647',
               fontSize: 13.5,
             }}
           >
@@ -868,270 +975,396 @@ export default function PendaftaranPage() {
           </div>
         )}
 
-      {/* ══ BODY ═════════════════════════════════════════════════════════════ */}
-      <div style={{ padding: '14px 16px 24px' }} key={step}>
+        {/* ══ BODY ═════════════════════════════════════════════════════════════ */}
+        <div style={{ padding: '14px 16px 24px' }} key={step}>
 
-        {/* ── STEP 1: Data Diri ── */}
-        {step === 1 && (
-          <div style={styles.card}>
-            <CardTitle icon={IconUser}>Identitas Diri Santri</CardTitle>
-            <Field
-              label="Nama Lengkap"
-              value={form.nama_lengkap}
-              onChange={v => { set('nama_lengkap', v); setErrorMsg(null) }}
-              placeholder="Sesuai ijazah"
-              disabled={!isEditable}
-            />
-            <div style={styles.grid2}>
-              <Field label="NIK"  value={form.nik}  onChange={v => { set('nik', v);  setErrorMsg(null) }} placeholder="NIK"  disabled={!isEditable} />
-              <Field label="NISN" value={form.nisn} onChange={v => { set('nisn', v); setErrorMsg(null) }} placeholder="NISN" disabled={!isEditable} />
-            </div>
-            <div style={styles.grid2}>
-              <Field label="Tempat Lahir"  value={form.tempat_lahir}  onChange={v => { set('tempat_lahir', v);  setErrorMsg(null) }} placeholder="Kota" disabled={!isEditable} />
-              <Field label="Tanggal Lahir" value={form.tanggal_lahir} onChange={v => { set('tanggal_lahir', v); setErrorMsg(null) }} type="date"        disabled={!isEditable} />
-            </div>
-            <div style={styles.field}>
-              <label style={styles.label}>Jenis Kelamin</label>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {(['L', 'P'] as const).map(v => {
-                  const active = form.jenis_kelamin === v
-                  return (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => isEditable && set('jenis_kelamin', v)}
-                      disabled={!isEditable}
-                      style={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                        padding: '12px 0',
-                        borderRadius: 12,
-                        border: active ? '1px solid #4F46E5' : '1px solid #E6E9F0',
-                        background: active ? '#EEF2FF' : '#F4F6FA',
-                        color: active ? '#4F46E5' : '#1E2233',
-                        fontWeight: 600,
-                        fontSize: 13.5,
-                        cursor: isEditable ? 'pointer' : 'not-allowed',
-                        opacity: isEditable ? 1 : 0.6,
-                      }}
-                    >
-                      <span style={{ display: 'flex' }}>{v === 'L' ? <IconMale size={15} /> : <IconFemale size={15} />}</span>
-                      <span>{v === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-            <SelectField label="Agama" value={form.agama} options={AGAMA} onChange={v => set('agama', v)} disabled={!isEditable} />
-          </div>
-        )}
-
-        {/* ── STEP 2: Asal Sekolah ── */}
-        {step === 2 && (
-          <div style={styles.card}>
-            <CardTitle icon={IconSchool}>Asal Sekolah Santri</CardTitle>
-            <Field
-              label="Nama SMP / MTs Asal"
-              value={form.asal_sekolah}
-              onChange={v => { set('asal_sekolah', v); setErrorMsg(null) }}
-              placeholder="Nama sekolah asal"
-              disabled={!isEditable}
-            />
-            <Field
-              label="NPSN (Nomor Pokok Sekolah Nasional)"
-              value={form.npsn}
-              onChange={v => { set('npsn', v); setErrorMsg(null) }}
-              placeholder="NPSN"
-              disabled={!isEditable}
-            />
-          </div>
-        )}
-
-        {/* ── STEP 3: Alamat & Kontak ── */}
-        {step === 3 && (
-          <div style={styles.card}>
-            <CardTitle icon={IconPin}>Alamat & Kontak Santri</CardTitle>
-            <Field
-              label="Alamat Lengkap"
-              value={form.alamat}
-              onChange={v => { set('alamat', v); setErrorMsg(null) }}
-              placeholder="Jl., Nomor, Gang, dsb"
-              disabled={!isEditable}
-            />
-            <div style={styles.grid2}>
-              <Field label="Kota"       value={form.alamat_kota}       onChange={v => { set('alamat_kota', v);       setErrorMsg(null) }} placeholder="Kota"       disabled={!isEditable} />
-              <Field label="Kecamatan"  value={form.alamat_kecamatan}  onChange={v => { set('alamat_kecamatan', v);  setErrorMsg(null) }} placeholder="Kecamatan"  disabled={!isEditable} />
-            </div>
-            <div style={styles.grid2}>
-              <Field label="RT/RW" value={form.alamat_rt_rw} onChange={v => { set('alamat_rt_rw', v); setErrorMsg(null) }} placeholder="RT/RW" disabled={!isEditable} />
-            </div>
-            <Field
-              label="No. HP / WA"
-              value={form.no_hp}
-              onChange={v => { set('no_hp', v); setErrorMsg(null) }}
-              placeholder="08xxxxxxxxxx"
-              disabled={!isEditable}
-            />
-            <div style={styles.field}>
-              <label style={styles.label}>Email</label>
-              <input
-                type="email"
-                value={session?.user?.email ?? ''}
-                disabled
-                style={{ ...styles.input, opacity: 0.6, cursor: 'not-allowed' }}
+          {/* ── STEP 1: Data Diri ── */}
+          {step === 1 && (
+            <div style={cardStyle}>
+              <CardTitle icon={IconUser} isDark={isDark}>
+                {isEn ? 'Student Identity' : 'Identitas Diri Santri'}
+              </CardTitle>
+              <Field
+                label={isEn ? 'Full Name' : 'Nama Lengkap'}
+                value={form.nama_lengkap}
+                onChange={v => { set('nama_lengkap', v); setErrorMsg(null) }}
+                placeholder={isEn ? 'As per diploma' : 'Sesuai ijazah'}
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
               />
-              <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '4px' }}>
-                Email diambil dari akun Anda dan tidak dapat diubah di sini.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 4: Data Orang Tua ── */}
-        {step === 4 && (
-          <div style={styles.card}>
-            <CardTitle icon={IconFamily}>Data Orang Tua & Wali</CardTitle>
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
-              <SectionLabel icon={IconUser} color="#1E2233">Data Ayah</SectionLabel>
-              <Field label="Nama Ayah" value={form.nama_ayah} onChange={v => { set('nama_ayah', v); setErrorMsg(null) }} placeholder="Nama lengkap ayah" disabled={!isEditable} />
-              <SelectField label="Pekerjaan Ayah" value={form.pekerjaan_ayah} options={PEKERJAAN} onChange={v => set('pekerjaan_ayah', v)} disabled={!isEditable} />
-            </div>
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
-              <SectionLabel icon={IconUser} color="#1E2233">Data Ibu</SectionLabel>
-              <Field label="Nama Ibu" value={form.nama_ibu} onChange={v => { set('nama_ibu', v); setErrorMsg(null) }} placeholder="Nama lengkap ibu" disabled={!isEditable} />
-              <SelectField label="Pekerjaan Ibu" value={form.pekerjaan_ibu} options={PEKERJAAN} onChange={v => set('pekerjaan_ibu', v)} disabled={!isEditable} />
-            </div>
-            <Field label="No. HP Orang Tua" value={form.no_hp_ortu} onChange={v => { set('no_hp_ortu', v); setErrorMsg(null) }} placeholder="08xxxxxxxxxx" disabled={!isEditable} />
-          </div>
-        )}
-
-        {/* ── STEP 5: Konfirmasi ── */}
-        {step === 5 && (
-          <div style={styles.card}>
-            <CardTitle icon={IconClipboardEdit}>Ringkasan Pendaftaran</CardTitle>
-
-            {/* Peringatan jika ada step yang belum lengkap */}
-            {Object.entries(stepCompletion).some(([k, v]) => Number(k) < 5 && !v) && (
-              <div
-                style={{
-                  marginBottom: '1rem',
-                  background: '#FEECEC',
-                  border: '1px solid #F5A9A9',
-                  borderRadius: 14,
-                  padding: '14px 16px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 10,
-                  color: '#B42318',
-                  fontSize: 13.5,
-                }}
-              >
-                <span style={{ flexShrink: 0, marginTop: 1 }}><IconAlertTriangle size={18} /></span>
-                <span>
-                  Beberapa field belum diisi:{' '}
-                  {[
-                    !stepCompletion[1] && 'Data Diri',
-                    !stepCompletion[2] && 'Asal Sekolah',
-                    !stepCompletion[3] && 'Alamat & Kontak',
-                    !stepCompletion[4] && 'Data Orang Tua',
-                  ].filter(Boolean).join(', ')}
-                  . Klik nama step di atas untuk melengkapi.
-                </span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Field 
+                  label="NIK"  
+                  value={form.nik}  
+                  onChange={v => { set('nik', v);  setErrorMsg(null) }} 
+                  placeholder="NIK"  
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+                <Field 
+                  label="NISN" 
+                  value={form.nisn} 
+                  onChange={v => { set('nisn', v); setErrorMsg(null) }} 
+                  placeholder="NISN" 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
               </div>
-            )}
-
-            {/* Data Diri */}
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
-              <SectionLabel icon={IconUser}>Data Diri</SectionLabel>
-              {[
-                { key: 'Nama Lengkap',      val: form.nama_lengkap },
-                { key: 'NIK / NISN',        val: `${form.nik} / ${form.nisn}` },
-                { key: 'Tempat, Tgl Lahir', val: `${form.tempat_lahir}, ${form.tanggal_lahir ? new Date(form.tanggal_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}` },
-                { key: 'Jenis Kelamin',     val: form.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
-                { key: 'Agama',             val: form.agama },
-              ].map(({ key, val }) => (
-                <div key={key} style={styles.summaryRow}>
-                  <span style={styles.summaryKey}>{key}</span>
-                  <span style={styles.summaryVal}>{val || '-'}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Field 
+                  label={isEn ? 'Place of Birth' : 'Tempat Lahir'}  
+                  value={form.tempat_lahir}  
+                  onChange={v => { set('tempat_lahir', v);  setErrorMsg(null) }} 
+                  placeholder={isEn ? 'City' : 'Kota'} 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+                <Field 
+                  label={isEn ? 'Date of Birth' : 'Tanggal Lahir'} 
+                  value={form.tanggal_lahir} 
+                  onChange={v => { set('tanggal_lahir', v); setErrorMsg(null) }} 
+                  type="date"        
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>{isEn ? 'Gender' : 'Jenis Kelamin'}</label>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {(['L', 'P'] as const).map(v => {
+                    const active = form.jenis_kelamin === v
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => isEditable && set('jenis_kelamin', v)}
+                        disabled={!isEditable}
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                          padding: '12px 0',
+                          borderRadius: 12,
+                          border: active ? '1px solid #4F46E5' : (isDark ? '1px solid #2e2a40' : '1px solid #E6E9F0'),
+                          background: active ? (isDark ? '#1e1b2e' : '#EEF2FF') : (isDark ? '#15131f' : '#F4F6FA'),
+                          color: active ? (isDark ? '#a5b4fc' : '#4F46E5') : (isDark ? '#94a3b8' : '#1E2233'),
+                          fontWeight: 600,
+                          fontSize: 13.5,
+                          cursor: isEditable ? 'pointer' : 'not-allowed',
+                          opacity: isEditable ? 1 : 0.6,
+                        }}
+                      >
+                        <span style={{ display: 'flex' }}>{v === 'L' ? <IconMale size={15} /> : <IconFemale size={15} />}</span>
+                        <span>{v === 'L' ? (isEn ? 'Male' : 'Laki-laki') : (isEn ? 'Female' : 'Perempuan')}</span>
+                      </button>
+                    )
+                  })}
                 </div>
-              ))}
+              </div>
+              <SelectField 
+                label={isEn ? 'Religion' : 'Agama'} 
+                value={form.agama} 
+                options={getAgamaOptions()} 
+                onChange={v => set('agama', v)} 
+                disabled={!isEditable}
+                isDark={isDark}
+              />
             </div>
+          )}
 
-            {/* Asal Sekolah */}
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
-              <SectionLabel icon={IconSchool}>Asal Sekolah</SectionLabel>
-              {[
-                { key: 'Nama Sekolah', val: form.asal_sekolah },
-                { key: 'NPSN',         val: form.npsn },
-              ].map(({ key, val }) => (
-                <div key={key} style={styles.summaryRow}>
-                  <span style={styles.summaryKey}>{key}</span>
-                  <span style={styles.summaryVal}>{val || '-'}</span>
+          {/* ── STEP 2: Asal Sekolah ── */}
+          {step === 2 && (
+            <div style={cardStyle}>
+              <CardTitle icon={IconSchool} isDark={isDark}>
+                {isEn ? 'School Origin' : 'Asal Sekolah Santri'}
+              </CardTitle>
+              <Field
+                label={isEn ? 'School Name' : 'Nama SMP / MTs Asal'}
+                value={form.asal_sekolah}
+                onChange={v => { set('asal_sekolah', v); setErrorMsg(null) }}
+                placeholder={isEn ? 'Previous school name' : 'Nama sekolah asal'}
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+              <Field
+                label="NPSN"
+                value={form.npsn}
+                onChange={v => { set('npsn', v); setErrorMsg(null) }}
+                placeholder="NPSN"
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+            </div>
+          )}
+
+          {/* ── STEP 3: Alamat & Kontak ── */}
+          {step === 3 && (
+            <div style={cardStyle}>
+              <CardTitle icon={IconPin} isDark={isDark}>
+                {isEn ? 'Address & Contact' : 'Alamat & Kontak Santri'}
+              </CardTitle>
+              <Field
+                label={isEn ? 'Full Address' : 'Alamat Lengkap'}
+                value={form.alamat}
+                onChange={v => { set('alamat', v); setErrorMsg(null) }}
+                placeholder={isEn ? 'Street, Number, Alley, etc' : 'Jl., Nomor, Gang, dsb'}
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Field 
+                  label={isEn ? 'City' : 'Kota'}       
+                  value={form.alamat_kota}       
+                  onChange={v => { set('alamat_kota', v);       setErrorMsg(null) }} 
+                  placeholder={isEn ? 'City' : 'Kota'}       
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+                <Field 
+                  label={isEn ? 'District' : 'Kecamatan'}  
+                  value={form.alamat_kecamatan}  
+                  onChange={v => { set('alamat_kecamatan', v);  setErrorMsg(null) }} 
+                  placeholder={isEn ? 'District' : 'Kecamatan'}  
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+              </div>
+              <Field 
+                label="RT/RW" 
+                value={form.alamat_rt_rw} 
+                onChange={v => { set('alamat_rt_rw', v); setErrorMsg(null) }} 
+                placeholder="RT/RW" 
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+              <Field
+                label={isEn ? 'Phone / WA' : 'No. HP / WA'}
+                value={form.no_hp}
+                onChange={v => { set('no_hp', v); setErrorMsg(null) }}
+                placeholder="08xxxxxxxxxx"
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Email</label>
+                <input
+                  type="email"
+                  value={session?.user?.email ?? ''}
+                  disabled
+                  style={{
+                    ...inputStyle,
+                    opacity: 0.6,
+                    cursor: 'not-allowed',
+                  }}
+                />
+                <p style={{ fontSize: '0.75rem', color: mutedColor, marginTop: '4px' }}>
+                  {isEn ? 'Email is taken from your account and cannot be changed here.' : 'Email diambil dari akun Anda dan tidak dapat diubah di sini.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 4: Data Orang Tua ── */}
+          {step === 4 && (
+            <div style={cardStyle}>
+              <CardTitle icon={IconFamily} isDark={isDark}>
+                {isEn ? "Parent & Guardian Data" : 'Data Orang Tua & Wali'}
+              </CardTitle>
+              <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: isDark ? '1px solid #2e2a40' : '1px solid #e0e0e0' }}>
+                <SectionLabel icon={IconUser} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? "Father's Data" : 'Data Ayah'}
+                </SectionLabel>
+                <Field 
+                  label={isEn ? "Father's Name" : 'Nama Ayah'} 
+                  value={form.nama_ayah} 
+                  onChange={v => { set('nama_ayah', v); setErrorMsg(null) }} 
+                  placeholder={isEn ? "Father's full name" : 'Nama lengkap ayah'} 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+                <SelectField 
+                  label={isEn ? "Father's Occupation" : 'Pekerjaan Ayah'} 
+                  value={form.pekerjaan_ayah} 
+                  options={getPekerjaanOptions()} 
+                  onChange={v => set('pekerjaan_ayah', v)} 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                />
+              </div>
+              <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: isDark ? '1px solid #2e2a40' : '1px solid #e0e0e0' }}>
+                <SectionLabel icon={IconUser} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? "Mother's Data" : 'Data Ibu'}
+                </SectionLabel>
+                <Field 
+                  label={isEn ? "Mother's Name" : 'Nama Ibu'} 
+                  value={form.nama_ibu} 
+                  onChange={v => { set('nama_ibu', v); setErrorMsg(null) }} 
+                  placeholder={isEn ? "Mother's full name" : 'Nama lengkap ibu'} 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                  isEn={isEn}
+                />
+                <SelectField 
+                  label={isEn ? "Mother's Occupation" : 'Pekerjaan Ibu'} 
+                  value={form.pekerjaan_ibu} 
+                  options={getPekerjaanOptions()} 
+                  onChange={v => set('pekerjaan_ibu', v)} 
+                  disabled={!isEditable}
+                  isDark={isDark}
+                />
+              </div>
+              <Field 
+                label={isEn ? "Parent's Phone" : 'No. HP Orang Tua'} 
+                value={form.no_hp_ortu} 
+                onChange={v => { set('no_hp_ortu', v); setErrorMsg(null) }} 
+                placeholder="08xxxxxxxxxx" 
+                disabled={!isEditable}
+                isDark={isDark}
+                isEn={isEn}
+              />
+            </div>
+          )}
+
+          {/* ── STEP 5: Konfirmasi ── */}
+          {step === 5 && (
+            <div style={cardStyle}>
+              <CardTitle icon={IconClipboardEdit} isDark={isDark}>
+                {isEn ? 'Registration Summary' : 'Ringkasan Pendaftaran'}
+              </CardTitle>
+
+              {Object.entries(stepCompletion).some(([k, v]) => Number(k) < 5 && !v) && (
+                <div
+                  style={{
+                    marginBottom: '1rem',
+                    background: isDark ? '#2e1a1a' : '#FEECEC',
+                    border: isDark ? '1px solid #4a1a1a' : '1px solid #F5A9A9',
+                    borderRadius: 14,
+                    padding: '14px 16px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 10,
+                    color: isDark ? '#fca5a5' : '#B42318',
+                    fontSize: 13.5,
+                  }}
+                >
+                  <span style={{ flexShrink: 0, marginTop: 1 }}><IconAlertTriangle size={18} /></span>
+                  <span>
+                    {isEn ? 'Some fields are not filled:' : 'Beberapa field belum diisi:'}
+                    {[
+                      !stepCompletion[1] && (isEn ? 'Personal Data' : 'Data Diri'),
+                      !stepCompletion[2] && (isEn ? 'School Origin' : 'Asal Sekolah'),
+                      !stepCompletion[3] && (isEn ? 'Address & Contact' : 'Alamat & Kontak'),
+                      !stepCompletion[4] && (isEn ? 'Parent Data' : 'Data Orang Tua'),
+                    ].filter(Boolean).join(', ')}
+                    . {isEn ? 'Click the step name above to complete.' : 'Klik nama step di atas untuk melengkapi.'}
+                  </span>
                 </div>
-              ))}
+              )}
+
+              {/* Data Diri */}
+              <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: isDark ? '1px solid #2e2a40' : '1px solid #e0e0e0' }}>
+                <SectionLabel icon={IconUser} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? 'Personal Data' : 'Data Diri'}
+                </SectionLabel>
+                {[
+                  { key: isEn ? 'Full Name' : 'Nama Lengkap', val: form.nama_lengkap },
+                  { key: 'NIK / NISN', val: `${form.nik} / ${form.nisn}` },
+                  { key: isEn ? 'Place, Date of Birth' : 'Tempat, Tgl Lahir', val: `${form.tempat_lahir}, ${form.tanggal_lahir ? new Date(form.tanggal_lahir).toLocaleDateString(isEn ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}` },
+                  { key: isEn ? 'Gender' : 'Jenis Kelamin', val: form.jenis_kelamin === 'L' ? (isEn ? 'Male' : 'Laki-laki') : (isEn ? 'Female' : 'Perempuan') },
+                  { key: isEn ? 'Religion' : 'Agama', val: form.agama },
+                ].map(({ key, val }) => (
+                  <div key={key} style={summaryRowStyle}>
+                    <span style={summaryKeyStyle}>{key}</span>
+                    <span style={summaryValStyle}>{val || '-'}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Asal Sekolah */}
+              <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: isDark ? '1px solid #2e2a40' : '1px solid #e0e0e0' }}>
+                <SectionLabel icon={IconSchool} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? 'School Origin' : 'Asal Sekolah'}
+                </SectionLabel>
+                {[
+                  { key: isEn ? 'School Name' : 'Nama Sekolah', val: form.asal_sekolah },
+                  { key: 'NPSN', val: form.npsn },
+                ].map(({ key, val }) => (
+                  <div key={key} style={summaryRowStyle}>
+                    <span style={summaryKeyStyle}>{key}</span>
+                    <span style={summaryValStyle}>{val || '-'}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Alamat & Kontak */}
+              <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: isDark ? '1px solid #2e2a40' : '1px solid #e0e0e0' }}>
+                <SectionLabel icon={IconPin} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? 'Address & Contact' : 'Alamat & Kontak'}
+                </SectionLabel>
+                {[
+                  { key: isEn ? 'Full Address' : 'Alamat Lengkap', val: form.alamat },
+                  { key: isEn ? 'City' : 'Kota', val: form.alamat_kota },
+                  { key: isEn ? 'District' : 'Kecamatan', val: form.alamat_kecamatan },
+                  { key: 'RT/RW', val: form.alamat_rt_rw },
+                  { key: isEn ? 'Phone / WA' : 'No. HP / WA', val: form.no_hp },
+                  { key: 'Email', val: session?.user?.email ?? '-' },
+                ].map(({ key, val }) => (
+                  <div key={key} style={summaryRowStyle}>
+                    <span style={summaryKeyStyle}>{key}</span>
+                    <span style={summaryValStyle}>{val || '-'}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Data Orang Tua */}
+              <div>
+                <SectionLabel icon={IconFamily} color={isDark ? '#f1f0f5' : '#1E2233'} isDark={isDark}>
+                  {isEn ? "Parent's Data" : 'Data Orang Tua'}
+                </SectionLabel>
+                {[
+                  { key: isEn ? "Father's Name" : 'Nama Ayah', val: form.nama_ayah },
+                  { key: isEn ? "Father's Occupation" : 'Pekerjaan Ayah', val: form.pekerjaan_ayah },
+                  { key: isEn ? "Mother's Name" : 'Nama Ibu', val: form.nama_ibu },
+                  { key: isEn ? "Mother's Occupation" : 'Pekerjaan Ibu', val: form.pekerjaan_ibu },
+                  { key: isEn ? "Parent's Phone" : 'No. HP Ortu', val: form.no_hp_ortu },
+                ].map(({ key, val }) => (
+                  <div key={key} style={summaryRowStyle}>
+                    <span style={summaryKeyStyle}>{key}</span>
+                    <span style={summaryValStyle}>{val || '-'}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            {/* Alamat & Kontak */}
-            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e0e0e0' }}>
-              <SectionLabel icon={IconPin}>Alamat & Kontak</SectionLabel>
-              {[
-                { key: 'Alamat Lengkap', val: form.alamat },
-                { key: 'Kota',           val: form.alamat_kota },
-                { key: 'Kecamatan',      val: form.alamat_kecamatan },
-                { key: 'RT/RW',          val: form.alamat_rt_rw },
-                { key: 'No. HP / WA',    val: form.no_hp },
-                { key: 'Email',          val: session?.user?.email ?? '-' },
-              ].map(({ key, val }) => (
-                <div key={key} style={styles.summaryRow}>
-                  <span style={styles.summaryKey}>{key}</span>
-                  <span style={styles.summaryVal}>{val || '-'}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Data Orang Tua */}
-            <div>
-              <SectionLabel icon={IconFamily}>Data Orang Tua</SectionLabel>
-              {[
-                { key: 'Nama Ayah',      val: form.nama_ayah },
-                { key: 'Pekerjaan Ayah', val: form.pekerjaan_ayah },
-                { key: 'Nama Ibu',       val: form.nama_ibu },
-                { key: 'Pekerjaan Ibu',  val: form.pekerjaan_ibu },
-                { key: 'No. HP Ortu',    val: form.no_hp_ortu },
-              ].map(({ key, val }) => (
-                <div key={key} style={styles.summaryRow}>
-                  <span style={styles.summaryKey}>{key}</span>
-                  <span style={styles.summaryVal}>{val || '-'}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-      </div>
-      </div>
-
-      {/* ══ BOTTOM NAVIGATION BAR (fixed, di atas SiswaBottomNav dari layout) ══ */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: SISWA_NAV_HEIGHT,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: 430,
-          zIndex: 40,
-          background: '#FFFFFF',
-          borderTop: '1px solid #EEF1F6',
-          padding: '12px 16px',
-          display: 'flex',
-          gap: 10,
-          boxSizing: 'border-box',
-        }}
-      >
+          {/* ══ ACTION BUTTONS (ikut mengalir/scroll bersama konten) ══ */}
+          <div
+            style={{
+              marginTop: 20,
+              background: isDark ? '#1e1b2e' : '#FFFFFF',
+              border: isDark ? '1px solid #2e2a40' : '1px solid #EEF1F6',
+              borderRadius: 16,
+              padding: 12,
+              display: 'flex',
+              gap: 10,
+              boxSizing: 'border-box',
+            }}
+          >
         {step > 1 && (
           <button
             type="button"
@@ -1144,15 +1377,15 @@ export default function PendaftaranPage() {
               gap: 6,
               padding: '14px 18px',
               borderRadius: 14,
-              border: '1px solid #E6E9F0',
-              background: '#F4F6FA',
-              color: '#1E2233',
+              border: isDark ? '1px solid #2e2a40' : '1px solid #E6E9F0',
+              background: isDark ? '#15131f' : '#F4F6FA',
+              color: isDark ? '#94a3b8' : '#1E2233',
               fontWeight: 700,
               fontSize: 14,
               cursor: 'pointer',
             }}
           >
-            <IconChevronLeft size={16} /> Kembali
+            <IconChevronLeft size={16} /> {isEn ? 'Back' : 'Kembali'}
           </button>
         )}
 
@@ -1176,7 +1409,7 @@ export default function PendaftaranPage() {
               cursor: 'pointer',
             }}
           >
-            Lanjut <IconChevronRight size={16} />
+            {isEn ? 'Next' : 'Lanjut'} <IconChevronRight size={16} />
           </button>
         ) : (
           <button
@@ -1192,7 +1425,7 @@ export default function PendaftaranPage() {
               padding: '14px 18px',
               borderRadius: 14,
               border: 'none',
-              background: 'linear-gradient(90deg, #4338CA, #6D5BF2)',
+              background: loading || !isEditable ? (isDark ? '#2e2a40' : '#cbd5e1') : 'linear-gradient(90deg, #4338CA, #6D5BF2)',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: 14,
@@ -1201,14 +1434,17 @@ export default function PendaftaranPage() {
             }}
           >
             {loading ? (
-              <><IconSpinner size={16} color="#FFFFFF" />Menyimpan...</>
+              <><IconSpinner size={16} color="#FFFFFF" />{isEn ? 'Saving...' : 'Menyimpan...'}</>
             ) : existing ? (
-              <><IconClipboardEdit size={16} />Perbarui Data</>
+              <><IconClipboardEdit size={16} />{isEn ? 'Update Data' : 'Perbarui Data'}</>
             ) : (
-              <><IconRocket size={16} />Kirim Pendaftaran</>
+              <><IconRocket size={16} />{isEn ? 'Submit Registration' : 'Kirim Pendaftaran'}</>
             )}
           </button>
         )}
+          </div>
+
+        </div>
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

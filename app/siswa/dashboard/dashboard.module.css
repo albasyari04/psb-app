@@ -23,13 +23,7 @@
 
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
-  min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  position: relative;
-  padding-bottom: 5.5rem;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden; /* safety-net: cegah halaman bisa di-geser ke kanan jika ada child yg overflow */
+ 
 }
 
 @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }

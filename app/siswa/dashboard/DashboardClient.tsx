@@ -1041,27 +1041,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
 
         <CtaBanner />
       </div>
-
-      {/* ══ BOTTOM NAV ══════════════════════════════════════════════════ */}
-      <nav className={styles.bottomNav}>
-        <Link href="/siswa" className={`${styles.navItem} ${styles.navItemActive}`}>
-          <div className={styles.navIconWrap}><IconHomeFilled /></div>
-          <span>{t('nav_beranda')}</span>
-        </Link>
-        <Link href="/siswa/pembayaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconWalletOutline /></div>
-          <span>{t('nav_bayar')}</span>
-        </Link>
-        <Link href="/siswa/laporan" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconDocumentOutline /></div>
-          <span>{t('nav_status')}</span>
-        </Link>
-        <Link href="/siswa/profile" className={styles.navItem}>
-          <div className={styles.navIconWrap}><IconPersonOutline /></div>
-          <span>{t('nav_profil')}</span>
-        </Link>
-      </nav>
-
+      
       {/* Announcement Modal */}
       {selectedAnn && (
         <AnnouncementModal item={selectedAnn} onClose={() => setSelectedAnn(null)} />

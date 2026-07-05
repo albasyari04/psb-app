@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import styles from './notifikasi.module.css'
 
 /* ════════════════════════════════════════════════════════════════
@@ -398,9 +397,6 @@ export default function NotifikasiPage() {
         <div className={styles.topBarCenter}>
           <h1 className={styles.topBarTitle}>Notifikasi</h1>
           <p className={styles.topBarSub}>Pemberitahuan penting untuk Anda</p>
-        </div>
-        <div className={styles.topBarBtn} style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Image src="/icons/notif-icon.png" alt="Notifikasi" width={38} height={38} style={{ objectFit: 'contain' }} />
         </div>
       </header>
 
