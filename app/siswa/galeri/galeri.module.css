@@ -34,6 +34,25 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
+   STICKY TOP — bungkus header + search bar, FIXED di atas viewport.
+   Pakai `fixed` (bukan `sticky`) karena tidak bergantung pada
+   ancestor scroll-container tertentu — selalu nempel di atas
+   berapa pun lapisan wrapper/app-shell di atasnya. Lebar disamakan
+   dengan .shell (max-width 480px, center) agar sejajar di desktop.
+   ══════════════════════════════════════════════════════════════ */
+.stickyTop {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  z-index: 40;
+  background: var(--bg);
+  padding-bottom: 1.1rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
    TOP HEADER — gambar latar + overlay gradient
    ══════════════════════════════════════════════════════════════ */
 .topHeader {
@@ -126,6 +145,10 @@
 /* ══════════════════════════════════════════════════════════════
    SEARCH BAR — kartu putih mengambang di atas header
    ══════════════════════════════════════════════════════════════ */
+.searchBarWrap {
+  padding: 0 1.1rem;
+}
+
 .searchBarCard {
   position: relative;
   z-index: 3;

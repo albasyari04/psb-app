@@ -404,6 +404,25 @@ export default function GaleriClient() {
   const [query, setQuery] = useState('')
   const gridRef = useRef<HTMLDivElement>(null)
 
+  /* Ukur tinggi header+search bar (fixed) secara dinamis, lalu jadikan
+     padding-top untuk konten scrollable di bawahnya, supaya tidak
+     ketiban/ketutup header. Dinamis karena tinggi header bisa berubah
+     (misal teks subtitle wrap 2 baris di layar sempit). */
+  const stickyRef = useRef<HTMLDivElement>(null)
+  const [stickyHeight, setStickyHeight] = useState(0)
+
+  useEffect(() => {
+    const el = stickyRef.current
+    if (!el) return
+
+    const updateHeight = () => setStickyHeight(el.offsetHeight)
+    updateHeight()
+
+    const ro = new ResizeObserver(updateHeight)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return GALLERY_ITEMS
@@ -418,50 +437,55 @@ export default function GaleriClient() {
 
   return (
     <div className={styles.shell}>
-      {/* ══ TOP HEADER ══════════════════════════════════════════ */}
-      <header className={styles.topHeader}>
-        <Image
-          src={HEADER_BG_SRC}
-          alt=""
-          fill
-          className={styles.headerBgImg}
-          priority
-        />
-        <div className={styles.headerOverlay} />
+      {/* ══ FIXED TOP: header + search bar, selalu nempel di atas ══ */}
+      <div ref={stickyRef} className={styles.stickyTop}>
+        <header className={styles.topHeader}>
+          <Image
+            src={HEADER_BG_SRC}
+            alt=""
+            fill
+            className={styles.headerBgImg}
+            priority
+          />
+          <div className={styles.headerOverlay} />
 
-        <div className={styles.headerInner}>
-          <div className={styles.headerTopRow}>
-            <Link href="/siswa/dashboard" className={styles.backBtn} aria-label="Kembali ke Beranda">
-              <IconBack />
-            </Link>
+          <div className={styles.headerInner}>
+            <div className={styles.headerTopRow}>
+              <Link href="/siswa/dashboard" className={styles.backBtn} aria-label="Kembali ke Beranda">
+                <IconBack />
+              </Link>
+            </div>
+            <div className={styles.headerTextWrap}>
+              <h1 className={styles.headerTitle}>Galeri Kegiatan</h1>
+              <p className={styles.headerSub}>Dokumentasi kegiatan Pondok Pesantren Al-Istiqomah</p>
+            </div>
           </div>
-          <div className={styles.headerTextWrap}>
-            <h1 className={styles.headerTitle}>Galeri Kegiatan</h1>
-            <p className={styles.headerSub}>Dokumentasi kegiatan Pondok Pesantren Al-Istiqomah</p>
+        </header>
+
+        {/* ══ SEARCH BAR (mengambang di atas header) ═════════════ */}
+        <div className={styles.searchBarWrap}>
+          <div className={styles.searchBarCard}>
+            <div className={styles.searchInputWrap}>
+              <IconSearch />
+              <input
+                type="text"
+                className={styles.searchInput}
+                placeholder="Cari kegiatan..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            {/* TODO: hubungkan dengan logika filter kategori bila dibutuhkan */}
+            <button type="button" className={styles.filterBtn}>
+              <IconFilter />
+              Filter
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* ══ SEARCH BAR (mengambang di atas header) ═════════════ */}
-      <div className={styles.pageBody}>
-        <div className={styles.searchBarCard}>
-          <div className={styles.searchInputWrap}>
-            <IconSearch />
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Cari kegiatan..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-          {/* TODO: hubungkan dengan logika filter kategori bila dibutuhkan */}
-          <button type="button" className={styles.filterBtn}>
-            <IconFilter />
-            Filter
-          </button>
-        </div>
-
+      {/* ══ KONTEN YANG BISA DI-SCROLL ════════════════════════════ */}
+      <div className={styles.pageBody} style={{ paddingTop: stickyHeight }}>
         {/* ══ BANNER CAROUSEL ═══════════════════════════════════ */}
         <BannerCarousel items={BANNER_ITEMS} />
 
