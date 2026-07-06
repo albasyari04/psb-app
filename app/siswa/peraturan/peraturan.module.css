@@ -1027,3 +1027,16 @@
     border-radius: 1rem;
   }
 }
+/* ════════════════════════════════════════════════════════════════════════
+   FILTER CHIPS - Sembunyikan scrollbar horizontal
+   ════════════════════════════════════════════════════════════════════════ */
+.filterChipsScroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge legacy */
+}
+
+.filterChipsScroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge Chromium */
+  height: 0;
+  width: 0;
+}

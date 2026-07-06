@@ -734,7 +734,7 @@ export default function PeraturanPage() {
 
       {/* ══ FILTER CHIPS ═══════════════════════════════════════════════ */}
       <div style={{ margin: '1rem 0 24px' }}>
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 2px 4px' }}>
+        <div className={styles.filterChipsScroll} style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 2px 4px' }}>
           {[
             { id: 'semua', label: 'Semua' },
             { id: 'tata-tertib', label: 'Tata Tertib' },
