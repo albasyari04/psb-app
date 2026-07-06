@@ -66,6 +66,7 @@ interface PeraturanItem {
   deskripsi : string
   kategori  : string
   tanggal   : string
+  icon      : string
 }
 
 // ── Notifikasi ──────────────────────────────────────────────────
@@ -126,6 +127,9 @@ const KATEGORI_PERATURAN_CONFIG: Record<string, string> = {
   'Larangan'   : styles.pillPeringatan,
   'Kewajiban'  : styles.pillPenting,
   'Informasi'  : styles.pillInformasi,
+  'Sanksi'     : styles.pillDanger,
+  'Aturan'     : styles.pillKetentuan,
+  'Wali Santri': styles.pillEtika,
 }
 
 const LAPORAN_TIPE_CONFIG: Record<string, {
@@ -203,36 +207,6 @@ function IconCheckSmall() {
   return (
     <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
-    </svg>
-  )
-}
-function IconHomeFilled() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg>
-  )
-}
-function IconWalletOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-      <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
-    </svg>
-  )
-}
-function IconDocumentOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" />
-    </svg>
-  )
-}
-function IconPersonOutline() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
     </svg>
   )
 }
@@ -824,18 +798,18 @@ function AnnouncementModal({ item, onClose }: { item: Announcement; onClose: () 
 function PeraturanCard({ item }: { item: PeraturanItem }) {
   const pillClass = KATEGORI_PERATURAN_CONFIG[item.kategori] ?? styles.pillInfo
   return (
-    <Link href="/siswa/peraturan" className={styles.annCard} aria-label={`Buka peraturan: ${item.judul}`}>
-      <div className={styles.annThumb}>
-        <Image src="/icons/tata-tertib-icon.png" alt="Peraturan" fill className={styles.annThumbImg} />
-      </div>
-      <div className={styles.annBody}>
-        <div className={styles.annTopRow}>
-          <p className={styles.annTitle}>{item.judul}</p>
-          <span className={styles.annDate}>{formatTanggalShort(item.tanggal)}</span>
+    <Link href="/siswa/peraturan" className={styles.peraturanCard} aria-label={`Buka peraturan: ${item.judul}`}>
+      <div className={styles.peraturanCardImage}>
+        <div className={styles.peraturanCardImageInner}>
+          <Image src={item.icon} alt={item.judul} fill className={styles.peraturanCardImageImg} />
         </div>
-        <p className={styles.annPreview}>{truncate(item.deskripsi, 90)}</p>
-        <div className={styles.annBadgeRow}>
-          <span className={`${styles.annBadge} ${pillClass}`}>{item.kategori}</span>
+      </div>
+      <div className={styles.peraturanCardBody}>
+        <p className={styles.peraturanCardTitle}>{item.judul}</p>
+        <p className={styles.peraturanCardPreview}>{truncate(item.deskripsi, 48)}</p>
+        <div className={styles.peraturanCardFooter}>
+          <span className={`${styles.peraturanCardBadge} ${pillClass}`}>{item.kategori}</span>
+          <span className={styles.peraturanCardDate}>{formatTanggalShort(item.tanggal)}</span>
         </div>
       </div>
     </Link>
@@ -892,9 +866,13 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
   }, [])
 
   const [peraturan] = useState<PeraturanItem[]>([
-    { id: '1', judul: 'Tata Tertib Umum',         deskripsi: 'Seluruh santri wajib menjaga adab, disiplin dan ketertiban pondok.', kategori: 'Tata Tertib', tanggal: '2026-06-15' },
-    { id: '2', judul: 'Larangan Membawa HP',       deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',       kategori: 'Larangan',    tanggal: '2026-06-08' },
-    { id: '3', judul: 'Kewajiban Mengikuti Jamaah',deskripsi: 'Seluruh santri wajib mengikuti sholat berjamaah dan kegiatan pondok.',kategori: 'Kewajiban',   tanggal: '2026-06-01' },
+    { id: '1', judul: 'Etika',                          deskripsi: 'Menghormati dewan masyayikh, asatidz, kepengurusan dan sesama santri serta tamu.',           kategori: 'Tata Tertib', tanggal: '2026-06-15', icon: '/icons/etika-icon.png' },
+    { id: '2', judul: 'Larangan Membawa HP',            deskripsi: 'Santri dilarang membawa alat elektronik tanpa izin pengurus.',                               kategori: 'Larangan',    tanggal: '2026-06-08', icon: '/icons/larangan membawa hp icon.png' },
+    { id: '3', judul: 'Kewajiban Mengikuti Jamaah',     deskripsi: 'Seluruh santri wajib mengikuti sholat berjamaah dan kegiatan pondok.',                       kategori: 'Kewajiban',   tanggal: '2026-06-01', icon: '/icons/kewajiban jamaah icon.png' },
+    { id: '4', judul: 'Sanksi Pelanggaran Berat',       deskripsi: 'Pelanggaran berat dikenai sanksi sesuai ketentuan pengurus pondok.',                         kategori: 'Sanksi',      tanggal: '2026-05-24', icon: '/icons/sanksi.png' },
+    { id: '5', judul: 'Larangan Merokok',               deskripsi: 'Merokok hanya di perbolehkan bagi santri yang sudah ber umur 18 tahun.',                     kategori: 'Larangan',    tanggal: '2026-05-18', icon: '/icons/larangan-merokok-icon.png' },
+    { id: '6', judul: 'Ketentuan',                      deskripsi: 'Ketentuan yang ada berlaku bagi semua santri Pondok Pesantren Al Istiqomah.',                kategori: 'Aturan',      tanggal: '2026-05-18', icon: '/icons/ketentuan-berlaku-icon.png' },
+    { id: '7', judul: 'Etika Bertamu',                  deskripsi: 'Tamu wajib melapor ke kantor sebelum menemui putra nya.',                                    kategori: 'Wali Santri', tanggal: '2026-05-02', icon: '/icons/etika-bertamu-icon.png' },
   ])
 
   useEffect(() => {
@@ -1072,7 +1050,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
               <p className={styles.annEmptyText}>Belum ada peraturan.</p>
             </div>
           ) : (
-            <div className={styles.announcementList}>
+            <div className={styles.peraturanScroll}>
               {peraturan.map(item => <PeraturanCard key={item.id} item={item} />)}
             </div>
           )}

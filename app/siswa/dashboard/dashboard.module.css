@@ -664,6 +664,9 @@
 }
 :global([data-theme='dark']) .pillInformasi  { background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
 :global([data-theme='dark']) .pillInfo       { background: rgba(22, 163, 74, 0.15); color: #4ade80; }
+:global([data-theme='dark']) .pillDanger     { background: rgba(220, 38, 38, 0.15); color: #f87171; }
+:global([data-theme='dark']) .pillKetentuan  { background: rgba(79, 70, 229, 0.16); color: #a5b4fc; }
+:global([data-theme='dark']) .pillEtika      { background: rgba(13, 148, 136, 0.16); color: #5eead4; }
 
 :global([data-theme='dark']) .annSkeletonCard {
   background: #15131f;
@@ -780,6 +783,9 @@
 .pillInformasi  { background: #eff6ff; color: #2563eb; }
 .pillInfo       { background: #f0fdf4; color: #16a34a; }
 .pillPeringatan { background: var(--amber-light); color: var(--amber); }
+.pillDanger     { background: #fef2f2; color: #dc2626; }
+.pillKetentuan  { background: #eef2ff; color: #4f46e5; }
+.pillEtika      { background: #f0fdfa; color: #0d9488; }
 
 .annSkeletonCard { background: #fff; border: 1px solid var(--border); border-radius: 1.1rem; padding: 0.9rem; }
 .annEmpty {
@@ -794,6 +800,111 @@
 }
 .annEmptyIcon { font-size: 2rem; }
 .annEmptyText { font-size: 0.82rem; font-weight: 600; color: var(--gray-light); }
+
+/* ══════════════════════════════════════════════════════════════
+   PERATURAN — kartu horizontal-scroll (gambar besar di atas, ala
+   kartu produk pada aplikasi mobile/TikTok)
+   ══════════════════════════════════════════════════════════════ */
+.peraturanScroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.15rem 0.1rem 0.35rem;
+  margin: 0 -0.1rem;
+}
+.peraturanScroll::-webkit-scrollbar { display: none; }
+.peraturanScroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+.peraturanCard {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: 152px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 1.1rem;
+  overflow: hidden;
+  text-decoration: none;
+  font-family: inherit;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.peraturanCard:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); }
+
+.peraturanCardImage {
+  position: relative;
+  width: 100%;
+  height: 104px;
+  background: var(--green-lighter);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.peraturanCardImageInner { position: absolute; inset: 4px; }
+.peraturanCardImageImg { object-fit: contain; }
+
+.peraturanCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  padding: 0.65rem 0.7rem 0.8rem;
+  flex: 1;
+}
+.peraturanCardTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.05em;
+}
+.peraturanCardPreview {
+  font-size: 0.66rem;
+  color: var(--gray);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.peraturanCardFooter {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding-top: 0.15rem;
+}
+.peraturanCardBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.56rem;
+  font-weight: 700;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.peraturanCardDate {
+  font-size: 0.58rem;
+  color: var(--gray-light);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+:global([data-theme='dark']) .peraturanCard {
+  background: #15131f;
+  border-color: #2a2640;
+}
+:global([data-theme='dark']) .peraturanCard:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+:global([data-theme='dark']) .peraturanCardImage {
+  background: #1a1728;
+}
 
 /* ══════════════════════════════════════════════════════════════
    CTA BANNER — Doa Harian
