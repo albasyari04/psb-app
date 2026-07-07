@@ -1,8 +1,11 @@
 // app/siswa/status/page.tsx
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { supabaseAdmin } from '@/lib/supabase'  // ← pakai supabaseAdmin agar bypass RLS
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Pendaftaran {
@@ -16,67 +19,167 @@ interface Pendaftaran {
   created_at: string
 }
 
-// ── Timeline steps ─────────────────────────────────────────────────────────────
+// ── Timeline steps with i18n ──────────────────────────────────────────────────
 const TIMELINE = [
   {
     key:   'menunggu',
-    label: 'Pendaftaran Dikirim',
+    label: { id: 'Pendaftaran Dikirim', en: 'Registration Sent' },
     icon:  '📤',
-    desc:  'Formulir berhasil diterima oleh sistem',
+    desc:  { id: 'Formulir berhasil diterima oleh sistem', en: 'Form successfully received by system' },
   },
   {
     key:   'diproses',
-    label: 'Verifikasi Berkas',
+    label: { id: 'Verifikasi Berkas', en: 'Document Verification' },
     icon:  '🔍',
-    desc:  'Panitia sedang memeriksa kelengkapan berkas',
+    desc:  { id: 'Panitia sedang memeriksa kelengkapan berkas', en: 'Committee is checking document completeness' },
   },
   {
     key:   'diterima',
-    label: 'Pengumuman Hasil',
+    label: { id: 'Pengumuman Hasil', en: 'Result Announcement' },
     icon:  '🎉',
-    desc:  'Keputusan akhir penerimaan telah ditetapkan',
+    desc:  { id: 'Keputusan akhir penerimaan telah ditetapkan', en: 'Final admission decision has been made' },
   },
 ]
 const STATUS_ORDER = ['menunggu', 'diproses', 'diterima']
 
-const STATUS_META: Record<Pendaftaran['status'], { icon: string; tag: string; name: string }> = {
-  menunggu: { icon: '⏳', tag: 'Menunggu Review',  name: 'Menunggu' },
-  diproses: { icon: '🔍', tag: 'Sedang Diproses',  name: 'Diproses' },
-  diterima: { icon: '🎉', tag: 'Diterima!',         name: 'Diterima' },
-  ditolak:  { icon: '❌', tag: 'Tidak Diterima',    name: 'Ditolak'  },
+const STATUS_META: Record<Pendaftaran['status'], { icon: string; tag: { id: string; en: string }; name: { id: string; en: string } }> = {
+  menunggu: { icon: '⏳', tag: { id: 'Menunggu Review', en: 'Pending Review' }, name: { id: 'Menunggu', en: 'Pending' } },
+  diproses: { icon: '🔍', tag: { id: 'Sedang Diproses', en: 'Processing' }, name: { id: 'Diproses', en: 'Processing' } },
+  diterima: { icon: '🎉', tag: { id: 'Diterima!', en: 'Accepted!' }, name: { id: 'Diterima', en: 'Accepted' } },
+  ditolak:  { icon: '❌', tag: { id: 'Tidak Diterima', en: 'Not Accepted' }, name: { id: 'Ditolak', en: 'Rejected' } },
 }
 
-// Tema warna per status
-const STATUS_COLORS: Record<Pendaftaran['status'], { pillBg: string; text: string; dot: string }> = {
-  menunggu: { pillBg: '#FEF3C7', text: '#B45309', dot: '#F59E0B' },
-  diproses: { pillBg: '#DBEAFE', text: '#1D4ED8', dot: '#3B82F6' },
-  diterima: { pillBg: '#DCFCE7', text: '#15803D', dot: '#22C55E' },
-  ditolak:  { pillBg: '#FEE2E2', text: '#DC2626', dot: '#EF4444' },
+// Tema warna per status dengan dukungan dark mode
+const STATUS_COLORS = {
+  menunggu: { 
+    pillBg: '#FEF3C7', pillBgDark: '#2e2a1a', 
+    text: '#B45309', textDark: '#fbbf24', 
+    dot: '#F59E0B', dotDark: '#fbbf24' 
+  },
+  diproses: { 
+    pillBg: '#DBEAFE', pillBgDark: '#1a2a3d', 
+    text: '#1D4ED8', textDark: '#60a5fa', 
+    dot: '#3B82F6', dotDark: '#60a5fa' 
+  },
+  diterima: { 
+    pillBg: '#DCFCE7', pillBgDark: '#1a2e1a', 
+    text: '#15803D', textDark: '#34d399', 
+    dot: '#22C55E', dotDark: '#34d399' 
+  },
+  ditolak: { 
+    pillBg: '#FEE2E2', pillBgDark: '#2e1a1a', 
+    text: '#DC2626', textDark: '#fca5a5', 
+    dot: '#EF4444', dotDark: '#fca5a5' 
+  },
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────────
-export default async function StatusPage() {
-  const session = await getServerSession(authOptions)
+// ─── Icons ─────────────────────────────────────────────────────────────────────
 
-  const { data, error } = await supabaseAdmin
-    .from('pendaftaran')
-    .select('*')
-    .eq('user_id', session!.user.id)
-    .maybeSingle()
+const IconBack = ({ color = '#7C3AED' }: { color?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+  </svg>
+)
 
-  if (error) {
-    console.error('Status page query error:', error.message)
+// ─── Main Page ─────────────────────────────────────────────────────────────────
+
+export default function StatusPage() {
+  const { data: session, status: sessionStatus } = useSession()
+  const router = useRouter()
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
+  const isEn = language === 'en'
+
+  const [pendaftaran, setPendaftaran] = useState<Pendaftaran | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (sessionStatus === 'unauthenticated') {
+      router.push('/login')
+      return
+    }
+
+    if (sessionStatus === 'authenticated' && session?.user?.id) {
+      fetch(`/api/siswa/pendaftaran/status`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch')
+          return res.json()
+        })
+        .then(data => {
+          setPendaftaran(data.data)
+          setError(null)
+        })
+        .catch(() => {
+          setError(isEn ? 'Failed to load registration data' : 'Gagal memuat data pendaftaran')
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+  }, [sessionStatus, session, router, isEn])
+
+  // ─── Helper: get localized text ─────────────────────────────────────────────
+  const getText = (obj: { id: string; en: string }) => isEn ? obj.en : obj.id
+
+  // ─── Dark mode colors ──────────────────────────────────────────────────────
+  const bgColor = isDark ? '#15131f' : '#F5F3FF'
+  const cardBg = isDark ? '#1e1b2e' : '#fff'
+  const cardBorder = isDark ? '1px solid #2e2a40' : 'none'
+  const textColor = isDark ? '#f1f0f5' : '#1F2937'
+  const mutedColor = isDark ? '#94a3b8' : '#9CA3AF'
+  const subColor = isDark ? '#94a3b8' : '#64748B'
+  const topBarBg = isDark ? '#1e1b2e' : '#fff'
+  const topBarBorder = isDark ? '1px solid #2e2a40' : '0 2px 10px rgba(0,0,0,0.04)'
+  const backBtnBg = isDark ? '#2e2a40' : '#EDE9FE'
+  const backBtnColor = isDark ? '#a5b4fc' : '#7C3AED'
+  const dividerColor = isDark ? '#2e2a40' : '#F1F5F9'
+  const acceptedBg = isDark ? 'linear-gradient(135deg, #065f46 0%, #047857 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+  const acceptedShadow = isDark ? '0 8px 24px rgba(0,0,0,0.4)' : '0 8px 24px rgba(5,150,105,0.3)'
+  const editBtnBg = isDark ? '#1e1b2e' : '#fff'
+  const editBtnBorder = isDark ? '1.5px solid #2e2a40' : '1.5px solid #DDD6FE'
+  const editBtnColor = isDark ? '#a5b4fc' : '#5B21B6'
+
+  // ─── Loading state ──────────────────────────────────────────────────────────
+  if (sessionStatus === 'loading' || loading) {
+    const spinnerColor = isDark ? '#2e2a40' : '#E2E8F0'
+    const spinnerTopColor = isDark ? '#a5b4fc' : '#7C3AED'
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: bgColor,
+        gap: 16,
+        fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          border: `4px solid ${spinnerColor}`,
+          borderTopColor: spinnerTopColor,
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+        <p style={{ color: mutedColor, fontSize: 13, fontWeight: 500 }}>
+          {isEn ? 'Loading registration data...' : 'Memuat data pendaftaran...'}
+        </p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
   }
 
-  const p          = data as Pendaftaran | null
+  const p = pendaftaran
   const currentIdx = p ? STATUS_ORDER.indexOf(p.status) : -1
-  const isDitolak  = p?.status === 'ditolak'
+  const isDitolak = p?.status === 'ditolak'
   const isDiterima = p?.status === 'diterima'
-  const meta       = p ? STATUS_META[p.status] : null
-  const sc         = p ? STATUS_COLORS[p.status] : null
+  const meta = p ? STATUS_META[p.status] : null
+  const sc = p ? STATUS_COLORS[p.status] : null
 
   const tanggalDaftar = p
-    ? new Date(p.created_at).toLocaleDateString('id-ID', {
+    ? new Date(p.created_at).toLocaleDateString(isEn ? 'en-US' : 'id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
       })
     : ''
@@ -86,28 +189,26 @@ export default async function StatusPage() {
     : '-'
 
   return (
-    // ══════ APP SHELL — tinggi dikunci 100dvh + overflow hidden ══════
-    // Top bar & bottom nav ada di flow normal (bukan fixed/sticky) di dalam
-    // flex column, sehingga tidak mungkin ikut ter-scroll. Hanya <main>
-    // di tengah yang bisa di-scroll.
     <div style={{
-      height: '100dvh',
-      backgroundColor: '#F5F3FF',
+      minHeight: '100vh',
+      backgroundColor: bgColor,
       fontFamily: "'Inter', 'Segoe UI', sans-serif",
       maxWidth: 430,
       margin: '0 auto',
       position: 'relative',
-      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
     }}>
 
-      {/* ══════ TOP APP BAR (STATIS — tidak ikut scroll, tanpa icon kanan) ══════ */}
+      {/* ══════ TOP APP BAR ══════ */}
       <div style={{
         flexShrink: 0,
-        background: '#fff',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+        background: topBarBg,
+        boxShadow: topBarBorder,
+        borderBottom: isDark ? '1px solid #2e2a40' : 'none',
         zIndex: 30,
+        position: 'sticky',
+        top: 0,
       }}>
         <div style={{
           display: 'flex',
@@ -117,49 +218,56 @@ export default async function StatusPage() {
         }}>
           <Link
             href="/siswa/dashboard"
-            aria-label="Kembali"
+            aria-label={isEn ? 'Back' : 'Kembali'}
             style={{
               width: 44, height: 44, borderRadius: 14,
-              background: '#EDE9FE', color: '#7C3AED',
+              background: backBtnBg, color: backBtnColor,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0, textDecoration: 'none',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
+            <IconBack color={backBtnColor} />
           </Link>
           <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: '#1F2937', margin: '0 0 3px', letterSpacing: -0.3, lineHeight: 1.2 }}>
-              Status Pendaftaran
+            <h1 style={{
+              fontSize: 20, fontWeight: 800, color: textColor,
+              margin: '0 0 3px', letterSpacing: -0.3, lineHeight: 1.2,
+            }}>
+              {isEn ? 'Registration Status' : 'Status Pendaftaran'}
             </h1>
-            <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
-              Pantau progres seleksi kamu
+            <p style={{ fontSize: 12, color: mutedColor, margin: 0, fontWeight: 500 }}>
+              {isEn ? 'Track your selection progress' : 'Pantau progres seleksi kamu'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ══════ AREA SCROLL — HANYA INI YANG BOLEH SCROLL ══════ */}
+      {/* ══════ AREA SCROLL ══════ */}
       <main style={{
         flex: 1,
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
-        padding: '16px 16px 120px',
+        padding: '16px 16px 40px',
       }}>
 
         {/* ── Empty state ── */}
         {!p && (
           <div style={{
-            background: '#fff', borderRadius: 20, padding: '48px 24px',
-            textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            background: cardBg,
+            borderRadius: 20,
+            padding: '48px 24px',
+            textAlign: 'center',
+            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)',
+            border: cardBorder,
           }}>
             <div style={{ fontSize: 52, marginBottom: 14 }}>📋</div>
-            <p style={{ fontSize: 16, fontWeight: 800, color: '#1E293B', margin: '0 0 8px' }}>
-              Belum Ada Pendaftaran
+            <p style={{ fontSize: 16, fontWeight: 800, color: textColor, margin: '0 0 8px' }}>
+              {isEn ? 'No Registration Yet' : 'Belum Ada Pendaftaran'}
             </p>
-            <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Kamu belum mengisi formulir pendaftaran. Segera daftarkan diri sebelum batas waktu.
+            <p style={{ fontSize: 13, color: subColor, margin: '0 0 20px', lineHeight: 1.5 }}>
+              {isEn 
+                ? 'You haven\'t filled out the registration form yet. Register before the deadline.'
+                : 'Kamu belum mengisi formulir pendaftaran. Segera daftarkan diri sebelum batas waktu.'}
             </p>
             <Link href="/siswa/pendaftaran" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -168,7 +276,7 @@ export default async function StatusPage() {
               fontWeight: 700, fontSize: 13, textDecoration: 'none',
             }}>
               <span>📝</span>
-              <span>Isi Formulir Sekarang</span>
+              <span>{isEn ? 'Fill Form Now' : 'Isi Formulir Sekarang'}</span>
             </Link>
           </div>
         )}
@@ -177,17 +285,28 @@ export default async function StatusPage() {
           <>
             {/* ── No. Registrasi ── */}
             <div style={{
-              background: '#fff', borderRadius: 18, padding: '16px 18px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 12,
+              background: cardBg,
+              borderRadius: 18,
+              padding: '16px 18px',
+              boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)',
+              border: cardBorder,
+              marginBottom: 12,
             }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', letterSpacing: 0.6, textTransform: 'uppercase', margin: '0 0 6px' }}>
-                No. Registrasi
+              <p style={{
+                fontSize: 11, fontWeight: 700, color: mutedColor,
+                letterSpacing: 0.6, textTransform: 'uppercase',
+                margin: '0 0 6px',
+              }}>
+                {isEn ? 'Registration No.' : 'No. Registrasi'}
               </p>
-              <p style={{ fontSize: 24, fontWeight: 800, color: '#1E293B', letterSpacing: 0.5, margin: '0 0 4px' }}>
+              <p style={{
+                fontSize: 24, fontWeight: 800, color: textColor,
+                letterSpacing: 0.5, margin: '0 0 4px',
+              }}>
                 {p.id.slice(0, 8).toUpperCase()}
               </p>
-              <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>
-                Didaftarkan: {tanggalDaftar}
+              <p style={{ fontSize: 12, color: mutedColor, margin: 0 }}>
+                {isEn ? 'Registered' : 'Didaftarkan'}: {tanggalDaftar}
               </p>
             </div>
 
@@ -195,28 +314,43 @@ export default async function StatusPage() {
             {meta && sc && (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: sc.pillBg, borderRadius: 16, padding: '12px 16px',
+                background: isDark ? sc.pillBgDark : sc.pillBg,
+                borderRadius: 16, padding: '12px 16px',
                 marginBottom: 12,
+                border: isDark ? '1px solid #2e2a40' : 'none',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: 12,
-                    background: 'rgba(255,255,255,0.6)',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.6)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 20, flexShrink: 0,
                   }}>
                     {meta.icon}
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: sc.text, letterSpacing: 0.6, textTransform: 'uppercase', margin: '0 0 2px' }}>
-                      {meta.tag}
+                    <p style={{
+                      fontSize: 10, fontWeight: 700,
+                      color: isDark ? sc.textDark : sc.text,
+                      letterSpacing: 0.6, textTransform: 'uppercase',
+                      margin: '0 0 2px',
+                    }}>
+                      {getText(meta.tag)}
                     </p>
-                    <p style={{ fontSize: 15, fontWeight: 800, color: sc.text, margin: 0 }}>
-                      {meta.name}
+                    <p style={{
+                      fontSize: 15, fontWeight: 800,
+                      color: isDark ? sc.textDark : sc.text,
+                      margin: 0,
+                    }}>
+                      {getText(meta.name)}
                     </p>
                   </div>
                 </div>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
+                <div style={{
+                  width: 10, height: 10, borderRadius: '50%',
+                  background: isDark ? sc.dotDark : sc.dot,
+                  flexShrink: 0,
+                }} />
               </div>
             )}
 
@@ -225,8 +359,8 @@ export default async function StatusPage() {
               <div style={{
                 position: 'relative', overflow: 'hidden',
                 borderRadius: 20, padding: '28px 20px', textAlign: 'center',
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                boxShadow: '0 8px 24px rgba(5,150,105,0.3)',
+                background: acceptedBg,
+                boxShadow: acceptedShadow,
                 marginBottom: 12,
               }}>
                 <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
@@ -234,10 +368,11 @@ export default async function StatusPage() {
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ fontSize: 40, marginBottom: 10 }}>🎊</div>
                   <p style={{ fontSize: 19, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>
-                    Selamat! Anda Diterima
+                    {isEn ? 'Congratulations! You\'re Accepted' : 'Selamat! Anda Diterima'}
                   </p>
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: '0 0 16px' }}>
-                    di Jurusan <span style={{ fontWeight: 700, color: '#fff' }}>{p.jurusan_pilihan || '-'}</span>
+                    {isEn ? 'in Major' : 'di Jurusan'}{' '}
+                    <span style={{ fontWeight: 700, color: '#fff' }}>{p.jurusan_pilihan || '-'}</span>
                   </p>
                   {p.catatan_admin && (
                     <p style={{
@@ -254,7 +389,7 @@ export default async function StatusPage() {
                     padding: '11px 22px', borderRadius: 12,
                     fontWeight: 700, fontSize: 13, textDecoration: 'none',
                   }}>
-                    🏠 Kembali ke Beranda
+                    🏠 {isEn ? 'Back to Home' : 'Kembali ke Beranda'}
                   </Link>
                 </div>
               </div>
@@ -263,34 +398,51 @@ export default async function StatusPage() {
             {/* ── Ditolak Card ── */}
             {isDitolak && (
               <div style={{
-                background: '#fff', borderRadius: 18, padding: '18px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 12,
-                borderLeft: '3px solid #EF4444',
+                background: cardBg,
+                borderRadius: 18,
+                padding: '18px',
+                boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)',
+                border: cardBorder,
+                marginBottom: 12,
+                borderLeft: `3px solid ${isDark ? '#fca5a5' : '#EF4444'}`,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 14,
-                    background: '#FEE2E2', color: '#DC2626',
+                    background: isDark ? '#2e1a1a' : '#FEE2E2',
+                    color: isDark ? '#fca5a5' : '#DC2626',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 20, flexShrink: 0,
                   }}>
                     ❌
                   </div>
                   <div>
-                    <p style={{ fontSize: 14, fontWeight: 800, color: '#1E293B', margin: '0 0 2px' }}>
-                      Pendaftaran Tidak Diterima
+                    <p style={{ fontSize: 14, fontWeight: 800, color: textColor, margin: '0 0 2px' }}>
+                      {isEn ? 'Registration Not Accepted' : 'Pendaftaran Tidak Diterima'}
                     </p>
-                    <p style={{ fontSize: 12, color: '#64748B', margin: 0 }}>
-                      Maaf, pendaftaran Anda tidak lolos seleksi
+                    <p style={{ fontSize: 12, color: subColor, margin: 0 }}>
+                      {isEn ? 'Sorry, your registration did not pass the selection' : 'Maaf, pendaftaran Anda tidak lolos seleksi'}
                     </p>
                   </div>
                 </div>
                 {p.catatan_admin && (
-                  <div style={{ background: '#FEF2F2', borderRadius: 12, padding: '12px 14px' }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', margin: '0 0 4px' }}>
-                      📌 Catatan Panitia
+                  <div style={{
+                    background: isDark ? '#2e1a1a' : '#FEF2F2',
+                    borderRadius: 12, padding: '12px 14px',
+                    border: isDark ? '1px solid #4a1a1a' : 'none',
+                  }}>
+                    <p style={{
+                      fontSize: 11, fontWeight: 700,
+                      color: isDark ? '#fca5a5' : '#DC2626',
+                      margin: '0 0 4px',
+                    }}>
+                      📌 {isEn ? 'Committee Note' : 'Catatan Panitia'}
                     </p>
-                    <p style={{ fontSize: 12, color: '#7F1D1D', margin: 0, lineHeight: 1.5 }}>
+                    <p style={{
+                      fontSize: 12,
+                      color: isDark ? '#fca5a5' : '#7F1D1D',
+                      margin: 0, lineHeight: 1.5,
+                    }}>
                       {p.catatan_admin}
                     </p>
                   </div>
@@ -298,34 +450,36 @@ export default async function StatusPage() {
               </div>
             )}
 
-            {/* ── Timeline (hanya jika bukan ditolak) ── */}
+            {/* ── Timeline ── */}
             {!isDitolak && (
               <div style={{
-                background: '#fff', borderRadius: 18, padding: '18px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 12,
+                background: cardBg,
+                borderRadius: 18,
+                padding: '18px',
+                boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)',
+                border: cardBorder,
+                marginBottom: 12,
               }}>
-                <p style={{ fontSize: 13, fontWeight: 800, color: '#1E293B', margin: '0 0 6px' }}>
-                  📊 Timeline Proses Seleksi
+                <p style={{ fontSize: 13, fontWeight: 800, color: textColor, margin: '0 0 6px' }}>
+                  📊 {isEn ? 'Selection Process Timeline' : 'Timeline Proses Seleksi'}
                 </p>
-                <div style={{ height: 1, background: '#F1F5F9', margin: '0 0 16px' }} />
+                <div style={{ height: 1, background: dividerColor, margin: '0 0 16px' }} />
 
                 <div>
                   {TIMELINE.map((step, i) => {
-                    const isDone   = i < currentIdx
+                    const isDone = i < currentIdx
                     const isActive = i === currentIdx
-                    const isLast   = i === TIMELINE.length - 1
+                    const isLast = i === TIMELINE.length - 1
 
-                    const dotBg   = isDone ? '#DCFCE7' : isActive ? '#DBEAFE' : '#F1F5F9'
-                    const dotText = isDone ? '#16A34A' : isActive ? '#2563EB' : '#94A3B8'
-                    const dotBorder = isDone ? '#BBF7D0' : isActive ? '#BFDBFE' : '#E2E8F0'
-                    const labelColor = isDone ? '#15803D' : isActive ? '#1D4ED8' : '#94A3B8'
-                    const descColor  = isDone ? '#4ADE80' : isActive ? '#60A5FA' : '#94A3B8'
-                    const lineColor  = isDone ? '#22C55E' : '#E2E8F0'
+                    const dotBg = isDone ? (isDark ? '#1a2e1a' : '#DCFCE7') : isActive ? (isDark ? '#1a2a3d' : '#DBEAFE') : (isDark ? '#2e2a40' : '#F1F5F9')
+                    const dotText = isDone ? (isDark ? '#34d399' : '#16A34A') : isActive ? (isDark ? '#60a5fa' : '#2563EB') : (isDark ? '#6b6885' : '#94A3B8')
+                    const dotBorder = isDone ? (isDark ? '#1a4a2e' : '#BBF7D0') : isActive ? (isDark ? '#2a3a5d' : '#BFDBFE') : (isDark ? '#2e2a40' : '#E2E8F0')
+                    const labelColor = isDone ? (isDark ? '#34d399' : '#15803D') : isActive ? (isDark ? '#60a5fa' : '#1D4ED8') : (isDark ? '#6b6885' : '#94A3B8')
+                    const descColor = isDone ? (isDark ? '#34d399' : '#4ADE80') : isActive ? (isDark ? '#60a5fa' : '#60A5FA') : (isDark ? '#6b6885' : '#94A3B8')
+                    const lineColor = isDone ? (isDark ? '#34d399' : '#22C55E') : (isDark ? '#2e2a40' : '#E2E8F0')
 
                     return (
                       <div key={step.key} style={{ display: 'flex', gap: 14 }}>
-
-                        {/* Track: dot + line */}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
                           <div style={{
                             width: 40, height: 40, borderRadius: '50%',
@@ -341,34 +495,36 @@ export default async function StatusPage() {
                           )}
                         </div>
 
-                        {/* Content */}
                         <div style={{ paddingBottom: isLast ? 0 : 20, minWidth: 0 }}>
                           <p style={{ fontSize: 14, fontWeight: 700, color: labelColor, margin: '6px 0 3px' }}>
-                            {step.label}
+                            {getText(step.label)}
                           </p>
-                          <p style={{ fontSize: 12, color: '#64748B', margin: '0 0 8px', lineHeight: 1.4 }}>
-                            {step.desc}
+                          <p style={{ fontSize: 12, color: isDark ? descColor : '#64748B', margin: '0 0 8px', lineHeight: 1.4 }}>
+                            {getText(step.desc)}
                           </p>
                           {isActive && (
                             <span style={{
                               display: 'inline-flex', alignItems: 'center', gap: 4,
-                              fontSize: 11, fontWeight: 700, color: '#2563EB',
-                              background: '#DBEAFE', borderRadius: 20, padding: '3px 10px',
+                              fontSize: 11, fontWeight: 700,
+                              color: isDark ? '#60a5fa' : '#2563EB',
+                              background: isDark ? '#1a2a3d' : '#DBEAFE',
+                              borderRadius: 20, padding: '3px 10px',
                             }}>
-                              ● Sedang berlangsung
+                              ● {isEn ? 'In progress' : 'Sedang berlangsung'}
                             </span>
                           )}
                           {isDone && (
                             <span style={{
                               display: 'inline-flex', alignItems: 'center', gap: 4,
-                              fontSize: 11, fontWeight: 700, color: '#16A34A',
-                              background: '#DCFCE7', borderRadius: 20, padding: '3px 10px',
+                              fontSize: 11, fontWeight: 700,
+                              color: isDark ? '#34d399' : '#16A34A',
+                              background: isDark ? '#1a2e1a' : '#DCFCE7',
+                              borderRadius: 20, padding: '3px 10px',
                             }}>
-                              ✓ Selesai
+                              ✓ {isEn ? 'Completed' : 'Selesai'}
                             </span>
                           )}
                         </div>
-
                       </div>
                     )
                   })}
@@ -378,29 +534,31 @@ export default async function StatusPage() {
 
             {/* ── Data Pendaftaran ── */}
             <div style={{
-              background: '#fff', borderRadius: 18, padding: '18px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 12,
+              background: cardBg,
+              borderRadius: 18,
+              padding: '18px',
+              boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.06)',
+              border: cardBorder,
+              marginBottom: 12,
             }}>
-              <p style={{ fontSize: 13, fontWeight: 800, color: '#1E293B', margin: '0 0 6px' }}>
-                📋 Data Pendaftaran
+              <p style={{ fontSize: 13, fontWeight: 800, color: textColor, margin: '0 0 6px' }}>
+                📋 {isEn ? 'Registration Data' : 'Data Pendaftaran'}
               </p>
-              <div style={{ height: 1, background: '#F1F5F9', margin: '0 0 8px' }} />
+              <div style={{ height: 1, background: dividerColor, margin: '0 0 8px' }} />
               <div>
-                {(
-                  [
-                    ['Nama Lengkap',    p.nama_lengkap],
-                    ['Jurusan Pilihan', p.jurusan_pilihan],
-                    ['Asal Sekolah',    p.asal_sekolah],
-                    ['Nilai Rata-rata', nilaiStr],
-                  ] as [string, string][]
-                ).map(([k, v], idx, arr) => (
+                {([
+                  [isEn ? 'Full Name' : 'Nama Lengkap', p.nama_lengkap],
+                  [isEn ? 'Major Choice' : 'Jurusan Pilihan', p.jurusan_pilihan],
+                  [isEn ? 'School Origin' : 'Asal Sekolah', p.asal_sekolah],
+                  [isEn ? 'Average Score' : 'Nilai Rata-rata', nilaiStr],
+                ] as [string, string][]).map(([k, v], idx, arr) => (
                   <div key={k} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '11px 0',
-                    borderBottom: idx < arr.length - 1 ? '1px solid #F1F5F9' : 'none',
+                    borderBottom: idx < arr.length - 1 ? `1px solid ${dividerColor}` : 'none',
                   }}>
-                    <span style={{ fontSize: 13, color: '#64748B' }}>{k}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', textAlign: 'right' }}>
+                    <span style={{ fontSize: 13, color: subColor }}>{k}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: textColor, textAlign: 'right' }}>
                       {v || '-'}
                     </span>
                   </div>
@@ -408,80 +566,24 @@ export default async function StatusPage() {
               </div>
             </div>
 
-            {/* ── Edit button (hanya jika masih menunggu) ── */}
+            {/* ── Edit button ── */}
             {p.status === 'menunggu' && (
               <Link href="/siswa/pendaftaran" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                background: '#fff', color: '#5B21B6',
-                border: '1.5px solid #DDD6FE',
+                background: editBtnBg,
+                color: editBtnColor,
+                border: editBtnBorder,
                 padding: '13px', borderRadius: 14,
                 fontWeight: 700, fontSize: 13, textDecoration: 'none',
               }}>
                 <span>✏️</span>
-                <span>Edit Formulir Pendaftaran</span>
+                <span>{isEn ? 'Edit Registration Form' : 'Edit Formulir Pendaftaran'}</span>
               </Link>
             )}
           </>
         )}
 
       </main>
-
-      {/* ─── BOTTOM NAV (STATIS — tidak ikut scroll) ─── */}
-      <nav style={{
-        flexShrink: 0,
-        background: '#fff',
-        borderTop: '1px solid #F1F5F9',
-        display: 'flex',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-        zIndex: 100,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}>
-        {([
-          { href: '/siswa',              label: 'Beranda', active: false },
-          { href: '/siswa/pendaftaran',  label: 'Daftar',  active: false },
-          { href: '/siswa/pembayaran',   label: 'Bayar',   active: false },
-          { href: '/siswa/status',       label: 'Status',  active: true  },
-          { href: '/siswa/profile',      label: 'Profil',  active: false },
-        ] as { href: string; label: string; active: boolean }[]).map((nav) => {
-          const color = nav.active ? '#4F46E5' : '#94A3B8'
-          return (
-            <Link key={nav.href} href={nav.href} style={{
-              flex: 1,
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              padding: '10px 0 14px', gap: 3,
-              color, textDecoration: 'none',
-              fontSize: 10, fontWeight: nav.active ? 600 : 400,
-            }}>
-              {nav.label === 'Beranda' && (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill={nav.active ? '#4F46E5' : 'none'} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-              )}
-              {nav.label === 'Daftar' && (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                </svg>
-              )}
-              {nav.label === 'Bayar' && (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
-              )}
-              {nav.label === 'Status' && (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                </svg>
-              )}
-              {nav.label === 'Profil' && (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
-              )}
-              <span>{nav.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
     </div>
   )
 }
