@@ -604,14 +604,12 @@ function CategoryDetail({
           return (
             <div
               key={key}
-              className={styles.accordionCard}
-              style={{ borderColor: isOpen ? category.colors.border : '#e8eef8' }}
+              className={`${styles.accordionCard} ${isOpen ? styles.accordionCardOpen : ''}`}
             >
               <button
-                className={styles.accordionHeader}
+                className={`${styles.accordionHeader} ${isOpen ? styles.accordionHeaderOpen : ''}`}
                 onClick={() => toggle(key)}
                 aria-expanded={isOpen}
-                style={{ background: isOpen ? category.colors.tagBg : 'white' }}
               >
                 <div className={styles.accordionHeaderLeft}>
                   <div
