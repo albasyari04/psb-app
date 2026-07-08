@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './peraturan.module.css'
+import { useSettings } from '@/contexts/SettingsContext'
 
 // ════════════════════════════════════════════════════════════════════════
 // Types
@@ -95,7 +96,7 @@ const IconInfo = ({ color = '#15803d', size = 15 }: { color?: string; size?: num
 )
 
 // ════════════════════════════════════════════════════════════════════════
-// Data peraturan
+// Data peraturan - dengan i18n
 // ════════════════════════════════════════════════════════════════════════
 const CATEGORIES: CategoryDef[] = [
   {
@@ -672,6 +673,10 @@ function CategoryDetail({
 // Komponen utama
 // ════════════════════════════════════════════════════════════════════════
 export default function PeraturanPage() {
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
+  const isEn = language === 'en'
+
   const [activeFilter, setActiveFilter] = useState<string>('semua')
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
   const headerRef = useRef<HTMLDivElement>(null)
@@ -701,17 +706,84 @@ export default function PeraturanPage() {
   const isLengkap = activeFilter === 'lengkap'
   const activeCategory = CATEGORIES.find((c) => c.id === activeFilter) ?? null
 
+  // ── i18n untuk filter chips ──
+  const filterTabs = [
+    { id: 'semua', label: isEn ? 'All' : 'Semua' },
+    { id: 'tata-tertib', label: isEn ? 'Rules' : 'Tata Tertib' },
+    { id: 'kewajiban', label: isEn ? 'Obligations' : 'Kewajiban' },
+    { id: 'larangan', label: isEn ? 'Prohibitions' : 'Larangan' },
+    { id: 'sanksi', label: isEn ? 'Sanctions' : 'Sanksi' },
+    { id: 'lain', label: isEn ? 'Other Provisions' : 'Ketentuan Lain' },
+    { id: 'wali-santri', label: isEn ? 'Parents' : 'Wali Santri' },
+  ]
+
+  const getFilterLabel = (id: string) => {
+    const found = filterTabs.find(t => t.id === id)
+    return found ? found.label : id
+  }
+
+  // ── i18n untuk ringkasan ──
+  const ringkasanItems = [
+    { 
+      id: 'tata-tertib', 
+      title: isEn ? 'Chapter I — General Provisions' : 'BAB I — Ketentuan Umum',
+      desc: isEn ? 'Basic rules and general provisions.' : 'Aturan dasar dan umum yang berlaku.',
+      pillLabel: isEn ? '2 Articles' : '2 Pasal',
+      pillBg: '#dcfce7', pillColor: '#166534',
+      icon: '/icons/ketentuan-umum-icon.png'
+    },
+    { 
+      id: 'kewajiban', 
+      title: isEn ? 'Chapter II — Student Obligations' : 'BAB II — Kewajiban Santri',
+      desc: isEn ? 'Student obligations in general.' : 'Kewajiban santri dalam keseluruhan.',
+      pillLabel: isEn ? '5 Articles' : '5 Pasal',
+      pillBg: '#d1fae5', pillColor: '#065f46',
+      icon: '/icons/kewajiban-santri-icon.png'
+    },
+    { 
+      id: 'larangan', 
+      title: isEn ? 'Chapter III — Prohibitions' : 'BAB III — Pelanggaran',
+      desc: isEn ? 'Prohibitions that must not be violated.' : 'Pelanggaran yang tidak boleh dilakukan.',
+      pillLabel: isEn ? '5 Articles' : '5 Pasal',
+      pillBg: '#fee2e2', pillColor: '#991b1b',
+      icon: '/icons/pelanggaran-icon.png'
+    },
+    { 
+      id: 'sanksi', 
+      title: isEn ? 'Chapter IV — Sanctions & Implementation' : 'BAB IV — Sanksi & Pelaksanaan',
+      desc: isEn ? 'Types of violations and applicable sanctions.' : 'Jenis pelanggaran dan sanksi yang diterapkan.',
+      pillLabel: isEn ? '4 Articles' : '4 Pasal',
+      pillBg: '#ede9fe', pillColor: '#5b21b6',
+      icon: '/icons/sanksi & hukuman-icon.png'
+    },
+    { 
+      id: 'lain', 
+      title: isEn ? 'Chapter V & VI — Other Provisions' : 'BAB V & VI — Ketentuan Lain',
+      desc: isEn ? 'Purpose of regulations and additional rules.' : 'Tujuan tata tertib serta aturan tambahan.',
+      pillLabel: isEn ? '3 Articles' : '3 Pasal',
+      pillBg: '#ccfbf1', pillColor: '#115e59',
+      icon: '/icons/ketentuan-lain-icon.png'
+    },
+    { 
+      id: 'wali-santri', 
+      title: isEn ? 'Appendix — Parents & Others' : 'Lampiran — Wali Santri & Lainnya',
+      desc: isEn ? 'Provisions and etiquette for parents.' : 'Ketentuan dan etika bersama wali santri.',
+      pillLabel: isEn ? '2 Articles' : '2 Pasal',
+      pillBg: '#dbeafe', pillColor: '#1e40af',
+      icon: '/icons/lampiran-icon.png'
+    },
+  ]
+
   return (
     <div className={styles.shell}>
-
       {/* ══ TOP HEADER ══════════════════════════════════════════════════ */}
       <div ref={headerRef} className={styles.topHeader}>
-        <Link href="/siswa" className={styles.backBtn} aria-label="Kembali">
-          <IconArrowLeft color="#0f172a" />
+        <Link href="/siswa" className={styles.backBtn} aria-label={isEn ? 'Back' : 'Kembali'}>
+          <IconArrowLeft color={isDark ? '#a5b4fc' : '#0f172a'} />
         </Link>
         <div className={styles.topHeaderTitleGroup}>
-          <h1 className={styles.topHeaderTitle}>Peraturan Pondok</h1>
-          <p className={styles.topHeaderSub}>Pondok Pesantren Al-Istiqomah</p>
+          <h1 className={styles.topHeaderTitle}>{isEn ? 'Pondok Regulations' : 'Peraturan Pondok'}</h1>
+          <p className={styles.topHeaderSub}>{isEn ? 'Al-Istiqomah Islamic Boarding School' : 'Pondok Pesantren Al-Istiqomah'}</p>
         </div>
       </div>
       <div style={{ height: headerHeight }} />
@@ -722,7 +794,7 @@ export default function PeraturanPage() {
           <div className={styles.bannerCard}>
             <Image
               src="/icons/peraturan-banner.png"
-              alt="Peraturan Pondok Pesantren Al-Istiqomah"
+              alt={isEn ? 'Al-Istiqomah Islamic Boarding School Regulations' : 'Peraturan Pondok Pesantren Al-Istiqomah'}
               width={440}
               height={200}
               className={styles.bannerImage}
@@ -735,15 +807,7 @@ export default function PeraturanPage() {
       {/* ══ FILTER CHIPS ═══════════════════════════════════════════════ */}
       <div style={{ margin: '1rem 0 24px' }}>
         <div className={styles.filterChipsScroll} style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 2px 4px' }}>
-          {[
-            { id: 'semua', label: 'Semua' },
-            { id: 'tata-tertib', label: 'Tata Tertib' },
-            { id: 'kewajiban', label: 'Kewajiban' },
-            { id: 'larangan', label: 'Larangan' },
-            { id: 'sanksi', label: 'Sanksi' },
-            { id: 'lain', label: 'Ketentuan Lain' },
-            { id: 'wali-santri', label: 'Wali Santri' },
-          ].map((tab) => {
+          {filterTabs.map((tab) => {
             const isActive = activeFilter === tab.id
             return (
               <button
@@ -752,9 +816,9 @@ export default function PeraturanPage() {
                 style={{
                   padding: '7px 14px', borderRadius: 999, fontSize: 11, fontWeight: 700,
                   lineHeight: 1.4, minHeight: 30,
-                  border: `1.5px solid ${isActive ? '#6366F1' : '#E2E8F0'}`,
-                  background: isActive ? '#EEF2FF' : '#F8FAFC',
-                  color: isActive ? '#4338CA' : '#64748B',
+                  border: `1.5px solid ${isActive ? '#6366F1' : (isDark ? '#2e2a40' : '#E2E8F0')}`,
+                  background: isActive ? (isDark ? '#2e2a40' : '#EEF2FF') : (isDark ? '#1e1b2e' : '#F8FAFC'),
+                  color: isActive ? (isDark ? '#a5b4fc' : '#4338CA') : (isDark ? '#94a3b8' : '#64748B'),
                   cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
                   flexShrink: 0,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -774,132 +838,36 @@ export default function PeraturanPage() {
         {isSemua && (
           <>
             <div className={styles.ringkasanHeader}>
-              <p className={styles.sectionLabelTitle} style={{ margin: 0 }}>Ringkasan Peraturan</p>
+              <p className={styles.sectionLabelTitle} style={{ margin: 0 }}>
+                {isEn ? 'Regulation Summary' : 'Ringkasan Peraturan'}
+              </p>
               <button className={styles.ringkasanLink} onClick={() => selectCategory('lengkap')}>
-                Lihat Semua
+                {isEn ? 'View All' : 'Lihat Semua'}
               </button>
             </div>
 
             <div className={styles.ringkasanList}>
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('tata-tertib')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/ketentuan-umum-icon.png"
-                    alt="Ketentuan Umum"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>BAB I — Ketentuan Umum</p>
-                  <p className={styles.ringkasanDesc}>Aturan dasar dan umum yang berlaku.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#dcfce7', color: '#166534' }}>
-                  2 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
-
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('kewajiban')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/kewajiban-santri-icon.png"
-                    alt="Kewajiban Santri"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>BAB II — Kewajiban Santri</p>
-                  <p className={styles.ringkasanDesc}>Kewajiban santri dalam keseluruhan.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#d1fae5', color: '#065f46' }}>
-                  5 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
-
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('larangan')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/pelanggaran-icon.png"
-                    alt="Pelanggaran"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>BAB III — Pelanggaran</p>
-                  <p className={styles.ringkasanDesc}>Pelanggaran yang tidak boleh dilakukan.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#fee2e2', color: '#991b1b' }}>
-                  5 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
-
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('sanksi')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/sanksi & hukuman-icon.png"
-                    alt="Sanksi & Pelaksanaan"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>BAB IV — Sanksi & Pelaksanaan</p>
-                  <p className={styles.ringkasanDesc}>Jenis pelanggaran dan sanksi yang diterapkan.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#ede9fe', color: '#5b21b6' }}>
-                  4 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
-
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('lain')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/ketentuan-lain-icon.png"
-                    alt="Ketentuan Lain"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>BAB V & VI — Ketentuan Lain</p>
-                  <p className={styles.ringkasanDesc}>Tujuan tata tertib serta aturan tambahan.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#ccfbf1', color: '#115e59' }}>
-                  3 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
-
-              <button className={styles.ringkasanRow} onClick={() => selectCategory('wali-santri')}>
-                <div className={styles.ringkasanIconWrap}>
-                  <Image
-                    src="/icons/lampiran-icon.png"
-                    alt="Lampiran Wali Santri"
-                    width={24}
-                    height={24}
-                    className={styles.ringkasanIconImage}
-                  />
-                </div>
-                <div className={styles.ringkasanBody}>
-                  <p className={styles.ringkasanTitle}>Lampiran — Wali Santri & Lainnya</p>
-                  <p className={styles.ringkasanDesc}>Ketentuan dan etika bersama wali santri.</p>
-                </div>
-                <span className={styles.ringkasanPill} style={{ background: '#dbeafe', color: '#1e40af' }}>
-                  2 Pasal
-                </span>
-                <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
-              </button>
+              {ringkasanItems.map((item) => (
+                <button key={item.id} className={styles.ringkasanRow} onClick={() => selectCategory(item.id)}>
+                  <div className={styles.ringkasanIconWrap}>
+                    <Image
+                      src={item.icon}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className={styles.ringkasanIconImage}
+                    />
+                  </div>
+                  <div className={styles.ringkasanBody}>
+                    <p className={styles.ringkasanTitle}>{item.title}</p>
+                    <p className={styles.ringkasanDesc}>{item.desc}</p>
+                  </div>
+                  <span className={styles.ringkasanPill} style={{ background: item.pillBg, color: item.pillColor }}>
+                    {item.pillLabel}
+                  </span>
+                  <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -907,7 +875,7 @@ export default function PeraturanPage() {
         {!isSemua && !isLengkap && activeCategory && (
           <>
             <button className={styles.backToSummary} onClick={() => selectCategory('semua')}>
-              <IconArrowLeft size={14} /> Kembali ke Ringkasan
+              <IconArrowLeft size={14} /> {isEn ? 'Back to Summary' : 'Kembali ke Ringkasan'}
             </button>
             <CategoryDetail category={activeCategory} expandedKey={expandedKey} toggle={toggle} />
           </>
@@ -916,7 +884,7 @@ export default function PeraturanPage() {
         {isLengkap && (
           <>
             <button className={styles.backToSummary} onClick={() => selectCategory('semua')}>
-              <IconArrowLeft size={14} /> Kembali ke Ringkasan
+              <IconArrowLeft size={14} /> {isEn ? 'Back to Summary' : 'Kembali ke Ringkasan'}
             </button>
             {CATEGORIES.map((cat) => (
               <CategoryDetail key={cat.id} category={cat} expandedKey={expandedKey} toggle={toggle} />
@@ -926,10 +894,12 @@ export default function PeraturanPage() {
 
         {/* ── Footer Note ─────────────────────────────────────────────── */}
         <div className={styles.footerNote}>
-          <IconInfo />
+          <IconInfo color={isDark ? '#a5b4fc' : '#15803d'} />
           <p>
-            Tata tertib ini berlaku sejak ditetapkan pada 12 Maret 2026 dan mengikat seluruh santri
-            Pondok Pesantren Al-Istiqomah. Ketidaktahuan tidak dapat dijadikan alasan pelanggaran.
+            {isEn 
+              ? 'These regulations have been in effect since March 12, 2026 and are binding on all students of Al-Istiqomah Islamic Boarding School. Ignorance cannot be used as an excuse for violations.'
+              : 'Tata tertib ini berlaku sejak ditetapkan pada 12 Maret 2026 dan mengikat seluruh santri Pondok Pesantren Al-Istiqomah. Ketidaktahuan tidak dapat dijadikan alasan pelanggaran.'
+            }
           </p>
         </div>
 
@@ -943,7 +913,7 @@ export default function PeraturanPage() {
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
             </svg>
           </div>
-          <span>Beranda</span>
+          <span>{isEn ? 'Home' : 'Beranda'}</span>
         </Link>
         <Link href="/siswa/pendaftaran" className={styles.navItem}>
           <div className={styles.navIconWrap}>
@@ -954,7 +924,7 @@ export default function PeraturanPage() {
               <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
           </div>
-          <span>Daftar</span>
+          <span>{isEn ? 'Register' : 'Daftar'}</span>
         </Link>
         <Link href="/siswa/pembayaran" className={styles.navItem}>
           <div className={styles.navIconWrap}>
@@ -963,7 +933,7 @@ export default function PeraturanPage() {
               <line x1="1" y1="10" x2="23" y2="10" />
             </svg>
           </div>
-          <span>Bayar</span>
+          <span>{isEn ? 'Pay' : 'Bayar'}</span>
         </Link>
         <Link href="/siswa/status" className={styles.navItem}>
           <div className={styles.navIconWrap}>
@@ -973,13 +943,13 @@ export default function PeraturanPage() {
               <line x1="6" y1="20" x2="6" y2="14" />
             </svg>
           </div>
-          <span>Status</span>
+          <span>{isEn ? 'Status' : 'Status'}</span>
         </Link>
         <Link href="/siswa/more" className={`${styles.navItem} ${styles.navItemActive}`}>
           <div className={`${styles.navIconWrap} ${styles.navIconWrapActive}`}>
-            <IconGrid color="#15803d" size={18} />
+            <IconGrid color={isDark ? '#a5b4fc' : '#15803d'} size={18} />
           </div>
-          <span>More</span>
+          <span>{isEn ? 'More' : 'More'}</span>
         </Link>
       </nav>
 
