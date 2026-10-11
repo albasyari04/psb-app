@@ -729,7 +729,7 @@ function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: 
       <div className={styles.annThumb}>
         {item.lampiran_url && isImageUrl(item.lampiran_url)
           ? <Image src={item.lampiran_url} alt="" fill className={styles.annThumbImg} />
-          : <Image src="/icons/pengumuman icon.png" alt="Pengumuman" fill className={styles.annThumbImg} />
+          : <Image src="/icons/pengumuman.png" alt="Pengumuman" fill sizes="62px" className={styles.annThumbIcon} />
         }
       </div>
       <div className={styles.annBody}>
