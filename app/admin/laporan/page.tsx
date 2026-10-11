@@ -42,93 +42,85 @@ interface ChartData {
 }
 
 // ─────────────────────────────────────────────
-// SVG Line Chart
+// Diagram dua garis (gaya "Overview": garis tebal + penanda bulat + legenda)
 // ─────────────────────────────────────────────
-function LineChart({ data, dark = false }: { data: ChartData[]; dark?: boolean }) {
-  const W = 600, H = 160, pL = 36, pR = 16, pT = 16, pB = 36
-  const textColor = dark ? '#6b6885' : '#94a3b8'
-  const lineColor = dark ? '#a5b4fc' : '#7c3aed'
-  const gridColor = dark ? '#2e2a40' : '#f1f5f9'
-  
-  if (!data.length) return (
+function OverviewChart({
+  labels, a, b, dark = false, emptyText,
+}: { labels: string[]; a: number[]; b: number[]; dark?: boolean; emptyText: string }) {
+  const W = 360, H = 210, pL = 34, pR = 14, pT = 14, pB = 30
+  const colA      = dark ? '#60a5fa' : '#3b82f6'
+  const colB      = dark ? '#34d399' : '#22c55e'
+  const gridColor = dark ? '#2e2a40' : '#EEF1F6'
+  const textColor = dark ? '#8b86a3' : '#9ca3af'
+  const dotFill   = dark ? '#1e1b2e' : '#ffffff'
+
+  if (!labels.length) return (
     <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: dark ? '#6b6885' : '#94a3b8', fontSize: 13 }}>
-        {dark ? 'No data available' : 'Belum ada data pendaftaran'}
-      </p>
+      <p style={{ color: textColor, fontSize: 13, margin: 0 }}>{emptyText}</p>
     </div>
   )
-  const maxVal = Math.max(...data.map(d => d.jumlah), 1)
-  const yMax   = Math.ceil(maxVal / 10) * 10 + 10
-  const xS     = (i: number) => pL + (i / (data.length - 1)) * (W - pL - pR)
-  const yS     = (v: number) => pT + ((yMax - v) / yMax) * (H - pT - pB)
-  const pts    = data.map((d, i) => ({ x: xS(i), y: yS(d.jumlah) }))
-  const line   = pts.reduce((acc, p, i) => {
-    if (i === 0) return `M ${p.x} ${p.y}`
-    const cp = (pts[i - 1].x + p.x) / 2
-    return `${acc} C ${cp} ${pts[i-1].y}, ${cp} ${p.y}, ${p.x} ${p.y}`
-  }, '')
-  const area   = `${line} L ${pts[pts.length-1].x} ${H-pB} L ${pts[0].x} ${H-pB} Z`
-  const yTicks = [0, Math.round(yMax*0.25), Math.round(yMax*0.5), Math.round(yMax*0.75), yMax]
+
+  const n      = labels.length
+  const maxVal = Math.max(...a, ...b, 1)
+  const step   = Math.max(1, Math.ceil(maxVal / 4))
+  const yMax   = step * 4
+  const ticks  = [0, 1, 2, 3, 4].map(i => i * step)
+  const x0     = pL + 12
+  const x1     = W - pR - 12
+  const xS     = (i: number) => (n === 1 ? (x0 + x1) / 2 : x0 + (i / (n - 1)) * (x1 - x0))
+  const yS     = (v: number) => pT + (1 - v / yMax) * (H - pT - pB)
+
+  const smooth = (vals: number[]) => {
+    const pts = vals.map((v, i) => ({ x: xS(i), y: yS(v) }))
+    const d = pts.reduce((acc, p, i) => {
+      if (i === 0) return `M ${p.x} ${p.y}`
+      const cp = (pts[i - 1].x + p.x) / 2
+      return `${acc} C ${cp} ${pts[i - 1].y}, ${cp} ${p.y}, ${p.x} ${p.y}`
+    }, '')
+    const base = H - pB
+    const area = `${d} L ${pts[pts.length - 1].x} ${base} L ${pts[0].x} ${base} Z`
+    return { pts, d, area }
+  }
+  const A = smooth(a)
+  const B = smooth(b)
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ overflow: 'visible', display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
       <defs>
-        <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={dark ? '#a5b4fc' : '#7c3aed'} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={dark ? '#a5b4fc' : '#7c3aed'} stopOpacity="0.01" />
+        <linearGradient id="ovAreaA" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={colA} stopOpacity={dark ? 0.32 : 0.28} />
+          <stop offset="100%" stopColor={colA} stopOpacity={0.02} />
+        </linearGradient>
+        <linearGradient id="ovAreaB" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={colB} stopOpacity={dark ? 0.28 : 0.24} />
+          <stop offset="100%" stopColor={colB} stopOpacity={0.02} />
         </linearGradient>
       </defs>
-      {yTicks.map(v => (
+
+      {ticks.map(v => (
         <g key={v}>
-          <line x1={pL} y1={yS(v)} x2={W-pR} y2={yS(v)} stroke={gridColor} strokeWidth={1} />
-          <text x={pL-6} y={yS(v)+4} textAnchor="end" fontSize={9} fill={textColor}>{v}</text>
+          <line x1={pL} y1={yS(v)} x2={W - pR} y2={yS(v)} stroke={gridColor} strokeWidth={1} />
+          <text x={pL - 8} y={yS(v) + 3.5} textAnchor="end" fontSize={10} fontWeight={600} fill={textColor}>{v}</text>
         </g>
       ))}
-      <path d={area} fill="url(#lg1)" />
-      <path d={line} fill="none" stroke={lineColor} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-      {pts.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={4.5} fill={dark ? '#1e1b2e' : 'white'} stroke={lineColor} strokeWidth={2.5} />
-      ))}
-      {data.map((d, i) => (
-        <text key={i} x={xS(i)} y={H-5} textAnchor="middle" fontSize={10} fill={textColor} fontWeight="600">{d.bulan}</text>
-      ))}
-    </svg>
-  )
-}
 
-// ─────────────────────────────────────────────
-// Mini Sparkline untuk Stat Card
-// ─────────────────────────────────────────────
-function MiniSparkline({ color, seed = 0 }: { color: string; seed?: number }) {
-  const W = 160, H = 46
-  // pola naik dengan sedikit variasi acak berdasarkan seed, murni dekoratif
-  const base = [0.55, 0.4, 0.62, 0.3, 0.5, 0.2, 0.35, 0.08]
-  const shifted = base.map((v, i) => {
-    const wiggle = Math.sin((i + seed) * 1.7) * 0.06
-    return Math.max(0.04, Math.min(0.95, v + wiggle))
-  })
-  const pts = shifted.map((v, i) => ({
-    x: (i / (shifted.length - 1)) * W,
-    y: v * H,
-  }))
-  const line = pts.reduce((acc, p, i) => {
-    if (i === 0) return `M ${p.x} ${p.y}`
-    const cp = (pts[i - 1].x + p.x) / 2
-    return `${acc} C ${cp} ${pts[i - 1].y}, ${cp} ${p.y}, ${p.x} ${p.y}`
-  }, '')
-  const area = `${line} L ${W} ${H} L 0 ${H} Z`
-  const gradId = `spark-${color.replace('#', '')}-${seed}`
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="46" preserveAspectRatio="none"
-      style={{ display: 'block' }}>
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill={`url(#${gradId})`} />
-      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Arsiran (area) di bawah garis */}
+      <path d={B.area} fill="url(#ovAreaB)" />
+      <path d={A.area} fill="url(#ovAreaA)" />
+
+      <path d={B.d} fill="none" stroke={colB} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={A.d} fill="none" stroke={colA} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+
+      {B.pts.map((p, i) => (
+        <circle key={`b${i}`} cx={p.x} cy={p.y} r={4} fill={dotFill} stroke={colB} strokeWidth={2.5} />
+      ))}
+      {A.pts.map((p, i) => (
+        <circle key={`a${i}`} cx={p.x} cy={p.y} r={4} fill={dotFill} stroke={colA} strokeWidth={2.5} />
+      ))}
+
+      {labels.map((l, i) => (
+        <text key={i} x={xS(i)} y={H - 8} textAnchor="middle" fontSize={10} fontWeight={600} fill={textColor}>{l}</text>
+      ))}
     </svg>
   )
 }
@@ -163,7 +155,7 @@ function getThStyle(dark: boolean): React.CSSProperties {
     color: dark ? '#94a3b8' : '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap',
   }
 }
-function getTdStyle(dark: boolean): React.CSSProperties {
+function getTdStyle(): React.CSSProperties {
   return {
     padding: '10px 10px', verticalAlign: 'middle',
   }
@@ -301,7 +293,6 @@ function LaporanModal({
   const inputBg = dark ? '#15131f' : '#fafafa'
   const inputBorder = dark ? '#2e2a40' : '#e5e7eb'
   const inputColor = dark ? '#f1f0f5' : '#111827'
-  const borderColor = dark ? '#2e2a40' : '#e5e7eb'
   
   const inp: React.CSSProperties = { 
     width: '100%', padding: '11px 14px', 
@@ -472,67 +463,6 @@ function SkeletonCard({ dark = false }: { dark?: boolean }) {
 }
 
 // ─────────────────────────────────────────────
-// Tab Toggle Ringkasan / Detail
-// ─────────────────────────────────────────────
-function TabToggle({ 
-  activeTab, setActiveTab, isDark = false, isEn = false 
-}: {
-  activeTab: 'ringkasan' | 'detail'
-  setActiveTab: (t: 'ringkasan' | 'detail') => void
-  isDark?: boolean; isEn?: boolean
-}) {
-  return (
-    <div style={{ display: 'flex', gap: 10 }}>
-      <button onClick={() => setActiveTab('ringkasan')} style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-        padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
-        fontSize: 14, fontWeight: 700, flex: 1,
-        background: activeTab === 'ringkasan' 
-          ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
-          : (isDark ? '#1e1b2e' : 'white'),
-        color: activeTab === 'ringkasan' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
-        boxShadow: activeTab === 'ringkasan' 
-          ? '0 4px 14px rgba(124,58,237,0.35)' 
-          : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
-        border: activeTab === 'ringkasan' 
-          ? 'none' 
-          : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
-      }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-          stroke={activeTab === 'ringkasan' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
-          strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-        </svg>
-        {isEn ? 'Summary' : 'Ringkasan Laporan'}
-      </button>
-      <button onClick={() => setActiveTab('detail')} style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-        padding: '12px 20px', borderRadius: 16, cursor: 'pointer',
-        fontSize: 14, fontWeight: 700, flex: 1,
-        background: activeTab === 'detail' 
-          ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' 
-          : (isDark ? '#1e1b2e' : 'white'),
-        color: activeTab === 'detail' ? 'white' : (isDark ? '#94a3b8' : '#6b7280'),
-        boxShadow: activeTab === 'detail' 
-          ? '0 4px 14px rgba(124,58,237,0.35)' 
-          : (isDark ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(15,23,42,0.05)'),
-        border: activeTab === 'detail' 
-          ? 'none' 
-          : (isDark ? '1px solid #2e2a40' : '1px solid #f1f5f9'),
-      }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-          stroke={activeTab === 'detail' ? 'white' : (isDark ? '#6b6885' : '#94a3b8')} 
-          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-        {isEn ? 'Details' : 'Detail Laporan'}
-      </button>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────
 export default function LaporanPage() {
@@ -620,31 +550,6 @@ export default function LaporanPage() {
   const tahunan = laporanList.filter(l => l.tipe === 'tahunan').length
   const khusus  = laporanList.filter(l => l.tipe === 'khusus').length
 
-  const statistikItems = [
-    { key: 'semua', label: isEn ? 'All' : 'Semua', value: total, 
-      iconBg: isDark ? '#2e2a40' : '#f5f3ff',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#7c3aed'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg> },
-    { key: 'bulanan', label: isEn ? 'Monthly' : 'Bulanan', value: bulanan, 
-      iconBg: isDark ? '#1e2a3d' : '#eff6ff',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#60a5fa' : '#2563eb'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg> },
-    { key: 'tahunan', label: isEn ? 'Yearly' : 'Tahunan', value: tahunan, 
-      iconBg: isDark ? '#1a2e1a' : '#ecfdf5',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#34d399' : '#16a34a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-            </svg> },
-    { key: 'khusus', label: isEn ? 'Special' : 'Khusus', value: khusus, 
-      iconBg: isDark ? '#2e2a1a' : '#fffbeb',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#fbbf24' : '#d97706'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg> },
-  ]
-
   const pctOf = (n: number) => total > 0 ? Math.round((n / total) * 100) : 0
 
   const buildDelta = (value: number, subKey: 'bulan' | 'tahun') => {
@@ -658,33 +563,29 @@ export default function LaporanPage() {
   const statsConfig = [
     { key: 'semua', label: isEn ? 'Total Reports' : 'Total Laporan', value: total, 
       iconBg: isDark ? '#2e2a40' : '#f5f3ff', numColor: isDark ? '#a5b4fc' : '#7c3aed',
-      sparkColor: isDark ? '#a5b4fc' : '#7c3aed', seed: 1,
       ...buildDelta(total, 'bulan'),
-      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#7c3aed'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#7c3aed'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
             </svg> },
     { key: 'bulanan', label: isEn ? 'This Month' : 'Bulan Ini', value: bulanan, 
       iconBg: isDark ? '#1e2a3d' : '#eff6ff', numColor: isDark ? '#60a5fa' : '#2563eb',
-      sparkColor: isDark ? '#60a5fa' : '#2563eb', seed: 2,
       ...buildDelta(bulanan, 'bulan'),
-      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#60a5fa' : '#2563eb'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#60a5fa' : '#2563eb'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg> },
     { key: 'tahunan', label: isEn ? 'This Year' : 'Tahun Ini', value: tahunan, 
       iconBg: isDark ? '#1a2e1a' : '#ecfdf5', numColor: isDark ? '#34d399' : '#16a34a',
-      sparkColor: isDark ? '#34d399' : '#16a34a', seed: 3,
       ...buildDelta(tahunan, 'tahun'),
-      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#34d399' : '#16a34a'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#34d399' : '#16a34a'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
             </svg> },
     { key: 'khusus', label: isEn ? 'Special' : 'Khusus', value: khusus, 
       iconBg: isDark ? '#2e2a1a' : '#fffbeb', numColor: isDark ? '#fbbf24' : '#d97706',
-      sparkColor: isDark ? '#fbbf24' : '#d97706', seed: 4,
       ...buildDelta(khusus, 'bulan'),
-      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#fbbf24' : '#d97706'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#fbbf24' : '#d97706'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg> },
   ]
@@ -695,6 +596,22 @@ export default function LaporanPage() {
   const rataRata = chartData.length
     ? (chartData.reduce((sum, d) => sum + d.jumlah, 0) / chartData.length)
     : 0
+
+  // Seri diagram: laporan per bulan + akumulasinya
+  const chartLabels = chartData.map(d => d.bulan)
+  const perBulan    = chartData.map(d => d.jumlah)
+  let   runTotal    = 0
+  const akumulasi   = perBulan.map(v => (runTotal += v))
+
+  // Gaya kartu pembungkus (sama dengan halaman Pendaftar)
+  const wrapBg     = isDark ? 'linear-gradient(180deg,#262239 0%,#1e1b2e 100%)' : 'linear-gradient(180deg,#ffffff 0%,#FAFBFF 100%)'
+  const wrapBorder = isDark ? '1px solid #322d49' : '1px solid #EBEEF5'
+  const wrapShadow = isDark
+    ? '0 1px 0 rgba(255,255,255,0.05) inset, 0 1px 2px rgba(0,0,0,0.45), 0 8px 20px -6px rgba(0,0,0,0.55)'
+    : '0 1px 0 rgba(255,255,255,0.95) inset, 0 1px 2px rgba(16,24,40,0.05), 0 6px 16px -4px rgba(16,24,40,0.08), 0 18px 34px -14px rgba(16,24,40,0.12)'
+  const innerBg     = isDark ? '#241f38' : '#F7F8FC'
+  const innerBorder = isDark ? '1.5px solid #322d49' : '1.5px solid #EEF0F6'
+  const TILE_TINT: Record<string, string> = { semua: '#DDD6FE', bulanan: '#BFDBFE', tahunan: '#A7F3D0', khusus: '#FDE68A' }
 
   const bgColor = isDark ? '#15131f' : '#f6f5fa'
   const cardBg = isDark ? '#1e1b2e' : 'white'
@@ -879,7 +796,7 @@ export default function LaporanPage() {
                           background: rowBg,
                           animation: 'fadeUp 0.3s ease both', animationDelay: `${idx * 35}ms`,
                         }}>
-                          <td style={{ ...getTdStyle(isDark), fontWeight: 700, color: textColor, maxWidth: 200 }}>
+                          <td style={{ ...getTdStyle(), fontWeight: 700, color: textColor, maxWidth: 200 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <LaporanIcon tipe={laporan.tipe} size={30} dark={isDark} />
                               <span style={{ 
@@ -890,12 +807,12 @@ export default function LaporanPage() {
                               </span>
                             </div>
                           </td>
-                          <td style={getTdStyle(isDark)}>
+                          <td style={getTdStyle()}>
                             {laporan.profiles
                               ? <span style={{ color: textColor, fontWeight: 600 }}>{laporan.profiles.name}</span>
                               : <span style={{ color: isDark ? '#6b6885' : '#cbd5e1' }}>—</span>}
                           </td>
-                          <td style={getTdStyle(isDark)}>
+                          <td style={getTdStyle()}>
                             <span style={{ 
                               fontSize: 10.5, fontWeight: 700, color: cfg.color, 
                               background: isDark ? cfg.bgDark : cfg.bg,
@@ -904,10 +821,10 @@ export default function LaporanPage() {
                               {label}
                             </span>
                           </td>
-                          <td style={{ ...getTdStyle(isDark), color: isDark ? '#94a3b8' : '#6b7280', whiteSpace: 'nowrap' as const }}>
+                          <td style={{ ...getTdStyle(), color: isDark ? '#94a3b8' : '#6b7280', whiteSpace: 'nowrap' as const }}>
                             {formatDate(laporan.created_at)}
                           </td>
-                          <td style={getTdStyle(isDark)}>
+                          <td style={getTdStyle()}>
                             {laporan.file_url ? (
                               <a href={laporan.file_url} target="_blank" rel="noopener noreferrer"
                                 style={{ 
@@ -922,12 +839,12 @@ export default function LaporanPage() {
                               </a>
                             ) : <span style={{ color: isDark ? '#6b6885' : '#cbd5e1' }}>—</span>}
                           </td>
-                          <td style={getTdStyle(isDark)}>
+                          <td style={getTdStyle()}>
                             {laporan.creator
                               ? <span style={{ color: isDark ? '#94a3b8' : '#6b7280' }}>{laporan.creator.name}</span>
                               : <span style={{ color: isDark ? '#6b6885' : '#cbd5e1' }}>—</span>}
                           </td>
-                          <td style={{ ...getTdStyle(isDark) }}>
+                          <td style={{ ...getTdStyle() }}>
                             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                               <ItemMenu 
                                 laporan={laporan} 
@@ -950,189 +867,132 @@ export default function LaporanPage() {
       ) : (
       <div style={{ padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* ── Stats 2x2 Grid ─────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-          {statsConfig.map((s, i) => (
-            <div key={s.key} style={{ 
-              background: cardBg, borderRadius: 20, padding: '16px 16px 0',
-              boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(15,23,42,0.06)',
-              border: cardBorder,
-              animation: 'fadeUp 0.4s ease both', animationDelay: `${i*70}ms`,
-              overflow: 'hidden', display: 'flex', flexDirection: 'column' 
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <div style={{ 
-                  width: 38, height: 38, borderRadius: 12, background: s.iconBg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  color: isDark ? '#a5b4fc' : '#7c3aed',
+        {/* ── Stats: satu kartu menampung ke-4 kartu (gaya Pendaftar) ── */}
+        <div style={{
+          background: wrapBg, border: wrapBorder, borderRadius: 22,
+          boxShadow: wrapShadow, padding: '16px 12px 12px',
+        }}>
+          <div style={{ padding: '0 4px' }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: textColor, margin: 0, letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+              {isEn ? 'Report Overview' : 'Ikhtisar Laporan'}
+            </p>
+            <p style={{ fontSize: 11, fontWeight: 500, color: mutedColor, margin: '2px 0 0' }}>
+              {isEn ? 'Report totals by period' : 'Total laporan berdasarkan periode'}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginTop: 14 }}>
+            {statsConfig.map((s, i) => (
+              <div key={s.key} style={{
+                background: innerBg, border: innerBorder, borderRadius: 16,
+                padding: '12px 6px 10px', minWidth: 0, textAlign: 'center' as const,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                animation: 'fadeUp 0.4s ease both', animationDelay: `${i * 70}ms`,
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                  background: isDark ? s.iconBg : `radial-gradient(circle at 35% 25%, #ffffff 0%, ${TILE_TINT[s.key]} 100%)`,
+                  border: isDark ? '1px solid #3d3655' : '1px solid rgba(255,255,255,0.9)',
+                  boxShadow: isDark ? 'none' : '0 1px 0 rgba(255,255,255,0.95) inset, 0 8px 14px -8px rgba(16,24,40,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {s.icon}
                 </div>
-                <span style={{ 
-                  width: 22, height: 22, borderRadius: '50%',
-                  color: isDark ? '#6b6885' : '#94a3b8', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
+                <div style={{ fontSize: 21, fontWeight: 900, color: textColor, lineHeight: 1.1, marginTop: 2 }}>
+                  {s.value}
+                </div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: isDark ? '#94a3b8' : '#374151', lineHeight: 1.3 }}>
+                  {s.label}
+                </div>
+                <div style={{
+                  fontSize: 9, fontWeight: 800, lineHeight: 1.2,
+                  color: s.positive ? '#16a34a' : mutedColor,
+                  display: 'flex', alignItems: 'center', gap: 2,
                 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 6 15 12 9 18"/>
-                  </svg>
-                </span>
+                  {s.positive && (
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>
+                    </svg>
+                  )}
+                  {s.text}
+                </div>
+                <div style={{ fontSize: 8, fontWeight: 500, color: isDark ? '#6b6885' : '#94a3b8', lineHeight: 1.2 }}>
+                  {s.sub}
+                </div>
               </div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: mutedColor, margin: '12px 0 0' }}>{s.label}</p>
-              <p style={{ 
-                fontSize: 30, fontWeight: 900, color: s.numColor, 
-                margin: '2px 0 0', lineHeight: 1 
-              }}>
-                {s.value}
-              </p>
-              <p style={{ 
-                fontSize: 11, fontWeight: 700, margin: '6px 0 0', display: 'flex', alignItems: 'center', gap: 3,
-                color: s.positive ? '#16a34a' : mutedColor 
-              }}>
-                {s.positive && (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/>
-                  </svg>
-                )}
-                {s.text} <span style={{ color: mutedColor, fontWeight: 600 }}>{s.sub}</span>
-              </p>
-              <div style={{ marginTop: 10, marginLeft: -16, marginRight: -16 }}>
-                <MiniSparkline color={s.sparkColor} seed={s.seed} />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* ── Ringkasan Chart + Statistik ──────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 12, alignItems: 'stretch' }}>
-
-          {/* Chart */}
-          <div style={{ 
-            background: cardBg, borderRadius: 20, padding: '18px 16px 14px',
-            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(15,23,42,0.06)',
-            border: cardBorder, minWidth: 0 
-          }}>
-            <div style={{ 
-              display: 'flex', justifyContent: 'space-between', 
-              alignItems: 'center', marginBottom: 16, 
-              flexWrap: 'wrap' as const, gap: 8 
+        {/* ── Ringkasan Laporan: diagram dua garis ───────── */}
+        <div style={{
+          background: wrapBg, border: wrapBorder, borderRadius: 22,
+          boxShadow: wrapShadow, padding: '18px 16px 16px', minWidth: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' as const }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: textColor, margin: 0, letterSpacing: '-0.3px' }}>
+              {isEn ? 'Report Summary' : 'Ringkasan Laporan'}
+            </p>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: isDark ? '#15131f' : '#ffffff',
+              border: `1px solid ${isDark ? '#2e2a40' : '#e5e7eb'}`,
+              borderRadius: 10, padding: '5px 10px',
+              fontSize: 11, color: mutedColor, fontWeight: 600,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ 
-                  width: 36, height: 36, borderRadius: 10, 
-                  background: isDark ? '#2e2a40' : '#f5f3ff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isDark ? '#a5b4fc' : '#7c3aed',
-                }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: textColor, margin: 0 }}>
-                  {isEn ? 'Report Summary' : 'Ringkasan Laporan'}
-                </p>
-              </div>
-              <div style={{ 
-                display: 'flex', alignItems: 'center', gap: 5, 
-                background: isDark ? '#15131f' : '#f8fafc',
-                border: `1px solid ${isDark ? '#2e2a40' : '#e5e7eb'}`,
-                borderRadius: 10, padding: '5px 10px',
-                fontSize: 11, color: mutedColor, fontWeight: 600 
-              }}>
-                {isEn ? 'Last 6 Months' : '6 Bulan Terakhir'}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#6b6885' : '#94a3b8'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-            </div>
-            <LineChart data={chartData} dark={isDark} />
-
-            {/* Mini summary cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 18 }}>
-              <div style={{ 
-                background: isDark ? '#15131f' : '#fafafa', 
-                borderRadius: 14, padding: '12px 14px',
-                border: cardBorder 
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: mutedColor, fontWeight: 600 }}>
-                    {isEn ? 'Highest Report' : 'Laporan Tertinggi'}
-                  </span>
-                  <div style={{ 
-                    width: 22, height: 22, borderRadius: 8, background: '#ecfdf5',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    color: '#16a34a',
-                  }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
-                  </div>
-                </div>
-                <p style={{ fontSize: 18, fontWeight: 900, color: textColor, margin: '6px 0 0' }}>
-                  {laporanTertinggi ? laporanTertinggi.jumlah : 0}
-                  <span style={{ fontSize: 12, fontWeight: 700, color: mutedColor }}> {isEn ? 'reports' : 'laporan'}</span>
-                </p>
-                <p style={{ fontSize: 11, color: mutedColor, margin: '2px 0 0' }}>
-                  {laporanTertinggi ? laporanTertinggi.bulan : '—'}
-                </p>
-              </div>
-              <div style={{ 
-                background: isDark ? '#15131f' : '#fafafa', 
-                borderRadius: 14, padding: '12px 14px',
-                border: cardBorder 
-              }}>
-                <span style={{ fontSize: 11, color: mutedColor, fontWeight: 600 }}>
-                  {isEn ? 'Monthly Average' : 'Rata-rata per Bulan'}
-                </span>
-                <p style={{ fontSize: 18, fontWeight: 900, color: textColor, margin: '6px 0 0' }}>
-                  {rataRata.toLocaleString(isEn ? 'en-US' : 'id-ID', { maximumFractionDigits: 1 })}
-                  <span style={{ fontSize: 12, fontWeight: 700, color: mutedColor }}> {isEn ? 'reports' : 'laporan'}</span>
-                </p>
-                <p style={{ fontSize: 11, color: mutedColor, margin: '2px 0 0' }}>
-                  {isEn ? 'Over the last 6 months' : 'Selama 6 bulan terakhir'}
-                </p>
-              </div>
+              {isEn ? 'Last 6 Months' : '6 Bulan Terakhir'}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#6b6885' : '#94a3b8'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </div>
           </div>
 
-          {/* Statistik Laporan */}
-          <div style={{ 
-            background: cardBg, borderRadius: 20, padding: '18px 14px',
-            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(15,23,42,0.06)',
-            border: cardBorder,
-            minWidth: 0, display: 'flex', flexDirection: 'column' 
-          }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: textColor, margin: '0 0 14px' }}>
-              {isEn ? 'Report Statistics' : 'Statistik Laporan'}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-              {statistikItems.map(item => (
-                <div key={item.key} style={{ 
-                  display: 'flex', alignItems: 'center',
-                  justifyContent: 'space-between', gap: 8, padding: '9px 6px' 
-                }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
-                    <span style={{ 
-                      width: 30, height: 30, borderRadius: 9, 
-                      background: isDark ? item.iconBg : item.iconBg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      color: isDark ? '#a5b4fc' : '#7c3aed',
-                    }}>
-                      {item.icon}
-                    </span>
-                    <span style={{ 
-                      fontSize: 13, fontWeight: 700, 
-                      color: isDark ? '#f1f0f5' : '#374151', 
-                      whiteSpace: 'nowrap' as const 
-                    }}>
-                      {item.label}
-                    </span>
-                  </span>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: textColor, flexShrink: 0 }}>
-                    {item.value}
-                  </span>
-                </div>
-              ))}
+          {/* Legenda */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '12px 0 14px', flexWrap: 'wrap' as const }}>
+            {[
+              { color: isDark ? '#60a5fa' : '#3b82f6', label: isEn ? 'Reports per Month' : 'Laporan per Bulan' },
+              { color: isDark ? '#34d399' : '#22c55e', label: isEn ? 'Cumulative' : 'Akumulasi' },
+            ].map(l => (
+              <span key={l.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: isDark ? '#b3aec4' : '#6b7280' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: l.color, display: 'inline-block' }} />
+                {l.label}
+              </span>
+            ))}
+          </div>
+
+          <OverviewChart
+            labels={chartLabels}
+            a={perBulan}
+            b={akumulasi}
+            dark={isDark}
+            emptyText={isEn ? 'No data available' : 'Belum ada data laporan'}
+          />
+
+          {/* Ringkas: tertinggi & rata-rata */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14 }}>
+            <div style={{ background: innerBg, border: innerBorder, borderRadius: 14, padding: '10px 12px' }}>
+              <p style={{ fontSize: 10.5, fontWeight: 600, color: mutedColor, margin: 0 }}>
+                {isEn ? 'Highest Report' : 'Laporan Tertinggi'}
+              </p>
+              <p style={{ fontSize: 17, fontWeight: 900, color: textColor, margin: '4px 0 0', lineHeight: 1.1 }}>
+                {laporanTertinggi ? laporanTertinggi.jumlah : 0}
+                <span style={{ fontSize: 11, fontWeight: 700, color: mutedColor }}> {isEn ? 'reports' : 'laporan'}</span>
+              </p>
+              <p style={{ fontSize: 10.5, color: mutedColor, margin: '2px 0 0' }}>
+                {laporanTertinggi ? laporanTertinggi.bulan : '—'}
+              </p>
+            </div>
+            <div style={{ background: innerBg, border: innerBorder, borderRadius: 14, padding: '10px 12px' }}>
+              <p style={{ fontSize: 10.5, fontWeight: 600, color: mutedColor, margin: 0 }}>
+                {isEn ? 'Monthly Average' : 'Rata-rata per Bulan'}
+              </p>
+              <p style={{ fontSize: 17, fontWeight: 900, color: textColor, margin: '4px 0 0', lineHeight: 1.1 }}>
+                {rataRata.toLocaleString(isEn ? 'en-US' : 'id-ID', { maximumFractionDigits: 1 })}
+                <span style={{ fontSize: 11, fontWeight: 700, color: mutedColor }}> {isEn ? 'reports' : 'laporan'}</span>
+              </p>
+              <p style={{ fontSize: 10.5, color: mutedColor, margin: '2px 0 0' }}>
+                {isEn ? 'Last 6 months' : '6 bulan terakhir'}
+              </p>
             </div>
           </div>
         </div>

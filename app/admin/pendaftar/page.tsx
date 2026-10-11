@@ -35,34 +35,18 @@ const STATUS_CONFIG: Record<string, { label: string; labelEn: string; color: str
   ditolak:  { label: 'Ditolak', labelEn: 'Rejected', color: '#dc2626', bg: '#fff5f5', dot: '#ef4444', border: '#fca5a5' },
 }
 
+// ─── Ikon PNG kartu statistik (file ada di /public/icons) ──────────────────────
+const STAT_ICONS = {
+  total:    '/icons/total-peserta-icon.png',
+  menunggu: '/icons/menunggu.png',
+  diterima: '/icons/verifikasi-icon.png',
+  ditolak:  '/icons/ditolak-icon.png',
+} as const
+
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconArrowLeft = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-  </svg>
-)
-const IconUsers = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-    <circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-)
-const IconClock = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-  </svg>
-)
-const IconCheckCircle = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-  </svg>
-)
-const IconXCircle = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
   </svg>
 )
 const IconSearch = () => (
@@ -126,20 +110,35 @@ const NavProfil = ({ active }: { active?: boolean }) => (
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({
-  label, sub, value, icon, iconBg, iconColor, borderColor, onClick, active, dark = false,
+  label, sub, value, iconSrc, iconTint, borderColor, onClick, active,
 }: {
   label: string; sub: string; value: number
-  icon: React.ReactNode; iconBg: string; iconColor: string; borderColor: string
-  onClick?: () => void; active?: boolean; dark?: boolean
+  iconSrc: string; iconTint: string; borderColor: string
+  onClick?: () => void; active?: boolean
 }) {
   return (
     <button
+      type="button"
       className={`stat-card${active ? ' stat-card--active' : ''}`}
-      style={active ? { borderColor } : {}}
+      style={{ ['--stat-accent' as string]: borderColor } as React.CSSProperties}
       onClick={onClick}
     >
-      <div className="stat-icon-wrap" style={{ background: iconBg, color: iconColor }}>
-        {icon}
+      <div
+        className="stat-icon-wrap"
+        style={{
+          background: `radial-gradient(circle at 35% 25%, #ffffff 0%, ${iconTint} 100%)`,
+          borderColor: `${borderColor}55`,
+        }}
+      >
+        <Image
+          src={iconSrc}
+          alt={label}
+          width={28}
+          height={28}
+          sizes="28px"
+          draggable={false}
+          style={{ width: 28, height: 28, objectFit: 'contain' }}
+        />
       </div>
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
@@ -193,10 +192,24 @@ html, body {
   background: #1e1b2e !important;
 }
 
+[data-theme='dark'] .stats-wrap {
+  background: linear-gradient(180deg, #262239 0%, #1e1b2e 100%) !important;
+  border-color: #322d49 !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 1px 2px rgba(0,0,0,0.45), 0 8px 20px -6px rgba(0,0,0,0.55) !important;
+}
+
+[data-theme='dark'] .stats-title {
+  color: #f1f0f5 !important;
+}
+
+[data-theme='dark'] .stats-sub {
+  color: #8b86a3 !important;
+}
+
 [data-theme='dark'] .stat-card {
-  background: #1e1b2e !important;
-  border-color: #2e2a40 !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  background: #241f38 !important;
+  border-color: #322d49 !important;
+  box-shadow: none !important;
 }
 
 [data-theme='dark'] .stat-value {
@@ -461,20 +474,32 @@ html, body {
 }
 
 /* ── Stats Grid ── */
+/* Wadah satu kartu yang menampung ke-4 kartu statistik (gaya kartu beranda) */
+.stats-wrap {
+  margin: 14px 16px 0;
+  padding: 16px 12px 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #FAFBFF 100%);
+  border: 1px solid #EBEEF5;
+  border-radius: 22px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.95) inset, 0 1px 2px rgba(16,24,40,0.05), 0 6px 16px -4px rgba(16,24,40,0.08), 0 18px 34px -14px rgba(16,24,40,0.12);
+}
+.stats-head { padding: 0 4px; }
+.stats-title { font-size: 15px; font-weight: 800; color: #111827; letter-spacing: -0.3px; line-height: 1.2; }
+.stats-sub   { font-size: 11px; font-weight: 500; color: #9ca3af; margin-top: 2px; }
 .pnd-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  padding: 18px 16px 0;
+  gap: 8px;
+  margin-top: 14px;
 }
 .stat-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 13px 8px 11px;
+  background: #F7F8FC;
+  border-radius: 16px;
+  padding: 12px 6px 10px;
   display: flex; flex-direction: column;
   align-items: center; gap: 5px;
-  border: 2px solid transparent;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1.5px solid #EEF0F6;
+  box-shadow: none;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -482,11 +507,15 @@ html, body {
   min-width: 0;
 }
 .stat-card:active { transform: scale(0.95); }
-.stat-card--active {
-  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+.stat-card.stat-card--active {
+  background: #ffffff;
+  border-color: var(--stat-accent) !important;
+  box-shadow: 0 4px 14px -4px rgba(99,102,241,0.25);
 }
 .stat-icon-wrap {
-  width: 36px; height: 36px; border-radius: 11px;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid transparent;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -736,7 +765,7 @@ html, body {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function PendaftarPage() {
   const router = useRouter()
-  const { theme, language, t } = useSettings()
+  const { theme, language } = useSettings()
   const isDark = theme === 'dark'
 
   const [items,     setItems]     = useState<PendaftarItem[]>([])
@@ -862,36 +891,38 @@ export default function PendaftarPage() {
         {/* ── SCROLLABLE CONTENT ── */}
         <div className="pnd-scroll-content" style={{ background: isDark ? '#15131f' : '#f0f2f8' }}>
 
-        {/* ── Stats ── */}
-        <div className="pnd-stats">
-          <StatCard
-            label={statLabels.total.label} sub={statLabels.total.sub}
-            value={stats.total} icon={<IconUsers />}
-            iconBg="#ede9fe" iconColor="#7c3aed" borderColor="#a78bfa"
-            onClick={() => setStatusTab('semua')} active={statusTab === 'semua'}
-            dark={isDark}
-          />
-          <StatCard
-            label={statLabels.menunggu.label} sub={statLabels.menunggu.sub}
-            value={stats.menunggu} icon={<IconClock />}
-            iconBg="#fef3c7" iconColor="#d97706" borderColor="#fbbf24"
-            onClick={() => setStatusTab('menunggu')} active={statusTab === 'menunggu'}
-            dark={isDark}
-          />
-          <StatCard
-            label={statLabels.diterima.label} sub={statLabels.diterima.sub}
-            value={stats.diterima} icon={<IconCheckCircle />}
-            iconBg="#d1fae5" iconColor="#059669" borderColor="#34d399"
-            onClick={() => setStatusTab('diterima')} active={statusTab === 'diterima'}
-            dark={isDark}
-          />
-          <StatCard
-            label={statLabels.ditolak.label} sub={statLabels.ditolak.sub}
-            value={stats.ditolak} icon={<IconXCircle />}
-            iconBg="#fee2e2" iconColor="#dc2626" borderColor="#f87171"
-            onClick={() => setStatusTab('ditolak')} active={statusTab === 'ditolak'}
-            dark={isDark}
-          />
+        {/* ── Stats: satu kartu menampung ke-4 kartu ── */}
+        <div className="stats-wrap">
+          <div className="stats-head">
+            <p className="stats-title">{language === 'en' ? 'Applicant Summary' : 'Ringkasan Pendaftar'}</p>
+            <p className="stats-sub">{language === 'en' ? 'Tap a card to filter the list' : 'Ketuk kartu untuk memfilter daftar'}</p>
+          </div>
+          <div className="pnd-stats">
+            <StatCard
+              label={statLabels.total.label} sub={statLabels.total.sub}
+              value={stats.total} iconSrc={STAT_ICONS.total}
+              iconTint="#DDD6FE" borderColor="#a78bfa"
+              onClick={() => setStatusTab('semua')} active={statusTab === 'semua'}
+            />
+            <StatCard
+              label={statLabels.menunggu.label} sub={statLabels.menunggu.sub}
+              value={stats.menunggu} iconSrc={STAT_ICONS.menunggu}
+              iconTint="#FDE68A" borderColor="#fbbf24"
+              onClick={() => setStatusTab('menunggu')} active={statusTab === 'menunggu'}
+            />
+            <StatCard
+              label={statLabels.diterima.label} sub={statLabels.diterima.sub}
+              value={stats.diterima} iconSrc={STAT_ICONS.diterima}
+              iconTint="#A7F3D0" borderColor="#34d399"
+              onClick={() => setStatusTab('diterima')} active={statusTab === 'diterima'}
+            />
+            <StatCard
+              label={statLabels.ditolak.label} sub={statLabels.ditolak.sub}
+              value={stats.ditolak} iconSrc={STAT_ICONS.ditolak}
+              iconTint="#FECACA" borderColor="#f87171"
+              onClick={() => setStatusTab('ditolak')} active={statusTab === 'ditolak'}
+            />
+          </div>
         </div>
 
         {/* ── Search Row ── */}

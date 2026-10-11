@@ -153,10 +153,26 @@ const QUICK_MENU: { id: string; label: string; src: string; href: string; unopti
 
 // ── Reusable UI ───────────────────────────────────────────────────────────────
 
-/** Tile ikon bundar bergaya 3D (efek keycap: gloss atas + tepi tebal bawah + bayangan berwarna) */
+/**
+ * Tile ikon bundar.
+ * - default : bergaya 3D (efek keycap: gloss atas + tepi tebal bawah + bayangan berwarna)
+ * - flat    : datar, warna solid lembut tanpa bayangan / gloss / tepi tebal
+ */
 function IconTile({
-  tone, size = 40, children,
-}: { tone: Tone; size?: number; children: ReactNode }) {
+  tone, size = 40, flat = false, children,
+}: { tone: Tone; size?: number; flat?: boolean; children: ReactNode }) {
+  if (flat) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: '50%', flexShrink: 0,
+        background: tone.from,
+        border: `1px solid ${tone.edge}66`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{ display: 'flex' }}>{children}</span>
+      </div>
+    )
+  }
   return (
     <div style={{
       position: 'relative', overflow: 'hidden',
@@ -176,17 +192,17 @@ function IconTile({
   )
 }
 
-/** Tile ikon statistik: alas rounded-square terang + halo warna aksen, ikon PNG tampil utuh (tanpa dipotong lingkaran) */
+/** Tile ikon statistik: alas BUNDAR terang + halo warna aksen, ikon PNG tampil utuh di tengah lingkaran */
 function StatIconTile({
-  tone, src, alt, size = 52,
+  tone, src, alt, size = 54,
 }: { tone: Tone; src: string; alt: string; size?: number }) {
-  const imgSize = Math.round(size * 0.74)
+  const imgSize = Math.round(size * 0.62)
   return (
     <div style={{
-      position: 'relative',
-      width: size, height: size, borderRadius: 16, flexShrink: 0,
-      background: `linear-gradient(145deg, #ffffff 0%, ${tone.from} 100%)`,
-      border: `1px solid ${tone.edge}55`,
+      position: 'relative', overflow: 'hidden',
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: `radial-gradient(circle at 35% 25%, #ffffff 0%, ${tone.from} 100%)`,
+      border: `1px solid ${tone.edge}66`,
       boxShadow: `0 1px 0 rgba(255,255,255,0.95) inset, 0 8px 16px -8px ${tone.glow}66`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
@@ -311,7 +327,7 @@ function AktivitasIcon({ type }: { type: AktivitasItem['type'] }) {
     )
   }
 
-  return <IconTile tone={tone} size={46}>{icon}</IconTile>
+  return <IconTile tone={tone} size={46} flat>{icon}</IconTile>
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
@@ -495,9 +511,9 @@ export default function AdminDashboardClient({
         .adm-lift { transition: transform .2s ease, box-shadow .2s ease; will-change: transform; }
         .adm-lift:active { transform: scale(.96); }
         @media (hover: hover) { .adm-lift:hover { transform: translateY(-3px); } }
-        .adm-key { display: block; transition: transform .12s ease; }
-        .adm-key:active { transform: translateY(3px); }
-        @media (hover: hover) { .adm-key:hover { transform: translateY(-2px); } }
+        .adm-key { display: block; transition: transform .12s ease, opacity .12s ease; }
+        .adm-key:active { transform: scale(.94); opacity: .85; }
+        @media (hover: hover) { .adm-key:hover { transform: scale(1.04); } }
         .adm-float { animation: admFloat 4.5s ease-in-out infinite; }
         @keyframes admFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
         @media (prefers-reduced-motion: reduce) { .adm-float { animation: none; } .adm-lift, .adm-key { transition: none; } }
@@ -787,11 +803,9 @@ export default function AdminDashboardClient({
               <Link key={item.id} href={item.href} className="adm-key" style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9 }}>
                   <div style={{
-                    position: 'relative', overflow: 'hidden',
                     width: 58, height: 58, borderRadius: '50%',
-                    background: 'radial-gradient(circle at 35% 25%, #ffffff 0%, #F1F3FA 55%, #E2E6F2 100%)',
-                    border: '1px solid rgba(255,255,255,0.95)',
-                    boxShadow: '0 1px 0 #fff inset, 0 -5px 10px rgba(16,24,40,0.07) inset, 0 4px 0 #CBD2E4, 0 14px 18px -6px rgba(16,24,40,0.35)',
+                    background: p.cellBg,
+                    border: `1px solid ${p.cardBorder}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <Image
@@ -802,7 +816,6 @@ export default function AdminDashboardClient({
                       unoptimized={item.unoptimized}
                       style={{
                         width: 36, height: 36, objectFit: 'contain',
-                        filter: 'drop-shadow(0 3px 4px rgba(16,24,40,0.25))',
                       }}
                     />
                   </div>

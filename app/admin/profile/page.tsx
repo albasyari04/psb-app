@@ -47,7 +47,7 @@ const IconArrowLeft = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <path
       d="M19 12H5M12 19l-7-7 7-7"
-      stroke="var(--purple)"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -259,7 +259,8 @@ const IconNavProfile = ({ active }: { active?: boolean }) => (
 export default function AdminProfilePage() {
   const router = useRouter()
   const { status } = useSession()
-  const { t } = useSettings()
+  const { t, theme } = useSettings()
+  const isDark = theme === 'dark'
 
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<AdminProfileData | null>(null)
@@ -368,7 +369,13 @@ export default function AdminProfilePage() {
       <div style={s.header}>
         <button
           onClick={() => router.back()}
-          style={s.iconBtn}
+          style={{
+            ...s.iconBtn,
+            background: isDark ? '#2e2a40' : '#ffffff',
+            border: isDark ? '1px solid #3d3655' : '1px solid #ede9fe',
+            boxShadow: isDark ? 'none' : '0 2px 8px rgba(109,40,217,0.12)',
+            color: isDark ? '#a5b4fc' : '#7c3aed',
+          }}
           type="button"
           aria-label={t('chat_back')}
         >
@@ -377,7 +384,6 @@ export default function AdminProfilePage() {
 
         <div style={s.headerCenter}>
           <h1 style={s.headerTitle}>{t('profile_header_title')}</h1>
-          <p style={s.headerSub}>{t('profile_header_sub')}</p>
         </div>
       </div>
 
@@ -625,17 +631,14 @@ const s: Record<string, React.CSSProperties> = {
     background: 'var(--purple-lighter)',
   },
   iconBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    border: '1.5px solid var(--purple-light)',
-    background: 'var(--white)',
+    width: 40,
+    height: 40,
+    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
     flexShrink: 0,
-    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
   },
   headerCenter: {
     textAlign: 'left' as const,

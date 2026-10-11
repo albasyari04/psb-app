@@ -485,9 +485,9 @@ function DeleteConfirmModal({
 
 // ─── StatCard ───────────────────────────────────────────────────
 function StatCard({
-  icon, iconBg, label, labelColor, count, countColor, subColor, dark = false,
+  iconSrc, iconBg, label, labelColor, count, countColor, subColor, dark = false,
 }: {
-  icon: React.ReactNode
+  iconSrc: string
   iconBg: string
   label: string
   labelColor: string
@@ -504,13 +504,24 @@ function StatCard({
       border: dark ? '1px solid #2e2a40' : '1px solid #f1f5f9',
       minWidth: 0,
     }}>
+      {/* Tile bundar berwarna terang (agar ikon gelap tetap terbaca di dark mode) */}
       <div style={{
-        width: 26, height: 26, borderRadius: 9,
-        background: iconBg,
+        width: 36, height: 36, borderRadius: '50%',
+        background: `radial-gradient(circle at 35% 25%, #ffffff 0%, ${iconBg} 100%)`,
+        border: '1px solid rgba(255,255,255,0.9)',
+        boxShadow: dark ? 'none' : '0 6px 12px -8px rgba(16,24,40,0.3)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 8,
+        overflow: 'hidden', marginBottom: 8,
       }}>
-        {icon}
+        <Image
+          src={iconSrc}
+          alt={label}
+          width={22}
+          height={22}
+          sizes="22px"
+          draggable={false}
+          style={{ width: 22, height: 22, objectFit: 'contain' }}
+        />
       </div>
       <p style={{ fontSize: 9.5, fontWeight: 700, color: labelColor, margin: '0 0 8px', lineHeight: 1.25 }}>
         {label}
@@ -519,7 +530,7 @@ function StatCard({
         {count}
       </p>
       <p style={{ fontSize: 9.5, color: dark ? '#6b6885' : subColor, margin: 0 }}>
-        {dark ? 'transaksi' : 'transaksi'}
+        transaksi
       </p>
     </div>
   )
@@ -585,10 +596,6 @@ export default function PembayaranPage() {
   ]
 
   const bgColor = isDark ? '#15131f' : '#f0eef8'
-  const textColor = isDark ? '#f1f0f5' : '#0f172a'
-  const mutedColor = isDark ? '#94a3b8' : '#94a3b8'
-  const cardBg = isDark ? '#1e1b2e' : '#fff'
-  const borderColor = isDark ? '#2e2a40' : '#f1f5f9'
   const inputBg = isDark ? '#1e1b2e' : '#fff'
   const inputBorder = isDark ? '#2e2a40' : '#e8ecf4'
 
@@ -710,15 +717,8 @@ export default function PembayaranPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginBottom: 20 }}>
           <StatCard
-            icon={
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="3" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            }
-            iconBg="#f5f3ff"
+            iconSrc="/icons/tagihan.png"
+            iconBg="#DDD6FE"
             label={isEn ? 'Total Bills' : 'Total Tagihan'}
             labelColor="#7c3aed"
             count={total}
@@ -728,13 +728,8 @@ export default function PembayaranPage() {
           />
 
           <StatCard
-            icon={
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="9 12 11 14 15 10" />
-              </svg>
-            }
-            iconBg="#ecfdf5"
+            iconSrc="/icons/verifikasi-icon.png"
+            iconBg="#A7F3D0"
             label={isEn ? 'Confirmed' : 'Terkonfirmasi'}
             labelColor="#059669"
             count={dikonfirmasi}
@@ -744,13 +739,8 @@ export default function PembayaranPage() {
           />
 
           <StatCard
-            icon={
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            }
-            iconBg="#fef3c7"
+            iconSrc="/icons/menunggu.png"
+            iconBg="#FDE68A"
             label={isEn ? 'Pending' : 'Menunggu'}
             labelColor="#d97706"
             count={menunggu}
@@ -760,14 +750,8 @@ export default function PembayaranPage() {
           />
 
           <StatCard
-            icon={
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-            }
-            iconBg="#fee2e2"
+            iconSrc="/icons/ditolak-icon.png"
+            iconBg="#FECACA"
             label={isEn ? 'Rejected' : 'Ditolak'}
             labelColor="#dc2626"
             count={ditolak}
@@ -890,27 +874,17 @@ export default function PembayaranPage() {
         {/* ── Daftar Transaksi ── */}
         {loading ? (
           <div style={{
-            background: isDark ? '#1e1b2e' : '#fff', 
-            borderRadius: 20, padding: '48px 20px',
-            textAlign: 'center', color: isDark ? '#94a3b8' : '#94a3b8',
-            boxShadow: isDark ? '0 2px 14px rgba(0,0,0,0.2)' : '0 2px 14px rgba(15,23,42,0.06)',
-            border: isDark ? '1px solid #2e2a40' : 'none',
+            padding: '56px 16px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
           }}>
             <div style={{
-              width: 52, height: 52, borderRadius: 16, background: isDark ? '#2e2a40' : '#f1f5f9',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 14px', animation: 'spin 1s linear infinite',
-            }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#6b6885' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12a9 9 0 1 1-6.22-8.56"/>
-              </svg>
-            </div>
-            <p style={{ fontWeight: 700, fontSize: 14, color: isDark ? '#94a3b8' : '#64748b', margin: '0 0 4px' }}>
+              width: 36, height: 36, border: '3px solid #e2e8f0',
+              borderTopColor: '#6366f1', borderRadius: '50%',
+              animation: 'spin 0.7s linear infinite',
+            }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? '#6b6885' : '#94a3b8' }}>
               {isEn ? 'Loading data...' : 'Memuat data...'}
-            </p>
-            <p style={{ fontSize: 12, margin: 0 }}>
-              {isEn ? 'Please wait a moment' : 'Mohon tunggu sebentar'}
-            </p>
+            </span>
           </div>
         ) : payments.length === 0 ? (
           <div style={{
