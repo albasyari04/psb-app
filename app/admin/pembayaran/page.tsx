@@ -54,27 +54,22 @@ function formatTanggal(dateStr: string | null, lang: 'id' | 'en' = 'id'): string
   })
 }
 
-// ─── Avatar Initials ─────────────────────────────────────────
-function Avatar({ name, dark = false }: { name: string; dark?: boolean }) {
-  const initials = name?.charAt(0)?.toUpperCase() ?? '?'
-  const colors = [
-    ['#ede9fe', '#7c3aed'],
-    ['#dbeafe', '#2563eb'],
-    ['#d1fae5', '#059669'],
-    ['#fce7f3', '#db2777'],
-    ['#fff7ed', '#ea580c'],
-  ]
-  const idx = name.charCodeAt(0) % colors.length
-  const [bg, fg] = colors[idx]
+// ─── Applicant Avatar ────────────────────────────────────────
+function Avatar({ dark = false }: { dark?: boolean }) {
   return (
     <div style={{
-      width: 44, height: 44, borderRadius: 14,
-      background: dark ? '#2e2a40' : bg,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 17, fontWeight: 900, color: dark ? '#a5b4fc' : fg, flexShrink: 0,
-      border: dark ? '2px solid #3d3655' : `2px solid ${fg}22`,
+      width: 44, height: 44, borderRadius: '50%', overflow: 'hidden',
+      background: dark ? '#2e2a40' : '#e8f1fb',
+      flexShrink: 0,
+      border: dark ? '2px solid #3d3655' : '2px solid #dbeafe',
     }}>
-      {initials}
+      <Image
+        src="/icons/santri-icon.png"
+        alt=""
+        width={44}
+        height={44}
+        style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+      />
     </div>
   )
 }
@@ -210,7 +205,7 @@ function PembayaranCreateModal({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '16px 0 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 40, height: 40, borderRadius: 12,
+              width: 40, height: 40, borderRadius: '50%',
               background: accentGrad,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: `0 4px 14px ${accentColor}44`,
@@ -621,7 +616,7 @@ export default function PembayaranPage() {
           <button
             onClick={() => router.back()}
             style={{
-              width: 40, height: 40, borderRadius: 12,
+              width: 40, height: 40, borderRadius: '50%',
               background: isDark ? '#2e2a40' : '#f5f3ff',
               border: isDark ? '1px solid #3d3655' : 'none',
               cursor: 'pointer',
@@ -646,18 +641,6 @@ export default function PembayaranPage() {
           </div>
         </div>
 
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <Image
-            src="/icons/dompet-icon.png"
-            alt={isEn ? 'Wallet' : 'Dompet'}
-            width={48}
-            height={48}
-            style={{ display: 'block', objectFit: 'contain' }}
-          />
-        </div>
       </div>
 
       <div style={{ padding: '16px 16px 0' }}>
@@ -981,7 +964,7 @@ export default function PembayaranPage() {
                   {/* Row 1: Avatar + Name + Status badge */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 11 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                      <Avatar name={item.nama_siswa ?? '?'} dark={isDark} />
+                      <Avatar dark={isDark} />
                       <div>
                         <p style={{ fontSize: 14, fontWeight: 700, color: isDark ? '#f1f0f5' : '#0f172a', margin: 0 }}>
                           {item.nama_siswa}

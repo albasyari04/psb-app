@@ -97,6 +97,14 @@ interface Props {
 // ── Konstanta ─────────────────────────────────────────────────────────────────
 const WALLET_ICON = '/icons/wallet.png'
 
+// Ikon kartu statistik (file ada di /public/icons)
+const STAT_ICONS = {
+  total:    '/icons/total-peserta-icon.png',
+  verified: '/icons/terverifikasi-icon.png',
+  waiting:  '/icons/menunggu.png',
+  rejected: '/icons/ditolak-icon.png',
+} as const
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getGreeting(hour: number): string {
   if (hour >= 4  && hour < 11) return 'Selamat pagi,'
@@ -164,6 +172,37 @@ function IconTile({
         pointerEvents: 'none',
       }} />
       <span style={{ position: 'relative', zIndex: 1, display: 'flex' }}>{children}</span>
+    </div>
+  )
+}
+
+/** Tile ikon statistik: alas rounded-square terang + halo warna aksen, ikon PNG tampil utuh (tanpa dipotong lingkaran) */
+function StatIconTile({
+  tone, src, alt, size = 52,
+}: { tone: Tone; src: string; alt: string; size?: number }) {
+  const imgSize = Math.round(size * 0.74)
+  return (
+    <div style={{
+      position: 'relative',
+      width: size, height: size, borderRadius: 16, flexShrink: 0,
+      background: `linear-gradient(145deg, #ffffff 0%, ${tone.from} 100%)`,
+      border: `1px solid ${tone.edge}55`,
+      boxShadow: `0 1px 0 rgba(255,255,255,0.95) inset, 0 8px 16px -8px ${tone.glow}66`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <Image
+        src={src}
+        alt={alt}
+        width={imgSize}
+        height={imgSize}
+        sizes={`${imgSize}px`}
+        draggable={false}
+        style={{
+          width: imgSize, height: imgSize, objectFit: 'contain',
+          filter: `drop-shadow(0 3px 4px ${tone.glow}40)`,
+          userSelect: 'none',
+        }}
+      />
     </div>
   )
 }
@@ -348,48 +387,26 @@ export default function AdminDashboardClient({
   // ── Kartu statistik ─────────────────────────────────────────────────────────
   const pct = (v: number) => (s.total > 0 ? Math.round((v / s.total) * 100) : 0)
 
-  const statCards: { label: string; value: number; tone: Tone; note: string; fill: number; icon: ReactNode }[] = [
+  const statCards: { label: string; value: number; tone: Tone; note: string; fill: number; iconSrc: string }[] = [
     {
       label: 'Total Pendaftar', value: s.total, tone: TONES.violet,
       note: 'Seluruh data masuk', fill: 100,
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#6D3DF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="9" cy="7" r="4" stroke="#6D3DF5" strokeWidth="2" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#6D3DF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      iconSrc: STAT_ICONS.total,
     },
     {
-      label: 'Terverifikasi', value: terVerif, tone: TONES.green,
+      label: 'Terverifikasi', value: terVerif, tone: TONES.blue,
       note: `${pct(terVerif)}% dari total`, fill: pct(terVerif),
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="#059669" strokeWidth="2" />
-          <path d="M8 12l2.5 2.5L16 9" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      iconSrc: STAT_ICONS.verified,
     },
     {
       label: 'Menunggu', value: s.menunggu, tone: TONES.amber,
       note: `${pct(s.menunggu)}% dari total`, fill: pct(s.menunggu),
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="#D97706" strokeWidth="2" />
-          <polyline points="12 6 12 12 16 14" stroke="#D97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      iconSrc: STAT_ICONS.waiting,
     },
     {
       label: 'Ditolak', value: s.ditolak, tone: TONES.red,
       note: `${pct(s.ditolak)}% dari total`, fill: pct(s.ditolak),
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="#DC2626" strokeWidth="2" />
-          <line x1="15" y1="9" x2="9" y2="15" stroke="#DC2626" strokeWidth="2.2" strokeLinecap="round" />
-          <line x1="9" y1="9" x2="15" y2="15" stroke="#DC2626" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
-      ),
+      iconSrc: STAT_ICONS.rejected,
     },
   ]
 
@@ -606,7 +623,7 @@ export default function AdminDashboardClient({
           {statCards.map((c) => (
             <Card key={c.label} p={p} className="adm-lift" style={{ padding: '14px 14px 13px', borderRadius: 20, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <IconTile tone={c.tone} size={40}>{c.icon}</IconTile>
+                <StatIconTile tone={c.tone} src={c.iconSrc} alt={c.label} />
                 <p style={{
                   fontSize: 28, fontWeight: 900, color: p.textPrimary, margin: 0,
                   lineHeight: 1, letterSpacing: '-1.2px',

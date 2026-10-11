@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/SettingsContext'
@@ -32,19 +33,6 @@ const STATUS_CONFIG: Record<string, { label: string; labelEn: string; color: str
   diproses: { label: 'Diproses', labelEn: 'Processing', color: '#2563eb', bg: '#eff6ff', dot: '#3b82f6', border: '#bfdbfe' },
   diterima: { label: 'Diterima', labelEn: 'Accepted', color: '#059669', bg: '#f0fdf4', dot: '#10b981', border: '#a7f3d0' },
   ditolak:  { label: 'Ditolak', labelEn: 'Rejected', color: '#dc2626', bg: '#fff5f5', dot: '#ef4444', border: '#fca5a5' },
-}
-
-// ─── Avatar Colors ────────────────────────────────────────────────────────────
-const AV_COLORS = [
-  { bg: '#ede9fe', text: '#7c3aed' },
-  { bg: '#dbeafe', text: '#1d4ed8' },
-  { bg: '#dcfce7', text: '#16a34a' },
-  { bg: '#fce7f3', text: '#be185d' },
-  { bg: '#ffedd5', text: '#c2410c' },
-  { bg: '#e0f2fe', text: '#0369a1' },
-]
-function getAvatarColor(name: string) {
-  return AV_COLORS[(name?.charCodeAt(0) ?? 65) % AV_COLORS.length]
 }
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
@@ -432,7 +420,7 @@ html, body {
 
 .pnd-topbar-left { display: flex; align-items: center; gap: 12px; }
 .pnd-topbar-back-btn {
-  width: 40px; height: 40px; border-radius: 12px;
+  width: 40px; height: 40px; border-radius: 50%;
   background: #f5f3ff;
   border: 1.5px solid #ede9fe;
   cursor: pointer;
@@ -624,9 +612,11 @@ html, body {
   transform: translateY(-1px);
 }
 .pnd-card-av {
-  width: 46px; height: 46px; border-radius: 15px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 900; flex-shrink: 0;
+  width: 46px; height: 46px; border-radius: 50%; overflow: hidden;
+  flex-shrink: 0;
+}
+.pnd-card-av img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
 }
 .pnd-card-body { flex: 1; min-width: 0; }
 .pnd-card-top-row {
@@ -865,21 +855,6 @@ export default function PendaftarPage() {
               </p>
             </div>
           </div>
-          <div style={{ 
-            width: 40, height: 40, borderRadius: 12,
-            background: isDark ? '#2e2a40' : '#f8fafc',
-            border: isDark ? '1.5px solid #3d3655' : '1.5px solid #e9eef2',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', color: isDark ? '#a5b4fc' : '#6d28d9',
-            flexShrink: 0 
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDark ? '#a5b4fc' : '#6d28d9'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
         </div>
 
         </div>{/* end pnd-sticky-header */}
@@ -997,7 +972,6 @@ export default function PendaftarPage() {
             </div>
           ) : sorted.map(item => {
             const sc  = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.menunggu
-            const av  = getAvatarColor(item.nama_lengkap ?? 'A')
             const d   = item.created_at ? new Date(item.created_at) : null
             const dateStr = d
               ? d.toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -1006,8 +980,8 @@ export default function PendaftarPage() {
 
             return (
               <div key={item.id} className="pnd-card" style={{ background: isDark ? '#1e1b2e' : '#fff', borderColor: isDark ? '#2e2a40' : '#f1f5f9' }}>
-                <div className="pnd-card-av" style={{ background: av.bg, color: av.text }}>
-                  {item.nama_lengkap?.charAt(0)?.toUpperCase() ?? '?'}
+                <div className="pnd-card-av" style={{ background: isDark ? '#2e2a40' : '#e8f1fb' }}>
+                  <Image src="/icons/santri-icon.png" alt="" width={46} height={46} />
                 </div>
                 <div className="pnd-card-body">
                   <div className="pnd-card-top-row">
