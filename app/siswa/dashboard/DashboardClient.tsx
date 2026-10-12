@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import type { ReactElement, MouseEvent as ReactMouseEvent } from 'react'
+import type { CSSProperties, ReactElement, MouseEvent as ReactMouseEvent } from 'react'
 import Image from 'next/image'
 import Link  from 'next/link'
 import styles from './dashboard.module.css'
@@ -106,13 +106,15 @@ const HERO_SLIDES = [
   },
 ] as const
 
+// Akses Cepat: icon baru (public/icons/*-santri.png) + warna tile bundar per menu.
+// Pengumuman belum punya icon baru → tetap memakai icon lama.
 const QUICK_ITEMS = [
-  { href: '/siswa/jadwal',     labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal icon.png' },
-  { href: '/siswa/berkas',     labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas icon.png' },
-  { href: '/siswa/pembayaran', labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/pembayaran icon.png' },
-  { href: '/siswa/laporan',    labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan icon.png' },
-  { href: '/siswa/pengumuman', labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman icon.png' },
-  { href: '/siswa/chat',       labelKey: 'menu_chat',       subKey: 'menu_chat_sub',       icon: '/icons/chat icon.png' },
+  { href: '/siswa/jadwal',     labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal-icon-santri.png', tint: '#DBEAFE' },
+  { href: '/siswa/berkas',     labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas-icon-santri.png', tint: '#BFDBFE' },
+  { href: '/siswa/pembayaran', labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/bayar-icon-santri.png',  tint: '#A7F3D0' },
+  { href: '/siswa/laporan',    labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan-santri.png',     tint: '#FDE68A' },
+  { href: '/siswa/pengumuman', labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman.png',         tint: '#FBCFE8' },
+  { href: '/siswa/chat',       labelKey: 'menu_chat',       subKey: 'menu_chat_sub',       icon: '/icons/chat-icon-santri.png',   tint: '#DDD6FE' },
 ] as const
 
 const TIPE_CONFIG: Record<string, { pill: string }> = {
@@ -554,14 +556,21 @@ function HeroBanner() {
 /* ════════════════════════════════════════════════════════════════
    JADWAL TERDEKAT
    ════════════════════════════════════════════════════════════════ */
+// Icon header kartu ringkasan — gaya sama persis dengan Akses Cepat
+function MiniIcon({ src, tint }: { src: string; tint: string }) {
+  return (
+    <div className={styles.miniCardIconTile} style={{ '--tile': tint } as CSSProperties}>
+      <Image src={src} alt="" width={52} height={52} sizes="24px" draggable={false} className={styles.miniCardIconImg} />
+    </div>
+  )
+}
+
 function JadwalHariIniCard({ items, loading }: { items: JadwalItem[]; loading: boolean }) {
   const { t } = useSettings()
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconJadwal}`}>
-          <Image src="/icons/jadwal icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
-        </div>
+        <MiniIcon src="/icons/jadwal-icon-santri.png" tint="#DBEAFE" />
         <div className={styles.miniCardHeadText}>
           <p className={styles.miniCardTitle}>{t('dashboard_jadwal_title')}</p>
           <Link href="/siswa/jadwal" className={styles.miniCardLink}>{t('dashboard_jadwal_link')}</Link>
@@ -617,9 +626,7 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconPembayaran}`}>
-          <Image src="/icons/pembayaran icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
-        </div>
+        <MiniIcon src="/icons/bayar-icon-santri.png" tint="#A7F3D0" />
         <div className={styles.miniCardHeadText}>
           <p className={styles.miniCardTitle}>{t('dashboard_payment_title')}</p>
           <Link href="/siswa/pembayaran" className={styles.miniCardLink}>{t('dashboard_payment_link')}</Link>
@@ -677,9 +684,7 @@ function LaporanCard({ data, loading }: { data: LaporanItem[]; loading: boolean 
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <div className={`${styles.miniCardIconWrap} ${styles.miniCardIconLaporan}`}>
-          <Image src="/icons/laporan icon.png" alt="" width={26} height={26} className={styles.miniCardIconImg} />
-        </div>
+        <MiniIcon src="/icons/laporan-santri.png" tint="#FDE68A" />
         <div className={styles.miniCardHeadText}>
           <p className={styles.miniCardTitle}>{t('dashboard_laporan_title')}</p>
           <Link href="/siswa/laporan" className={styles.miniCardLink}>{t('dashboard_laporan_link')}</Link>
@@ -724,12 +729,16 @@ function isImageUrl(url: string) { return /\.(png|jpe?g|webp|gif)$/i.test(url) }
 
 function AnnouncementCard({ item, onClick }: { item: Announcement; onClick: (a: Announcement) => void }) {
   const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi
+  const hasPhoto = !!item.lampiran_url && isImageUrl(item.lampiran_url)
   return (
     <button type="button" className={styles.annCard} onClick={() => onClick(item)} aria-label={`Buka pengumuman: ${item.judul}`}>
-      <div className={styles.annThumb}>
-        {item.lampiran_url && isImageUrl(item.lampiran_url)
-          ? <Image src={item.lampiran_url} alt="" fill className={styles.annThumbImg} />
-          : <Image src="/icons/pengumuman.png" alt="Pengumuman" fill sizes="62px" className={styles.annThumbIcon} />
+      <div
+        className={`${styles.annThumb} ${!hasPhoto ? styles.annThumbTile : ''}`}
+        style={!hasPhoto ? ({ '--tile': '#FBCFE8' } as CSSProperties) : undefined}
+      >
+        {hasPhoto
+          ? <Image src={item.lampiran_url as string} alt="" fill sizes="46px" className={styles.annThumbImg} />
+          : <Image src="/icons/pengumuman.png" alt="Pengumuman" fill sizes="46px" className={styles.annThumbIcon} />
         }
       </div>
       <div className={styles.annBody}>
@@ -974,17 +983,28 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
       <div className={styles.pageBody}>
         <HeroBanner />
 
-        {/* Akses Cepat */}
+        {/* Akses Cepat — icon baru di dalam tile bundar berwarna */}
         <div className={styles.sectionWrap}>
           <div className={styles.sectionRow}>
             <p className={styles.sectionTitle}>{t('dashboard_quick_access')}</p>
             <Link href="/siswa/menu" className={styles.sectionLink}>{t('dashboard_see_all')}</Link>
           </div>
           <div className={styles.quickGrid}>
-            {QUICK_ITEMS.map(({ href, labelKey, subKey, icon }) => (
+            {QUICK_ITEMS.map(({ href, labelKey, subKey, icon, tint }) => (
               <Link key={labelKey} href={href} className={styles.quickCard}>
-                <div className={styles.quickIconWrap}>
-                  <Image src={icon} alt={t(labelKey)} width={52} height={52} className={styles.quickIconImage} />
+                <div
+                  className={styles.quickIconTile}
+                  style={{ '--tile': tint } as CSSProperties}
+                >
+                  <Image
+                    src={icon}
+                    alt={t(labelKey)}
+                    width={52}
+                    height={52}
+                    sizes="40px"
+                    draggable={false}
+                    className={styles.quickIconImage}
+                  />
                 </div>
                 <span className={styles.quickLabel}>{t(labelKey)}</span>
                 <span className={styles.quickSub}>{t(subKey)}</span>
@@ -1058,7 +1078,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
 
         <CtaBanner />
       </div>
-      
+
       {/* Announcement Modal */}
       {selectedAnn && (
         <AnnouncementModal item={selectedAnn} onClose={() => setSelectedAnn(null)} />

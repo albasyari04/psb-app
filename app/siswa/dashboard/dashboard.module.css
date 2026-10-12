@@ -23,7 +23,6 @@
 
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
- 
 }
 
 @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
@@ -284,7 +283,7 @@
   display: grid;
   /* FIX: minmax(0, 1fr) — tanpa ini, kolom grid akan "blowout" (melebar
      melebihi container) saat konten anak (icon/teks) tidak bisa menyusut,
-     sehingga kolom ke-6 (Formulir) terdorong keluar layar & terpotong. */
+     sehingga kolom ke-6 terdorong keluar layar & terpotong. */
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.3rem;
 }
@@ -298,28 +297,35 @@
   padding: 0.15rem;
   min-width: 0; /* FIX: izinkan item grid menyusut sesuai lebar kolom */
 }
-.quickIconWrap {
+
+/* Tile bundar berwarna terang pembungkus icon (warna dari variabel --tile
+   yang di-set inline per menu lewat JSX). Tanpa card putih di luarnya. */
+.quickIconTile {
   width: 100%;
-  max-width: 52px;
-  aspect-ratio: 1 / 1; /* FIX: dulu fixed 52px → memaksa lebar minimum kolom.
-                          Sekarang responsif, ikut menyusut di layar sempit. */
-  border-radius: 1.1rem;
-  background: #f1f3f5;
+  max-width: 48px;
+  aspect-ratio: 1 / 1; /* responsif, ikut menyusut di layar sempit */
+  transition: transform 0.15s;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #ffffff 0%, var(--tile, #ecfdf5) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 12px -8px rgba(16, 24, 40, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
-.quickIconInner {
-  width: 38px;
-  height: 38px;
-  border-radius: 0.7rem;
-  background: linear-gradient(135deg, var(--teal-1), var(--teal-2));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 0 3px 8px rgba(13, 107, 79, 0.28);
+
+.quickCard:hover .quickIconTile { transform: translateY(-2px); }
+
+.quickIconImage {
+  width: 62%;
+  height: 62%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  display: block;
 }
+
 .quickLabel {
   font-size: 0.66rem;
   font-weight: 700;
@@ -341,28 +347,16 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.quickIconImage {
-  width: 54%;
-  height: 54%;
-  max-width: 28px;
-  max-height: 28px;
-  object-fit: contain;
-  display: block;
-}
 
 /* ══════════════════════════════════════════════════════════════
    THREE COLUMN ROW — Jadwal / Pembayaran / Laporan
    ══════════════════════════════════════════════════════════════ */
 .threeColGrid {
   display: grid;
-  /* FIX: minmax(0, 1fr) — mencegah kolom melebar di luar container ketika
-     judul ("Laporan Terbaru") + link ("Lihat Semua") tidak cukup ruang,
-     yang sebelumnya mendorong kartu ke-3 (Laporan) terpotong di kanan. */
+  /* FIX: minmax(0, 1fr) — mencegah kolom melebar di luar container */
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
-  /* Padding horizontal SUDAH disediakan oleh .sectionWrap pembungkusnya —
-     dulu di sini juga ada padding:0 1.1rem sehingga dobel (total 2.2rem),
-     bikin 3 kolom makin sempit dan judul kepotong ("Paym...", "S. View..."). */
+  /* Padding horizontal SUDAH disediakan oleh .sectionWrap pembungkusnya */
   align-items: stretch;
 }
 .miniCard {
@@ -377,11 +371,7 @@
   overflow: hidden; /* FIX: jaring pengaman, klip konten yg masih kepanjangan */
 }
 
-/* ── Header: icon kotak warna + judul/​link bertumpuk ─────────────
-   Sebelumnya judul & link "Lihat Semua" sejajar di baris yang sama →
-   di kolom sempit judul kepotong ("Paym... See All"). Sekarang icon
-   di kiri, judul + link ditumpuk vertikal di kanannya (sesuai
-   ringkasan_aktivitas_desain.png). ────────────────────────────────── */
+/* ── Header: icon kotak warna + judul/link bertumpuk ───────────── */
 .miniCardHeader {
   display: flex;
   align-items: center;
@@ -389,19 +379,26 @@
   margin-bottom: 0.8rem;
   min-width: 0;
 }
-.miniCardIconWrap {
-  width: 32px;
-  height: 32px;
-  border-radius: 0.65rem;
+/* Tile bundar berwarna — sama persis dengan .quickIconTile di Akses Cepat */
+.miniCardIconTile {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 35% 25%, #ffffff 0%, var(--tile, #ecfdf5) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 12px -8px rgba(16, 24, 40, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  overflow: hidden;
 }
-.miniCardIconImg { width: 20px; height: 20px; object-fit: contain; }
-.miniCardIconJadwal     { background: #ede9fe; }
-.miniCardIconPembayaran { background: var(--green-lighter, #ecfdf5); }
-.miniCardIconLaporan    { background: #dbeafe; }
+.miniCardIconImg {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+  display: block;
+}
 
 .miniCardHeadText {
   display: flex;
@@ -429,7 +426,7 @@
   text-overflow: ellipsis;
 }
 
-/* ── Footer link bawah kartu (Lihat Kalender / Riwayat Pembayaran / Lihat Laporan) ── */
+/* ── Footer link bawah kartu ── */
 .miniCardFooter {
   display: flex;
   align-items: center;
@@ -469,8 +466,7 @@
 .timelineTime { font-size: 0.57rem; font-weight: 600; color: var(--gray-light); margin-top: 0.15rem; }
 .timelineLoc { font-size: 0.57rem; color: var(--gray-light); font-weight: 500; margin-top: 0.05rem; }
 .timelineEmpty { font-size: 0.62rem; color: var(--gray-light); font-weight: 500; padding: 0.5rem 0; }
-/* FIX: badge status jadwal (Akan Datang / Berlangsung / dst) — warnanya
-   dinamis sesuai kolom `warna` yang diisi admin saat membuat jadwal. */
+/* FIX: badge status jadwal — warnanya dinamis sesuai kolom `warna` */
 .jadwalStatusBadge {
   display: inline-flex;
   align-items: center;
@@ -616,8 +612,9 @@
   background: #211d33;
 }
 
-:global([data-theme='dark']) .quickIconWrap {
-  background: #1a1728;
+/* Akses Cepat: tile bundar tetap terang agar icon terbaca di dark mode */
+:global([data-theme='dark']) .quickIconTile {
+  box-shadow: none;
 }
 
 :global([data-theme='dark']) .miniCard {
@@ -643,9 +640,8 @@
   border-top-color: #2a2640;
 }
 
-:global([data-theme='dark']) .miniCardIconJadwal     { background: rgba(124, 58, 237, 0.18); }
-:global([data-theme='dark']) .miniCardIconPembayaran { background: rgba(22, 163, 74, 0.16); }
-:global([data-theme='dark']) .miniCardIconLaporan    { background: rgba(37, 99, 235, 0.18); }
+/* Tile bundar tetap terang di dark mode agar icon terbaca */
+:global([data-theme='dark']) .miniCardIconTile { box-shadow: none; }
 
 :global([data-theme='dark']) .miniCardFooter { border-top-color: #2a2640; }
 :global([data-theme='dark']) .miniCardFooterJadwal     { color: #a78bfa; }
@@ -662,9 +658,10 @@
 :global([data-theme='dark']) .annThumb {
   background: #1a1728;
 }
-/* Ikon megafon berwarna hitam → dibalik jadi putih agar terbaca di dark mode */
-:global([data-theme='dark']) .annThumbIcon {
-  filter: invert(1);
+/* Thumb ikon pengumuman memakai tile terang → tidak perlu invert di dark mode */
+:global([data-theme='dark']) .annThumbTile {
+  background: radial-gradient(circle at 35% 25%, #ffffff 0%, var(--tile, #fbcfe8) 100%);
+  box-shadow: none;
 }
 :global([data-theme='dark']) .pillInformasi  { background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
 :global([data-theme='dark']) .pillInfo       { background: rgba(22, 163, 74, 0.15); color: #4ade80; }
@@ -729,29 +726,30 @@
 :global([data-theme='dark']) .modalCloseBtn:hover {
   background: #211d33;
 }
+
 /* ══════════════════════════════════════════════════════════════
    PENGUMUMAN TERBARU
    ══════════════════════════════════════════════════════════════ */
-.announcementList { display: flex; flex-direction: column; gap: 0.6rem; }
+.announcementList { display: flex; flex-direction: column; gap: 0.5rem; }
 .annCard {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.6rem;
   width: 100%;
   text-align: left;
   cursor: pointer;
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 1.1rem;
-  padding: 0.85rem;
+  border-radius: 1rem;
+  padding: 0.6rem 0.7rem;
   font-family: inherit;
   transition: transform 0.18s, box-shadow 0.18s;
 }
 .annCard:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08); }
 .annThumb {
   position: relative;
-  width: 62px;
-  height: 62px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -759,21 +757,27 @@
   box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 .annThumbImg { object-fit: cover; }
+/* Thumb ikon pengumuman: tile bundar berwarna — sama dengan Akses Cepat */
+.annThumbTile {
+  background: radial-gradient(circle at 35% 25%, #ffffff 0%, var(--tile, #fbcfe8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 12px -8px rgba(16, 24, 40, 0.3);
+}
 /* Ikon pengumuman (megafon): tampil utuh di tengah lingkaran */
 .annThumbIcon {
   object-fit: contain;
-  padding: 0.8rem;
+  padding: 19%;
   box-sizing: border-box;
 }
 .annThumbFallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--teal-1); }
-.annBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.3rem; }
-.annTopRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; }
-.annTitle { font-size: 0.84rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
-.annDate { font-size: 0.62rem; color: var(--gray-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; margin-top: 0.1rem; }
+.annBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.annTopRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.annTitle { font-size: 0.76rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.annDate { font-size: 0.56rem; color: var(--gray-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; margin-top: 0.1rem; }
 .annPreview {
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   color: var(--gray);
-  line-height: 1.5;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -784,9 +788,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.6rem;
+  font-size: 0.54rem;
   font-weight: 700;
-  padding: 0.16rem 0.55rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
   width: fit-content;
 }
@@ -813,8 +817,7 @@
 .annEmptyText { font-size: 0.82rem; font-weight: 600; color: var(--gray-light); }
 
 /* ══════════════════════════════════════════════════════════════
-   PERATURAN — kartu horizontal-scroll (gambar besar di atas, ala
-   kartu produk pada aplikasi mobile/TikTok)
+   PERATURAN — kartu horizontal-scroll
    ══════════════════════════════════════════════════════════════ */
 .peraturanScroll {
   display: flex;
@@ -1105,12 +1108,12 @@
   font-family: inherit;
 }
 .modalCloseBtn:hover { background: #f1f5f9; }
+
 /* ================================================================
-   TAMBAHKAN KE dashboard.module.css
-   Bagian: Notification Bell — sesuai pop-up-notifikasi-desain.png
+   NOTIFICATION BELL — sesuai pop-up-notifikasi-desain.png
    ================================================================ */
 
-/* ── Wrapper posisi relative agar dropdown bisa absolute ───────── */
+/* ── Wrapper posisi relative ───────────────────────────────────── */
 .notifWrap {
   position: relative;
 }
@@ -1139,7 +1142,6 @@
   to   { transform: scale(1);   opacity: 1; }
 }
 
-/* ── Dropdown panel ───────────────────────────────────────────── */
 /* ── Backdrop overlay fixed (menutupi seluruh layar, panel di tengah) ── */
 .notifBackdrop {
   position       : fixed;
@@ -1151,7 +1153,7 @@
   align-items    : center;
   justify-content: center;
   padding        : 1.25rem;
-  animation       : notifBackdropIn 0.18s ease both;
+  animation      : notifBackdropIn 0.18s ease both;
 }
 @keyframes notifBackdropIn {
   from { opacity: 0; }
@@ -1206,9 +1208,9 @@
   color        : var(--green);
 }
 .notifPanelIconDot {
-  position     : absolute;
-  top          : 2px;
-  right        : 2px;
+  position      : absolute;
+  top           : 2px;
+  right         : 2px;
   width         : 9px;
   height        : 9px;
   border-radius : 50%;
@@ -1464,7 +1466,7 @@
   flex-shrink: 0;
 }
 
-/* ── Dark mode ─────────────────────────────────────────────────── */
+/* ── Dark mode (notifikasi) ───────────────────────────────────── */
 :global([data-theme='dark']) .notifPanel {
   background: #18162a;
   border-color: var(--border);
