@@ -106,12 +106,15 @@ const HERO_SLIDES = [
   },
 ] as const
 
+// Icon Pembayaran: tagihan.png (hitam, dijadikan putih lewat CSS .iconToWhite)
+const PAY_ICON = '/icons/tagihan.png'
+
 // Akses Cepat: icon baru (public/icons/*-santri.png) + warna tile bundar per menu.
 // Pengumuman belum punya icon baru → tetap memakai icon lama.
 const QUICK_ITEMS = [
   { href: '/siswa/jadwal',     labelKey: 'menu_jadwal',     subKey: 'menu_jadwal_sub',     icon: '/icons/jadwal-icon-santri.png', tint: '#DBEAFE' },
   { href: '/siswa/berkas',     labelKey: 'menu_berkas',     subKey: 'menu_berkas_sub',     icon: '/icons/berkas-icon-santri.png', tint: '#BFDBFE' },
-  { href: '/siswa/pembayaran', labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: '/icons/bayar-icon-santri.png',  tint: '#A7F3D0' },
+  { href: '/siswa/pembayaran', labelKey: 'menu_pembayaran', subKey: 'menu_pembayaran_sub', icon: PAY_ICON,                 tint: '#A7F3D0' },
   { href: '/siswa/laporan',    labelKey: 'menu_laporan',    subKey: 'menu_laporan_sub',    icon: '/icons/laporan-santri.png',     tint: '#FDE68A' },
   { href: '/siswa/pengumuman', labelKey: 'menu_pengumuman', subKey: 'menu_pengumuman_sub', icon: '/icons/pengumuman.png',         tint: '#FBCFE8' },
   { href: '/siswa/chat',       labelKey: 'menu_chat',       subKey: 'menu_chat_sub',       icon: '/icons/chat-icon-santri.png',   tint: '#DDD6FE' },
@@ -560,7 +563,7 @@ function HeroBanner() {
 function MiniIcon({ src, tint }: { src: string; tint: string }) {
   return (
     <div className={styles.miniCardIconTile} style={{ '--tile': tint } as CSSProperties}>
-      <Image src={src} alt="" width={52} height={52} sizes="24px" draggable={false} className={styles.miniCardIconImg} />
+      <Image src={src} alt="" width={52} height={52} sizes="24px" draggable={false} className={`${styles.miniCardIconImg} ${src === PAY_ICON ? styles.iconToWhite : ''}`} />
     </div>
   )
 }
@@ -626,7 +629,7 @@ function PembayaranCard({ data, loading }: { data: PembayaranData; loading: bool
   return (
     <div className={styles.miniCard}>
       <div className={styles.miniCardHeader}>
-        <MiniIcon src="/icons/bayar-icon-santri.png" tint="#A7F3D0" />
+        <MiniIcon src={PAY_ICON} tint="#A7F3D0" />
         <div className={styles.miniCardHeadText}>
           <p className={styles.miniCardTitle}>{t('dashboard_payment_title')}</p>
           <Link href="/siswa/pembayaran" className={styles.miniCardLink}>{t('dashboard_payment_link')}</Link>
@@ -991,7 +994,7 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
                     height={52}
                     sizes="40px"
                     draggable={false}
-                    className={styles.quickIconImage}
+                    className={`${styles.quickIconImage} ${icon === PAY_ICON ? styles.iconToWhite : ''}`}
                   />
                 </div>
                 <span className={styles.quickLabel}>{t(labelKey)}</span>
