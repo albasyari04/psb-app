@@ -826,18 +826,6 @@ function PeraturanCard({ item }: { item: PeraturanItem }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   CTA BANNER
-   ════════════════════════════════════════════════════════════════ */
-function CtaBanner() {
-  return (
-    <div className={styles.bannerKataWrap}>
-      <Image src="/icons/kata-banner.png" alt="Banner Motivasi Santri" width={1200} height={350}
-        className={styles.bannerKataImage} priority />
-    </div>
-  )
-}
-
-/* ════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════ */
 export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: Props) {
@@ -1075,8 +1063,6 @@ export default function DashboardClient({ fullName, avatarInitial, avatarUrl }: 
             </div>
           )}
         </div>
-
-        <CtaBanner />
       </div>
 
       {/* Announcement Modal */}
