@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
@@ -25,98 +26,228 @@ interface Toast {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Icons (inline SVG components) dengan dukungan dark mode
+// Theme — palet disamakan dengan Beranda (dashboard.module.css)
 // ─────────────────────────────────────────────────────────────────────────────
-const IconCamera = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-      stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="13" r="4" stroke="white" strokeWidth="1.8" />
+const getTheme = (isDark: boolean) => ({
+  isDark,
+  bg: isDark ? '#0D0D16' : '#F6F8FA',
+  surface: isDark ? '#15131F' : '#FFFFFF',
+  surfaceAlt: isDark ? '#1A1728' : '#FFFFFF',
+  field: isDark ? '#211D33' : '#F3F5F7',
+  border: isDark ? '#2A2640' : '#E9EEF2',
+  divider: isDark ? '#2A2640' : '#F1F5F9',
+  ink: isDark ? '#F1F0F5' : '#0F172A',
+  slate: isDark ? '#C9C5D8' : '#475569',
+  gray: isDark ? '#9892AF' : '#64748B',
+  grayLight: isDark ? '#6B6680' : '#94A3B8',
+  green: isDark ? '#4ADE80' : '#16A34A',
+  greenSoft: isDark ? 'rgba(22,163,74,0.20)' : '#ECFDF5',
+  greenText: isDark ? '#4ADE80' : '#15803D',
+  danger: isDark ? '#F87171' : '#DC2626',
+  dangerSoft: isDark ? 'rgba(220,38,38,0.12)' : '#FEF2F2',
+  dangerBorder: isDark ? 'rgba(248,113,113,0.28)' : '#FECACA',
+  shadow: isDark ? '0 4px 16px rgba(0,0,0,0.35)' : '0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.06)',
+  heroGradient: 'linear-gradient(120deg, #0e7c5f 0%, #0a5c46 55%, #073d2f 100%)',
+  tileBg: 'radial-gradient(circle at 32% 24%, #4b8a76 0%, #235347 52%, #153d32 100%)',
+  tileShadow: 'inset 0 1.5px 1.5px rgba(255,255,255,0.30), inset 0 -3px 4px rgba(0,0,0,0.30), 0 3px 8px rgba(18,48,42,0.28)',
+  toastSuccess: isDark ? '#065f46' : '#16A34A',
+  toastError: isDark ? '#7f1d1d' : '#DC2626',
+})
+type Theme = ReturnType<typeof getTheme>
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Icons — satu keluarga (stroke 1.8, rounded) agar tampil konsisten
+// ─────────────────────────────────────────────────────────────────────────────
+interface SvgProps {
+  size?: number
+  color?: string
+  stroke?: number
+  children: ReactNode
+}
+const Svg = ({ size = 20, color = 'currentColor', stroke = 1.8, children }: SvgProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={stroke}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    {children}
   </svg>
 )
 
-const IconShield = ({ color = '#16A34A' }: { color?: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
-    <path d="M9 12l2 2 4-4" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+interface IconProps {
+  size?: number
+  color?: string
+  stroke?: number
+}
+
+const IconCamera = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M14.5 4h-5L7.5 6.5H5a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2h-2.5L14.5 4z" />
+    <circle cx="12" cy="13" r="3.5" />
+  </Svg>
+)
+const IconUser = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20.5c0-3.6 3.6-6 8-6s8 2.4 8 6" />
+  </Svg>
+)
+const IconMail = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="3" />
+    <path d="M3.5 7.5 12 13l8.5-5.5" />
+  </Svg>
+)
+const IconShieldCheck = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3z" />
+    <path d="m9 12 2.2 2.2L15.2 10" />
+  </Svg>
+)
+const IconIdCard = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="3" />
+    <circle cx="9" cy="11" r="2" />
+    <path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M14.5 10h3.5M14.5 13.5H18" />
+  </Svg>
+)
+const IconHome = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m3 10.5 9-7 9 7V19a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2v-8.5z" />
+  </Svg>
+)
+const IconClipboard = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="5" y="4" width="14" height="17" rx="2.5" />
+    <path d="M9 4.5V3.8A.8.8 0 0 1 9.8 3h4.4a.8.8 0 0 1 .8.8v.7a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5z" />
+    <path d="M9 11h6M9 15h4" />
+  </Svg>
+)
+const IconCard = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="2.5" y="5" width="19" height="14" rx="3" />
+    <path d="M2.5 10h19M6.5 15h3" />
+  </Svg>
+)
+const IconBarChart = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M5 20v-7M12 20V5M19 20v-10" />
+  </Svg>
+)
+const IconPencil = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z" />
+    <path d="m13.5 6.5 4 4" />
+  </Svg>
+)
+const IconChevronRight = (p: IconProps) => (
+  <Svg {...p} stroke={p.stroke ?? 2}>
+    <path d="m9 6 6 6-6 6" />
+  </Svg>
+)
+const IconLogout = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3" />
+    <path d="m16 17 5-5-5-5M21 12H9" />
+  </Svg>
+)
+const IconImage = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3.5" width="18" height="17" rx="3" />
+    <circle cx="8.5" cy="9" r="1.6" />
+    <path d="m21 16-4.5-4.5L7 20.5" />
+  </Svg>
 )
 
-const IconUser = ({ color = '#16A34A' }: { color?: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="1.8" />
-  </svg>
+// ─────────────────────────────────────────────────────────────────────────────
+// Small reusable pieces
+// ─────────────────────────────────────────────────────────────────────────────
+const IconTile = ({ c, size = 40, children }: { c: Theme; size?: number; children: ReactNode }) => (
+  <div
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size >= 40 ? 13 : 11,
+      background: c.tileBg,
+      boxShadow: c.tileShadow,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      color: '#FFFFFF',
+    }}
+  >
+    {children}
+  </div>
 )
 
-const IconMail = ({ color = '#16A34A' }: { color?: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="1.8" />
-    <path d="M2 8l10 6 10-6" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
+const Pill = ({ c, children, icon }: { c: Theme; children: ReactNode; icon?: ReactNode }) => (
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      fontSize: 11.5,
+      fontWeight: 700,
+      lineHeight: 1,
+      padding: '6px 10px',
+      borderRadius: 999,
+      background: c.greenSoft,
+      color: c.greenText,
+      whiteSpace: 'nowrap',
+    }}
+  >
+    {icon}
+    {children}
+  </span>
 )
 
-const IconRole = ({ color = '#16A34A' }: { color?: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
-  </svg>
-)
-
-const IconHome = ({ active, color = '#94A3B8', activeColor = '#16A34A' }: { active?: boolean; color?: string; activeColor?: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinejoin="round" />
-    <path d="M9 22V12h6v10" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
-
-const IconClipboard = ({ active, color = '#94A3B8', activeColor = '#16A34A' }: { active?: boolean; color?: string; activeColor?: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="8" y="2" width="8" height="4" rx="1" stroke={active ? activeColor : color} strokeWidth="1.8" />
-    <path d="M5 4h-1a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1" stroke={active ? activeColor : color} strokeWidth="1.8" />
-    <path d="M9 12h6M9 16h4" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-)
-
-const IconCard = ({ active, color = '#94A3B8', activeColor = '#16A34A' }: { active?: boolean; color?: string; activeColor?: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="5" width="20" height="14" rx="2" stroke={active ? activeColor : color} strokeWidth="1.8" />
-    <path d="M2 10h20" stroke={active ? activeColor : color} strokeWidth="1.8" />
-    <path d="M6 15h4" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-)
-
-const IconBarChart = ({ active, color = '#94A3B8', activeColor = '#16A34A' }: { active?: boolean; color?: string; activeColor?: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M18 20V10M12 20V4M6 20v-6" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-)
-
-const IconProfileNav = ({ active, color = '#94A3B8', activeColor = '#16A34A' }: { active?: boolean; color?: string; activeColor?: string }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="8" r="4" stroke={active ? activeColor : color} strokeWidth="1.8" />
-    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke={active ? activeColor : color} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-)
-
-const IconChevronRight = ({ color = '#CBD5E1' }: { color?: string }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M9 18l6-6-6-6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
-
-const IconLogout = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="#EF4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M16 17l5-5-5-5" stroke="#EF4444" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M21 12H9" stroke="#EF4444" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-)
-
-const IconEdit = ({ color = '#16A34A' }: { color?: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+interface FieldProps {
+  c: Theme
+  label: string
+  value: string
+  icon: ReactNode
+  trailing?: ReactNode
+}
+const InfoField = ({ c, label, value, icon, trailing }: FieldProps) => (
+  <div style={{ marginBottom: 16 }}>
+    <div style={{ fontSize: 13, fontWeight: 700, color: c.ink, marginBottom: 8 }}>{label}</div>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        minHeight: 52,
+        padding: '0 14px',
+        borderRadius: 14,
+        background: c.field,
+      }}
+    >
+      <span style={{ display: 'flex', color: c.green, flexShrink: 0 }}>{icon}</span>
+      <span
+        style={{
+          flex: 1,
+          minWidth: 0,
+          fontSize: 14.5,
+          fontWeight: 600,
+          color: c.ink,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {value || '–'}
+      </span>
+      {trailing}
+    </div>
+  </div>
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,16 +255,19 @@ const IconEdit = ({ color = '#16A34A' }: { color?: string }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter()
-  const { status } = useSession()
+  const { status, update: updateSession } = useSession()
   const { theme, language } = useSettings()
   const isDark = theme === 'dark'
   const isEn = language === 'en'
+  const c = getTheme(isDark)
+  const s = makeStyles(c)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [loading, setLoading] = useState(true)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   const [profile, setProfile] = useState<ProfileData>({
     name: '',
@@ -153,6 +287,13 @@ export default function ProfilePage() {
     return () => clearTimeout(t)
   }, [toast])
 
+  // ── Bersihkan object URL preview agar tidak bocor memori ────────────────
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview)
+    }
+  }, [avatarPreview])
+
   // ── Fetch profil ────────────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
     try {
@@ -163,15 +304,15 @@ export default function ProfilePage() {
       setProfile({
         name: data.profile.name ?? '',
         email: data.profile.email ?? '',
-        role: data.profile.role ?? (isEn ? 'Student' : 'Siswa'),
+        role: data.profile.role ?? 'Siswa',
         avatar_url: data.profile.avatar_url ?? null,
         is_verified: data.profile.is_verified ?? true,
-        status: data.profile.status ?? (isEn ? 'Active' : 'Aktif'),
+        status: data.profile.status ?? 'Aktif',
       })
     } catch (err) {
       setToast({
         type: 'error',
-        message: err instanceof Error ? err.message : (isEn ? 'Failed to load profile data' : 'Gagal memuat data profil'),
+        message: err instanceof Error ? err.message : isEn ? 'Failed to load profile data' : 'Gagal memuat data profil',
       })
     } finally {
       setLoading(false)
@@ -186,17 +327,19 @@ export default function ProfilePage() {
   // ── Upload foto ─────────────────────────────────────────────────────────
   const handlePickPhoto = () => fileInputRef.current?.click()
 
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) {
       setToast({ type: 'error', message: isEn ? 'Photo format must be JPG, PNG, or WebP' : 'Format foto harus JPG, PNG, atau WebP' })
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
     if (file.size > 2 * 1024 * 1024) {
       setToast({ type: 'error', message: isEn ? 'Maximum photo size is 2 MB' : 'Ukuran foto maksimal 2 MB' })
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
@@ -211,8 +354,12 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error(data.error || (isEn ? 'Failed to upload photo' : 'Gagal mengunggah foto'))
       setProfile((prev) => ({ ...prev, avatar_url: data.avatar_url }))
       setToast({ type: 'success', message: isEn ? 'Profile photo updated successfully' : 'Foto profil berhasil diperbarui' })
+      await updateSession?.({ avatar_url: data.avatar_url })
     } catch (err) {
-      setToast({ type: 'error', message: err instanceof Error ? err.message : (isEn ? 'Failed to upload photo' : 'Gagal mengunggah foto') })
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : isEn ? 'Failed to upload photo' : 'Gagal mengunggah foto',
+      })
       setAvatarPreview(null)
     } finally {
       setUploadingPhoto(false)
@@ -223,97 +370,73 @@ export default function ProfilePage() {
   // ── Helpers ─────────────────────────────────────────────────────────────
   const displayedAvatar = avatarPreview || profile.avatar_url
 
-  const initials = (profile.name || profile.email || 'S')
-    .trim()
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join('') || 'S'
+  const initials =
+    (profile.name || profile.email || 'S')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join('') || 'S'
+
+  const isActive = profile.status === 'Aktif' || profile.status === 'Active'
+  const roleLabel = !profile.role || profile.role === 'Siswa' ? (isEn ? 'Student' : 'Siswa') : profile.role
 
   const handleLogout = async () => {
+    if (loggingOut) return
+    setLoggingOut(true)
     await signOut({ callbackUrl: '/login' })
   }
 
-  // ── Menu items with i18n ──────────────────────────────────────────────────────────
+  // ── Menu & nav ──────────────────────────────────────────────────────────
   const menuItems = [
     {
-      icon: <IconHome color={isDark ? '#6b6885' : '#94A3B8'} />,
+      icon: <IconHome size={20} color="#FFFFFF" />,
       label: isEn ? 'Home' : 'Beranda',
       desc: isEn ? 'Back to main dashboard' : 'Kembali ke dashboard utama',
       href: '/siswa',
     },
     {
-      icon: <IconClipboard color={isDark ? '#6b6885' : '#94A3B8'} />,
+      icon: <IconClipboard size={20} color="#FFFFFF" />,
       label: isEn ? 'Registration Form' : 'Formulir Pendaftaran',
       desc: isEn ? 'Fill or complete registration data' : 'Isi atau lengkapi data pendaftaran',
       href: '/siswa/pendaftaran',
     },
     {
-      icon: <IconBarChart color={isDark ? '#6b6885' : '#94A3B8'} />,
+      icon: <IconBarChart size={20} color="#FFFFFF" />,
       label: isEn ? 'Registration Status' : 'Status Pendaftaran',
       desc: isEn ? 'Track selection process progress' : 'Pantau progres proses seleksi',
       href: '/siswa/status',
     },
     {
-      icon: <IconEdit color={isDark ? '#6b6885' : '#16A34A'} />,
+      icon: <IconPencil size={20} color="#FFFFFF" />,
       label: isEn ? 'Edit Profile' : 'Edit Profil',
       desc: isEn ? 'Change name and account information' : 'Ubah nama dan informasi akun',
       href: '/siswa/profile/edit',
     },
   ]
 
-  // ── Nav items with i18n ──────────────────────────────────────────────────────────
   const navItems = [
-    { icon: <IconHome color={isDark ? '#6b6885' : '#94A3B8'} activeColor={isDark ? '#a5b4fc' : '#16A34A'} />, label: isEn ? 'Home' : 'Beranda', href: '/siswa' },
-    { icon: <IconClipboard color={isDark ? '#6b6885' : '#94A3B8'} activeColor={isDark ? '#a5b4fc' : '#16A34A'} />, label: isEn ? 'Register' : 'Daftar', href: '/siswa/pendaftaran' },
-    { icon: <IconCard color={isDark ? '#6b6885' : '#94A3B8'} activeColor={isDark ? '#a5b4fc' : '#16A34A'} />, label: isEn ? 'Pay' : 'Bayar', href: '/siswa/pembayaran' },
-    { icon: <IconBarChart color={isDark ? '#6b6885' : '#94A3B8'} activeColor={isDark ? '#a5b4fc' : '#16A34A'} />, label: isEn ? 'Status' : 'Status', href: '/siswa/status' },
-    { icon: <IconProfileNav active color={isDark ? '#6b6885' : '#94A3B8'} activeColor={isDark ? '#a5b4fc' : '#16A34A'} />, label: isEn ? 'Profile' : 'Profil', href: '/siswa/profile', active: true },
+    { Icon: IconHome, label: isEn ? 'Home' : 'Beranda', href: '/siswa' },
+    { Icon: IconClipboard, label: isEn ? 'Register' : 'Daftar', href: '/siswa/pendaftaran' },
+    { Icon: IconCard, label: isEn ? 'Pay' : 'Bayar', href: '/siswa/pembayaran' },
+    { Icon: IconBarChart, label: 'Status', href: '/siswa/status' },
+    { Icon: IconUser, label: isEn ? 'Profile' : 'Profil', href: '/siswa/profile', active: true },
   ]
 
-  // ── Dark mode colors ──────────────────────────────────────────────────────
-  const pageBg = isDark ? '#15131f' : '#F0FDF4'
-  const cardBg = isDark ? '#1e1b2e' : '#FFFFFF'
-  const cardBorder = isDark ? '1px solid #2e2a40' : 'none'
-  const textColor = isDark ? '#f1f0f5' : '#0F172A'
-  const mutedColor = isDark ? '#94a3b8' : '#94A3B8'
-  const subColor = isDark ? '#94a3b8' : '#94A3B8'
-  const iconBg = isDark ? '#2e2a40' : '#F0FDF4'
-  const iconColor = isDark ? '#a5b4fc' : '#16A34A'
-  const dividerColor = isDark ? '#2e2a40' : '#F1F5F9'
-  const navBg = isDark ? '#1e1b2e' : '#FFFFFF'
-  const navBorder = isDark ? '1px solid #2e2a40' : '1px solid #E2E8F0'
-  const navColor = isDark ? '#6b6885' : '#94A3B8'
-  const navActiveColor = isDark ? '#a5b4fc' : '#16A34A'
-  const heroGradient = isDark 
-    ? 'linear-gradient(150deg, #0a2e1a 0%, #0a4a2a 60%, #0a5a3a 100%)' 
-    : 'linear-gradient(150deg, #14532D 0%, #16A34A 60%, #22C55E 100%)'
-  const heroCardBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)'
-  const heroCardBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.22)'
-  const editBtnBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)'
-  const editBtnBorder = isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.3)'
-  const veriBadgeBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)'
-  const veriBadgeBorder = isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.25)'
-  const veriValueColor = isDark ? '#6ee7b7' : '#86EFAC'
-  const toastSuccessBg = isDark ? '#065f46' : '#16A34A'
-  const toastErrorBg = isDark ? '#7f1d1d' : '#DC2626'
-  const logoutBg = isDark ? '#2e1a1a' : '#FFF5F5'
-  const logoutBorder = isDark ? '1.5px solid #4a1a1a' : '1.5px solid #FECACA'
-  const badgeBg = isDark ? '#1a2e1a' : '#DCFCE7'
-  const badgeColor = isDark ? '#34d399' : '#16A34A'
-
-  // ── Loading ──────────────────────────────────────────────────────────────
+  // ── Loading ─────────────────────────────────────────────────────────────
   if (loading) {
-    const spinnerColor = isDark ? '#2e2a40' : '#DCFCE7'
-    const spinnerTopColor = isDark ? '#a5b4fc' : '#16A34A'
     return (
-      <div style={{ ...s.page, background: pageBg }}>
+      <div style={{ ...s.page, background: c.bg }}>
         <div style={s.loadingWrap}>
-          <div style={{ ...s.spinner, border: `3px solid ${spinnerColor}`, borderTopColor: spinnerTopColor }} />
-          <p style={{ ...s.loadingText, color: mutedColor }}>
-            {isEn ? 'Loading profile...' : 'Memuat profil…'}
-          </p>
+          <div
+            style={{
+              ...s.spinner,
+              border: `3px solid ${isDark ? '#2A2640' : '#DCFCE7'}`,
+              borderTopColor: c.green,
+            }}
+          />
+          <p style={{ ...s.loadingText, color: c.gray }}>{isEn ? 'Loading profile…' : 'Memuat profil…'}</p>
         </div>
         <style>{globalCss}</style>
       </div>
@@ -321,234 +444,182 @@ export default function ProfilePage() {
   }
 
   return (
-    <div style={{ ...s.page, background: pageBg }}>
-
+    <div style={{ ...s.page, background: c.bg }}>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <div style={{ ...s.hero, background: heroGradient }}>
-        <div style={s.heroOverlay} />
-
-        {/* Header row */}
+      <div style={s.hero}>
         <div style={s.heroHeader}>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h1 style={s.heroTitle}>{isEn ? 'My Profile' : 'Profil Saya'}</h1>
             <p style={s.heroSub}>{isEn ? 'Manage your account information' : 'Kelola informasi akun Anda'}</p>
           </div>
           <button
             onClick={() => router.push('/siswa/profile/edit')}
-            style={{ ...s.editBtn, background: editBtnBg, border: editBtnBorder }}
+            style={s.editBtn}
             type="button"
             aria-label={isEn ? 'Edit Profile' : 'Edit Profil'}
+            className="tap"
           >
-            <IconEdit color="#FFFFFF" />
-            <span style={s.editBtnText}>{isEn ? 'Edit Profile' : 'Edit Profil'}</span>
+            <IconPencil size={16} color="#FFFFFF" />
+            <span style={s.editBtnText}>{isEn ? 'Edit' : 'Edit Profil'}</span>
           </button>
         </div>
+      </div>
 
-        {/* Profile card inside hero */}
-        <div style={{ ...s.heroCard, background: heroCardBg, border: heroCardBorder }}>
-          {/* Avatar */}
-          <div style={s.avatarWrap}>
-            <div style={s.avatarRing}>
-              <div style={s.avatarInner}>
-                {displayedAvatar ? (
-                  <Image
-                    src={displayedAvatar}
-                    alt={isEn ? 'Profile photo' : 'Foto profil'}
-                    width={80}
-                    height={80}
-                    style={s.avatarImg}
-                  />
-                ) : (
-                  <span style={s.avatarInitials}>{initials}</span>
-                )}
-                {uploadingPhoto && (
-                  <div style={s.uploadOverlay}>
-                    <div style={s.avatarSpinner} />
-                  </div>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={handlePickPhoto}
-              style={s.cameraBtn}
-              type="button"
-              aria-label={isEn ? 'Change photo' : 'Ganti foto'}
-              disabled={uploadingPhoto}
-            >
-              <IconCamera />
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              onChange={handlePhotoChange}
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          {/* Name & Email */}
-          <div style={s.heroCardInfo}>
-            <h2 style={s.heroName}>{profile.name || '–'}</h2>
-            <div style={s.heroBadgeRow}>
-              {profile.status && (profile.status === 'Aktif' || profile.status === 'Active') && (
-                <span style={{ ...s.badgeActive, background: badgeBg, color: badgeColor }}>
-                  {isEn ? 'Active' : 'Aktif'}
-                </span>
+      {/* ── PROFILE CARD (overlap hero) ──────────────────────────────────── */}
+      <div style={s.profileCard}>
+        <div style={s.avatarWrap}>
+          <div style={s.avatarRing}>
+            <div style={s.avatarInner}>
+              {displayedAvatar ? (
+                <Image
+                  src={displayedAvatar}
+                  alt={isEn ? 'Profile photo' : 'Foto profil'}
+                  width={96}
+                  height={96}
+                  style={s.avatarImg}
+                  unoptimized={displayedAvatar.startsWith('blob:') || displayedAvatar.startsWith('data:')}
+                />
+              ) : (
+                <span style={s.avatarInitials}>{initials}</span>
+              )}
+              {uploadingPhoto && (
+                <div style={s.uploadOverlay}>
+                  <div style={s.avatarSpinner} />
+                </div>
               )}
             </div>
-            <p style={s.heroEmail}>{profile.email}</p>
           </div>
+          <button
+            onClick={handlePickPhoto}
+            style={s.cameraBtn}
+            type="button"
+            aria-label={isEn ? 'Change photo' : 'Ganti foto'}
+            disabled={uploadingPhoto}
+            className="tap"
+          >
+            <IconCamera size={14} color="#FFFFFF" stroke={2} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handlePhotoChange}
+            style={{ display: 'none' }}
+          />
+        </div>
 
-          {/* Verification badge */}
+        <h2 style={s.profileName}>{profile.name || '–'}</h2>
+        <p style={s.profileEmail}>{profile.email}</p>
+
+        <div style={s.pillRow}>
+          {isActive && (
+            <Pill c={c} icon={<span style={s.dot} />}>
+              {isEn ? 'Active' : 'Aktif'}
+            </Pill>
+          )}
           {profile.is_verified && (
-            <div style={{ ...s.veriBadge, background: veriBadgeBg, border: veriBadgeBorder }}>
-              <IconShield color={isDark ? '#34d399' : '#16A34A'} />
-              <div>
-                <div style={s.veriLabel}>{isEn ? 'Verification' : 'Verifikasi'}</div>
-                <div style={{ ...s.veriValue, color: veriValueColor }}>
-                  {isEn ? 'Verified' : 'Terverifikasi'}
-                </div>
-              </div>
-            </div>
+            <Pill c={c} icon={<IconShieldCheck size={13} color={c.greenText} stroke={2.2} />}>
+              {isEn ? 'Verified' : 'Terverifikasi'}
+            </Pill>
           )}
         </div>
       </div>
 
-      {/* ── BODY ──────────────────────────────────────────────────────────── */}
+      {/* ── BODY ─────────────────────────────────────────────────────────── */}
       <div style={s.body}>
-
-        {/* Foto Profil row */}
-        <div style={{ ...s.rowCard, background: cardBg, border: cardBorder }}>
-          <div style={{ ...s.rowIconWrap, background: iconBg }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
-                stroke={iconColor} strokeWidth="1.8" strokeLinejoin="round" />
-              <circle cx="12" cy="13" r="4" stroke={iconColor} strokeWidth="1.8" />
-            </svg>
-          </div>
+        {/* Foto profil */}
+        <button type="button" onClick={handlePickPhoto} disabled={uploadingPhoto} style={s.photoRow} className="tap">
+          <IconTile c={c} size={44}>
+            <IconImage size={21} color="#FFFFFF" />
+          </IconTile>
           <div style={s.rowBody}>
-            <span style={{ ...s.rowLabel, color: textColor }}>
-              {isEn ? 'Profile Photo' : 'Foto Profil'}
+            <span style={{ ...s.rowLabel, color: c.ink }}>{isEn ? 'Profile Photo' : 'Foto Profil'}</span>
+            <span style={{ ...s.rowDesc, color: c.gray }}>
+              {isEn ? 'Tap to choose a new photo' : 'Ketuk untuk memilih foto baru'}
             </span>
-            <span style={{ ...s.rowDesc, color: mutedColor }}>
-              {isEn ? 'Tap the camera icon on the avatar to change photo.' : 'Ketuk ikon kamera di avatar untuk mengganti foto.'}
-            </span>
-            <span style={{ ...s.rowDesc, color: mutedColor }}>
+            <span style={{ ...s.rowDesc, color: c.grayLight }}>
               {isEn ? 'Max 2 MB · JPG, PNG, WebP' : 'Maks. 2 MB · JPG, PNG, WebP'}
             </span>
           </div>
-          <IconChevronRight color={isDark ? '#6b6885' : '#CBD5E1'} />
+          <IconChevronRight size={16} color={c.grayLight} />
+        </button>
+
+        {/* Informasi akun */}
+        <p style={{ ...s.sectionTitle, color: c.green }}>{isEn ? 'ACCOUNT INFORMATION' : 'INFORMASI AKUN'}</p>
+        <div style={s.fieldsCard}>
+          <InfoField
+            c={c}
+            label={isEn ? 'Full Name' : 'Nama Lengkap'}
+            value={profile.name}
+            icon={<IconUser size={19} />}
+          />
+          <InfoField c={c} label="Email" value={profile.email} icon={<IconMail size={19} />} />
+          <InfoField
+            c={c}
+            label={isEn ? 'Account Role' : 'Role Akun'}
+            value={roleLabel}
+            icon={<IconIdCard size={19} />}
+            trailing={isActive ? <Pill c={c}>{isEn ? 'Active' : 'Aktif'}</Pill> : undefined}
+          />
         </div>
 
-        {/* INFORMASI AKUN */}
-        <p style={{ ...s.sectionTitle, color: iconColor }}>
-          {isEn ? 'ACCOUNT INFORMATION' : 'INFORMASI AKUN'}
-        </p>
-        <div style={{ ...s.groupCard, background: cardBg, border: cardBorder }}>
-          {/* Nama */}
-          <div style={{ ...s.infoRow, borderBottom: `1px solid ${dividerColor}` }}>
-            <div style={{ ...s.infoIconWrap, background: iconBg }}>
-              <IconUser color={iconColor} />
-            </div>
-            <div style={s.infoBody}>
-              <span style={{ ...s.infoFieldLabel, color: mutedColor }}>
-                {isEn ? 'Full Name' : 'Nama Lengkap'}
-              </span>
-              <span style={{ ...s.infoFieldValue, color: textColor }}>
-                {profile.name || '–'}
-              </span>
-            </div>
-            <IconChevronRight color={isDark ? '#6b6885' : '#CBD5E1'} />
-          </div>
-          {/* Email */}
-          <div style={{ ...s.infoRow, borderBottom: `1px solid ${dividerColor}` }}>
-            <div style={{ ...s.infoIconWrap, background: iconBg }}>
-              <IconMail color={iconColor} />
-            </div>
-            <div style={s.infoBody}>
-              <span style={{ ...s.infoFieldLabel, color: mutedColor }}>Email</span>
-              <span style={{ ...s.infoFieldValue, color: textColor }}>
-                {profile.email || '–'}
-              </span>
-            </div>
-            <IconChevronRight color={isDark ? '#6b6885' : '#CBD5E1'} />
-          </div>
-          {/* Role */}
-          <div style={s.infoRow}>
-            <div style={{ ...s.infoIconWrap, background: iconBg }}>
-              <IconRole color={iconColor} />
-            </div>
-            <div style={s.infoBody}>
-              <span style={{ ...s.infoFieldLabel, color: mutedColor }}>
-                {isEn ? 'Account Role' : 'Role Akun'}
-              </span>
-              <span style={{ ...s.infoFieldValue, color: textColor }}>
-                {isEn ? (profile.role === 'Siswa' ? 'Student' : profile.role) : profile.role ?? (isEn ? 'Student' : 'Siswa')}
-              </span>
-            </div>
-            {profile.status && (profile.status === 'Aktif' || profile.status === 'Active') && (
-              <span style={{ ...s.badgeActiveSmall, background: badgeBg, color: badgeColor }}>
-                {isEn ? 'Active' : 'Aktif'}
-              </span>
-            )}
-            <IconChevronRight color={isDark ? '#6b6885' : '#CBD5E1'} />
-          </div>
-        </div>
-
-        {/* MENU UTAMA */}
-        <p style={{ ...s.sectionTitle, color: iconColor }}>
-          {isEn ? 'MAIN MENU' : 'MENU UTAMA'}
-        </p>
-        <div style={{ ...s.groupCard, background: cardBg, border: cardBorder }}>
+        {/* Menu utama */}
+        <p style={{ ...s.sectionTitle, color: c.green }}>{isEn ? 'MAIN MENU' : 'MENU UTAMA'}</p>
+        <div style={s.menuCard}>
           {menuItems.map((item, i) => (
             <div key={item.href}>
-              <div
-                style={s.menuRow}
-                onClick={() => router.push(item.href)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && router.push(item.href)}
-              >
-                <div style={{ ...s.menuIconWrap, background: iconBg }}>{item.icon}</div>
-                <div style={s.menuBody}>
-                  <span style={{ ...s.menuLabel, color: textColor }}>{item.label}</span>
-                  <span style={{ ...s.menuDesc, color: mutedColor }}>{item.desc}</span>
+              <button type="button" style={s.menuRow} onClick={() => router.push(item.href)} className="tap">
+                <IconTile c={c} size={40}>
+                  {item.icon}
+                </IconTile>
+                <div style={s.rowBody}>
+                  <span style={{ ...s.menuLabel, color: c.ink }}>{item.label}</span>
+                  <span style={{ ...s.rowDesc, color: c.gray }}>{item.desc}</span>
                 </div>
-                <IconChevronRight color={isDark ? '#6b6885' : '#CBD5E1'} />
-              </div>
-              {i < menuItems.length - 1 && <div style={{ ...s.divider, background: dividerColor }} />}
+                <IconChevronRight size={16} color={c.grayLight} />
+              </button>
+              {i < menuItems.length - 1 && <div style={{ ...s.divider, background: c.divider }} />}
             </div>
           ))}
         </div>
 
         {/* Logout */}
-        <button onClick={handleLogout} style={{ ...s.logoutBtn, background: logoutBg, border: logoutBorder }} type="button">
-          <IconLogout />
-          <span style={s.logoutText}>{isEn ? 'Sign Out' : 'Keluar dari Akun'}</span>
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          style={{ ...s.logoutBtn, background: c.dangerSoft, border: `1.5px solid ${c.dangerBorder}`, color: c.danger, opacity: loggingOut ? 0.7 : 1 }}
+          type="button"
+          className="tap"
+        >
+          <IconLogout size={18} color={c.danger} />
+          <span>{isEn ? 'Sign Out' : 'Keluar dari Akun'}</span>
         </button>
-
       </div>
 
-      {/* ── BOTTOM NAV ───────────────────────────────────────────────────── */}
-      <nav style={{ ...s.bottomNav, background: navBg, borderTop: navBorder }}>
-        {navItems.map((nav) => (
+      {/* ── BOTTOM NAV (sama dengan Beranda) ─────────────────────────────── */}
+      <nav style={s.bottomNav} aria-label={isEn ? 'Main navigation' : 'Navigasi utama'}>
+        {navItems.map(({ Icon, label, href, active }) => (
           <button
-            key={nav.href}
-            onClick={() => router.push(nav.href)}
-            style={{ ...s.navItem, ...(nav.active ? s.navItemActive : {}) }}
+            key={href}
+            onClick={() => router.push(href)}
+            style={{ ...s.navItem, color: active ? c.green : c.grayLight }}
             type="button"
+            aria-current={active ? 'page' : undefined}
           >
-            {nav.icon}
-            <span style={{ ...s.navLabel, ...(nav.active ? { ...s.navLabelActive, color: navActiveColor } : { color: navColor }) }}>
-              {nav.label}
+            <span style={{ ...s.navIconWrap, ...(active ? { background: c.greenSoft } : {}) }}>
+              <Icon size={21} color="currentColor" stroke={active ? 2 : 1.8} />
             </span>
+            <span style={s.navLabel}>{label}</span>
           </button>
         ))}
       </nav>
 
       {/* ── TOAST ────────────────────────────────────────────────────────── */}
       {toast && (
-        <div style={{ ...s.toast, ...(toast.type === 'success' ? { ...s.toastSuccess, background: toastSuccessBg } : { ...s.toastError, background: toastErrorBg }) }}>
+        <div
+          role="status"
+          style={{ ...s.toast, background: toast.type === 'success' ? c.toastSuccess : c.toastError }}
+        >
           {toast.type === 'success' ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" />
@@ -575,63 +646,43 @@ export default function ProfilePage() {
 // ─────────────────────────────────────────────────────────────────────────────
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-  * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; box-sizing: border-box; }
+  *, *::before, *::after { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; box-sizing: border-box; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  button { font-family: inherit; }
-  [role="button"] { cursor: pointer; }
-  [role="button"]:hover { opacity: 0.88; }
+  button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+  button:disabled { cursor: not-allowed; }
+  .tap { transition: transform 0.12s ease, opacity 0.12s ease; }
+  .tap:active:not(:disabled) { transform: scale(0.98); opacity: 0.92; }
+  button:focus-visible { outline: 2px solid #16A34A; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 `
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Styles
 // ─────────────────────────────────────────────────────────────────────────────
-const s: Record<string, React.CSSProperties> = {
+const makeStyles = (c: Theme): Record<string, CSSProperties> => ({
   page: {
     minHeight: '100vh',
-    paddingBottom: 80,
+    paddingBottom: 96,
     maxWidth: 480,
     margin: '0 auto',
     position: 'relative',
   },
 
   // Loading
-  loadingWrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    gap: 14,
-  },
-  spinner: {
-    width: 32,
-    height: 32,
-    borderRadius: '50%',
-    animation: 'spin 0.8s linear infinite',
-  },
-  loadingText: {
-    fontSize: 13,
-    fontWeight: 600,
-    margin: 0,
-  },
+  loadingWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 14 },
+  spinner: { width: 32, height: 32, borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
+  loadingText: { fontSize: 13, fontWeight: 600, margin: 0 },
 
   // Hero
   hero: {
     position: 'relative',
-    paddingTop: 52,
-    paddingLeft: 20,
-    paddingRight: 20,
-    paddingBottom: 24,
+    background: c.heroGradient,
+    padding: '52px 20px 84px',
     overflow: 'hidden',
-  },
-  heroOverlay: {
-    position: 'absolute',
-    inset: 0,
-    backgroundImage:
-      'radial-gradient(circle at 80% 10%, rgba(255,255,255,0.12) 0%, transparent 50%), radial-gradient(circle at 5% 90%, rgba(255,255,255,0.08) 0%, transparent 40%)',
-    pointerEvents: 'none',
   },
   heroHeader: {
     position: 'relative',
@@ -639,96 +690,72 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    gap: 12,
   },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: 800,
-    color: '#FFFFFF',
-    margin: 0,
-    letterSpacing: -0.3,
-  },
-  heroSub: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.75)',
-    margin: '3px 0 0',
-  },
+  heroTitle: { fontSize: 22, fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 },
+  heroSub: { fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.78)', margin: '3px 0 0' },
   editBtn: {
     display: 'flex',
     alignItems: 'center',
     gap: 6,
     borderRadius: 12,
-    padding: '8px 14px',
+    padding: '8px 13px',
     cursor: 'pointer',
+    background: 'rgba(255,255,255,0.14)',
+    border: '1px solid rgba(255,255,255,0.28)',
     backdropFilter: 'blur(6px)',
-  },
-  editBtnText: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: '#FFFFFF',
-  },
-
-  // Hero card
-  heroCard: {
-    position: 'relative',
-    zIndex: 2,
-    borderRadius: 20,
-    padding: '16px 16px 16px 16px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 14,
-    backdropFilter: 'blur(8px)',
-    animation: 'fadeIn 0.4s ease',
-  },
-  avatarWrap: {
-    position: 'relative',
     flexShrink: 0,
   },
-  avatarRing: {
-    width: 84,
-    height: 84,
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #A7F3D0, #059669)',
-    padding: 3,
+  editBtnText: { fontSize: 13, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap' },
+
+  // Profile card
+  profileCard: {
+    position: 'relative',
+    zIndex: 3,
+    margin: '-56px 16px 0',
+    padding: '0 20px 20px',
+    borderRadius: 24,
+    background: c.surface,
+    border: `1px solid ${c.border}`,
+    boxShadow: c.shadow,
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 0 0 3px rgba(255,255,255,0.3)',
+    animation: 'fadeIn 0.4s ease',
+  },
+  avatarWrap: { position: 'relative', marginTop: -48, flexShrink: 0 },
+  avatarRing: {
+    width: 104,
+    height: 104,
+    borderRadius: '50%',
+    padding: 4,
+    background: c.surface,
+    boxShadow: '0 6px 18px rgba(7,61,47,0.22)',
   },
   avatarInner: {
     width: '100%',
     height: '100%',
     borderRadius: '50%',
-    background: '#1A4731',
+    background: 'linear-gradient(135deg, #0e7c5f, #0a5c46)',
     overflow: 'hidden',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    border: '2px solid rgba(255,255,255,0.2)',
   },
-  avatarImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  avatarInitials: {
-    fontSize: 28,
-    fontWeight: 800,
-    color: '#FFFFFF',
-  },
+  avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
+  avatarInitials: { fontSize: 30, fontWeight: 800, color: '#FFFFFF' },
   uploadOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'rgba(0,0,0,0.4)',
+    background: 'rgba(0,0,0,0.42)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarSpinner: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     borderRadius: '50%',
     border: '2.5px solid rgba(255,255,255,0.35)',
     borderTopColor: '#FFFFFF',
@@ -736,216 +763,103 @@ const s: Record<string, React.CSSProperties> = {
   },
   cameraBtn: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 28,
-    height: 28,
+    bottom: 2,
+    right: 2,
+    width: 32,
+    height: 32,
     borderRadius: '50%',
-    background: '#16A34A',
-    border: '2px solid #FFFFFF',
+    background: c.tileBg,
+    border: `2.5px solid ${c.surface}`,
+    boxShadow: '0 3px 8px rgba(18,48,42,0.35)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+    padding: 0,
   },
-  heroCardInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-  heroName: {
-    fontSize: 17,
+  profileName: {
+    fontSize: 19,
     fontWeight: 800,
-    color: '#FFFFFF',
-    margin: '0 0 4px',
-    whiteSpace: 'nowrap',
+    color: c.ink,
+    margin: '12px 0 2px',
+    letterSpacing: -0.2,
+    textAlign: 'center',
+    maxWidth: '100%',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-  },
-  heroBadgeRow: {
-    display: 'flex',
-    gap: 6,
-    marginBottom: 4,
-  },
-  badgeActive: {
-    fontSize: 11,
-    fontWeight: 700,
-    borderRadius: 6,
-    padding: '2px 8px',
-  },
-  badgeActiveSmall: {
-    fontSize: 11,
-    fontWeight: 700,
-    borderRadius: 6,
-    padding: '2px 8px',
     whiteSpace: 'nowrap',
-    marginRight: 4,
   },
-  heroEmail: {
-    fontSize: 12.5,
+  profileEmail: {
+    fontSize: 13,
     fontWeight: 500,
-    color: 'rgba(255,255,255,0.8)',
+    color: c.gray,
     margin: 0,
-    whiteSpace: 'nowrap',
+    maxWidth: '100%',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  veriBadge: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 12,
-    padding: '8px 12px',
-    flexShrink: 0,
-  },
-  veriLabel: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: 'rgba(255,255,255,0.7)',
-    textAlign: 'center' as const,
-  },
-  veriValue: {
-    fontSize: 11.5,
-    fontWeight: 700,
-    textAlign: 'center' as const,
-  },
+  pillRow: { display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap', justifyContent: 'center' },
+  dot: { width: 6, height: 6, borderRadius: '50%', background: c.green, display: 'inline-block' },
 
   // Body
-  body: {
-    padding: '20px 16px 0',
-    animation: 'fadeIn 0.4s ease',
-  },
+  body: { padding: '22px 16px 0', animation: 'fadeIn 0.45s ease' },
 
-  // Row card (foto profil)
-  rowCard: {
-    borderRadius: 16,
+  photoRow: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
     padding: '14px 16px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)',
-    marginBottom: 16,
+    marginBottom: 22,
+    borderRadius: 18,
+    background: c.surface,
+    border: `1px solid ${c.border}`,
+    boxShadow: c.shadow,
     cursor: 'pointer',
+    textAlign: 'left',
   },
-  rowIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  rowBody: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 2,
-  },
-  rowLabel: {
-    fontSize: 14,
-    fontWeight: 700,
-  },
-  rowDesc: {
-    fontSize: 12,
-    fontWeight: 500,
-    lineHeight: 1.4,
+  rowBody: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 },
+  rowLabel: { fontSize: 14, fontWeight: 700 },
+  rowDesc: { fontSize: 12, fontWeight: 500, lineHeight: 1.4 },
+
+  sectionTitle: { fontSize: 11, fontWeight: 800, letterSpacing: 1.1, margin: '0 0 10px 4px' },
+
+  fieldsCard: {
+    padding: '18px 16px 2px',
+    marginBottom: 22,
+    borderRadius: 20,
+    background: c.surface,
+    border: `1px solid ${c.border}`,
+    boxShadow: c.shadow,
   },
 
-  // Section title
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 1.1,
-    margin: '0 0 8px 4px',
-  },
-
-  // Group card
-  groupCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)',
+  menuCard: {
     marginBottom: 20,
+    borderRadius: 20,
+    overflow: 'hidden',
+    background: c.surface,
+    border: `1px solid ${c.border}`,
+    boxShadow: c.shadow,
   },
-
-  // Info rows
-  infoRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: '14px 16px',
-    cursor: 'pointer',
-  },
-  infoIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  infoBody: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 1,
-  },
-  infoFieldLabel: {
-    fontSize: 11.5,
-    fontWeight: 500,
-  },
-  infoFieldValue: {
-    fontSize: 14.5,
-    fontWeight: 600,
-  },
-
-  // Divider
-  divider: {
-    height: 1,
-    marginLeft: 64,
-  },
-
-  // Menu rows
   menuRow: {
+    width: '100%',
     display: 'flex',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     padding: '14px 16px',
+    background: 'transparent',
+    border: 'none',
     cursor: 'pointer',
-    transition: 'background 0.1s',
+    textAlign: 'left',
   },
-  menuIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  menuBody: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 2,
-  },
-  menuLabel: {
-    fontSize: 14,
-    fontWeight: 700,
-  },
-  menuDesc: {
-    fontSize: 12,
-    fontWeight: 500,
-  },
+  menuLabel: { fontSize: 14, fontWeight: 700 },
+  divider: { height: 1, marginLeft: 70 },
 
-  // Logout
   logoutBtn: {
     width: '100%',
     height: 52,
     borderRadius: 16,
-    color: '#EF4444',
     fontSize: 14.5,
     fontWeight: 700,
     display: 'flex',
@@ -955,47 +869,42 @@ const s: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     marginBottom: 24,
   },
-  logoutText: {
-    color: '#EF4444',
-    fontSize: 14.5,
-    fontWeight: 700,
-  },
 
-  // Bottom nav
+  // Bottom nav — meniru .bottomNav di dashboard.module.css
   bottomNav: {
     position: 'fixed',
     bottom: 0,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '100%',
+    left: 0,
+    right: 0,
     maxWidth: 480,
-    borderTop: '1px solid #E2E8F0',
+    margin: '0 auto',
+    zIndex: 100,
+    background: c.surface,
+    borderTop: `1px solid ${c.border}`,
+    boxShadow: '0 -4px 20px rgba(15,23,42,0.06)',
     display: 'flex',
-    padding: '8px 0 12px',
-    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    padding: '8px 0 max(10px, env(safe-area-inset-bottom))',
   },
   navItem: {
-    flex: 1,
     display: 'flex',
-    flexDirection: 'column' as const,
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    padding: 0,
+    padding: '0 8px',
+    transition: 'color 0.2s',
   },
-  navItemActive: {},
-  navLabel: {
-    fontSize: 10.5,
-    fontWeight: 600,
-  },
-  navLabelActive: {},
+  navIconWrap: { width: 34, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 9 },
+  navLabel: { fontSize: 10, fontWeight: 600 },
 
   // Toast
   toast: {
     position: 'fixed',
-    bottom: 92,
+    bottom: 96,
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
@@ -1007,11 +916,8 @@ const s: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     color: '#FFFFFF',
     boxShadow: '0 10px 28px rgba(15,23,42,0.22)',
-    zIndex: 50,
+    zIndex: 150,
     animation: 'slideUp 0.3s ease',
     maxWidth: '90%',
-    whiteSpace: 'nowrap',
   },
-  toastSuccess: {},
-  toastError: {},
-}
+})
