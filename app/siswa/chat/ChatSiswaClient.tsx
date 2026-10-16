@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import styles from './chat.module.css'
-import { useSettings } from '@/contexts/SettingsContext'
 import { useChatRealtime } from '@/lib/useChatRealtime'
 import type { ChatMessage, ChatThread } from '@/types/chat'
 
@@ -128,7 +127,6 @@ function groupByDate(messages: ChatMessage[]): { dateLabel: string; items: ChatM
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════ */
 export default function ChatSiswaClient() {
-  const { t } = useSettings()
   const [thread, setThread] = useState<ChatThread | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(true)

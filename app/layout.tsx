@@ -9,6 +9,10 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'PSMB - Pon-Pes Al Istiqomah',
   description: 'Penerimaan Santri Baru',
+  icons: {
+    icon: '/icons/logo.png',
+    apple: '/icons/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

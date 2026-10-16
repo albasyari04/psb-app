@@ -9,28 +9,28 @@ import { useSettings } from '@/contexts/SettingsContext'
 // ── Icon set (SVG line-style — profesional, elegant, modern) ───────────────────
 type IconProps = { size?: number; color?: string; strokeWidth?: number }
 
-const IconUser = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconUser = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="4" />
     <path d="M5 21c0-3.866 3.134-7 7-7s7 3.134 7 7" />
   </svg>
 )
 
-const IconSchool = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconSchool = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 3 2 8l10 5 10-5-10-5Z" />
     <path d="M6 10.5V16c0 1.2 2.7 3 6 3s6-1.8 6-3v-5.5" />
   </svg>
 )
 
-const IconPin = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconPin = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11Z" />
     <circle cx="12" cy="10" r="2.5" />
   </svg>
 )
 
-const IconFamily = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconFamily = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="8.5" cy="7.5" r="3" />
     <circle cx="16" cy="8.5" r="2.3" />
@@ -39,14 +39,14 @@ const IconFamily = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: Icon
   </svg>
 )
 
-const IconCheckCircle = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconCheckCircle = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="9" />
     <path d="m8.5 12.5 2.3 2.3 4.7-5" />
   </svg>
 )
 
-const IconAlertTriangle = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconAlertTriangle = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 3.5 21.5 20H2.5L12 3.5Z" />
     <path d="M12 10v4" />
@@ -54,7 +54,7 @@ const IconAlertTriangle = ({ size = 18, color = 'currentColor', strokeWidth = 2 
   </svg>
 )
 
-const IconSave = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconSave = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 4h11l3 3v13H5V4Z" />
     <path d="M8 4v5h7V4" />
@@ -62,7 +62,7 @@ const IconSave = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconPr
   </svg>
 )
 
-const IconClipboardEdit = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconClipboardEdit = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <rect x="5" y="4" width="14" height="17" rx="2" />
     <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z" />
@@ -71,11 +71,10 @@ const IconClipboardEdit = ({ size = 18, color = 'currentColor', strokeWidth = 2 
   </svg>
 )
 
-const IconRocket = ({ size = 18, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconSend = ({ size = 18, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14.5 4.5c2.5-1 5-1 5-1s0 2.5-1 5c-1.2 2.9-3.4 5.1-5.6 6.6L9 18l-3-3 2.9-3.9C10.4 11.9 12.6 9.7 15.5 8.5c2-1 5-1 5-1" />
-    <path d="M9 15c-2 .3-3.2 1-4 3-1.8-.8-2.5-2-3-4 2-.8 2.7-2 3-4" />
-    <circle cx="15.5" cy="8.5" r="1.4" />
+    <path d="M21 3 10.5 13.5" />
+    <path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z" />
   </svg>
 )
 
@@ -118,14 +117,14 @@ const IconCheck = ({ size = 16, color = 'currentColor', strokeWidth = 2.6 }: Ico
   </svg>
 )
 
-const IconMale = ({ size = 16, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconMale = ({ size = 16, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="10" cy="14" r="6" />
     <path d="M14.5 9.5 20 4M20 4h-4.5M20 4v4.5" />
   </svg>
 )
 
-const IconFemale = ({ size = 16, color = 'currentColor', strokeWidth = 2 }: IconProps) => (
+const IconFemale = ({ size = 16, color = 'currentColor', strokeWidth = 1.75 }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="9" r="6" />
     <path d="M12 15v6M9 19h6" />
@@ -221,24 +220,28 @@ const INIT: FormState = {
 // ── Theme tokens ───────────────────────────────────────────────────────────────
 function getTheme(isDark: boolean) {
   return {
-    bg:          isDark ? '#15131f' : '#F8FAFC',
-    surface:     isDark ? '#1e1b2e' : '#FFFFFF',
-    surfaceAlt:  isDark ? '#15131f' : '#F4F6FA',
-    border:      isDark ? '#2e2a40' : '#EEF1F6',
-    borderInput: isDark ? '#2e2a40' : '#E6E9F0',
-    divider:     isDark ? '#2e2a40' : '#EEF1F6',
-    text:        isDark ? '#f1f0f5' : '#1E2233',
-    label:       isDark ? '#cbd5e1' : '#1E2233',
-    muted:       isDark ? '#94a3b8' : '#7B8296',
-    faint:       isDark ? '#6b6885' : '#A6ACBC',
-    primary:     '#4F46E5',
-    primaryText: isDark ? '#a5b4fc' : '#4F46E5',
-    primarySoft: isDark ? '#2a2650' : '#EEF2FF',
-    pendingBg:   isDark ? '#2e2a40' : '#EFF1F5',
-    line:        isDark ? '#2e2a40' : '#E6E9F0',
+    // Palet hijau — diselaraskan dengan Beranda (banner hijau tua, aksen emas, link hijau)
+    bg:          isDark ? '#0E1512' : '#F5F8F6',
+    surface:     isDark ? '#15201B' : '#FFFFFF',
+    surfaceAlt:  isDark ? '#101A16' : '#F6F9F7',
+    border:      isDark ? '#22332B' : '#E7EEE9',
+    borderInput: isDark ? '#2A3D34' : '#DCE6DF',
+    divider:     isDark ? '#22332B' : '#EAF0EC',
+    text:        isDark ? '#EEF5F1' : '#14231C',
+    label:       isDark ? '#CFE0D6' : '#1B2E25',
+    muted:       isDark ? '#8FA89B' : '#6B7F74',
+    faint:       isDark ? '#5E7569' : '#A3B3AA',
+    primary:     '#0F6B4A',
+    primaryDark: '#0A4F37',
+    primaryText: isDark ? '#4ADE98' : '#0F6B4A',
+    primarySoft: isDark ? '#16302A' : '#E8F4EE',
+    accent:      '#F2B705',
+    pendingBg:   isDark ? '#22332B' : '#EDF2EF',
+    line:        isDark ? '#22332B' : '#DCE6DF',
+    gradient:    'linear-gradient(135deg, #0F6B4A 0%, #0A4F37 100%)',
+    shadowBtn:   '0 8px 20px rgba(15,107,74,.26)',
   }
 }
-type Theme = ReturnType<typeof getTheme>
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
 const getDraftKey = (userId: string) => `pendaftaran_draft_${userId}`
@@ -358,9 +361,9 @@ function getCardStyle(isDark: boolean): React.CSSProperties {
   return {
     background: t.surface,
     border: `1px solid ${t.border}`,
-    borderRadius: 18,
-    padding: 18,
-    boxShadow: isDark ? 'none' : '0 1px 2px rgba(30,34,51,.03), 0 4px 16px rgba(30,34,51,.04)',
+    borderRadius: 22,
+    padding: 20,
+    boxShadow: isDark ? 'none' : '0 1px 2px rgba(15,60,40,.04), 0 10px 28px rgba(15,60,40,.06)',
   }
 }
 
@@ -368,10 +371,11 @@ function getLabelStyle(isDark: boolean): React.CSSProperties {
   const t = getTheme(isDark)
   return {
     display: 'block',
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: 700,
     color: t.label,
-    marginBottom: 6,
+    marginBottom: 7,
+    letterSpacing: '.01em',
   }
 }
 
@@ -474,15 +478,16 @@ function IconBadge({
         width: size,
         height: size,
         minWidth: size,
-        borderRadius: 11,
-        background: t.primarySoft,
-        color: t.primaryText,
+        borderRadius: '50%',
+        background: t.gradient,
+        color: '#FFFFFF',
+        boxShadow: isDark ? 'none' : '0 4px 10px rgba(15,107,74,.22)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Icon size={Math.round(size * 0.5)} />
+      <Icon size={Math.round(size * 0.48)} strokeWidth={1.8} />
     </span>
   )
 }
@@ -512,7 +517,7 @@ function CardTitle({
     >
       <IconBadge icon={icon} isDark={isDark} size={40} />
       <div style={{ minWidth: 0 }}>
-        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: t.text, lineHeight: 1.3 }}>{title}</h2>
+        <h2 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: t.text, lineHeight: 1.3, letterSpacing: '-.01em' }}>{title}</h2>
         {subtitle && (
           <p style={{ margin: '2px 0 0', fontSize: 12.5, color: t.muted, fontWeight: 500, lineHeight: 1.4 }}>{subtitle}</p>
         )}
@@ -567,8 +572,8 @@ function Alert({
   style?: React.CSSProperties
 }) {
   const palette: Record<AlertKind, { bg: string; border: string; color: string }> = {
-    info:    { bg: isDark ? '#1e1b2e' : '#EEF2FF', border: isDark ? '#2e2a40' : '#C7D2FE', color: isDark ? '#a5b4fc' : '#4338CA' },
-    warning: { bg: isDark ? '#2e2a1a' : '#FEF3D9', border: isDark ? '#4a3a1a' : '#F4D58D', color: isDark ? '#fbbf24' : '#92660B' },
+    info:    { bg: isDark ? '#16302A' : '#E8F4EE', border: isDark ? '#22443A' : '#BFE0CE', color: isDark ? '#4ADE98' : '#0A4F37' },
+    warning: { bg: isDark ? '#2e2a1a' : '#FFF6D6', border: isDark ? '#4a3a1a' : '#F2D77A', color: isDark ? '#fbbf24' : '#8A6200' },
     error:   { bg: isDark ? '#2e1a1a' : '#FEECEC', border: isDark ? '#4a1a1a' : '#F5A9A9', color: isDark ? '#fca5a5' : '#B42318' },
     success: { bg: isDark ? '#1a2e1a' : '#E7F8EE', border: isDark ? '#1a4a2e' : '#86E0AB', color: isDark ? '#6ee7b7' : '#067647' },
   }
@@ -688,9 +693,9 @@ function SummarySection({
 // CSS global halaman (focus ring, tombol back, animasi spinner)
 const PAGE_CSS = `
 @keyframes spin { to { transform: rotate(360deg); } }
-.psmb-input:focus { border-color: #6366F1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,.18) !important; }
+.psmb-input:focus { border-color: #0F6B4A !important; box-shadow: 0 0 0 3px rgba(15,107,74,.16) !important; }
 .psmb-input[aria-invalid='true'] { border-color: #EF4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.14) !important; }
-.psmb-input::placeholder { color: #A6ACBC; opacity: 1; }
+.psmb-input::placeholder { color: #A3B3AA; opacity: 1; }
 .psmb-back { transition: transform .12s ease, background-color .15s ease; -webkit-tap-highlight-color: transparent; }
 .psmb-back:active { transform: scale(.94); }
 .psmb-btn { transition: transform .12s ease, filter .15s ease; -webkit-tap-highlight-color: transparent; }
@@ -910,8 +915,8 @@ export default function PendaftaranPage() {
           height: 44,
           borderWidth: 4,
           borderStyle: 'solid',
-          borderColor: isDark ? '#2e2a40' : '#E2E8F0',
-          borderTopColor: '#6366F1',
+          borderColor: isDark ? '#22332B' : '#DCE6DF',
+          borderTopColor: '#0F6B4A',
           borderRadius: '50%',
           animation: 'spin .8s linear infinite',
         }} />
@@ -1005,13 +1010,13 @@ export default function PendaftaranPage() {
             height: 40,
             minWidth: 40,
             borderRadius: '50%',
-            background: isDark ? '#2e2a40' : '#F3F0FF',
-            border: isDark ? '1px solid #3b3656' : '1px solid #E9E4FF',
-            boxShadow: isDark ? 'none' : '0 1px 2px rgba(124,58,237,.08)',
+            background: t.primarySoft,
+            border: isDark ? '1px solid #22443A' : '1px solid #CFE6DA',
+            boxShadow: isDark ? 'none' : '0 1px 2px rgba(15,107,74,.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isDark ? '#c4b5fd' : '#7C3AED',
+            color: t.primaryText,
             textDecoration: 'none',
             flexShrink: 0,
           }}
@@ -1059,21 +1064,34 @@ export default function PendaftaranPage() {
       >
         {/* ── STEP INDICATOR ── */}
         <div style={{ padding: '16px 16px 0' }}>
-          <div style={{ ...cardStyle, padding: '14px 8px 14px', borderRadius: 18 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 10px 14px',
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 600, color: t.muted }}>
-                {isEn ? `Step ${step} of ${STEPS.length}` : `Langkah ${step} dari ${STEPS.length}`}
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: t.primaryText }}>
-                {Math.round((step / STEPS.length) * 100)}%
-              </span>
+          <div style={{ ...cardStyle, padding: '16px 8px 14px', borderRadius: 22 }}>
+            <div style={{ padding: '0 12px 16px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 9,
+                }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 600, color: t.muted }}>
+                  {isEn ? `Step ${step} of ${STEPS.length}` : `Langkah ${step} dari ${STEPS.length}`}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: t.primaryText }}>
+                  {Math.round((step / STEPS.length) * 100)}%
+                </span>
+              </div>
+              <div style={{ height: 5, borderRadius: 999, background: t.pendingBg, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: `${(step / STEPS.length) * 100}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: `linear-gradient(90deg, ${t.primary}, ${t.accent})`,
+                    transition: 'width .3s ease',
+                  }}
+                />
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${STEPS.length}, 1fr)` }}>
@@ -1133,7 +1151,7 @@ export default function PendaftaranPage() {
                           justifyContent: 'center',
                           fontSize: 13,
                           fontWeight: 700,
-                          boxShadow: isActive ? `0 0 0 4px ${isDark ? 'rgba(129,140,248,.22)' : 'rgba(79,70,229,.14)'}` : 'none',
+                          boxShadow: isActive ? `0 0 0 4px ${isDark ? 'rgba(74,222,152,.18)' : 'rgba(15,107,74,.14)'}` : 'none',
                           transition: 'box-shadow .2s ease, background-color .2s ease',
                         }}
                       >
@@ -1594,8 +1612,8 @@ export default function PendaftaranPage() {
                     padding: '14px 18px',
                     borderRadius: 14,
                     border: 'none',
-                    background: 'linear-gradient(90deg, #4338CA, #6D5BF2)',
-                    boxShadow: '0 6px 16px rgba(79,70,229,.28)',
+                    background: t.gradient,
+                    boxShadow: t.shadowBtn,
                     color: '#FFFFFF',
                     fontWeight: 700,
                     fontSize: 14,
@@ -1620,8 +1638,8 @@ export default function PendaftaranPage() {
                     padding: '14px 18px',
                     borderRadius: 14,
                     border: 'none',
-                    background: loading || !isEditable ? (isDark ? '#2e2a40' : '#cbd5e1') : 'linear-gradient(90deg, #4338CA, #6D5BF2)',
-                    boxShadow: loading || !isEditable ? 'none' : '0 6px 16px rgba(79,70,229,.28)',
+                    background: loading || !isEditable ? (isDark ? '#22332B' : '#B8C7BE') : t.gradient,
+                    boxShadow: loading || !isEditable ? 'none' : t.shadowBtn,
                     color: '#FFFFFF',
                     fontWeight: 700,
                     fontSize: 14,
@@ -1634,7 +1652,7 @@ export default function PendaftaranPage() {
                   ) : existing ? (
                     <><IconClipboardEdit size={16} />{isEn ? 'Update Data' : 'Perbarui Data'}</>
                   ) : (
-                    <><IconRocket size={16} />{isEn ? 'Submit Registration' : 'Kirim Pendaftaran'}</>
+                    <><IconSend size={16} />{isEn ? 'Submit Registration' : 'Kirim Pendaftaran'}</>
                   )}
                 </button>
               )}
