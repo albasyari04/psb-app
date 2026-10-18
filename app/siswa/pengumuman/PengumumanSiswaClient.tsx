@@ -1,13 +1,142 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
+// app/siswa/pengumuman/PengumumanSiswaClient.tsx
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface IconProps {
-  active: boolean;
-}
+/* ════════════════════════════════════════════════════════════════
+   ICON SET — SVG line-style (gaya sama dengan halaman Pendaftaran)
+   ════════════════════════════════════════════════════════════════ */
+type IconProps = { size?: number; color?: string; strokeWidth?: number };
+type IconCmp = React.ComponentType<IconProps>;
 
+const Svg = ({
+  size,
+  color,
+  strokeWidth,
+  children,
+}: Required<IconProps> & { children: React.ReactNode }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {children}
+  </svg>
+);
+
+// Ikon panah kembali — IDENTIK dengan halaman Pendaftaran / Jadwal / Laporan
+const IconArrowLeft = ({ size = 18, color = "currentColor", strokeWidth = 2.3 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M19 12H5" />
+    <path d="m12 19-7-7 7-7" />
+  </Svg>
+);
+
+const IconArrowRight = ({ size = 14, color = "currentColor", strokeWidth = 2.4 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M5 12h14" />
+    <path d="m13 6 6 6-6 6" />
+  </Svg>
+);
+
+const IconX = ({ size = 15, color = "currentColor", strokeWidth = 2.3 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </Svg>
+);
+
+const IconCalendar = ({ size = 13, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+    <path d="M8 3v4M16 3v4M3.5 10h17" />
+  </Svg>
+);
+
+const IconPaperclip = ({ size = 14, color = "currentColor", strokeWidth = 1.9 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="m20.5 11.5-8.6 8.6a5 5 0 0 1-7.1-7.1l8.9-8.9a3.4 3.4 0 0 1 4.8 4.8l-8.9 8.9a1.8 1.8 0 0 1-2.5-2.5l8.2-8.2" />
+  </Svg>
+);
+
+const IconInbox = ({ size = 28, color = "currentColor", strokeWidth = 1.6 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M3 13.5 5.8 5.8A2 2 0 0 1 7.7 4.5h8.6a2 2 0 0 1 1.9 1.3L21 13.5" />
+    <path d="M3 13.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4.5h-5.2a1 1 0 0 0-.9.6 3.3 3.3 0 0 1-5.8 0 1 1 0 0 0-.9-.6H3Z" />
+  </Svg>
+);
+
+const IconGrid = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.8" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.8" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.8" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.8" />
+  </Svg>
+);
+
+const IconAlertTriangle = ({ size = 20, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M12 3.5 21.5 20H2.5L12 3.5Z" />
+    <path d="M12 10v4" />
+    <path d="M12 17.2h.01" />
+  </Svg>
+);
+
+const IconInfo = ({ size = 20, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5" />
+    <path d="M12 7.8h.01" />
+  </Svg>
+);
+
+const IconBell = ({ size = 20, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
+    <path d="M10 20a2 2 0 0 0 4 0" />
+  </Svg>
+);
+
+// Ikon navigasi bawah
+const NavHome = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z" />
+  </Svg>
+);
+const NavForm = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z" />
+    <path d="m9 14 2 2 4-4" />
+  </Svg>
+);
+const NavCard = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+    <path d="M2.5 10h19M6.5 15h3" />
+  </Svg>
+);
+const NavChart = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M4 20V10M10 20V4M16 20v-7M21 20H3" />
+  </Svg>
+);
+const NavUser = ({ size = 22, color = "currentColor", strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M5 21c0-3.866 3.134-7 7-7s7 3.134 7 7" />
+  </Svg>
+);
+
+/* ════════════════════════════════════════════════════════════════
+   TYPES
+   ════════════════════════════════════════════════════════════════ */
 type TipeKey = "Penting" | "Informasi" | "Info" | "Peringatan";
 
 interface Announcement {
@@ -21,168 +150,153 @@ interface Announcement {
   created_at: string;
 }
 
-interface Category {
+interface CategoryDef {
   id: string;
   label: { id: string; en: string };
-  imgSrc?: string;
-  color: string;
-  tipeFilter?: string;
+  tipe?: TipeKey; // filter ke API
 }
 
-interface NavItem {
-  id: string;
+/* ════════════════════════════════════════════════════════════════
+   THEME (identik dengan halaman Pendaftaran / Jadwal / Laporan)
+   ════════════════════════════════════════════════════════════════ */
+const HEADER_HEIGHT = 84;
+const NAV_HEIGHT = 68;
+
+function getTheme(isDark: boolean) {
+  return {
+    bg: isDark ? "#0E1512" : "#F5F8F6",
+    surface: isDark ? "#15201B" : "#FFFFFF",
+    surfaceAlt: isDark ? "#101A16" : "#F6F9F7",
+    border: isDark ? "#22332B" : "#E7EEE9",
+    borderInput: isDark ? "#2A3D34" : "#DCE6DF",
+    divider: isDark ? "#22332B" : "#EAF0EC",
+    text: isDark ? "#EEF5F1" : "#14231C",
+    label: isDark ? "#CFE0D6" : "#1B2E25",
+    muted: isDark ? "#8FA89B" : "#6B7F74",
+    faint: isDark ? "#5E7569" : "#A3B3AA",
+    primary: "#0F6B4A",
+    primaryDark: "#0A4F37",
+    primaryText: isDark ? "#4ADE98" : "#0F6B4A",
+    primarySoft: isDark ? "#16302A" : "#E8F4EE",
+    accent: "#F2B705",
+    pendingBg: isDark ? "#22332B" : "#EDF2EF",
+    line: isDark ? "#22332B" : "#DCE6DF",
+    gradient: "linear-gradient(135deg, #0F6B4A 0%, #0A4F37 100%)",
+    shadowBtn: "0 8px 20px rgba(15,107,74,.26)",
+  };
+}
+
+function getCardStyle(isDark: boolean): React.CSSProperties {
+  const t = getTheme(isDark);
+  return {
+    background: t.surface,
+    border: `1px solid ${t.border}`,
+    borderRadius: 22,
+    boxShadow: isDark
+      ? "none"
+      : "0 1px 2px rgba(15,60,40,.04), 0 10px 28px rgba(15,60,40,.06)",
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TIPE → TONE
+   Penting = merah, Informasi/Info = hijau, Peringatan = emas
+   ════════════════════════════════════════════════════════════════ */
+interface ToneDef {
+  fg: string;
+  fgDark: string;
+  soft: string;
+  softDark: string;
+  line: string;
+  lineDark: string;
+  grad: string;
+  glow: string;
+  icon: string; // path PNG milik Anda di /public/icons
+  Fallback: IconCmp;
   label: { id: string; en: string };
-  icon: React.FC<IconProps>;
 }
 
-// ─── Tipe → style map ────────────────────────────────────────────────────────
-const TIPE_CONFIG: Record<
-  TipeKey,
-  { color: string; bg: string; bgDark: string; icon: string; label: { id: string; en: string } }
-> = {
+const GREEN_TONE = {
+  fg: "#0A4F37",
+  fgDark: "#4ADE98",
+  soft: "#E8F4EE",
+  softDark: "#16302A",
+  line: "#BFE0CE",
+  lineDark: "#22443A",
+  grad: "linear-gradient(135deg, #0F6B4A 0%, #0A4F37 100%)",
+  glow: "rgba(15,107,74,.26)",
+};
+
+const TONES: Record<TipeKey, ToneDef> = {
   Penting: {
-    color: "#EF4444",
-    bg: "#FEE2E2",
-    bgDark: "#2e1a1a",
+    fg: "#B42318",
+    fgDark: "#fca5a5",
+    soft: "#FEECEC",
+    softDark: "#2e1a1a",
+    line: "#F5A9A9",
+    lineDark: "#4a1a1a",
+    grad: "linear-gradient(135deg, #E5484D 0%, #B42318 100%)",
+    glow: "rgba(220,38,38,.26)",
     icon: "/icons/icon penting.png",
+    Fallback: IconAlertTriangle,
     label: { id: "Penting", en: "Important" },
   },
   Informasi: {
-    color: "#3B82F6",
-    bg: "#DBEAFE",
-    bgDark: "#1a2a3d",
+    ...GREEN_TONE,
     icon: "/icons/informasi icon.png",
+    Fallback: IconInfo,
     label: { id: "Informasi", en: "Information" },
   },
   Info: {
-    color: "#3B82F6",
-    bg: "#DBEAFE",
-    bgDark: "#1a2a3d",
+    ...GREEN_TONE,
     icon: "/icons/informasi icon.png",
+    Fallback: IconInfo,
     label: { id: "Info", en: "Info" },
   },
   Peringatan: {
-    color: "#F59E0B",
-    bg: "#FEF3C7",
-    bgDark: "#2e2a1a",
+    fg: "#8A6200",
+    fgDark: "#fbbf24",
+    soft: "#FFF6D6",
+    softDark: "#2e2a1a",
+    line: "#F2D77A",
+    lineDark: "#4a3a1a",
+    grad: "linear-gradient(135deg, #F2B705 0%, #D99A00 100%)",
+    glow: "rgba(242,183,5,.30)",
     icon: "/icons/pengumuman icon.png",
+    Fallback: IconBell,
     label: { id: "Peringatan", en: "Warning" },
   },
 };
 
-// ─── Category tabs ────────────────────────────────────────────────────────────
-const categories: Category[] = [
-  { id: "semua", label: { id: "Semua", en: "All" }, color: "#3B82F6" },
-  {
-    id: "penting",
-    label: { id: "Penting", en: "Important" },
-    imgSrc: "/icons/icon penting.png",
-    color: "#EF4444",
-    tipeFilter: "Penting",
-  },
-  {
-    id: "informasi",
-    label: { id: "Informasi", en: "Information" },
-    imgSrc: "/icons/informasi icon.png",
-    color: "#3B82F6",
-    tipeFilter: "Informasi",
-  },
-  {
-    id: "peringatan",
-    label: { id: "Peringatan", en: "Warning" },
-    imgSrc: "/icons/pengumuman icon.png",
-    color: "#F59E0B",
-    tipeFilter: "Peringatan",
-  },
+function toneOf(tipe: string, isDark: boolean, isEn: boolean) {
+  const m = TONES[tipe as TipeKey] ?? TONES.Informasi;
+  return {
+    fg: isDark ? m.fgDark : m.fg,
+    soft: isDark ? m.softDark : m.soft,
+    line: isDark ? m.lineDark : m.line,
+    grad: m.grad,
+    glow: m.glow,
+    icon: m.icon,
+    Fallback: m.Fallback,
+    label: isEn ? m.label.en : m.label.id,
+  };
+}
+
+const CATEGORIES: CategoryDef[] = [
+  { id: "semua", label: { id: "Semua", en: "All" } },
+  { id: "penting", label: { id: "Penting", en: "Important" }, tipe: "Penting" },
+  { id: "informasi", label: { id: "Informasi", en: "Information" }, tipe: "Informasi" },
+  { id: "peringatan", label: { id: "Peringatan", en: "Warning" }, tipe: "Peringatan" },
 ];
 
-// ─── Nav Icon Components ──────────────────────────────────────────────────────
-function HomeIcon({ active }: IconProps) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill={active ? "#1E3A8A" : "#9CA3AF"}
-    >
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg>
-  );
-}
-function DaftarIcon({ active }: IconProps) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={active ? "#1E3A8A" : "#9CA3AF"}
-      strokeWidth="2"
-    >
-      <rect x="5" y="2" width="14" height="20" rx="2" />
-      <line x1="9" y1="7" x2="15" y2="7" />
-      <line x1="9" y1="11" x2="15" y2="11" />
-      <line x1="9" y1="15" x2="13" y2="15" />
-    </svg>
-  );
-}
-function BayarIcon({ active }: IconProps) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={active ? "#1E3A8A" : "#9CA3AF"}
-      strokeWidth="2"
-    >
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <line x1="2" y1="10" x2="22" y2="10" />
-    </svg>
-  );
-}
-function StatusIcon({ active }: IconProps) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={active ? "#1E3A8A" : "#9CA3AF"}
-      strokeWidth="2"
-    >
-      <polyline points="9 11 12 14 22 4" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
-  );
-}
-function ProfilIcon({ active }: IconProps) {
-  return (
-    <svg
-      width="22" height="22" viewBox="0 0 24 24"
-      fill="none"
-      stroke={active ? "#1E3A8A" : "#9CA3AF"}
-      strokeWidth="2"
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-const navItems: NavItem[] = [
-  { id: "beranda", label: { id: "Beranda", en: "Home" }, icon: HomeIcon },
-  { id: "daftar", label: { id: "Daftar", en: "Register" }, icon: DaftarIcon },
-  { id: "bayar", label: { id: "Bayar", en: "Pay" }, icon: BayarIcon },
-  { id: "status", label: { id: "Status", en: "Status" }, icon: StatusIcon },
-  { id: "profil", label: { id: "Profil", en: "Profile" }, icon: ProfilIcon },
-];
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════════════ */
 function formatTanggal(iso: string, isEn: boolean): string {
   try {
-    const locale = isEn ? "en-US" : "id-ID";
-    return new Date(iso).toLocaleDateString(locale, {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(isEn ? "en-US" : "id-ID", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -192,423 +306,697 @@ function formatTanggal(iso: string, isEn: boolean): string {
   }
 }
 
-function getText(obj: { id: string; en: string }, isEn: boolean): string {
-  return isEn ? obj.en : obj.id;
+function useUi() {
+  const { theme, language } = useSettings();
+  const isDark = theme === "dark";
+  const isEn = language === "en";
+  return {
+    isDark,
+    isEn,
+    t: getTheme(isDark),
+    tr: (id: string, en: string) => (isEn ? en : id),
+  };
 }
 
-// ─── Detail Modal ─────────────────────────────────────────────────────────────
-function DetailModal({
-  item,
-  onClose,
-  isDark = false,
-  isEn = false,
+// Gambar dari /public/icons — otomatis fallback ke ikon vektor jika file gagal dimuat
+function AssetIcon({
+  src,
+  alt,
+  size,
+  fallback,
 }: {
-  item: Announcement;
-  onClose: () => void;
-  isDark?: boolean;
-  isEn?: boolean;
+  src: string;
+  alt: string;
+  size: number;
+  fallback: React.ReactNode;
 }) {
-  const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi;
-  const bgColor = isDark ? "#1e1b2e" : "#fff";
-  const textColor = isDark ? "#f1f0f5" : "#111827";
-  const subColor = isDark ? "#94a3b8" : "#374151";
-  const mutedColor = isDark ? "#6b6885" : "#6B7280";
-  const handleBg = isDark ? "#3d3655" : "#E5E7EB";
-  const lampBg = isDark ? "#2e2a40" : "#F3F4F6";
-  const lampColor = isDark ? "#a5b4fc" : "#1D4ED8";
-  const badgeBg = isDark ? cfg.bgDark : cfg.bg;
-  const closeBtnBg = isDark ? "#2e2a40" : "#1E3A8A";
-  const closeBtnColor = isDark ? "#f1f0f5" : "#fff";
-
+  const [err, setErr] = useState(false);
+  if (err) return <>{fallback}</>;
   return (
-    <div
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={encodeURI(src)}
+      alt={alt}
+      width={size}
+      height={size}
+      draggable={false}
+      onError={() => setErr(true)}
+      style={{ width: size, height: size, objectFit: "contain", display: "block", userSelect: "none" }}
+    />
+  );
+}
+
+// Lingkaran ikon (card BUNDAR) berisi PNG tipe pengumuman
+function TipeCircle({
+  tipe,
+  size,
+  imgSize,
+}: {
+  tipe: string;
+  size: number;
+  imgSize: number;
+}) {
+  const { isDark, isEn } = useUi();
+  const tone = toneOf(tipe, isDark, isEn);
+  return (
+    <span
       style={{
-        position: "fixed",
-        inset: 0,
-        background: isDark ? "rgba(0,0,0,0.8)" : "rgba(0,0,0,0.45)",
-        zIndex: 200,
+        width: size,
+        height: size,
+        minWidth: size,
+        borderRadius: "50%",
+        background: tone.soft,
+        border: `1.5px solid ${tone.line}`,
+        boxSizing: "border-box",
+        boxShadow: isDark ? "none" : `0 4px 12px ${tone.glow}`,
         display: "flex",
-        alignItems: "flex-end",
+        alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden",
       }}
     >
-      <div
-        style={{
-          background: bgColor,
-          borderRadius: "20px 20px 0 0",
-          padding: "24px 20px 36px",
-          width: "100%",
-          maxWidth: 430,
-          maxHeight: "80vh",
-          overflowY: "auto",
-          borderTop: isDark ? "1px solid #2e2a40" : "none",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 4,
-            background: handleBg,
-            borderRadius: 2,
-            margin: "0 auto 20px",
-          }}
-        />
+      <AssetIcon
+        src="/icons/pengumuman.png"
+        alt={isEn ? "Announcement" : "Pengumuman"}
+        size={imgSize}
+        fallback={
+          <span style={{ display: "flex", color: tone.fg }}>
+            <tone.Fallback size={Math.round(imgSize * 0.8)} />
+          </span>
+        }
+      />
+    </span>
+  );
+}
 
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: cfg.color,
-            background: badgeBg,
-            borderRadius: 20,
-            padding: "3px 10px",
-            letterSpacing: 0.4,
-          }}
-        >
-          ● {getText(cfg.label, isEn)}
-        </span>
+function Chip({
+  fg,
+  soft,
+  line,
+  dot,
+  children,
+}: {
+  fg: string;
+  soft: string;
+  line: string;
+  dot?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 10px",
+        borderRadius: 999,
+        fontSize: 11,
+        fontWeight: 700,
+        background: soft,
+        color: fg,
+        border: `1px solid ${line}`,
+        whiteSpace: "nowrap",
+        lineHeight: 1.3,
+      }}
+    >
+      {dot && <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot }} />}
+      {children}
+    </span>
+  );
+}
 
-        <h2
-          style={{
-            fontSize: 18,
-            fontWeight: 800,
-            color: textColor,
-            margin: "10px 0 6px",
-          }}
-        >
-          {item.judul}
-        </h2>
+/* ════════════════════════════════════════════════════════════════
+   CATEGORY TABS — card bundar per kategori
+   ════════════════════════════════════════════════════════════════ */
+function CategoryTabs({
+  active,
+  onChange,
+}: {
+  active: string;
+  onChange: (id: string) => void;
+}) {
+  const { isDark, isEn, t } = useUi();
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12,
-            color: mutedColor,
-            marginBottom: 16,
-          }}
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          {formatTanggal(item.tanggal, isEn)}
-        </div>
+  return (
+    <div role="tablist" style={{ ...getCardStyle(isDark), padding: "16px 8px 14px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${CATEGORIES.length}, 1fr)` }}>
+        {CATEGORIES.map((cat) => {
+          const isActive = active === cat.id;
+          const isAll = !cat.tipe;
+          const tone = cat.tipe ? toneOf(cat.tipe, isDark, isEn) : null;
+          const FallbackIcon = tone?.Fallback ?? IconInfo;
+          const ringColor = isAll ? t.primary : tone!.fg;
+          const circleBg = isActive
+            ? isAll
+              ? t.primarySoft
+              : tone!.soft
+            : t.surfaceAlt;
+          const labelColor = isActive ? (isAll ? t.primaryText : tone!.fg) : t.muted;
 
-        <p
-          style={{
-            fontSize: 14,
-            color: subColor,
-            lineHeight: 1.7,
-            margin: "0 0 20px",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {item.konten}
-        </p>
-
-        {item.lampiran_url && (
-          <a
-            href={item.lampiran_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 14px",
-              background: lampBg,
-              borderRadius: 10,
-              fontSize: 13,
-              color: lampColor,
-              fontWeight: 600,
-              textDecoration: "none",
-              marginBottom: 20,
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              className="pn-tab"
+              onClick={() => onChange(cat.id)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: "inherit",
+              }}
             >
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-            </svg>
-            {item.lampiran_nama ?? (isEn ? "View Attachment" : "Lihat Lampiran")}
-          </a>
-        )}
-
-        <button
-          onClick={onClose}
-          style={{
-            width: "100%",
-            padding: "13px",
-            background: closeBtnBg,
-            color: closeBtnColor,
-            borderRadius: 12,
-            border: "none",
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-        >
-          {isEn ? "Close" : "Tutup"}
-        </button>
+              <span
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: "50%",
+                  background: circleBg,
+                  border: `2px solid ${isActive ? ringColor : t.border}`,
+                  boxSizing: "border-box",
+                  boxShadow: isActive
+                    ? `0 0 0 4px ${isDark ? "rgba(74,222,152,.14)" : "rgba(15,107,74,.10)"}`
+                    : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "box-shadow .2s ease, border-color .2s ease, background-color .2s ease, transform .2s ease",
+                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                }}
+              >
+                {isAll ? (
+                  <span style={{ display: "flex", color: isActive ? t.primaryText : t.faint }}>
+                    <IconGrid size={22} />
+                  </span>
+                ) : (
+                  <span style={{ opacity: isActive ? 1 : 0.8, display: "flex" }}>
+                    <AssetIcon
+                      src={tone!.icon}
+                      alt={isEn ? cat.label.en : cat.label.id}
+                      size={30}
+                      fallback={
+                        <span style={{ display: "flex", color: tone!.fg }}>
+                          <FallbackIcon size={22} />
+                        </span>
+                      }
+                    />
+                  </span>
+                )}
+              </span>
+              <span
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: isActive ? 800 : 600,
+                  color: labelColor,
+                  lineHeight: 1.2,
+                  textAlign: "center",
+                }}
+              >
+                {isEn ? cat.label.en : cat.label.id}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-export default function PengumumanSiswaClient() {
-  const { theme, language } = useSettings();
-  const isDark = theme === "dark";
-  const isEn = language === "en";
+/* ════════════════════════════════════════════════════════════════
+   BANNER
+   ════════════════════════════════════════════════════════════════ */
+function Banner() {
+  const { isDark, t, tr } = useUi();
+  const [err, setErr] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("semua");
-  const [activeNav, setActiveNav] = useState("beranda");
-  const [megaphoneError, setMegaphoneError] = useState(false);
-  const [iconErrors, setIconErrors] = useState<Record<string, boolean>>({});
-  const [catIconErrors, setCatIconErrors] = useState<Record<string, boolean>>({});
-
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<Announcement | null>(null);
-
-  // ── Fixed header measurement (agar header tidak ikut ter-scroll) ───────────
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const [headerHeight, setHeaderHeight] = useState(72);
-
-  useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-
-    const updateHeight = () => setHeaderHeight(el.offsetHeight);
-    updateHeight();
-
-    const ro = new ResizeObserver(updateHeight);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  // ── Dark mode colors ──────────────────────────────────────────────────────
-  const bgColor = isDark ? "#15131f" : "#F0F4FF";
-  const cardBg = isDark ? "#1e1b2e" : "#fff";
-  const cardBorder = isDark ? "1px solid #2e2a40" : "1px solid #F3F4F6";
-  const textColor = isDark ? "#f1f0f5" : "#111827";
-  const subColor = isDark ? "#94a3b8" : "#6B7280";
-  const mutedColor = isDark ? "#6b6885" : "#9CA3AF";
-  const tabBg = isDark ? "#1e1b2e" : "#fff";
-  const tabBorder = isDark ? "1px solid #2e2a40" : "1px solid #E5E7EB";
-  const navBg = isDark ? "#1e1b2e" : "#fff";
-  const navBorder = isDark ? "1px solid #2e2a40" : "1px solid #E5E7EB";
-  const navColor = isDark ? "#6b6885" : "#9CA3AF";
-  const navActiveColor = isDark ? "#a5b4fc" : "#1E3A8A";
-  const skeletonBg = isDark ? "#2e2a40" : "#F3F4F6";
-  const emptyColor = isDark ? "#6b6885" : "#9CA3AF";
-  const errorBg = isDark ? "#2e1a1a" : "#FEF2F2";
-  const errorBorder = isDark ? "1px solid #4a1a1a" : "1px solid #FECACA";
-  const errorColor = isDark ? "#fca5a5" : "#DC2626";
-  const retryBtnBg = isDark ? "#2e2a40" : "#1E3A8A";
-  const retryBtnColor = isDark ? "#f1f0f5" : "#fff";
-  const detailBtnBg = isDark ? "#2e2a40" : "#1E3A8A";
-  const detailBtnColor = isDark ? "#f1f0f5" : "#fff";
-
-  // ── Fetch dari API ──
-  const fetchAnnouncements = useCallback(async (tipeFilter?: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams({ limit: "20" });
-      if (tipeFilter) params.set("tipe", tipeFilter);
-
-      const res = await fetch(`/api/siswa/announcements?${params.toString()}`);
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error ?? (isEn ? "Failed to load announcements" : "Gagal memuat pengumuman"));
-        return;
-      }
-      setAnnouncements(json.data ?? []);
-    } catch {
-      setError(isEn ? "Connection failed, try again." : "Koneksi gagal, coba lagi.");
-    } finally {
-      setLoading(false);
-    }
-  }, [isEn]);
-
-  useEffect(() => {
-    const cat = categories.find((c) => c.id === activeTab);
-    fetchAnnouncements(cat?.tipeFilter);
-  }, [activeTab, fetchAnnouncements]);
-
-  // ── Render card ──
-  function renderCard(item: Announcement) {
-    const cfg = TIPE_CONFIG[item.tipe] ?? TIPE_CONFIG.Informasi;
-    const badgeBg = isDark ? cfg.bgDark : cfg.bg;
-    const cardShadow = isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.06)";
-    const cardHoverShadow = isDark ? "0 4px 16px rgba(0,0,0,0.4)" : "0 4px 16px rgba(0,0,0,0.1)";
-
-    return (
-      <div
-        key={item.id}
-        onClick={() => setSelectedItem(item)}
-        style={{
-          background: cardBg,
-          borderRadius: 14,
-          padding: "14px",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          boxShadow: cardShadow,
-          cursor: "pointer",
-          transition: "all 0.2s",
-          border: cardBorder,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = cardHoverShadow;
-          e.currentTarget.style.transform = "translateY(-1px)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow = cardShadow;
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
-      >
-        <div
+  return (
+    <div
+      style={{
+        ...getCardStyle(isDark),
+        position: "relative",
+        overflow: "hidden",
+        height: 160,
+        background: t.gradient,
+      }}
+    >
+      {!err ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={encodeURI("/icons/pengumuman banner.png")}
+          alt={tr("Banner Pengumuman", "Announcement Banner")}
+          onError={() => setErr(true)}
           style={{
-            width: 54,
-            height: 54,
-            borderRadius: 14,
-            background: badgeBg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            overflow: "hidden",
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
           }}
-        >
-          {iconErrors[item.id] ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cfg.icon}
-              alt={item.tipe}
-              width={40}
-              height={40}
-              style={{ objectFit: "contain" }}
-            />
-          ) : (
-            <Image
-              src={cfg.icon}
-              alt={item.tipe}
-              width={40}
-              height={40}
-              style={{ objectFit: "contain" }}
-              onError={() =>
-                setIconErrors((prev) => ({ ...prev, [item.id]: true }))
-              }
-            />
-          )}
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 3,
-            }}
-          >
+        />
+      ) : (
+        <>
+          <div style={{ position: "absolute", top: -28, right: -28, width: 130, height: 130, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
+          <div style={{ position: "absolute", bottom: -26, left: "40%", width: 80, height: 80, borderRadius: "50%", background: "rgba(242,183,5,.16)" }} />
+          <div style={{ position: "relative", zIndex: 1, height: "100%", display: "flex", alignItems: "center", gap: 14, padding: "0 20px" }}>
             <span
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: cfg.color,
-                background: badgeBg,
-                borderRadius: 20,
-                padding: "2px 8px",
-                letterSpacing: 0.3,
+                width: 52,
+                height: 52,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,.14)",
+                border: "1px solid rgba(255,255,255,.22)",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
               }}
             >
-              ● {getText(cfg.label, isEn)}
+              <IconBell size={24} />
             </span>
-            <span style={{ fontSize: 10, color: mutedColor }}>
+            <div>
+              <p style={{ margin: 0, color: "#FFFFFF", fontSize: 17, fontWeight: 800, letterSpacing: "-.01em" }}>
+                {tr("Pengumuman", "Announcements")}
+              </p>
+              <p style={{ margin: "4px 0 0", color: "rgba(255,255,255,.82)", fontSize: 12.5, lineHeight: 1.45 }}>
+                {tr("Informasi resmi dari Pondok Pesantren", "Official information from the boarding school")}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ANNOUNCEMENT CARD
+   ════════════════════════════════════════════════════════════════ */
+function AnnouncementCard({
+  item,
+  onClick,
+}: {
+  item: Announcement;
+  onClick: (a: Announcement) => void;
+}) {
+  const { isDark, isEn, t, tr } = useUi();
+  const tone = toneOf(item.tipe, isDark, isEn);
+
+  return (
+    <button
+      type="button"
+      className="pn-card"
+      onClick={() => onClick(item)}
+      style={{
+        ...getCardStyle(isDark),
+        width: "100%",
+        textAlign: "left",
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        fontFamily: "inherit",
+        cursor: "pointer",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <TipeCircle tipe={item.tipe} size={56} imgSize={34} />
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
+            <Chip fg={tone.fg} soft={tone.soft} line={tone.line} dot={tone.fg}>
+              {tone.label}
+            </Chip>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 500, color: t.muted, whiteSpace: "nowrap" }}>
+              <span style={{ display: "flex", color: t.primaryText }}>
+                <IconCalendar size={12} />
+              </span>
               {formatTanggal(item.tanggal, isEn)}
             </span>
           </div>
-          <div
+          <h3
             style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: textColor,
-              marginBottom: 3,
+              margin: 0,
+              fontSize: 15,
+              fontWeight: 800,
+              color: t.text,
+              lineHeight: 1.35,
+              letterSpacing: "-.01em",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
             }}
           >
             {item.judul}
-          </div>
-          <div
+          </h3>
+        </div>
+      </div>
+
+      <p
+        style={{
+          margin: 0,
+          fontSize: 13,
+          color: t.muted,
+          fontWeight: 500,
+          lineHeight: 1.55,
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}
+      >
+        {item.konten}
+      </p>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          paddingTop: 12,
+          borderTop: `1px solid ${t.divider}`,
+        }}
+      >
+        {item.lampiran_url ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: t.muted }}>
+            <span style={{ display: "flex", color: t.primaryText }}>
+              <IconPaperclip size={14} />
+            </span>
+            {tr("Ada lampiran", "Has attachment")}
+          </span>
+        ) : (
+          <span />
+        )}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 800, color: tone.fg }}>
+          {tr("Baca selengkapnya", "Read more")}
+          <IconArrowRight size={14} />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function SkeletonCard() {
+  const { isDark, t } = useUi();
+  const bar = (w: string, h: number, r = 6, mb = 0): React.CSSProperties => ({
+    width: w,
+    height: h,
+    borderRadius: r,
+    background: t.pendingBg,
+    marginBottom: mb,
+  });
+  return (
+    <div style={{ ...getCardStyle(isDark), padding: 16, animation: "pn-pulse 1.5s ease-in-out infinite" }}>
+      <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 14 }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: t.pendingBg, flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          <div style={bar("35%", 20, 999, 8)} />
+          <div style={bar("75%", 14)} />
+        </div>
+      </div>
+      <div style={bar("92%", 11, 6, 6)} />
+      <div style={bar("68%", 11)} />
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DETAIL MODAL — bottom sheet
+   ════════════════════════════════════════════════════════════════ */
+function DetailModal({ item, onClose }: { item: Announcement; onClose: () => void }) {
+  const { isDark, isEn, t, tr } = useUi();
+  const tone = toneOf(item.tipe, isDark, isEn);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.judul}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 200,
+        background: "rgba(8,20,14,.55)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        animation: "pn-backdrop .22s ease forwards",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 430,
+          background: t.surface,
+          borderTop: `1px solid ${t.border}`,
+          borderRadius: "28px 28px 0 0",
+          padding: "0 20px calc(24px + env(safe-area-inset-bottom))",
+          maxHeight: "88dvh",
+          overflowY: "auto",
+          animation: "pn-sheet .3s cubic-bezier(.32,.72,0,1) forwards",
+        }}
+      >
+        <div style={{ width: 40, height: 4, borderRadius: 999, background: t.borderInput, margin: "12px auto 18px" }} />
+
+        {/* Chip + tombol tutup */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <Chip fg={tone.fg} soft={tone.soft} line={tone.line} dot={tone.fg}>
+            {tone.label}
+          </Chip>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={tr("Tutup", "Close")}
+            className="psmb-back"
             style={{
-              fontSize: 11,
-              color: subColor,
-              lineHeight: 1.4,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              width: 36,
+              height: 36,
+              minWidth: 36,
+              borderRadius: "50%",
+              background: t.primarySoft,
+              border: isDark ? "1px solid #22443A" : "1px solid #CFE6DA",
+              color: t.primaryText,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
             }}
           >
-            {item.konten}
+            <IconX size={15} />
+          </button>
+        </div>
+
+        {/* Judul */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+          <TipeCircle tipe={item.tipe} size={60} imgSize={36} />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: t.text, lineHeight: 1.35, letterSpacing: "-.01em", wordBreak: "break-word" }}>
+              {item.judul}
+            </h2>
+            <p style={{ margin: "6px 0 0", display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 500, color: t.muted }}>
+              <span style={{ display: "flex", color: t.primaryText }}>
+                <IconCalendar size={13} />
+              </span>
+              {formatTanggal(item.tanggal, isEn)}
+            </p>
           </div>
         </div>
 
-        <div style={{ flexShrink: 0 }}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={isDark ? "#6b6885" : "#9CA3AF"}
-            strokeWidth="2.5"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+        {/* Isi */}
+        <div
+          style={{
+            background: t.surfaceAlt,
+            border: `1px solid ${t.border}`,
+            borderRadius: 16,
+            padding: "14px 16px",
+            marginBottom: 16,
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 14, color: t.label, lineHeight: 1.75, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            {item.konten}
+          </p>
         </div>
+
+        {/* Lampiran */}
+        {item.lampiran_url && (
+          <a
+            href={item.lampiran_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pn-btn"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "12px 14px",
+              borderRadius: 16,
+              background: t.primarySoft,
+              border: isDark ? "1px solid #22443A" : "1px solid #CFE6DA",
+              color: t.primaryText,
+              textDecoration: "none",
+              marginBottom: 12,
+            }}
+          >
+            <span
+              style={{
+                width: 38,
+                height: 38,
+                minWidth: 38,
+                borderRadius: "50%",
+                background: t.gradient,
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconPaperclip size={16} />
+            </span>
+            <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 700, wordBreak: "break-word" }}>
+              {item.lampiran_nama ?? tr("Lihat Lampiran", "View Attachment")}
+            </span>
+            <IconArrowRight size={16} />
+          </a>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="pn-btn"
+          style={{
+            width: "100%",
+            minHeight: 50,
+            padding: "14px 18px",
+            borderRadius: 14,
+            border: "none",
+            background: t.gradient,
+            boxShadow: t.shadowBtn,
+            color: "#FFFFFF",
+            fontSize: 14,
+            fontWeight: 700,
+            fontFamily: "inherit",
+            cursor: "pointer",
+          }}
+        >
+          {tr("Tutup", "Close")}
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CSS GLOBAL HALAMAN
+   ════════════════════════════════════════════════════════════════ */
+const PAGE_CSS = `
+@keyframes pn-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+@keyframes pn-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pn-backdrop { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pn-sheet { from { transform: translateY(100%); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+.psmb-back { transition: transform .12s ease, background-color .15s ease; -webkit-tap-highlight-color: transparent; }
+.psmb-back:active { transform: scale(.94); }
+.pn-btn { transition: transform .12s ease, filter .15s ease; -webkit-tap-highlight-color: transparent; }
+.pn-btn:active { transform: scale(.98); }
+.pn-tab { -webkit-tap-highlight-color: transparent; }
+.pn-tab:active { transform: scale(.96); }
+.pn-card { transition: transform .15s ease; -webkit-tap-highlight-color: transparent; }
+.pn-card:active { transform: scale(.985); }
+@media (hover: hover) { .pn-card:hover { transform: translateY(-2px); } }
+.pn-nav { -webkit-tap-highlight-color: transparent; }
+`;
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN PAGE
+   ════════════════════════════════════════════════════════════════ */
+export default function PengumumanSiswaClient() {
+  const { isDark, isEn, t, tr } = useUi();
+
+  const [activeTab, setActiveTab] = useState("semua");
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Announcement | null>(null);
+
+  const fetchAnnouncements = useCallback(
+    async (tipeFilter?: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ limit: "20" });
+        if (tipeFilter) params.set("tipe", tipeFilter);
+
+        const res = await fetch(`/api/siswa/announcements?${params.toString()}`);
+        const json = await res.json();
+
+        if (!res.ok) {
+          setError(json.error ?? (isEn ? "Failed to load announcements" : "Gagal memuat pengumuman"));
+          return;
+        }
+        setAnnouncements(json.data ?? []);
+      } catch {
+        setError(isEn ? "Connection failed, try again." : "Koneksi gagal, coba lagi.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isEn],
+  );
+
+  useEffect(() => {
+    const cat = CATEGORIES.find((c) => c.id === activeTab);
+    fetchAnnouncements(cat?.tipe);
+  }, [activeTab, fetchAnnouncements]);
+
+  const handleClose = useCallback(() => setSelectedItem(null), []);
+
+  const navItems = [
+    { href: "/siswa", label: tr("Beranda", "Home"), Icon: NavHome },
+    { href: "/siswa/pendaftaran", label: tr("Daftar", "Register"), Icon: NavForm },
+    { href: "/siswa/pembayaran", label: tr("Bayar", "Pay"), Icon: NavCard },
+    { href: "/siswa/status", label: "Status", Icon: NavChart },
+    { href: "/siswa/profile", label: tr("Profil", "Profile"), Icon: NavUser },
+  ];
 
   return (
     <div
       style={{
-        minHeight: "100vh",
-        backgroundColor: bgColor,
-        fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', sans-serif",
+        position: "relative",
         maxWidth: 430,
         margin: "0 auto",
-        position: "relative",
+        minHeight: "100dvh",
+        background: t.bg,
         overflowX: "hidden",
+        WebkitFontSmoothing: "antialiased",
       }}
     >
-      {/* ─── TOP BAR (fixed, sama persis seperti header Pengaturan) ─── */}
+      {/* ══ HEADER (FIXED) — identik dengan halaman Pendaftaran ══ */}
       <div
-        ref={headerRef}
         style={{
           position: "fixed",
           top: 0,
@@ -616,417 +1004,213 @@ export default function PengumumanSiswaClient() {
           transform: "translateX(-50%)",
           width: "100%",
           maxWidth: 430,
-          zIndex: 50,
+          height: HEADER_HEIGHT,
+          zIndex: 40,
+          background: t.surface,
+          borderBottom: `1px solid ${t.border}`,
+          padding: "0 16px",
+          boxSizing: "border-box",
           display: "flex",
           alignItems: "center",
           gap: 12,
-          padding: "14.4px 16px 13.6px",
-          background: isDark ? "#15131f" : "#ffffff",
-          borderBottom: isDark ? "1px solid #2a2640" : "1px solid #e9eef2",
-          boxShadow: isDark
-            ? "0 2px 12px rgba(0,0,0,0.3)"
-            : "0 2px 12px rgba(14,124,95,0.06)",
         }}
       >
-        {/* Tombol kembali */}
-        <a
+        <Link
           href="/siswa"
-          aria-label={isEn ? "Back to Home" : "Kembali ke Beranda"}
+          aria-label={tr("Kembali", "Back")}
+          className="psmb-back"
           style={{
             width: 40,
             height: 40,
-            borderRadius: 12,
-            background: isDark ? "rgba(14,124,95,0.15)" : "#ecfdf5",
-            border: isDark
-              ? "1.5px solid rgba(14,124,95,0.3)"
-              : "1.5px solid #dcfce7",
+            minWidth: 40,
+            borderRadius: "50%",
+            background: t.primarySoft,
+            border: isDark ? "1px solid #22443A" : "1px solid #CFE6DA",
+            boxShadow: isDark ? "none" : "0 1px 2px rgba(15,107,74,.08)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#0e7c5f",
+            color: t.primaryText,
             textDecoration: "none",
             flexShrink: 0,
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-        </a>
+          <IconArrowLeft size={18} />
+        </Link>
 
-        {/* Judul & subjudul */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <h1
             style={{
-              fontSize: "1.05rem",
-              fontWeight: 800,
-              color: isDark ? "#f1f0f5" : "#0f172a",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
               margin: 0,
+              fontSize: 20,
+              fontWeight: 800,
+              color: t.text,
+              lineHeight: 1.25,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            {isEn ? "Announcements" : "Pengumuman"}
+            {tr("Pengumuman", "Announcements")}
           </h1>
           <p
             style={{
-              fontSize: "0.68rem",
-              color: isDark ? "#6b6680" : "#94a3b8",
+              margin: "2px 0 0",
+              fontSize: 13,
+              color: t.muted,
               fontWeight: 500,
-              margin: "0.1rem 0 0",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            {isEn
-              ? "Information & announcements from the Islamic Boarding School"
-              : "Informasi & pengumuman dari Pondok Pesantren"}
+            {tr("Informasi resmi dari Pondok Pesantren", "Official information from the boarding school")}
           </p>
         </div>
-
-        {/* Tombol ikon kanan */}
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: isDark ? "#1a1728" : "#f6f8fa",
-            border: isDark ? "1.5px solid #2a2640" : "1.5px solid #e9eef2",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#0e7c5f",
-            flexShrink: 0,
-          }}
-        >
-          {megaphoneError ? (
-            <span style={{ fontSize: 18 }}>📣</span>
-          ) : (
-            <Image
-              src="/icons/pengumuman-icon.png"
-              alt={isEn ? "Megaphone" : "Megaphone"}
-              width={20}
-              height={20}
-              style={{ objectFit: "contain" }}
-              onError={() => setMegaphoneError(true)}
-            />
-          )}
-        </div>
       </div>
 
-      {/* ─── SPACER: menggantikan tinggi header fixed di atas ─── */}
-      <div style={{ height: headerHeight }} />
-
-      {/* ─── CATEGORY FILTER TABS ─── */}
+      {/* ══ KONTEN ══ */}
       <div
         style={{
-          background: tabBg,
-          padding: "16px 8px 12px",
-          boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.2)" : "0 2px 8px rgba(0,0,0,0.06)",
-          borderBottom: tabBorder,
+          paddingTop: HEADER_HEIGHT + 16,
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingBottom: NAV_HEIGHT + 24,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
         }}
       >
-        <div
-          style={{ display: "flex", gap: 0, overflowX: "auto", scrollbarWidth: "none" }}
-        >
-          {categories.map((cat) => {
-            const isActive = activeTab === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 5,
-                  padding: "4px 8px 8px",
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  flex: "1 0 0",
-                  minWidth: 64,
-                  position: "relative",
-                  transition: "all 0.2s",
-                }}
-              >
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "transform 0.2s",
-                    transform: isActive ? "scale(1.08)" : "scale(1)",
-                  }}
-                >
-                  {cat.id === "semua" ? (
-                    <div
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        background: isActive ? (isDark ? "#1a2a3d" : "#EFF6FF") : (isDark ? "#2e2a40" : "#F3F4F6"),
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: isActive
-                          ? `2px solid ${cat.color}`
-                          : `2px solid ${isDark ? "#2e2a40" : "transparent"}`,
-                      }}
-                    >
-                      <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill={isActive ? cat.color : (isDark ? "#6b6885" : "#9CA3AF")}
-                      >
-                        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                      </svg>
-                    </div>
-                  ) : catIconErrors[cat.id] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={cat.imgSrc ?? ""}
-                      alt={getText(cat.label, isEn)}
-                      width={44}
-                      height={44}
-                      style={{ objectFit: "contain", opacity: isActive ? 1 : 0.85 }}
-                    />
-                  ) : (
-                    <Image
-                      src={cat.imgSrc ?? ""}
-                      alt={getText(cat.label, isEn)}
-                      width={44}
-                      height={44}
-                      style={{
-                        objectFit: "contain",
-                        filter: isActive
-                          ? "drop-shadow(0 2px 6px rgba(0,0,0,0.2))"
-                          : "grayscale(0%) opacity(0.85)",
-                      }}
-                      onError={() =>
-                        setCatIconErrors((prev) => ({
-                          ...prev,
-                          [cat.id]: true,
-                        }))
-                      }
-                    />
-                  )}
-                </div>
+        <CategoryTabs active={activeTab} onChange={setActiveTab} />
 
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: isActive ? cat.color : (isDark ? "#6b6885" : "#6B7280"),
-                    fontWeight: isActive ? 700 : 500,
-                    lineHeight: 1,
-                  }}
-                >
-                  {getText(cat.label, isEn)}
-                </div>
+        <Banner />
 
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: isActive ? cat.color : (isDark ? "#94a3b8" : "#374151"),
-                    fontWeight: 700,
-                    lineHeight: 1,
-                  }}
-                >
-                  {loading ? "…" : isActive ? announcements.length : ""}
-                </div>
-
-                {isActive && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: "20%",
-                      right: "20%",
-                      height: 2.5,
-                      borderRadius: 2,
-                      background: cat.color,
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ─── SCROLLABLE CONTENT ─── */}
-      <div style={{ padding: "16px 16px 100px", overflowY: "auto" }}>
-
-        {/* ── Welcome Banner ── */}
-        <div
-          style={{
-            borderRadius: 16,
-            marginBottom: 20,
-            position: "relative",
-            overflow: "hidden",
-            boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : "0 4px 20px rgba(30,58,138,0.25)",
-            height: 160,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/icons/pengumuman banner.png"
-            alt={isEn ? "Announcement Banner" : "Banner Pengumuman"}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
-        </div>
-
-        {/* ── Section Header ── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: textColor, margin: 0 }}>
-            {isEn ? "Latest Announcements" : "Pengumuman Terbaru"}
+        {/* Section header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <h2 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: t.text, letterSpacing: "-.01em" }}>
+            {tr("Pengumuman Terbaru", "Latest Announcements")}
           </h2>
-          {!loading && (
-            <span style={{ fontSize: 12, color: mutedColor }}>
-              {announcements.length} {isEn ? "announcements" : "pengumuman"}
+          {!loading && !error && (
+            <span
+              style={{
+                padding: "4px 10px",
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 700,
+                background: t.primarySoft,
+                color: t.primaryText,
+              }}
+            >
+              {announcements.length} {tr("pengumuman", "announcements")}
             </span>
           )}
         </div>
 
-        {/* ── Loading ── */}
+        {/* Loading */}
         {loading && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                style={{
-                  background: cardBg,
-                  borderRadius: 14,
-                  padding: "14px",
-                  height: 80,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  border: cardBorder,
-                }}
-              >
-                <div
-                  style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 14,
-                    background: skeletonBg,
-                    flexShrink: 0,
-                    animation: "pulse 1.5s ease-in-out infinite",
-                  }}
-                />
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-                  <div
-                    style={{
-                      height: 10,
-                      background: skeletonBg,
-                      borderRadius: 6,
-                      width: "40%",
-                    }}
-                  />
-                  <div
-                    style={{
-                      height: 13,
-                      background: skeletonBg,
-                      borderRadius: 6,
-                      width: "80%",
-                    }}
-                  />
-                  <div
-                    style={{
-                      height: 10,
-                      background: skeletonBg,
-                      borderRadius: 6,
-                      width: "60%",
-                    }}
-                  />
-                </div>
-              </div>
+              <SkeletonCard key={i} />
             ))}
           </div>
         )}
 
-        {/* ── Error ── */}
+        {/* Error */}
         {!loading && error && (
           <div
+            role="alert"
             style={{
-              background: errorBg,
-              border: errorBorder,
-              borderRadius: 12,
-              padding: "16px",
-              textAlign: "center",
+              background: isDark ? "#2e1a1a" : "#FEECEC",
+              border: `1px solid ${isDark ? "#4a1a1a" : "#F5A9A9"}`,
+              borderRadius: 14,
+              padding: "12px 14px",
+              color: isDark ? "#fca5a5" : "#B42318",
+              fontSize: 13.5,
+              lineHeight: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
             }}
           >
-            <p style={{ color: errorColor, fontSize: 14, margin: "0 0 12px" }}>
-              {error}
-            </p>
+            <span style={{ display: "flex", flexShrink: 0 }}>
+              <IconAlertTriangle size={17} />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>{error}</span>
             <button
+              type="button"
               onClick={() => {
-                const cat = categories.find((c) => c.id === activeTab);
-                fetchAnnouncements(cat?.tipeFilter);
+                const cat = CATEGORIES.find((c) => c.id === activeTab);
+                fetchAnnouncements(cat?.tipe);
               }}
               style={{
-                padding: "8px 20px",
-                background: retryBtnBg,
-                color: retryBtnColor,
+                background: "none",
                 border: "none",
-                borderRadius: 8,
+                color: "inherit",
+                fontWeight: 800,
                 fontSize: 13,
-                fontWeight: 600,
+                fontFamily: "inherit",
                 cursor: "pointer",
+                flexShrink: 0,
               }}
             >
-              {isEn ? "Try Again" : "Coba Lagi"}
+              {tr("Coba Lagi", "Try Again")}
             </button>
           </div>
         )}
 
-        {/* ── Empty state ── */}
+        {/* Empty */}
         {!loading && !error && announcements.length === 0 && (
           <div
             style={{
-              textAlign: "center",
-              padding: "48px 20px",
-              color: emptyColor,
+              ...getCardStyle(isDark),
+              padding: "40px 24px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 14,
+              animation: "pn-fade .3s ease both",
             }}
           >
-            <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
-            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>
-              {isEn ? "No Announcements Yet" : "Belum Ada Pengumuman"}
-            </p>
-            <p style={{ fontSize: 12, margin: 0 }}>
-              {isEn ? "Announcements will appear here." : "Pengumuman akan muncul di sini."}
-            </p>
+            <span
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                background: t.primarySoft,
+                color: t.primaryText,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconInbox size={28} />
+            </span>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: t.text }}>
+                {tr("Belum Ada Pengumuman", "No Announcements Yet")}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: t.muted, lineHeight: 1.5 }}>
+                {tr("Pengumuman akan muncul di sini.", "Announcements will appear here.")}
+              </p>
+            </div>
           </div>
         )}
 
-        {/* ── Announcement Cards ── */}
+        {/* Cards */}
         {!loading && !error && announcements.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {announcements.map((item) => renderCard(item))}
+          <div
+            key={activeTab}
+            style={{ display: "flex", flexDirection: "column", gap: 12, animation: "pn-fade .3s ease both" }}
+          >
+            {announcements.map((item) => (
+              <AnnouncementCard key={item.id} item={item} onClick={setSelectedItem} />
+            ))}
           </div>
         )}
       </div>
 
-      {/* ─── BOTTOM NAVIGATION BAR ─── */}
-      <div
+      {/* ══ BOTTOM NAV (FIXED) ══ */}
+      <nav
         style={{
           position: "fixed",
           bottom: 0,
@@ -1034,65 +1218,41 @@ export default function PengumumanSiswaClient() {
           transform: "translateX(-50%)",
           width: "100%",
           maxWidth: 430,
-          background: navBg,
-          borderTop: navBorder,
-          display: "flex",
-          alignItems: "center",
-          padding: "8px 0 16px",
-          boxShadow: isDark ? "0 -4px 20px rgba(0,0,0,0.3)" : "0 -4px 20px rgba(0,0,0,0.08)",
           zIndex: 100,
+          background: t.surface,
+          borderTop: `1px solid ${t.border}`,
+          boxShadow: isDark ? "none" : "0 -4px 20px rgba(15,60,40,.07)",
+          display: "flex",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {navItems.map((nav) => {
-          const Icon = nav.icon;
-          const isActive = activeNav === nav.id;
-          return (
-            <button
-              key={nav.id}
-              onClick={() => setActiveNav(nav.id)}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 3,
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                padding: "4px 0",
-              }}
-            >
-              <Icon active={isActive} />
-              <span
-                style={{
-                  fontSize: 10,
-                  color: isActive ? navActiveColor : navColor,
-                  fontWeight: isActive ? 700 : 400,
-                }}
-              >
-                {getText(nav.label, isEn)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+        {navItems.map(({ href, label, Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="pn-nav"
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "10px 0 12px",
+              gap: 4,
+              color: t.faint,
+              textDecoration: "none",
+              fontSize: 10.5,
+              fontWeight: 500,
+            }}
+          >
+            <Icon size={22} color={t.faint} />
+            <span>{label}</span>
+          </Link>
+        ))}
+      </nav>
 
-      {/* ─── DETAIL MODAL ─── */}
-      {selectedItem && (
-        <DetailModal
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-          isDark={isDark}
-          isEn={isEn}
-        />
-      )}
+      {selectedItem && <DetailModal item={selectedItem} onClose={handleClose} />}
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      <style>{PAGE_CSS}</style>
     </div>
   );
 }

@@ -144,15 +144,6 @@
   background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
   box-shadow: 0 12px 28px rgba(7, 59, 44, 0.28);
 }
-.heroBannerBgPattern {
-  position: absolute;
-  inset: 0;
-  opacity: 0.5;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 22px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 22px);
-}
 .heroBannerContent {
   position: absolute;
   /* PERBAIKAN: absolute agar selalu menempati area kiri yang sama */

@@ -1,10 +1,207 @@
 'use client'
+// app/siswa/peraturan/page.tsx
 
 import Link from 'next/link'
 import Image from 'next/image'
-import React, { useState, useRef, useEffect } from 'react'
-import styles from './peraturan.module.css'
+import React, { useState } from 'react'
 import { useSettings } from '@/contexts/SettingsContext'
+
+// ════════════════════════════════════════════════════════════════════════
+// KONSTANTA — ganti di sini bila nama file icon berbeda
+// ════════════════════════════════════════════════════════════════════════
+const PERATURAN_ICON = '/icons/peraturan-icon-santri.png'
+const HEADER_HEIGHT = 84
+const NAV_HEIGHT = 68
+
+// ════════════════════════════════════════════════════════════════════════
+// Icon set — SVG line-style (gaya sama dengan halaman Pendaftaran)
+// ════════════════════════════════════════════════════════════════════════
+type IconProps = { size?: number; color?: string; strokeWidth?: number }
+
+const Svg = ({
+  size, color, strokeWidth, children,
+}: Required<IconProps> & { children: React.ReactNode }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    {children}
+  </svg>
+)
+
+// Ikon panah kembali — IDENTIK dengan halaman Pendaftaran / Jadwal / Laporan / Pengumuman
+const IconArrowLeft = ({ size = 18, color = 'currentColor', strokeWidth = 2.3 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M19 12H5" />
+    <path d="m12 19-7-7 7-7" />
+  </Svg>
+)
+
+const IconChevronRight = ({ size = 14, color = 'currentColor', strokeWidth = 2.3 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M9 5l7 7-7 7" />
+  </Svg>
+)
+
+const IconChevronDown = ({ size = 14, color = 'currentColor', strokeWidth = 2.4 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="m6 9 6 6 6-6" />
+  </Svg>
+)
+
+const IconAlertTriangle = ({ size = 18, color = 'currentColor', strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="M12 3.5 21.5 20H2.5L12 3.5Z" />
+    <path d="M12 10v4" />
+    <path d="M12 17.2h.01" />
+  </Svg>
+)
+
+const IconInfo = ({ size = 18, color = 'currentColor', strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5" />
+    <path d="M12 7.8h.01" />
+  </Svg>
+)
+
+// Ikon palu (cadangan bila PNG gagal dimuat)
+const IconGavel = ({ size = 22, color = 'currentColor', strokeWidth = 1.8 }: IconProps) => (
+  <Svg size={size} color={color} strokeWidth={strokeWidth}>
+    <path d="m14 13-8.4 8.4a1.4 1.4 0 0 1-2-2L12 11" />
+    <path d="m13.5 4.5 6 6" />
+    <path d="m9.5 8.5 6 6" />
+    <rect x="9.6" y="2.4" width="7" height="5" rx="1" transform="rotate(45 13.1 4.9)" />
+    <rect x="14.6" y="7.4" width="7" height="5" rx="1" transform="rotate(45 18.1 9.9)" />
+  </Svg>
+)
+
+// ════════════════════════════════════════════════════════════════════════
+// Theme (identik dengan halaman Pendaftaran & lainnya)
+// ════════════════════════════════════════════════════════════════════════
+function getTheme(isDark: boolean) {
+  return {
+    bg:          isDark ? '#0E1512' : '#F5F8F6',
+    surface:     isDark ? '#15201B' : '#FFFFFF',
+    surfaceAlt:  isDark ? '#101A16' : '#F6F9F7',
+    border:      isDark ? '#22332B' : '#E7EEE9',
+    borderInput: isDark ? '#2A3D34' : '#DCE6DF',
+    divider:     isDark ? '#22332B' : '#EAF0EC',
+    text:        isDark ? '#EEF5F1' : '#14231C',
+    label:       isDark ? '#CFE0D6' : '#1B2E25',
+    muted:       isDark ? '#8FA89B' : '#6B7F74',
+    faint:       isDark ? '#5E7569' : '#A3B3AA',
+    primary:     '#0F6B4A',
+    primaryDark: '#0A4F37',
+    primaryText: isDark ? '#4ADE98' : '#0F6B4A',
+    primarySoft: isDark ? '#16302A' : '#E8F4EE',
+    accent:      '#F2B705',
+    pendingBg:   isDark ? '#22332B' : '#EDF2EF',
+    line:        isDark ? '#22332B' : '#DCE6DF',
+    gradient:    'linear-gradient(135deg, #0F6B4A 0%, #0A4F37 100%)',
+    shadowBtn:   '0 8px 20px rgba(15,107,74,.26)',
+  }
+}
+
+function useUi() {
+  const { theme, language } = useSettings()
+  const isDark = theme === 'dark'
+  const isEn = language === 'en'
+  return {
+    isDark,
+    isEn,
+    t: getTheme(isDark),
+    tr: (id: string, en: string) => (isEn ? en : id),
+  }
+}
+
+function getCardStyle(isDark: boolean): React.CSSProperties {
+  const t = getTheme(isDark)
+  return {
+    background: t.surface,
+    border: `1px solid ${t.border}`,
+    borderRadius: 22,
+    boxShadow: isDark ? 'none' : '0 1px 2px rgba(15,60,40,.04), 0 10px 28px rgba(15,60,40,.06)',
+  }
+}
+
+// Teks rata kanan-kiri
+const JUSTIFY: React.CSSProperties = {
+  textAlign: 'justify',
+  textJustify: 'inter-word',
+  hyphens: 'auto',
+  WebkitHyphens: 'auto',
+  wordBreak: 'break-word',
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// Tone per kategori & sanksi
+// ════════════════════════════════════════════════════════════════════════
+interface ToneDef {
+  fg: string; fgDark: string
+  soft: string; softDark: string
+  line: string; lineDark: string
+  grad: string; glow: string
+}
+
+const TONES: Record<string, ToneDef> = {
+  'tata-tertib': {
+    fg: '#0A4F37', fgDark: '#4ADE98', soft: '#E8F4EE', softDark: '#16302A',
+    line: '#BFE0CE', lineDark: '#22443A',
+    grad: 'linear-gradient(135deg, #0F6B4A 0%, #0A4F37 100%)', glow: 'rgba(15,107,74,.26)',
+  },
+  'kewajiban': {
+    fg: '#0E6E83', fgDark: '#5CC8DB', soft: '#E3F4F8', softDark: '#12303A',
+    line: '#B5DEE8', lineDark: '#1F4654',
+    grad: 'linear-gradient(135deg, #0E8FA8 0%, #0B6F83 100%)', glow: 'rgba(14,143,168,.26)',
+  },
+  'larangan': {
+    fg: '#B42318', fgDark: '#fca5a5', soft: '#FEECEC', softDark: '#2e1a1a',
+    line: '#F5A9A9', lineDark: '#4a1a1a',
+    grad: 'linear-gradient(135deg, #E5484D 0%, #B42318 100%)', glow: 'rgba(220,38,38,.26)',
+  },
+  'sanksi': {
+    fg: '#5B3FC4', fgDark: '#B7A6FF', soft: '#EFEBFD', softDark: '#231F3D',
+    line: '#D4C9F7', lineDark: '#373064',
+    grad: 'linear-gradient(135deg, #7C5CE0 0%, #5B3FC4 100%)', glow: 'rgba(124,92,224,.26)',
+  },
+  'lain': {
+    fg: '#8A6200', fgDark: '#fbbf24', soft: '#FFF6D6', softDark: '#2e2a1a',
+    line: '#F2D77A', lineDark: '#4a3a1a',
+    grad: 'linear-gradient(135deg, #F2B705 0%, #D99A00 100%)', glow: 'rgba(242,183,5,.30)',
+  },
+  'wali-santri': {
+    fg: '#2456B8', fgDark: '#93B4F5', soft: '#E8EFFD', softDark: '#18233D',
+    line: '#BFD1F5', lineDark: '#27375F',
+    grad: 'linear-gradient(135deg, #3B74E0 0%, #2456B8 100%)', glow: 'rgba(59,116,224,.26)',
+  },
+}
+
+function toneOf(id: string, isDark: boolean) {
+  const m = TONES[id] ?? TONES['tata-tertib']
+  return {
+    fg: isDark ? m.fgDark : m.fg,
+    soft: isDark ? m.softDark : m.soft,
+    line: isDark ? m.lineDark : m.line,
+    grad: m.grad,
+    glow: m.glow,
+  }
+}
+
+function sanksiTone(key: 'ringan' | 'sedang' | 'berat', isDark: boolean) {
+  const map = {
+    ringan: {
+      fg: isDark ? '#fbbf24' : '#8A6200', soft: isDark ? '#2e2a1a' : '#FFF6D6',
+      line: isDark ? '#4a3a1a' : '#F2D77A', bar: '#F2B705',
+    },
+    sedang: {
+      fg: isDark ? '#fdba74' : '#C2410C', soft: isDark ? '#3a2412' : '#FFEDD5',
+      line: isDark ? '#5a3716' : '#FDC99B', bar: '#F97316',
+    },
+    berat: {
+      fg: isDark ? '#fca5a5' : '#B42318', soft: isDark ? '#2e1a1a' : '#FEECEC',
+      line: isDark ? '#4a1a1a' : '#F5A9A9', bar: '#EF4444',
+    },
+  }
+  return map[key]
+}
 
 // ════════════════════════════════════════════════════════════════════════
 // Types
@@ -15,107 +212,36 @@ interface PasalItem {
   items: string[]
 }
 
-interface CategoryColors {
-  cardBg: string
-  border: string
-  iconBg: string
-  accent: string
-  tagBg: string
-  tagText: string
-}
-
 interface CategoryDef {
   id: string
-  chipLabel: string
   title: string
   desc: string
   bab: string
   babTitle: string
   pasalCount: number
-  illustration?: string
-  colors: CategoryColors
   pasal: PasalItem[]
 }
 
 interface SanksiLevel {
-  level: string
-  color: string
-  bg: string
-  border: string
-  iconBg: string
-  barColor: string
+  key: 'ringan' | 'sedang' | 'berat'
+  level: { id: string; en: string }
+  pill: { id: string; en: string }
   barWidth: string
   pasalRef: string
   hukuman: string[]
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// Icon set
-// ════════════════════════════════════════════════════════════════════════
-const IconArrowLeft = ({ color = 'currentColor', size = 18 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-)
-
-const IconChevronRight = ({ color = 'currentColor', size = 16 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-)
-
-const IconChevronDown = ({ color = 'currentColor', size = 16 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-)
-
-const IconGrid = ({ color = 'currentColor', size = 16 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <rect x="3" y="3" width="7.5" height="7.5" rx="1.8" />
-    <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" />
-    <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" />
-    <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" />
-  </svg>
-)
-
-const IconAlertTriangle = ({ color = 'currentColor', size = 16 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-    <line x1="12" y1="9" x2="12" y2="13" />
-    <line x1="12" y1="17" x2="12.01" y2="17" />
-  </svg>
-)
-
-const IconInfo = ({ color = '#15803d', size = 15 }: { color?: string; size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '0.12rem' }}>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-)
-
-// ════════════════════════════════════════════════════════════════════════
-// Data peraturan - dengan i18n
+// Data peraturan
 // ════════════════════════════════════════════════════════════════════════
 const CATEGORIES: CategoryDef[] = [
   {
     id: 'tata-tertib',
-    chipLabel: 'Tata Tertib',
     title: 'Tata Tertib Umum',
     desc: 'Aturan dasar dan umum yang wajib diikuti seluruh santri.',
     bab: 'BAB I',
     babTitle: 'Ketentuan Umum',
     pasalCount: 2,
-    illustration: '/icons/tata-tertib-icon.png',
-    colors: {
-      cardBg: 'linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)',
-      border: '#bbf7d0',
-      iconBg: '#dcfce7',
-      accent: '#16a34a',
-      tagBg: '#dcfce7',
-      tagText: '#166534',
-    },
     pasal: [
       {
         pasal: 1,
@@ -139,21 +265,11 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     id: 'kewajiban',
-    chipLabel: 'Kewajiban',
     title: 'Kewajiban & Ketentuan',
     desc: 'Kewajiban santri dalam menjalankan kegiatan di pondok.',
     bab: 'BAB II',
     babTitle: 'Kewajiban Santri',
     pasalCount: 5,
-    illustration: '/image/kewajiban.png',
-    colors: {
-      cardBg: 'linear-gradient(160deg, #f0fdf9 0%, #d1fae5 100%)',
-      border: '#a7f3d0',
-      iconBg: '#d1fae5',
-      accent: '#059669',
-      tagBg: '#d1fae5',
-      tagText: '#065f46',
-    },
     pasal: [
       {
         pasal: 3,
@@ -227,21 +343,11 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     id: 'larangan',
-    chipLabel: 'Larangan',
     title: 'Larangan & Pelanggaran',
     desc: 'Pelanggaran yang tidak boleh dilakukan santri di lingkungan pondok.',
     bab: 'BAB III',
     babTitle: 'Larangan',
     pasalCount: 5,
-    illustration: '/icons/icon penting.png',
-    colors: {
-      cardBg: 'linear-gradient(160deg, #fffbeb 0%, #fef3c7 100%)',
-      border: '#fde68a',
-      iconBg: '#fee2e2',
-      accent: '#dc2626',
-      tagBg: '#fee2e2',
-      tagText: '#991b1b',
-    },
     pasal: [
       {
         pasal: 8,
@@ -323,21 +429,11 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     id: 'sanksi',
-    chipLabel: 'Sanksi',
     title: 'Sanksi & Hukuman',
     desc: 'Jenis pelanggaran dan sanksi sesuai tingkat pelanggaran.',
     bab: 'BAB IV',
     babTitle: 'Sanksi & Pelaksanaan',
     pasalCount: 4,
-    illustration: '/icons/sanksi hakim.png',
-    colors: {
-      cardBg: 'linear-gradient(160deg, #faf5ff 0%, #ede9fe 100%)',
-      border: '#ddd6fe',
-      iconBg: '#ede9fe',
-      accent: '#7c3aed',
-      tagBg: '#ede9fe',
-      tagText: '#5b21b6',
-    },
     pasal: [
       {
         pasal: 15,
@@ -360,20 +456,11 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     id: 'lain',
-    chipLabel: 'Ketentuan Lain',
     title: 'Tujuan & Aturan Tambahan',
     desc: 'Tujuan tata tertib serta aturan tambahan bagi santri.',
     bab: 'BAB V & VI',
     babTitle: 'Ketentuan Lain',
     pasalCount: 3,
-    colors: {
-      cardBg: 'linear-gradient(160deg, #f0fdfa 0%, #ccfbf1 100%)',
-      border: '#99f6e4',
-      iconBg: '#ccfbf1',
-      accent: '#0d9488',
-      tagBg: '#ccfbf1',
-      tagText: '#115e59',
-    },
     pasal: [
       {
         pasal: 17,
@@ -406,20 +493,11 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     id: 'wali-santri',
-    chipLabel: 'Wali Santri',
     title: 'Tata Tertib Wali Santri',
     desc: 'Ketentuan dan etika bertamu bagi wali/orang tua santri.',
     bab: 'Lampiran',
     babTitle: 'Wali Santri & Etika Bertamu',
     pasalCount: 2,
-    colors: {
-      cardBg: 'linear-gradient(160deg, #eff6ff 0%, #dbeafe 100%)',
-      border: '#bfdbfe',
-      iconBg: '#dbeafe',
-      accent: '#2563eb',
-      tagBg: '#dbeafe',
-      tagText: '#1e40af',
-    },
     pasal: [
       {
         pasal: 0,
@@ -452,209 +530,398 @@ const CATEGORIES: CategoryDef[] = [
 
 const SANKSI_LEVELS: SanksiLevel[] = [
   {
-    level: 'RINGAN',
-    color: '#d97706',
-    bg: 'linear-gradient(135deg, #fffbeb 0%, #fef9ec 100%)',
-    border: '#fde68a',
-    iconBg: '#fef3c7',
-    barColor: '#fbbf24',
+    key: 'ringan',
+    level: { id: 'RINGAN', en: 'MILD' },
+    pill: { id: 'Pelanggaran Ringan', en: 'Mild Violation' },
     barWidth: '33%',
     pasalRef: 'Pasal 10 ayat 11, 12, 13, 14 · Pasal 11 ayat 1, 3, 8 · Pasal 12 ayat 1, 4, 5',
     hukuman: ['Diperingatkan', 'Pernyataan diri tidak mengulangi', 'Disiram dengan air'],
   },
   {
-    level: 'SEDANG',
-    color: '#ea580c',
-    bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-    border: '#fed7aa',
-    iconBg: '#ffedd5',
-    barColor: '#fb923c',
+    key: 'sedang',
+    level: { id: 'SEDANG', en: 'MODERATE' },
+    pill: { id: 'Pelanggaran Sedang', en: 'Moderate Violation' },
     barWidth: '66%',
     pasalRef: 'Pasal 8 ayat 1–2 · Pasal 9 ayat 2 · Pasal 10 ayat 8, 10, 15–19, 21 · Pasal 11 ayat 2, 6, 7 · Pasal 12 ayat 2, 3, 7, 8, 9',
     hukuman: ['Nadhofah / bersih-bersih', 'Membaca atau menulis surat pilihan di lapangan', 'Membuat surat perjanjian'],
   },
   {
-    level: 'BERAT',
-    color: '#7c3aed',
-    bg: 'linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%)',
-    border: '#ddd6fe',
-    iconBg: '#ede9fe',
-    barColor: '#a78bfa',
+    key: 'berat',
+    level: { id: 'BERAT', en: 'SEVERE' },
+    pill: { id: 'Pelanggaran Berat', en: 'Severe Violation' },
     barWidth: '100%',
     pasalRef: 'Pasal 9 ayat 1, 3 · Pasal 10 ayat 1–7, 9, 20 · Pasal 11 ayat 4, 5, 9 · Pasal 12 ayat 6, 10',
     hukuman: ['Dicukur', 'Ganti rugi', 'Penyitaan barang tanpa dikembalikan', 'Denda', 'Disowankan kepada pengasuh', 'Dikembalikan kepada wali/orang tua'],
   },
 ]
 
+// Teks ringkasan (i18n)
+const RINGKASAN_TEXT: Record<string, { title: { id: string; en: string }; desc: { id: string; en: string } }> = {
+  'tata-tertib': {
+    title: { id: 'BAB I — Ketentuan Umum', en: 'Chapter I — General Provisions' },
+    desc: { id: 'Aturan dasar dan umum yang berlaku.', en: 'Basic rules and general provisions.' },
+  },
+  'kewajiban': {
+    title: { id: 'BAB II — Kewajiban Santri', en: 'Chapter II — Student Obligations' },
+    desc: { id: 'Kewajiban santri dalam keseluruhan.', en: 'Student obligations in general.' },
+  },
+  'larangan': {
+    title: { id: 'BAB III — Pelanggaran', en: 'Chapter III — Prohibitions' },
+    desc: { id: 'Pelanggaran yang tidak boleh dilakukan.', en: 'Prohibitions that must not be violated.' },
+  },
+  'sanksi': {
+    title: { id: 'BAB IV — Sanksi & Pelaksanaan', en: 'Chapter IV — Sanctions & Implementation' },
+    desc: { id: 'Jenis pelanggaran dan sanksi yang diterapkan.', en: 'Types of violations and applicable sanctions.' },
+  },
+  'lain': {
+    title: { id: 'BAB V & VI — Ketentuan Lain', en: 'Chapter V & VI — Other Provisions' },
+    desc: { id: 'Tujuan tata tertib serta aturan tambahan.', en: 'Purpose of regulations and additional rules.' },
+  },
+  'wali-santri': {
+    title: { id: 'Lampiran — Wali Santri & Lainnya', en: 'Appendix — Parents & Others' },
+    desc: { id: 'Ketentuan dan etika bersama wali santri.', en: 'Provisions and etiquette for parents.' },
+  },
+}
+
 // ════════════════════════════════════════════════════════════════════════
-// Sub-komponen: detail satu kategori
+// Sub-komponen umum
+// ════════════════════════════════════════════════════════════════════════
+
+// Gambar dari /public/icons — otomatis fallback ke ikon vektor jika file gagal dimuat
+function AssetIcon({
+  src, alt, size, fallback,
+}: {
+  src: string
+  alt: string
+  size: number
+  fallback: React.ReactNode
+}) {
+  const [err, setErr] = useState(false)
+  if (err) return <>{fallback}</>
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={encodeURI(src)}
+      alt={alt}
+      width={size}
+      height={size}
+      draggable={false}
+      onError={() => setErr(true)}
+      style={{ width: size, height: size, objectFit: 'contain', display: 'block', userSelect: 'none' }}
+    />
+  )
+}
+
+// Card BUNDAR berisi icon peraturan (palu)
+function PeraturanBubble({
+  categoryId, size, imgSize,
+}: {
+  categoryId: string
+  size: number
+  imgSize: number
+}) {
+  const { isDark } = useUi()
+  const tone = toneOf(categoryId, isDark)
+  return (
+    <span
+      style={{
+        width: size,
+        height: size,
+        minWidth: size,
+        borderRadius: '50%',
+        background: tone.soft,
+        border: `1.5px solid ${tone.line}`,
+        boxSizing: 'border-box',
+        boxShadow: isDark ? 'none' : `0 4px 12px ${tone.glow}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
+    >
+      <AssetIcon
+        src={PERATURAN_ICON}
+        alt="Peraturan"
+        size={imgSize}
+        fallback={
+          <span style={{ display: 'flex', color: tone.fg }}>
+            <IconGavel size={Math.round(imgSize * 0.8)} />
+          </span>
+        }
+      />
+    </span>
+  )
+}
+
+function Chip({
+  fg, soft, line, children,
+}: {
+  fg: string; soft: string; line: string; children: React.ReactNode
+}) {
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '4px 10px',
+        borderRadius: 999,
+        fontSize: 11,
+        fontWeight: 700,
+        background: soft,
+        color: fg,
+        border: `1px solid ${line}`,
+        whiteSpace: 'nowrap',
+        lineHeight: 1.3,
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// Detail satu kategori
 // ════════════════════════════════════════════════════════════════════════
 function CategoryDetail({
-  category,
-  expandedKey,
-  toggle,
+  category, expandedKey, toggle,
 }: {
   category: CategoryDef
   expandedKey: string | null
   toggle: (key: string) => void
 }) {
+  const { isDark, isEn, t, tr } = useUi()
+  const tone = toneOf(category.id, isDark)
+
   return (
-    <div className={styles.detailSection}>
-      <div className={styles.detailHeader} style={{ borderColor: category.colors.border }}>
-        <div className={styles.detailIconWrap} style={{ background: category.colors.iconBg }}>
-          {category.id === 'tata-tertib' && (
-            <Image
-              src="/icons/ketentuan-umum-icon.png"
-              alt="Ketentuan Umum"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-          {category.id === 'kewajiban' && (
-            <Image
-              src="/icons/kewajiban-santri-icon.png"
-              alt="Kewajiban Santri"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-          {category.id === 'larangan' && (
-            <Image
-              src="/icons/pelanggaran-icon.png"
-              alt="Pelanggaran"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-          {category.id === 'sanksi' && (
-            <Image
-              src="/icons/sanksi___hukuman-icon.png"
-              alt="Sanksi & Pelaksanaan"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-          {category.id === 'lain' && (
-            <Image
-              src="/icons/ketentuan-lain-icon.png"
-              alt="Ketentuan Lain"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-          {category.id === 'wali-santri' && (
-            <Image
-              src="/icons/lampiran-icon.png"
-              alt="Lampiran Wali Santri"
-              width={24}
-              height={24}
-              className={styles.detailIconImage}
-            />
-          )}
-        </div>
-        <div>
-          <p className={styles.detailBabTag} style={{ color: category.colors.accent }}>
-            {category.bab} &mdash; {category.babTitle}
+    <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Header kategori */}
+      <div style={{ ...getCardStyle(isDark), padding: 16, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+        <PeraturanBubble categoryId={category.id} size={60} imgSize={40} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            style={{
+              margin: '0 0 6px',
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: '.05em',
+              textTransform: 'uppercase',
+              color: tone.fg,
+              lineHeight: 1.4,
+            }}
+          >
+            {category.bab} — {category.babTitle}
           </p>
-          <h3 className={styles.detailTitle}>{category.title}</h3>
-          <p className={styles.detailDesc}>{category.desc}</p>
+          <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 800, color: t.text, lineHeight: 1.3, letterSpacing: '-.01em' }}>
+            {category.title}
+          </h3>
+          <p style={{ margin: 0, fontSize: 13, color: t.muted, lineHeight: 1.6, fontWeight: 500, ...JUSTIFY }}>
+            {category.desc}
+          </p>
         </div>
       </div>
 
+      {/* Kartu tingkat sanksi */}
       {category.id === 'sanksi' && (
-        <div className={styles.sanksiList}>
-          {SANKSI_LEVELS.map((s) => (
-            <div key={s.level} className={styles.sanksiCard} style={{ background: s.bg, borderColor: s.border }}>
-              <div className={styles.sanksiIconWrap} style={{ background: s.iconBg }}>
-                <IconAlertTriangle color={s.color} size={18} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {SANKSI_LEVELS.map((s) => {
+            const st = sanksiTone(s.key, isDark)
+            return (
+              <div key={s.key} style={{ ...getCardStyle(isDark), padding: 16, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <span
+                  style={{
+                    width: 46,
+                    height: 46,
+                    minWidth: 46,
+                    borderRadius: '50%',
+                    background: st.soft,
+                    border: `1.5px solid ${st.line}`,
+                    boxSizing: 'border-box',
+                    color: st.fg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconAlertTriangle size={20} />
+                </span>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: st.fg, letterSpacing: '.02em' }}>
+                      {isEn ? s.level.en : s.level.id}
+                    </p>
+                    <Chip fg={st.fg} soft={st.soft} line={st.line}>
+                      {isEn ? s.pill.en : s.pill.id}
+                    </Chip>
+                  </div>
+
+                  <div style={{ height: 6, borderRadius: 999, background: t.pendingBg, overflow: 'hidden', marginBottom: 12 }}>
+                    <div style={{ width: s.barWidth, height: '100%', borderRadius: 999, background: st.bar, transition: 'width .6s ease' }} />
+                  </div>
+
+                  <p style={{ margin: '0 0 12px', fontSize: 12.5, color: t.muted, lineHeight: 1.6, ...JUSTIFY }}>
+                    <strong style={{ color: t.label, fontWeight: 700 }}>{tr('Berlaku untuk:', 'Applies to:')}</strong> {s.pasalRef}
+                  </p>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {s.hukuman.map((h) => (
+                      <span
+                        key={h}
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          padding: '5px 11px',
+                          borderRadius: 999,
+                          background: st.soft,
+                          border: `1px solid ${st.line}`,
+                          color: st.fg,
+                          lineHeight: 1.35,
+                        }}
+                      >
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className={styles.sanksiBody}>
-                <div className={styles.sanksiLabelRow}>
-                  <p className={styles.sanksiLevel} style={{ color: s.color }}>{s.level}</p>
-                  <span className={styles.sanksiPill} style={{ background: s.iconBg, color: s.color }}>
-                    Pelanggaran {s.level.charAt(0) + s.level.slice(1).toLowerCase()}
-                  </span>
-                </div>
-                <div className={styles.sanksiBarTrack}>
-                  <div className={styles.sanksiBar} style={{ width: s.barWidth, background: s.barColor }} />
-                </div>
-                <p className={styles.sanksiRef}>Berlaku untuk: {s.pasalRef}</p>
-                <div className={styles.sanksiHukumanList}>
-                  {s.hukuman.map((h, i) => (
-                    <span key={i} className={styles.sanksiHukumanPill} style={{ borderColor: s.border, color: s.color }}>
-                      {h}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
-      <div className={styles.pasalList}>
+      {/* Accordion pasal */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {category.pasal.map((p) => {
           const key = `${category.id}-${p.pasal}-${p.title}`
           const isOpen = expandedKey === key
+          const countText = isEn ? `${p.items.length} provisions` : `${p.items.length} ketentuan`
+          const pasalText = p.pasal > 0 ? (isEn ? `Article ${p.pasal}` : `Pasal ${p.pasal}`) : tr('Umum', 'General')
+
           return (
             <div
               key={key}
-              className={`${styles.accordionCard} ${isOpen ? styles.accordionCardOpen : ''}`}
+              style={{
+                ...getCardStyle(isDark),
+                overflow: 'hidden',
+                borderColor: isOpen ? tone.line : t.border,
+                transition: 'border-color .2s ease',
+              }}
             >
               <button
-                className={`${styles.accordionHeader} ${isOpen ? styles.accordionHeaderOpen : ''}`}
+                type="button"
+                className="prt-acc"
                 onClick={() => toggle(key)}
                 aria-expanded={isOpen}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '14px 16px',
+                  background: isOpen ? tone.soft : 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontFamily: 'inherit',
+                  transition: 'background-color .2s ease',
+                }}
               >
-                <div className={styles.accordionHeaderLeft}>
-                  <div
-                    className={styles.accordionNum}
-                    style={{
-                      background: category.colors.iconBg,
-                      border: `1.5px solid ${category.colors.border}`,
-                      color: category.colors.accent
-                    }}
-                  >
-                    {p.pasal > 0 ? p.pasal : '\u2022'}
-                  </div>
-                  <div>
-                    <p className={styles.accordionTitle}>{p.title}</p>
-                    <span className={styles.accordionTag}
-                      style={{
-                        background: category.colors.tagBg,
-                        color: category.colors.tagText
-                      }}
-                    >
-                      {p.pasal > 0 ? `Pasal ${p.pasal}` : 'Umum'} · {p.items.length} ketentuan
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`${styles.accordionChevron} ${isOpen ? styles.accordionChevronOpen : ''}`}
-                  style={{ color: category.colors.accent }}
+                <span
+                  style={{
+                    width: 42,
+                    height: 42,
+                    minWidth: 42,
+                    borderRadius: '50%',
+                    background: isOpen ? t.surface : tone.soft,
+                    border: `1.5px solid ${tone.line}`,
+                    boxSizing: 'border-box',
+                    color: tone.fg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 800,
+                  }}
                 >
-                  <IconChevronDown />
-                </div>
+                  {p.pasal > 0 ? p.pasal : '\u2022'}
+                </span>
+
+                <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={{ fontSize: 14.5, fontWeight: 800, color: t.text, lineHeight: 1.35, letterSpacing: '-.01em' }}>
+                    {p.title}
+                  </span>
+                  <span style={{ alignSelf: 'flex-start' }}>
+                    <Chip fg={tone.fg} soft={tone.soft} line={tone.line}>
+                      {pasalText} · {countText}
+                    </Chip>
+                  </span>
+                </span>
+
+                <span
+                  style={{
+                    width: 30,
+                    height: 30,
+                    minWidth: 30,
+                    borderRadius: '50%',
+                    background: t.surfaceAlt,
+                    border: `1px solid ${t.border}`,
+                    color: tone.fg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform .25s ease',
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                >
+                  <IconChevronDown size={15} />
+                </span>
               </button>
 
               {isOpen && (
-                <div className={styles.ruleList}>
+                <div
+                  style={{
+                    padding: '14px 16px 18px',
+                    borderTop: `1px solid ${t.divider}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 14,
+                    animation: 'prt-fade .22s ease both',
+                  }}
+                >
                   {p.items.map((item, i) => (
-                    <div key={i} className={styles.ruleItem}>
-                      <div 
-                        className={styles.ruleBullet} 
-                        style={{ 
-                          background: category.colors.accent
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <span
+                        style={{
+                          width: 24,
+                          height: 24,
+                          minWidth: 24,
+                          borderRadius: '50%',
+                          background: tone.grad,
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 800,
+                          marginTop: 1,
                         }}
                       >
                         {i + 1}
-                      </div>
-                      <p className={styles.ruleText}>{item}</p>
+                      </span>
+                      <p
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          margin: 0,
+                          fontSize: 13.5,
+                          lineHeight: 1.7,
+                          color: t.label,
+                          fontWeight: 500,
+                          ...JUSTIFY,
+                        }}
+                      >
+                        {item}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -663,32 +930,37 @@ function CategoryDetail({
           )
         })}
       </div>
-    </div>
+    </section>
   )
 }
+
+// ════════════════════════════════════════════════════════════════════════
+// CSS halaman
+// ════════════════════════════════════════════════════════════════════════
+const PAGE_CSS = `
+@keyframes prt-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.psmb-back { transition: transform .12s ease, background-color .15s ease; -webkit-tap-highlight-color: transparent; }
+.psmb-back:active { transform: scale(.94); }
+.prt-btn { transition: transform .12s ease, filter .15s ease; -webkit-tap-highlight-color: transparent; }
+.prt-btn:active { transform: scale(.97); }
+.prt-chip { transition: background .15s ease, color .15s ease, box-shadow .15s ease, transform .12s ease; -webkit-tap-highlight-color: transparent; }
+.prt-chip:active { transform: scale(.96); }
+.prt-row { transition: transform .15s ease; -webkit-tap-highlight-color: transparent; }
+.prt-row:active { transform: scale(.985); }
+@media (hover: hover) { .prt-row:hover { transform: translateY(-2px); } }
+.prt-acc { -webkit-tap-highlight-color: transparent; }
+.prt-chips::-webkit-scrollbar { display: none; height: 0; width: 0; }
+.prt-chips { scrollbar-width: none; -ms-overflow-style: none; }
+`
 
 // ════════════════════════════════════════════════════════════════════════
 // Komponen utama
 // ════════════════════════════════════════════════════════════════════════
 export default function PeraturanPage() {
-  const { theme, language } = useSettings()
-  const isDark = theme === 'dark'
-  const isEn = language === 'en'
+  const { isDark, isEn, t, tr } = useUi()
 
   const [activeFilter, setActiveFilter] = useState<string>('semua')
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
-  const headerRef = useRef<HTMLDivElement>(null)
-  const [headerHeight, setHeaderHeight] = useState(0)
-
-  useEffect(() => {
-    const el = headerRef.current
-    if (!el) return
-    const update = () => setHeaderHeight(el.offsetHeight)
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
 
   function toggle(key: string) {
     setExpandedKey((prev) => (prev === key ? null : key))
@@ -704,122 +976,185 @@ export default function PeraturanPage() {
   const isLengkap = activeFilter === 'lengkap'
   const activeCategory = CATEGORIES.find((c) => c.id === activeFilter) ?? null
 
-  // ── i18n untuk filter chips ──
   const filterTabs = [
-    { id: 'semua', label: isEn ? 'All' : 'Semua' },
-    { id: 'tata-tertib', label: isEn ? 'Rules' : 'Tata Tertib' },
-    { id: 'kewajiban', label: isEn ? 'Obligations' : 'Kewajiban' },
-    { id: 'larangan', label: isEn ? 'Prohibitions' : 'Larangan' },
-    { id: 'sanksi', label: isEn ? 'Sanctions' : 'Sanksi' },
-    { id: 'lain', label: isEn ? 'Other Provisions' : 'Ketentuan Lain' },
-    { id: 'wali-santri', label: isEn ? 'Parents' : 'Wali Santri' },
+    { id: 'semua',       label: tr('Semua', 'All') },
+    { id: 'tata-tertib', label: tr('Tata Tertib', 'Rules') },
+    { id: 'kewajiban',   label: tr('Kewajiban', 'Obligations') },
+    { id: 'larangan',    label: tr('Larangan', 'Prohibitions') },
+    { id: 'sanksi',      label: tr('Sanksi', 'Sanctions') },
+    { id: 'lain',        label: tr('Ketentuan Lain', 'Other Provisions') },
+    { id: 'wali-santri', label: tr('Wali Santri', 'Parents') },
   ]
 
-  const getFilterLabel = (id: string) => {
-    const found = filterTabs.find(t => t.id === id)
-    return found ? found.label : id
-  }
-
-  // ── i18n untuk ringkasan ──
-  const ringkasanItems = [
-    { 
-      id: 'tata-tertib', 
-      title: isEn ? 'Chapter I — General Provisions' : 'BAB I — Ketentuan Umum',
-      desc: isEn ? 'Basic rules and general provisions.' : 'Aturan dasar dan umum yang berlaku.',
-      pillLabel: isEn ? '2 Articles' : '2 Pasal',
-      pillBg: '#dcfce7', pillColor: '#166534',
-      icon: '/icons/ketentuan-umum-icon.png'
-    },
-    { 
-      id: 'kewajiban', 
-      title: isEn ? 'Chapter II — Student Obligations' : 'BAB II — Kewajiban Santri',
-      desc: isEn ? 'Student obligations in general.' : 'Kewajiban santri dalam keseluruhan.',
-      pillLabel: isEn ? '5 Articles' : '5 Pasal',
-      pillBg: '#d1fae5', pillColor: '#065f46',
-      icon: '/icons/kewajiban-santri-icon.png'
-    },
-    { 
-      id: 'larangan', 
-      title: isEn ? 'Chapter III — Prohibitions' : 'BAB III — Pelanggaran',
-      desc: isEn ? 'Prohibitions that must not be violated.' : 'Pelanggaran yang tidak boleh dilakukan.',
-      pillLabel: isEn ? '5 Articles' : '5 Pasal',
-      pillBg: '#fee2e2', pillColor: '#991b1b',
-      icon: '/icons/pelanggaran-icon.png'
-    },
-    { 
-      id: 'sanksi', 
-      title: isEn ? 'Chapter IV — Sanctions & Implementation' : 'BAB IV — Sanksi & Pelaksanaan',
-      desc: isEn ? 'Types of violations and applicable sanctions.' : 'Jenis pelanggaran dan sanksi yang diterapkan.',
-      pillLabel: isEn ? '4 Articles' : '4 Pasal',
-      pillBg: '#ede9fe', pillColor: '#5b21b6',
-      icon: '/icons/sanksi & hukuman-icon.png'
-    },
-    { 
-      id: 'lain', 
-      title: isEn ? 'Chapter V & VI — Other Provisions' : 'BAB V & VI — Ketentuan Lain',
-      desc: isEn ? 'Purpose of regulations and additional rules.' : 'Tujuan tata tertib serta aturan tambahan.',
-      pillLabel: isEn ? '3 Articles' : '3 Pasal',
-      pillBg: '#ccfbf1', pillColor: '#115e59',
-      icon: '/icons/ketentuan-lain-icon.png'
-    },
-    { 
-      id: 'wali-santri', 
-      title: isEn ? 'Appendix — Parents & Others' : 'Lampiran — Wali Santri & Lainnya',
-      desc: isEn ? 'Provisions and etiquette for parents.' : 'Ketentuan dan etika bersama wali santri.',
-      pillLabel: isEn ? '2 Articles' : '2 Pasal',
-      pillBg: '#dbeafe', pillColor: '#1e40af',
-      icon: '/icons/lampiran-icon.png'
-    },
-  ]
+  const BackToSummary = (
+    <button
+      type="button"
+      className="prt-btn"
+      onClick={() => selectCategory('semua')}
+      style={{
+        alignSelf: 'flex-start',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 14px 8px 10px',
+        borderRadius: 999,
+        background: t.primarySoft,
+        border: isDark ? '1px solid #22443A' : '1px solid #CFE6DA',
+        color: t.primaryText,
+        fontSize: 12.5,
+        fontWeight: 700,
+        fontFamily: 'inherit',
+        cursor: 'pointer',
+      }}
+    >
+      <IconArrowLeft size={14} />
+      {tr('Kembali ke Ringkasan', 'Back to Summary')}
+    </button>
+  )
 
   return (
-    <div className={styles.shell}>
-      {/* ══ TOP HEADER ══════════════════════════════════════════════════ */}
-      <div ref={headerRef} className={styles.topHeader}>
-        <Link href="/siswa" className={styles.backBtn} aria-label={isEn ? 'Back' : 'Kembali'}>
-          <IconArrowLeft color={isDark ? '#a5b4fc' : '#0f172a'} />
+    <div
+      style={{
+        position: 'relative',
+        maxWidth: 430,
+        margin: '0 auto',
+        minHeight: '100dvh',
+        background: t.bg,
+        overflowX: 'hidden',
+        WebkitFontSmoothing: 'antialiased',
+      }}
+    >
+      {/* ══ HEADER (FIXED) — identik dengan halaman Pendaftaran ══ */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: 430,
+          height: HEADER_HEIGHT,
+          zIndex: 40,
+          background: t.surface,
+          borderBottom: `1px solid ${t.border}`,
+          padding: '0 16px',
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <Link
+          href="/siswa"
+          aria-label={tr('Kembali', 'Back')}
+          className="psmb-back"
+          style={{
+            width: 40,
+            height: 40,
+            minWidth: 40,
+            borderRadius: '50%',
+            background: t.primarySoft,
+            border: isDark ? '1px solid #22443A' : '1px solid #CFE6DA',
+            boxShadow: isDark ? 'none' : '0 1px 2px rgba(15,107,74,.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: t.primaryText,
+            textDecoration: 'none',
+            flexShrink: 0,
+          }}
+        >
+          <IconArrowLeft size={18} />
         </Link>
-        <div className={styles.topHeaderTitleGroup}>
-          <h1 className={styles.topHeaderTitle}>{isEn ? 'Pondok Regulations' : 'Peraturan Pondok'}</h1>
-          <p className={styles.topHeaderSub}>{isEn ? 'Al-Istiqomah Islamic Boarding School' : 'Pondok Pesantren Al-Istiqomah'}</p>
+
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 20,
+              fontWeight: 800,
+              color: t.text,
+              lineHeight: 1.25,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {tr('Peraturan Pondok', 'Pondok Regulations')}
+          </h1>
+          <p
+            style={{
+              margin: '2px 0 0',
+              fontSize: 13,
+              color: t.muted,
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {tr('Pondok Pesantren Al-Istiqomah', 'Al-Istiqomah Islamic Boarding School')}
+          </p>
         </div>
       </div>
-      <div style={{ height: headerHeight }} />
 
-      {/* ══ HERO BANNER ══════════════════════════════════════════════════ */}
-      {isSemua && (
-        <div className={styles.bannerWrapper}>
-          <div className={styles.bannerCard}>
-            <Image
-              src="/icons/peraturan-banner.png"
-              alt={isEn ? 'Al-Istiqomah Islamic Boarding School Regulations' : 'Peraturan Pondok Pesantren Al-Istiqomah'}
-              width={440}
-              height={200}
-              className={styles.bannerImage}
-              priority
-            />
+      {/* ══ KONTEN ══ */}
+      <div
+        style={{
+          paddingTop: HEADER_HEIGHT + 16,
+          paddingBottom: NAV_HEIGHT + 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
+        {/* Banner */}
+        {isSemua && (
+          <div style={{ padding: '0 16px' }}>
+            <div style={{ ...getCardStyle(isDark), overflow: 'hidden', background: t.primarySoft }}>
+              <Image
+                src="/icons/peraturan-banner.png"
+                alt={tr('Peraturan Pondok Pesantren Al-Istiqomah', 'Al-Istiqomah Islamic Boarding School Regulations')}
+                width={440}
+                height={200}
+                priority
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ══ FILTER CHIPS ═══════════════════════════════════════════════ */}
-      <div style={{ margin: '1rem 0 24px' }}>
-        <div className={styles.filterChipsScroll} style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 2px 4px' }}>
+        {/* Filter chips */}
+        <div
+          className="prt-chips"
+          role="tablist"
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '2px 16px 4px' }}
+        >
           {filterTabs.map((tab) => {
             const isActive = activeFilter === tab.id
             return (
               <button
                 key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className="prt-chip"
                 onClick={() => selectCategory(tab.id)}
                 style={{
-                  padding: '7px 14px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-                  lineHeight: 1.4, minHeight: 30,
-                  border: `1.5px solid ${isActive ? '#6366F1' : (isDark ? '#2e2a40' : '#E2E8F0')}`,
-                  background: isActive ? (isDark ? '#2e2a40' : '#EEF2FF') : (isDark ? '#1e1b2e' : '#F8FAFC'),
-                  color: isActive ? (isDark ? '#a5b4fc' : '#4338CA') : (isDark ? '#94a3b8' : '#64748B'),
-                  cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
+                  padding: '9px 16px',
+                  minHeight: 38,
+                  borderRadius: 999,
+                  fontSize: 12.5,
+                  fontWeight: isActive ? 800 : 600,
+                  lineHeight: 1.3,
+                  border: isActive ? 'none' : `1px solid ${t.borderInput}`,
+                  background: isActive ? t.gradient : t.surface,
+                  color: isActive ? '#FFFFFF' : t.muted,
+                  boxShadow: isActive ? '0 4px 10px rgba(15,107,74,.24)' : 'none',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  fontFamily: 'inherit',
                   flexShrink: 0,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   boxSizing: 'border-box',
                 }}
               >
@@ -828,129 +1163,174 @@ export default function PeraturanPage() {
             )
           })}
         </div>
-      </div>
 
-      {/* ══ CONTENT ═════════════════════════════════════════════════════ */}
-      <div className={styles.content}>
-
-        {isSemua && (
-          <>
-            <div className={styles.ringkasanHeader}>
-              <p className={styles.sectionLabelTitle} style={{ margin: 0 }}>
-                {isEn ? 'Regulation Summary' : 'Ringkasan Peraturan'}
-              </p>
-              <button className={styles.ringkasanLink} onClick={() => selectCategory('lengkap')}>
-                {isEn ? 'View All' : 'Lihat Semua'}
-              </button>
-            </div>
-
-            <div className={styles.ringkasanList}>
-              {ringkasanItems.map((item) => (
-                <button key={item.id} className={styles.ringkasanRow} onClick={() => selectCategory(item.id)}>
-                  <div className={styles.ringkasanIconWrap}>
-                    <Image
-                      src={item.icon}
-                      alt=""
-                      width={24}
-                      height={24}
-                      className={styles.ringkasanIconImage}
-                    />
-                  </div>
-                  <div className={styles.ringkasanBody}>
-                    <p className={styles.ringkasanTitle}>{item.title}</p>
-                    <p className={styles.ringkasanDesc}>{item.desc}</p>
-                  </div>
-                  <span className={styles.ringkasanPill} style={{ background: item.pillBg, color: item.pillColor }}>
-                    {item.pillLabel}
-                  </span>
-                  <span className={styles.ringkasanChevron}><IconChevronRight size={15} /></span>
+        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* ── Ringkasan ── */}
+          {isSemua && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                <h2 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: t.text, letterSpacing: '-.01em' }}>
+                  {tr('Ringkasan Peraturan', 'Regulation Summary')}
+                </h2>
+                <button
+                  type="button"
+                  className="prt-btn"
+                  onClick={() => selectCategory('lengkap')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 999,
+                    background: t.primarySoft,
+                    border: isDark ? '1px solid #22443A' : '1px solid #CFE6DA',
+                    color: t.primaryText,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    fontFamily: 'inherit',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tr('Lihat Semua', 'View All')}
                 </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {CATEGORIES.map((cat) => {
+                  const tone = toneOf(cat.id, isDark)
+                  const txt = RINGKASAN_TEXT[cat.id]
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className="prt-row"
+                      onClick={() => selectCategory(cat.id)}
+                      style={{
+                        ...getCardStyle(isDark),
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '14px 14px 14px 16px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      <PeraturanBubble categoryId={cat.id} size={50} imgSize={34} />
+
+                      <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 800,
+                            color: t.text,
+                            lineHeight: 1.3,
+                            letterSpacing: '-.01em',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {tr(txt.title.id, txt.title.en)}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 12.5,
+                            color: t.muted,
+                            fontWeight: 500,
+                            lineHeight: 1.45,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {tr(txt.desc.id, txt.desc.en)}
+                        </span>
+                      </span>
+
+                      <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Chip fg={tone.fg} soft={tone.soft} line={tone.line}>
+                          {cat.pasalCount} {tr('Pasal', 'Articles')}
+                        </Chip>
+                        <span
+                          style={{
+                            width: 26,
+                            height: 26,
+                            borderRadius: '50%',
+                            background: t.surfaceAlt,
+                            border: `1px solid ${t.border}`,
+                            color: t.faint,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <IconChevronRight size={13} />
+                        </span>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
+          {/* ── Detail satu kategori ── */}
+          {!isSemua && !isLengkap && activeCategory && (
+            <div key={activeCategory.id} style={{ display: 'flex', flexDirection: 'column', gap: 16, animation: 'prt-fade .25s ease both' }}>
+              {BackToSummary}
+              <CategoryDetail category={activeCategory} expandedKey={expandedKey} toggle={toggle} />
+            </div>
+          )}
+
+          {/* ── Semua kategori ── */}
+          {isLengkap && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 28, animation: 'prt-fade .25s ease both' }}>
+              {BackToSummary}
+              {CATEGORIES.map((cat) => (
+                <CategoryDetail key={cat.id} category={cat} expandedKey={expandedKey} toggle={toggle} />
               ))}
             </div>
-          </>
-        )}
+          )}
 
-        {!isSemua && !isLengkap && activeCategory && (
-          <>
-            <button className={styles.backToSummary} onClick={() => selectCategory('semua')}>
-              <IconArrowLeft size={14} /> {isEn ? 'Back to Summary' : 'Kembali ke Ringkasan'}
-            </button>
-            <CategoryDetail category={activeCategory} expandedKey={expandedKey} toggle={toggle} />
-          </>
-        )}
-
-        {isLengkap && (
-          <>
-            <button className={styles.backToSummary} onClick={() => selectCategory('semua')}>
-              <IconArrowLeft size={14} /> {isEn ? 'Back to Summary' : 'Kembali ke Ringkasan'}
-            </button>
-            {CATEGORIES.map((cat) => (
-              <CategoryDetail key={cat.id} category={cat} expandedKey={expandedKey} toggle={toggle} />
-            ))}
-          </>
-        )}
-
-        {/* ── Footer Note ─────────────────────────────────────────────── */}
-        <div className={styles.footerNote}>
-          <IconInfo color={isDark ? '#a5b4fc' : '#15803d'} />
-          <p>
-            {isEn 
-              ? 'These regulations have been in effect since March 12, 2026 and are binding on all students of Al-Istiqomah Islamic Boarding School. Ignorance cannot be used as an excuse for violations.'
-              : 'Tata tertib ini berlaku sejak ditetapkan pada 12 Maret 2026 dan mengikat seluruh santri Pondok Pesantren Al-Istiqomah. Ketidaktahuan tidak dapat dijadikan alasan pelanggaran.'
-            }
-          </p>
+          {/* ── Catatan kaki ── */}
+          <div
+            style={{
+              ...getCardStyle(isDark),
+              padding: '14px 16px',
+              display: 'flex',
+              gap: 12,
+              alignItems: 'flex-start',
+              background: t.primarySoft,
+              border: isDark ? '1px solid #22443A' : '1px solid #CFE6DA',
+              boxShadow: 'none',
+            }}
+          >
+            <span
+              style={{
+                width: 34,
+                height: 34,
+                minWidth: 34,
+                borderRadius: '50%',
+                background: t.gradient,
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <IconInfo size={17} />
+            </span>
+            <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.65, color: t.label, fontWeight: 500, ...JUSTIFY }}>
+              {tr(
+                'Tata tertib ini berlaku sejak ditetapkan pada 12 Maret 2026 dan mengikat seluruh santri Pondok Pesantren Al-Istiqomah. Ketidaktahuan tidak dapat dijadikan alasan pelanggaran.',
+                'These regulations have been in effect since March 12, 2026 and are binding on all students of Al-Istiqomah Islamic Boarding School. Ignorance cannot be used as an excuse for violations.',
+              )}
+            </p>
+          </div>
         </div>
-
       </div>
 
-      {/* ══ BOTTOM NAV ══════════════════════════════════════════════════ */}
-      <nav className={styles.bottomNav}>
-        <Link href="/siswa" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-            </svg>
-          </div>
-          <span>{isEn ? 'Home' : 'Beranda'}</span>
-        </Link>
-        <Link href="/siswa/pendaftaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-          </div>
-          <span>{isEn ? 'Register' : 'Daftar'}</span>
-        </Link>
-        <Link href="/siswa/pembayaran" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-              <line x1="1" y1="10" x2="23" y2="10" />
-            </svg>
-          </div>
-          <span>{isEn ? 'Pay' : 'Bayar'}</span>
-        </Link>
-        <Link href="/siswa/status" className={styles.navItem}>
-          <div className={styles.navIconWrap}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-          </div>
-          <span>{isEn ? 'Status' : 'Status'}</span>
-        </Link>
-        <Link href="/siswa/more" className={`${styles.navItem} ${styles.navItemActive}`}>
-          <div className={`${styles.navIconWrap} ${styles.navIconWrapActive}`}>
-            <IconGrid color={isDark ? '#a5b4fc' : '#15803d'} size={18} />
-          </div>
-          <span>{isEn ? 'More' : 'More'}</span>
-        </Link>
-      </nav>
-
+      <style>{PAGE_CSS}</style>
     </div>
   )
 }

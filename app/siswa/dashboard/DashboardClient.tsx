@@ -528,7 +528,6 @@ function HeroBanner() {
 
   return (
     <div className={styles.heroBannerWrap}>
-      <div className={styles.heroBannerBgPattern} />
       <div className={styles.heroBannerContent}>
         <div>
           <span className={styles.heroBannerEyebrow}>{slide.eyebrow}</span>
