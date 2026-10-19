@@ -957,7 +957,7 @@ const PAGE_CSS = `
 // Komponen utama
 // ════════════════════════════════════════════════════════════════════════
 export default function PeraturanPage() {
-  const { isDark, isEn, t, tr } = useUi()
+  const { isDark, t, tr } = useUi()
 
   const [activeFilter, setActiveFilter] = useState<string>('semua')
   const [expandedKey, setExpandedKey] = useState<string | null>(null)

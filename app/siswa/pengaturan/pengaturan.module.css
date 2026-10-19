@@ -65,18 +65,19 @@
 .backBtn {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  background: var(--green-lighter);
-  border: 1.5px solid var(--green-light);
+  border-radius: 50%;
+  background: #e3f3ec;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--teal-1);
+  color: #0e7c5f;
   text-decoration: none;
   flex-shrink: 0;
-  transition: background 0.18s, transform 0.18s;
+  transition: background 0.15s, transform 0.15s;
 }
-.backBtn:hover { background: var(--green-light); transform: translateX(-2px); }
+.backBtn:hover { background: #d3ecdf; }
+.backBtn:active { transform: scale(0.94); }
 
 .topBarCenter { flex: 1; min-width: 0; }
 .topBarTitle {
@@ -92,20 +93,6 @@
   color: var(--gray-light);
   font-weight: 500;
   margin: 0.1rem 0 0;
-}
-
-/* Gear icon button di kanan top bar */
-.topBarIconBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--teal-1);
-  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -162,17 +149,43 @@
 .settingRow:hover { background: #f8faf9; }
 .settingRowLast { border-bottom: none; }
 
-/* icon wrap dalam row */
+/* icon wrap dalam row — tile bundar hijau 3D (sama dengan Notifikasi/Dashboard) */
 .rowIconWrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  background: var(--green-lighter);
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 24%, #4b8a76 0%, #235347 52%, #153d32 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.3),
+    0 4px 10px rgba(21, 61, 50, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  color: #fff;
 }
+.rowIconWrap::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 14%;
+  width: 72%;
+  height: 44%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+.rowIconWrap svg {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+.settingRow:active .rowIconWrap { transform: scale(0.96); }
 
 .rowText { flex: 1; min-width: 0; }
 .rowTitle {
@@ -190,7 +203,7 @@
 }
 
 .rowChevron {
-  color: var(--gray-light);
+  color: #cbd5e1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -524,16 +537,8 @@
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
-:global([data-theme='dark']) .backBtn {
-  background: rgba(14, 124, 95, 0.15);
-  border-color: rgba(14, 124, 95, 0.3);
-}
-:global([data-theme='dark']) .backBtn:hover { background: rgba(14, 124, 95, 0.25); }
-
-:global([data-theme='dark']) .topBarIconBtn {
-  background: #1a1728;
-  border-color: #2a2640;
-}
+:global([data-theme='dark']) .backBtn { background: rgba(22, 163, 74, 0.18); color: #4ade80; }
+:global([data-theme='dark']) .backBtn:hover { background: rgba(22, 163, 74, 0.28); }
 
 :global([data-theme='dark']) .card {
   background: #1a1728;
@@ -546,7 +551,7 @@
 :global([data-theme='dark']) .settingRow:hover { background: rgba(255,255,255,0.04); }
 :global([data-theme='dark']) .rowDivider { background: #2a2640; }
 
-:global([data-theme='dark']) .rowIconWrap { background: rgba(14, 124, 95, 0.15); }
+:global([data-theme='dark']) .rowChevron { color: #4b4768; }
 
 :global([data-theme='dark']) .modalSheet { background: #1a1728; }
 :global([data-theme='dark']) .modalHandle { background: #2a2640; }

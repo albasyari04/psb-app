@@ -16,14 +16,6 @@ function IconArrowLeft() {
     </svg>
   )
 }
-function IconGear() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  )
-}
 function IconChevronRight() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -34,48 +26,48 @@ function IconChevronRight() {
 function IconPerson() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" stroke="#0e7c5f" strokeWidth="1.8" />
-      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   )
 }
 function IconGlobe() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="#0e7c5f" strokeWidth="1.8" />
-      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke="#0e7c5f" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" stroke="currentColor" strokeWidth="1.9" />
     </svg>
   )
 }
 function IconMonitor() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="3" width="20" height="14" rx="2" stroke="#0e7c5f" strokeWidth="1.8" />
-      <path d="M8 21h8M12 17v4" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" />
     </svg>
   )
 }
 function IconTextSize() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M4 7V5h16v2M9 19h6M12 5v14" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 7V5h16v2M9 19h6M12 5v14" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 function IconBell() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   )
 }
 function IconHelp() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="#0e7c5f" strokeWidth="1.8" />
-      <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3" stroke="#0e7c5f" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="12" cy="17" r="0.5" fill="#0e7c5f" stroke="#0e7c5f" strokeWidth="1" />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="currentColor" strokeWidth="1" />
     </svg>
   )
 }
@@ -361,9 +353,6 @@ export default function SiswaPengaturanPage() {
         <div className={styles.topBarCenter}>
           <h1 className={styles.topBarTitle}>Pengaturan</h1>
           <p className={styles.topBarSub}>Preferensi aplikasi santri</p>
-        </div>
-        <div className={styles.topBarIconBtn}>
-          <IconGear />
         </div>
       </header>
 

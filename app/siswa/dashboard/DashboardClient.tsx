@@ -146,18 +146,40 @@ const LAPORAN_TIPE_CONFIG: Record<string, {
   khusus : { labelKey: 'laporan_tipe_khusus',  badge: styles.laporanBadgeKhusus },
 }
 
-// Konfigurasi tampilan notifikasi per type: kotak ikon berwarna + ikon SVG + warna dot
-type NotifTypeConfig = { box: string; dotColor: string; render: () => ReactElement }
-const NOTIF_TYPE_CONFIG: Record<string, NotifTypeConfig> = {
-  chat        : { box: styles.notifIconChat,        dotColor: '#7c3aed', render: () => <IconNotifChat /> },
-  laporan     : { box: styles.notifIconLaporan,      dotColor: '#2563eb', render: () => <IconNotifDoc /> },
-  jadwal      : { box: styles.notifIconJadwal,       dotColor: '#7c3aed', render: () => <IconNotifCalendar /> },
-  pembayaran  : { box: styles.notifIconPembayaran,   dotColor: '#2563eb', render: () => <IconNotifCard /> },
-  pengumuman  : { box: styles.notifIconPengumuman,   dotColor: '#db2777', render: () => <IconNotifMegaphone /> },
-  pendaftaran : { box: styles.notifIconPendaftaran,  dotColor: '#d97706', render: () => <IconNotifBell /> },
-  info        : { box: styles.notifIconInfo,         dotColor: '#16a34a', render: () => <IconNotifInfo /> },
+// ── Notifikasi: ikon per jenis (ikon dari /public/icons) ───────────────────
+const NOTIF_ICON_BELL       = '/icons/lonceng-icon.png'
+const NOTIF_ICON_WALLET     = '/icons/wallet.png'
+const NOTIF_ICON_LAPORAN    = '/icons/laporan-icon-santri.png'
+const NOTIF_ICON_PENGUMUMAN = '/icons/pengumuman.png'
+
+type NotifKind = 'transaksi' | 'laporan' | 'pengumuman' | 'chat' | 'jadwal' | 'pendaftaran' | 'info'
+
+const NOTIF_TRANSAKSI_KEYWORDS = ['pembayaran', 'tagihan', 'transfer', 'spp', 'bayar']
+
+/** Tentukan jenis notifikasi dari isi teks, lalu dari field type */
+function getNotifKind(n: NotifItem): NotifKind {
+  const text = `${n.title} ${n.message}`.toLowerCase()
+  if (NOTIF_TRANSAKSI_KEYWORDS.some((kw) => text.includes(kw))) return 'transaksi'
+  if (text.includes('pengumuman')) return 'pengumuman'
+  if (text.includes('laporan'))    return 'laporan'
+  if (n.type === 'chat' || n.type === 'jadwal' || n.type === 'pendaftaran') return n.type
+  return 'info'
 }
-const NOTIF_TYPE_DEFAULT: NotifTypeConfig = { box: styles.notifIconInfo, dotColor: '#16a34a', render: () => <IconNotifBell /> }
+
+function renderNotifIcon(kind: NotifKind): ReactElement {
+  switch (kind) {
+    case 'transaksi':
+      return <Image src={NOTIF_ICON_WALLET} alt="" width={64} height={64} draggable={false} className={`${styles.notifIconImg} ${styles.iconToWhite}`} />
+    case 'laporan':
+      return <Image src={NOTIF_ICON_LAPORAN} alt="" width={64} height={64} draggable={false} className={`${styles.notifIconImg} ${styles.notifIconImgLg}`} />
+    case 'pengumuman':
+      return <Image src={NOTIF_ICON_PENGUMUMAN} alt="" width={64} height={64} draggable={false} className={`${styles.notifIconImg} ${styles.iconToWhite}`} />
+    case 'chat':        return <IconNotifChat />
+    case 'jadwal':      return <IconNotifCalendar />
+    case 'pendaftaran': return <IconNotifBell />
+    default:            return <IconNotifInfo />
+  }
+}
 
 /* ════════════════════════════════════════════════════════════════
    HELPERS
@@ -253,15 +275,6 @@ function IconNotifCard() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" />
-    </svg>
-  )
-}
-function IconNotifMegaphone() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11v3a1 1 0 0 0 1 1h2l3.5 5v-15L6 9H4a1 1 0 0 0-1 1z" />
-      <path d="M14 8a4 4 0 0 1 0 8" />
-      <path d="M17.5 5a8.5 8.5 0 0 1 0 14" />
     </svg>
   )
 }
@@ -401,7 +414,7 @@ function NotificationBell() {
             <div className={styles.notifPanelHeader}>
               <div className={styles.notifPanelHeaderLeft}>
                 <span className={styles.notifPanelIconWrap}>
-                  <IconBell />
+                  <Image src={NOTIF_ICON_BELL} alt="" width={64} height={64} draggable={false} className={styles.notifPanelIconImg} />
                   {unreadCount > 0 && <span className={styles.notifPanelIconDot} aria-hidden />}
                 </span>
                 <div className={styles.notifPanelHeaderText}>
@@ -447,7 +460,7 @@ function NotificationBell() {
                 </div>
               ) : (
                 notifs.map(n => {
-                  const cfg = NOTIF_TYPE_CONFIG[n.type] ?? NOTIF_TYPE_DEFAULT
+                  const kind = getNotifKind(n)
                   return (
                     <button
                       key={n.id}
@@ -455,16 +468,8 @@ function NotificationBell() {
                       className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ''}`}
                       onClick={() => { if (!n.is_read) markRead(n.id) }}
                     >
-                      {!n.is_read && (
-                        <span
-                          className={`${styles.notifDot} ${styles.notifDotLeft}`}
-                          style={{ background: cfg.dotColor }}
-                          aria-hidden
-                        />
-                      )}
-
-                      <span className={`${styles.notifIcon} ${cfg.box}`}>
-                        {cfg.render()}
+                      <span className={styles.notifIcon}>
+                        {renderNotifIcon(kind)}
                       </span>
 
                       <div className={styles.notifItemBody}>
@@ -474,13 +479,7 @@ function NotificationBell() {
 
                       <div className={styles.notifItemMeta}>
                         <span className={styles.notifItemTime}>{timeAgo(n.created_at)}</span>
-                        {!n.is_read && (
-                          <span
-                            className={`${styles.notifDot} ${styles.notifDotRight}`}
-                            style={{ background: cfg.dotColor }}
-                            aria-hidden
-                          />
-                        )}
+                        {!n.is_read && <span className={styles.notifUnreadDot} aria-label="Belum dibaca" />}
                       </div>
                     </button>
                   )

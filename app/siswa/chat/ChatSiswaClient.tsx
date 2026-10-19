@@ -11,24 +11,16 @@ import type { ChatMessage, ChatThread } from '@/types/chat'
    ════════════════════════════════════════════════════════════════ */
 function IconBack() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 18l-6-6 6-6" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 5l-7 7 7 7" />
     </svg>
   )
 }
 function IconAdminAvatar() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
-}
-function IconInfo() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
     </svg>
   )
 }
@@ -84,6 +76,15 @@ function IconAlert() {
     </svg>
   )
 }
+
+/* ════════════════════════════════════════════════════════════════
+   CONSTANTS
+   ════════════════════════════════════════════════════════════════ */
+const QUICK_TOPICS = [
+  'Konsultasi pembayaran',
+  'Pertanyaan pendaftaran',
+  'Administrasi & berkas',
+]
 
 /* ════════════════════════════════════════════════════════════════
    HELPERS
@@ -271,12 +272,12 @@ export default function ChatSiswaClient() {
           <span className={styles.onlineDot} />
         </div>
         <div className={styles.headerText}>
-          <p className={styles.headerName}>Admin Pondok</p>
+          <p className={styles.headerName}>
+            Admin Pondok
+            <span className={styles.adminPill}>Admin</span>
+          </p>
           <p className={styles.headerStatus}>Biasanya membalas dalam beberapa jam</p>
         </div>
-        <button type="button" className={styles.headerInfoBtn} aria-label="Info">
-          <IconInfo />
-        </button>
       </header>
 
       {/* ══ MESSAGE LIST ════════════════════════════════════════════ */}
@@ -293,6 +294,13 @@ export default function ChatSiswaClient() {
           <p className={styles.emptyText}>
             Punya pertanyaan seputar pendaftaran, pembayaran, atau administrasi? Kirim pesan dan admin pondok akan segera membalas.
           </p>
+          <div className={styles.chipRow}>
+            {QUICK_TOPICS.map((t) => (
+              <button key={t} type="button" className={styles.topicChip} onClick={() => setDraft(t)}>
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <div className={styles.messageList} ref={listRef}>

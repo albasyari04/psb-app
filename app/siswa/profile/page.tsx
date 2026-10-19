@@ -172,19 +172,38 @@ const IconImage = (p: IconProps) => (
 const IconTile = ({ c, size = 40, children }: { c: Theme; size?: number; children: ReactNode }) => (
   <div
     style={{
+      position: 'relative',
       width: size,
       height: size,
-      borderRadius: size >= 40 ? 13 : 11,
+      borderRadius: '50%',
       background: c.tileBg,
+      border: '1px solid rgba(255,255,255,0.16)',
       boxShadow: c.tileShadow,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
+      overflow: 'hidden',
       color: '#FFFFFF',
     }}
   >
-    {children}
+    {/* kilap lengkung di atas tile (efek cembung 3D, sama dengan Notifikasi) */}
+    <span
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        top: '5%',
+        left: '14%',
+        width: '72%',
+        height: '44%',
+        borderRadius: '50%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.36) 0%, rgba(255,255,255,0) 100%)',
+        pointerEvents: 'none',
+      }}
+    />
+    <span style={{ position: 'relative', zIndex: 1, display: 'flex', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>
+      {children}
+    </span>
   </div>
 )
 

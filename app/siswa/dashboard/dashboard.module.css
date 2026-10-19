@@ -1214,27 +1214,51 @@
   gap        : 0.75rem;
 }
 
-/* Lingkaran hijau muda berisi ikon lonceng */
+/* Tile bundar hijau 3D berisi ikon lonceng */
 .notifPanelIconWrap {
   position     : relative;
   display      : flex;
   align-items  : center;
   justify-content: center;
-  width        : 44px;
-  height       : 44px;
+  width        : 48px;
+  height       : 48px;
   flex-shrink  : 0;
   border-radius: 50%;
-  background   : var(--green-lighter);
-  color        : var(--green);
+  background   : radial-gradient(circle at 32% 24%, #4b8a76 0%, #235347 52%, #153d32 100%);
+  border       : 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow   : inset 0 2px 2px rgba(255, 255, 255, 0.3), inset 0 -4px 6px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(21, 61, 50, 0.2);
+}
+.notifPanelIconWrap::before,
+.notifIcon::before,
+.notifSettingsIconWrap::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 14%;
+  width: 72%;
+  height: 44%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+.notifPanelIconImg {
+  position: relative;
+  z-index: 1;
+  width: 66%;
+  height: 66%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
 .notifPanelIconDot {
   position      : absolute;
-  top           : 2px;
-  right         : 2px;
-  width         : 9px;
-  height        : 9px;
+  z-index       : 2;
+  top           : 1px;
+  right         : 1px;
+  width         : 12px;
+  height        : 12px;
   border-radius : 50%;
-  background    : var(--green);
+  background    : #ef4444;
   border        : 2px solid #fff;
 }
 
@@ -1299,63 +1323,70 @@
   min-height  : 0;
   overflow-y  : auto;
   overscroll-behavior: contain;
-  padding     : 0 1.25rem;
+  padding     : 0.15rem 1.25rem 0.25rem;
+  display     : flex;
+  flex-direction: column;
+  gap         : 0.6rem;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
 .notifList::-webkit-scrollbar       { width: 4px; }
 .notifList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
-/* ── Satu baris notifikasi ────────────────────────────────────── */
+/* ── Satu kartu notifikasi ────────────────────────────────────── */
 .notifItem {
+  position   : relative;
   display    : flex;
   align-items: flex-start;
-  gap        : 0.85rem;
+  gap        : 0.8rem;
   width      : 100%;
-  padding    : 1rem 0;
-  background : transparent;
-  border     : none;
-  border-bottom: 1px solid #f1f5f9;
+  padding    : 0.8rem 0.85rem;
+  background : #fff;
+  border     : 1px solid var(--border);
+  border-radius: 1rem;
   cursor     : pointer;
   text-align : left;
-  transition : background 0.12s;
-  position   : relative;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition : box-shadow 0.15s, border-color 0.15s, transform 0.15s;
 }
-.notifItem:last-child { border-bottom: none; }
-.notifItem:hover      { background: #fafbfc; }
+.notifItem:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); transform: translateY(-1px); }
+.notifItemUnread {
+  background  : linear-gradient(180deg, #ffffff 0%, #f4fbf8 100%);
+  border-color: rgba(14, 124, 95, 0.22);
+}
 
-.notifItemUnread { background: transparent; }
-.notifItemUnread:hover { background: #fafbfc; }
-
-/* Kotak ikon rounded berwarna pastel, sesuai kategori notifikasi */
+/* Tile ikon bundar hijau 3D */
 .notifIcon {
+  position       : relative;
   display        : flex;
   align-items    : center;
   justify-content: center;
-  width          : 42px;
-  height         : 42px;
+  width          : 44px;
+  height         : 44px;
   flex-shrink    : 0;
-  border-radius  : 0.85rem;
+  border-radius  : 50%;
+  background     : radial-gradient(circle at 32% 24%, #4b8a76 0%, #235347 52%, #153d32 100%);
+  border         : 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow     : inset 0 2px 2px rgba(255, 255, 255, 0.3), inset 0 -4px 6px rgba(0, 0, 0, 0.3);
+  overflow       : hidden;
+  color          : #fff;
 }
-.notifIconChat        { background: #ede9fe; color: #7c3aed; }
-.notifIconPembayaran  { background: #dbeafe; color: #2563eb; }
-.notifIconPengumuman  { background: #fce7f3; color: #db2777; }
-.notifIconPendaftaran { background: #fef3c7; color: #d97706; }
-.notifIconLaporan     { background: #dbeafe; color: #2563eb; }
-.notifIconJadwal      { background: #ede9fe; color: #7c3aed; }
-.notifIconInfo        { background: var(--green-lighter); color: var(--green); }
+.notifIcon svg { position: relative; z-index: 1; width: 20px; height: 20px; color: #fff; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); }
+.notifIconImg  { position: relative; z-index: 1; width: 60%; height: 60%; object-fit: contain; display: block; }
+.notifIconImgLg { width: 72%; height: 72%; }
 
 /* Konten teks */
 .notifItemBody  { flex: 1; min-width: 0; padding-top: 0.05rem; }
 .notifItemTitle {
-  font-size  : 0.85rem;
-  font-weight: 700;
+  font-size  : 0.84rem;
+  font-weight: 800;
   color      : var(--ink);
   margin     : 0 0 0.2rem;
   line-height: 1.3;
 }
 .notifItemMsg {
-  font-size  : 0.78rem;
+  font-size  : 0.76rem;
   color      : var(--slate);
   margin     : 0;
   line-height: 1.45;
@@ -1365,36 +1396,28 @@
   overflow   : hidden;
 }
 
-/* Kolom kanan: waktu di atas, dot warna di bawah — sejajar vertikal */
+/* Kolom kanan: waktu + titik belum dibaca */
 .notifItemMeta {
   display       : flex;
   flex-direction: column;
   align-items   : flex-end;
-  gap           : 0.5rem;
+  gap           : 0.45rem;
   flex-shrink   : 0;
   padding-top   : 0.1rem;
 }
 .notifItemTime {
-  font-size  : 0.7rem;
+  font-size  : 0.68rem;
   color      : var(--gray-light);
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
-
-/* Dot warna "belum dibaca" — muncul di kiri (sejajar ikon) & kanan (sejajar waktu) */
-.notifDot {
-  width        : 8px;
-  height       : 8px;
+.notifItemUnread .notifItemTime { color: var(--teal-1); }
+.notifUnreadDot {
+  width        : 9px;
+  height       : 9px;
   border-radius: 50%;
-  flex-shrink  : 0;
-}
-.notifDotLeft {
-  position : absolute;
-  left     : 0;
-  top      : 1.35rem;
-}
-.notifDotRight {
-  /* warna diisi inline via JSX (cfg.dotColor) agar konsisten dengan kategori ikon */
+  background   : #ef4444;
+  box-shadow   : 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
 /* ── State kosong ─────────────────────────────────────────────── */
@@ -1453,16 +1476,21 @@
 .notifSettingsRow:hover { background: var(--bg); border-color: var(--gray-light); }
 
 .notifSettingsIconWrap {
+  position       : relative;
   display        : flex;
   align-items    : center;
   justify-content: center;
-  width          : 38px;
-  height         : 38px;
+  width          : 42px;
+  height         : 42px;
   flex-shrink    : 0;
-  border-radius  : 0.75rem;
-  background     : var(--green-lighter);
-  color          : var(--green);
+  border-radius  : 50%;
+  background     : radial-gradient(circle at 32% 24%, #4b8a76 0%, #235347 52%, #153d32 100%);
+  border         : 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow     : inset 0 2px 2px rgba(255, 255, 255, 0.3), inset 0 -4px 6px rgba(0, 0, 0, 0.3);
+  overflow       : hidden;
+  color          : #fff;
 }
+.notifSettingsIconWrap svg { position: relative; z-index: 1; width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); }
 .notifSettingsText {
   display       : flex;
   flex-direction: column;
@@ -1491,17 +1519,14 @@
   background: #18162a;
   border-color: var(--border);
 }
-:global([data-theme='dark']) .notifItem { border-bottom-color: #2a2640; }
-:global([data-theme='dark']) .notifItem:hover,
-:global([data-theme='dark']) .notifItemUnread:hover { background: #1f1c33; }
+:global([data-theme='dark']) .notifItem { background: #1f1c33; border-color: #2a2640; }
+:global([data-theme='dark']) .notifItemUnread {
+  background: linear-gradient(180deg, #1f1c33 0%, #172a2a 100%);
+  border-color: rgba(14, 124, 95, 0.4);
+}
+:global([data-theme='dark']) .notifItem:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
+:global([data-theme='dark']) .notifItemUnread .notifItemTime { color: #4ade80; }
+:global([data-theme='dark']) .notifPanelIconDot { border-color: #18162a; }
 :global([data-theme='dark']) .notifCloseBtn { background: #18162a; }
 :global([data-theme='dark']) .notifCloseBtn:hover { background: #241f3a; }
 :global([data-theme='dark']) .notifSettingsRow:hover { background: #1f1c33; }
-:global([data-theme='dark']) .notifPanelIconWrap,
-:global([data-theme='dark']) .notifSettingsIconWrap { background: rgba(22, 163, 74, 0.18); }
-:global([data-theme='dark']) .notifIconChat        { background: rgba(124, 58, 237, 0.22); color: #c4b5fd; }
-:global([data-theme='dark']) .notifIconPembayaran,
-:global([data-theme='dark']) .notifIconLaporan      { background: rgba(37, 99, 235, 0.22); color: #93c5fd; }
-:global([data-theme='dark']) .notifIconPengumuman  { background: rgba(219, 39, 119, 0.22); color: #f9a8d4; }
-:global([data-theme='dark']) .notifIconPendaftaran { background: rgba(217, 119, 6, 0.22); color: #fcd34d; }
-:global([data-theme='dark']) .notifIconJadwal      { background: rgba(124, 58, 237, 0.22); color: #c4b5fd; }
