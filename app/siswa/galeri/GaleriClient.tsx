@@ -7,10 +7,7 @@ import styles from './galeri.module.css'
 
 /* ════════════════════════════════════════════════════════════════
    DATA GALERI
-   Sesuaikan src dengan nama file asli di public/image/galeri/ Anda.
-   `category` menentukan icon badge yang tampil di atas thumbnail.
-   `photoCount` = jumlah foto dalam album ini (ganti dengan data asli,
-   angka di bawah ini hanya contoh mengikuti mockup desain).
+   `category` menentukan icon badge + label kategori + filter chip.
    ════════════════════════════════════════════════════════════════ */
 type GalleryCategory = 'people' | 'mosque' | 'book' | 'sparkle' | 'tower' | 'camera'
 
@@ -21,6 +18,17 @@ interface GalleryItem {
   category: GalleryCategory
   photoCount: number
 }
+
+const CATEGORY_LABEL: Record<GalleryCategory, string> = {
+  people: 'Kebersamaan',
+  mosque: 'Ziarah',
+  book: 'Ngaji',
+  sparkle: 'Sholawat',
+  tower: 'Kunjungan',
+  camera: 'Acara',
+}
+
+const CATEGORY_ORDER: GalleryCategory[] = ['people', 'mosque', 'book', 'sparkle', 'tower', 'camera']
 
 const GALLERY_ITEMS: GalleryItem[] = [
   {
@@ -76,14 +84,14 @@ const GALLERY_ITEMS: GalleryItem[] = [
     src: '/image/galeri/menara-kudus-putri.jpeg',
     title: 'Menara Kudus — Santriwati',
     desc: 'Foto bersama santriwati di area Menara Kudus',
-    category: 'camera',
+    category: 'tower',
     photoCount: 22,
   },
   {
     src: '/image/galeri/Sowan ndalem kesepuhan K.H Nurul Huda Dzajuli.jpeg',
     title: 'Sowan ndalem Kesepuhan (Ploso)',
     desc: 'Sowan ndalem Kesepuhan K.H. Nurul Huda Djazuli',
-    category: 'camera',
+    category: 'people',
     photoCount: 26,
   },
   {
@@ -104,8 +112,6 @@ const GALLERY_ITEMS: GalleryItem[] = [
 
 /* ════════════════════════════════════════════════════════════════
    BANNER CAROUSEL
-   Tambahkan objek baru ke array ini untuk banner lain — dots &
-   auto-rotate menyesuaikan otomatis dengan jumlah item.
    ════════════════════════════════════════════════════════════════ */
 interface BannerItem {
   src: string
@@ -119,16 +125,19 @@ const BANNER_ITEMS: BannerItem[] = [
   },
 ]
 
-/* Background foto header — foto pondok sendiri (public/image/pondok.jpeg) */
+/* Background foto header */
 const HEADER_BG_SRC = '/image/pondok.jpeg'
 
 /* ════════════════════════════════════════════════════════════════
    ICONS
    ════════════════════════════════════════════════════════════════ */
+
+/* Panah back — sama dengan halaman Pendaftaran (arrow-left) */
 function IconBack() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="15 18 9 12 15 6" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
     </svg>
   )
 }
@@ -141,9 +150,18 @@ function IconImageFallback({ size = 28 }: { size?: number }) {
     </svg>
   )
 }
-function IconClose() {
+function IconGallery({ size = 20 }: { size?: number }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="8.5" cy="8.5" r="1.6" />
+      <path d="M21 15l-5-5L5 21" />
+    </svg>
+  )
+}
+function IconClose({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -161,24 +179,24 @@ function IconFilter() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="4" y1="6" x2="20" y2="6" />
-      <circle cx="9" cy="6" r="2" fill="white" />
+      <circle cx="9" cy="6" r="2" fill="currentColor" />
       <line x1="4" y1="12" x2="20" y2="12" />
-      <circle cx="16" cy="12" r="2" fill="white" />
+      <circle cx="16" cy="12" r="2" fill="currentColor" />
       <line x1="4" y1="18" x2="20" y2="18" />
-      <circle cx="11" cy="18" r="2" fill="white" />
+      <circle cx="11" cy="18" r="2" fill="currentColor" />
     </svg>
   )
 }
-function IconChevronRight() {
+function IconChevronRight({ size = 15 }: { size?: number }) {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="9 18 15 12 9 6" />
     </svg>
   )
 }
 function IconStar() {
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
       <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17l-6.1 3.5 1.5-6.8L2.2 9l6.9-.7L12 2z" />
     </svg>
   )
@@ -188,6 +206,15 @@ function IconSend() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 2L11 13" />
       <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+    </svg>
+  )
+}
+function IconLayers({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
     </svg>
   )
 }
@@ -261,7 +288,7 @@ function CategoryIcon({ category }: { category: GalleryCategory }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   BANNER — carousel sederhana dengan auto-rotate + dot indicator
+   BANNER — carousel dengan auto-rotate + dot indicator
    ════════════════════════════════════════════════════════════════ */
 function BannerCarousel({ items }: { items: BannerItem[] }) {
   const [active, setActive] = useState(0)
@@ -283,6 +310,7 @@ function BannerCarousel({ items }: { items: BannerItem[] }) {
           src={items[active].src}
           alt={items[active].alt}
           fill
+          sizes="(max-width: 480px) 100vw, 480px"
           className={styles.bannerImg}
           priority
         />
@@ -305,7 +333,7 @@ function BannerCarousel({ items }: { items: BannerItem[] }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   KARTU FOTO — dengan badge kategori & fallback jika gambar gagal load
+   KARTU FOTO
    ════════════════════════════════════════════════════════════════ */
 function GalleryCard({ item, onOpen }: { item: GalleryItem; onOpen: () => void }) {
   const [imgError, setImgError] = useState(false)
@@ -318,14 +346,22 @@ function GalleryCard({ item, onOpen }: { item: GalleryItem; onOpen: () => void }
             <IconImageFallback />
           </div>
         ) : (
-          <Image
-            src={item.src}
-            alt={item.title}
-            fill
-            className={styles.galleryThumbImg}
-            onError={() => setImgError(true)}
-          />
+          <>
+            <Image
+              src={item.src}
+              alt={item.title}
+              fill
+              sizes="(max-width: 480px) 50vw, 240px"
+              className={styles.galleryThumbImg}
+              onError={() => setImgError(true)}
+            />
+            <div className={styles.galleryThumbShade} />
+          </>
         )}
+        <span className={styles.photoPill}>
+          <IconLayers />
+          {item.photoCount}
+        </span>
       </div>
 
       <div className={styles.galleryBadge}>
@@ -336,8 +372,10 @@ function GalleryCard({ item, onOpen }: { item: GalleryItem; onOpen: () => void }
         <p className={styles.galleryCardTitle}>{item.title}</p>
         {item.desc && <p className={styles.galleryCardDesc}>{item.desc}</p>}
         <div className={styles.galleryCardFooter}>
-          <IconImageFallback size={13} />
-          <span className={styles.galleryCardFooterText}>{item.photoCount} Foto</span>
+          <span className={styles.categoryTag}>{CATEGORY_LABEL[item.category]}</span>
+          <span className={styles.viewMore}>
+            <IconChevronRight size={14} />
+          </span>
         </div>
       </div>
     </button>
@@ -345,7 +383,7 @@ function GalleryCard({ item, onOpen }: { item: GalleryItem; onOpen: () => void }
 }
 
 /* ════════════════════════════════════════════════════════════════
-   LIGHTBOX — preview foto ukuran besar
+   LIGHTBOX
    ════════════════════════════════════════════════════════════════ */
 function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void }) {
   const [imgError, setImgError] = useState(false)
@@ -366,7 +404,7 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
     <div className={styles.lightboxOverlay} onClick={onClose}>
       <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
         <button type="button" className={styles.lightboxCloseBtn} onClick={onClose} aria-label="Tutup">
-          <IconClose />
+          <IconClose size={20} />
         </button>
         <div className={styles.lightboxImageWrap}>
           {imgError ? (
@@ -378,16 +416,21 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
               src={item.src}
               alt={item.title}
               fill
+              sizes="(max-width: 480px) 100vw, 440px"
               className={styles.lightboxImg}
               onError={() => setImgError(true)}
             />
           )}
         </div>
         <div className={styles.lightboxCaption}>
+          <span className={styles.lightboxTag}>
+            <CategoryIcon category={item.category} />
+            {CATEGORY_LABEL[item.category]}
+          </span>
           <p className={styles.lightboxTitle}>{item.title}</p>
           {item.desc && <p className={styles.lightboxDesc}>{item.desc}</p>}
           <div className={styles.lightboxFooter}>
-            <CategoryIcon category={item.category} />
+            <IconLayers size={14} />
             <span className={styles.lightboxFooterText}>{item.photoCount} Foto dalam album ini</span>
           </div>
         </div>
@@ -402,12 +445,11 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
 export default function GaleriClient() {
   const [selected, setSelected] = useState<GalleryItem | null>(null)
   const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<GalleryCategory | 'all'>('all')
+  const [filterOpen, setFilterOpen] = useState(false)
   const gridRef = useRef<HTMLDivElement>(null)
 
-  /* Ukur tinggi header+search bar (fixed) secara dinamis, lalu jadikan
-     padding-top untuk konten scrollable di bawahnya, supaya tidak
-     ketiban/ketutup header. Dinamis karena tinggi header bisa berubah
-     (misal teks subtitle wrap 2 baris di layar sempit). */
+  /* Ukur tinggi header+search bar (fixed) untuk padding-top konten */
   const stickyRef = useRef<HTMLDivElement>(null)
   const [stickyHeight, setStickyHeight] = useState(0)
 
@@ -423,27 +465,43 @@ export default function GaleriClient() {
     return () => ro.disconnect()
   }, [])
 
+  /* Hanya tampilkan chip untuk kategori yang benar-benar ada datanya */
+  const availableCategories = useMemo(
+    () => CATEGORY_ORDER.filter((c) => GALLERY_ITEMS.some((i) => i.category === c)),
+    []
+  )
+
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return GALLERY_ITEMS
-    return GALLERY_ITEMS.filter(
-      (item) => item.title.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
-    )
-  }, [query])
+    return GALLERY_ITEMS.filter((item) => {
+      const matchCategory = category === 'all' || item.category === category
+      const matchQuery =
+        !q || item.title.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
+      return matchCategory && matchQuery
+    })
+  }, [query, category])
+
+  const isFiltering = category !== 'all' || query.trim() !== ''
 
   const scrollToGrid = () => {
     gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const pickCategory = (c: GalleryCategory | 'all') => {
+    setCategory(c)
+    setFilterOpen(false)
+  }
+
   return (
     <div className={styles.shell}>
-      {/* ══ FIXED TOP: header + search bar, selalu nempel di atas ══ */}
+      {/* ══ FIXED TOP: header + search bar ══ */}
       <div ref={stickyRef} className={styles.stickyTop}>
         <header className={styles.topHeader}>
           <Image
             src={HEADER_BG_SRC}
             alt=""
             fill
+            sizes="(max-width: 480px) 100vw, 480px"
             className={styles.headerBgImg}
             priority
           />
@@ -456,13 +514,17 @@ export default function GaleriClient() {
               </Link>
             </div>
             <div className={styles.headerTextWrap}>
+              <span className={styles.headerEyebrow}>
+                <IconGallery size={12} />
+                Dokumentasi
+              </span>
               <h1 className={styles.headerTitle}>Galeri Kegiatan</h1>
               <p className={styles.headerSub}>Dokumentasi kegiatan Pondok Pesantren Al-Istiqomah</p>
             </div>
           </div>
         </header>
 
-        {/* ══ SEARCH BAR (mengambang di atas header) ═════════════ */}
+        {/* ══ SEARCH BAR ═════════════════════════════════════════ */}
         <div className={styles.searchBarWrap}>
           <div className={styles.searchBarCard}>
             <div className={styles.searchInputWrap}>
@@ -474,26 +536,67 @@ export default function GaleriClient() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
+              {query && (
+                <button
+                  type="button"
+                  className={styles.clearBtn}
+                  onClick={() => setQuery('')}
+                  aria-label="Hapus pencarian"
+                >
+                  <IconClose size={12} />
+                </button>
+              )}
             </div>
-            {/* TODO: hubungkan dengan logika filter kategori bila dibutuhkan */}
-            <button type="button" className={styles.filterBtn}>
+            <button
+              type="button"
+              className={`${styles.filterBtn} ${filterOpen ? styles.filterBtnActive : ''}`}
+              onClick={() => setFilterOpen((v) => !v)}
+              aria-expanded={filterOpen}
+            >
               <IconFilter />
               Filter
+              {category !== 'all' && !filterOpen && <span className={styles.filterDot} />}
             </button>
           </div>
+
+          {filterOpen && (
+            <div className={styles.filterPanel}>
+              <p className={styles.filterPanelTitle}>Kategori Kegiatan</p>
+              <div className={styles.chipRow}>
+                <button
+                  type="button"
+                  className={`${styles.chip} ${category === 'all' ? styles.chipActive : ''}`}
+                  onClick={() => pickCategory('all')}
+                >
+                  <IconGallery size={14} />
+                  Semua
+                </button>
+                {availableCategories.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`${styles.chip} ${category === c ? styles.chipActive : ''}`}
+                    onClick={() => pickCategory(c)}
+                  >
+                    <CategoryIcon category={c} />
+                    {CATEGORY_LABEL[c]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ══ KONTEN YANG BISA DI-SCROLL ════════════════════════════ */}
+      {/* ══ KONTEN SCROLLABLE ════════════════════════════════════ */}
       <div className={styles.pageBody} style={{ paddingTop: stickyHeight }}>
-        {/* ══ BANNER CAROUSEL ═══════════════════════════════════ */}
         <BannerCarousel items={BANNER_ITEMS} />
 
-        {/* ══ SECTION HEADER ════════════════════════════════════ */}
+        {/* ══ SECTION HEADER ═════════════════════════════════════ */}
         <div className={styles.sectionHeader}>
           <div className={styles.sectionHeaderLeft}>
             <div className={styles.sectionIconBox}>
-              <IconImageFallback size={19} />
+              <IconGallery size={19} />
             </div>
             <div className={styles.sectionTitleWrap}>
               <p className={styles.sectionTitle}>Galeri Kegiatan</p>
@@ -502,20 +605,28 @@ export default function GaleriClient() {
           </div>
           <button type="button" className={styles.seeAllLink} onClick={scrollToGrid}>
             Lihat Semua
-            <IconChevronRight />
+            <IconChevronRight size={14} />
           </button>
         </div>
 
-        {/* ══ GRID GALERI ═══════════════════════════════════════ */}
-        <div ref={gridRef}>
+        {isFiltering && filteredItems.length > 0 && (
+          <p className={styles.resultInfo}>
+            Menampilkan <strong>{filteredItems.length}</strong> dari {GALLERY_ITEMS.length} kegiatan
+          </p>
+        )}
+
+        {/* ══ GRID GALERI ════════════════════════════════════════ */}
+        <div ref={gridRef} style={{ scrollMarginTop: stickyHeight + 8 }}>
           {filteredItems.length === 0 ? (
             <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>🖼️</span>
+              <div className={styles.emptyIconWrap}>
+                <IconGallery size={26} />
+              </div>
               <p className={styles.emptyText}>
                 {GALLERY_ITEMS.length === 0 ? 'Belum ada foto kegiatan' : 'Kegiatan tidak ditemukan'}
               </p>
               {GALLERY_ITEMS.length > 0 && (
-                <p className={styles.emptyHint}>Coba kata kunci pencarian lain</p>
+                <p className={styles.emptyHint}>Coba kata kunci atau kategori lain</p>
               )}
             </div>
           ) : (
@@ -527,7 +638,7 @@ export default function GaleriClient() {
           )}
         </div>
 
-        {/* ══ CTA — KIRIM DOKUMENTASI ═══════════════════════════ */}
+        {/* ══ CTA — KIRIM DOKUMENTASI ════════════════════════════ */}
         <div className={styles.ctaBanner}>
           <div className={styles.ctaIconBox}>
             <IconStar />
@@ -544,7 +655,7 @@ export default function GaleriClient() {
         </div>
       </div>
 
-      {/* ══ LIGHTBOX ════════════════════════════════════════════ */}
+      {/* ══ LIGHTBOX ═════════════════════════════════════════════ */}
       {selected && <Lightbox item={selected} onClose={() => setSelected(null)} />}
     </div>
   )

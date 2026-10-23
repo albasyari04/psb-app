@@ -1,7 +1,6 @@
 /* ================================================================
-   galeri_module.css — Galeri Kegiatan Santri
-   Tema warna disamakan dengan dashboard_module.css (teal/green)
-   Direvisi mengikuti mockup galeri_desain.png
+   galeri.module.css — Galeri Kegiatan Santri
+   Tema teal/green, disamakan dengan dashboard & pendaftaran.
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -19,8 +18,8 @@
   --slate: #475569;
   --gray: #64748b;
   --gray-light: #94a3b8;
-  --border: #e9eef2;
-  --bg: #f6f8fa;
+  --border: #e6ecf0;
+  --bg: #f4f7f9;
 
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
@@ -28,17 +27,13 @@
   max-width: 480px;
   margin: 0 auto;
   position: relative;
-  padding-bottom: 2rem;
+  padding-bottom: 6.5rem; /* ruang untuk bottom navigation */
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   STICKY TOP — bungkus header + search bar, FIXED di atas viewport.
-   Pakai `fixed` (bukan `sticky`) karena tidak bergantung pada
-   ancestor scroll-container tertentu — selalu nempel di atas
-   berapa pun lapisan wrapper/app-shell di atasnya. Lebar disamakan
-   dengan .shell (max-width 480px, center) agar sejajar di desktop.
+   FIXED TOP — header + search bar
    ══════════════════════════════════════════════════════════════ */
 .stickyTop {
   position: fixed;
@@ -53,16 +48,17 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TOP HEADER — gambar latar + overlay gradient
+   TOP HEADER
    ══════════════════════════════════════════════════════════════ */
 .topHeader {
   position: relative;
-  min-height: 210px;
-  padding: 1.1rem 1.1rem 2.4rem;
-  border-radius: 0 0 28px 28px;
+  min-height: 200px;
+  padding: 1.1rem 1.1rem 2.6rem;
+  border-radius: 0 0 30px 30px;
   overflow: hidden;
   color: #fff;
   background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
+  box-shadow: 0 10px 28px rgba(7, 61, 47, 0.22);
 }
 
 .headerBgImg {
@@ -75,13 +71,15 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    100deg,
-    rgba(7, 61, 47, 0.96) 0%,
-    rgba(7, 61, 47, 0.88) 32%,
-    rgba(7, 61, 47, 0.62) 62%,
-    rgba(7, 61, 47, 0.4) 100%
-  );
+  background:
+    radial-gradient(circle at 100% 0%, rgba(232, 193, 120, 0.18) 0%, transparent 45%),
+    linear-gradient(
+      100deg,
+      rgba(7, 61, 47, 0.96) 0%,
+      rgba(7, 61, 47, 0.88) 32%,
+      rgba(7, 61, 47, 0.62) 62%,
+      rgba(7, 61, 47, 0.42) 100%
+    );
 }
 
 .headerInner {
@@ -89,7 +87,7 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .headerTopRow {
@@ -97,28 +95,50 @@
   align-items: center;
 }
 
+/* Tombol back — disamakan dengan halaman Pendaftaran:
+   lingkaran hijau muda + panah teal */
 .backBtn {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--green-lighter);
+  border: 1px solid var(--green-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--teal-1);
   flex-shrink: 0;
   text-decoration: none;
-  backdrop-filter: blur(2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
   transition: background 0.15s, transform 0.15s;
 }
-.backBtn:hover { background: rgba(255, 255, 255, 0.26); transform: translateX(-1px); }
+.backBtn:hover {
+  background: var(--green-light);
+  transform: translateX(-1px);
+}
+.backBtn:active { transform: scale(0.95); }
 
 .headerTextWrap { display: flex; flex-direction: column; min-width: 0; }
+.headerEyebrow {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-1);
+  background: rgba(232, 193, 120, 0.14);
+  border: 1px solid rgba(232, 193, 120, 0.35);
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.55rem;
+}
 .headerTitle {
   font-size: 1.55rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   margin: 0;
   line-height: 1.2;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
@@ -128,24 +148,25 @@
   font-weight: 500;
   color: rgba(255, 255, 255, 0.88);
   margin: 0.3rem 0 0;
-  max-width: 240px;
-  line-height: 1.4;
+  max-width: 250px;
+  line-height: 1.45;
 }
 
 /* ══════════════════════════════════════════════════════════════
    PAGE BODY
    ══════════════════════════════════════════════════════════════ */
 .pageBody {
-  padding: 0 1.1rem 0;
+  padding: 0 1.1rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   SEARCH BAR — kartu putih mengambang di atas header
+   SEARCH BAR
    ══════════════════════════════════════════════════════════════ */
 .searchBarWrap {
+  position: relative;
   padding: 0 1.1rem;
 }
 
@@ -157,9 +178,14 @@
   align-items: center;
   gap: 0.6rem;
   background: #fff;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 0.55rem 0.6rem 0.55rem 0.9rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.9rem;
   box-shadow: 0 10px 28px rgba(7, 61, 47, 0.16);
+}
+.searchBarCard:focus-within {
+  border-color: var(--teal-1);
+  box-shadow: 0 10px 28px rgba(7, 61, 47, 0.2), 0 0 0 3px rgba(14, 124, 95, 0.12);
 }
 
 .searchInputWrap {
@@ -184,23 +210,106 @@
 }
 .searchInput::placeholder { color: var(--gray-light); }
 
+.clearBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
 .filterBtn {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-shrink: 0;
   background: var(--green-lighter);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--green-light);
+  border-radius: 12px;
+  padding: 0.55rem 0.8rem;
   font-family: inherit;
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--teal-1);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 .filterBtn:hover { background: var(--green-light); }
+.filterBtnActive {
+  background: var(--teal-1);
+  border-color: var(--teal-1);
+  color: #fff;
+}
+.filterBtnActive:hover { background: var(--teal-2); }
+.filterDot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold-2);
+  border: 2px solid #fff;
+}
+
+/* Panel filter kategori (dropdown, tidak mengubah tinggi header) */
+.filterPanel {
+  position: absolute;
+  z-index: 2;
+  left: 1.1rem;
+  right: 1.1rem;
+  top: calc(100% - 0.4rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.1rem 0.9rem 0.9rem;
+  box-shadow: 0 16px 34px rgba(7, 61, 47, 0.18);
+  animation: dropIn 0.16s ease-out;
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.filterPanelTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 0.6rem;
+}
+.chipRow { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip svg { width: 14px; height: 14px; }
+.chip:hover { border-color: var(--teal-1); color: var(--teal-1); }
+.chipActive {
+  background: var(--teal-1);
+  border-color: var(--teal-1);
+  color: #fff;
+}
+.chipActive:hover { color: #fff; }
 
 /* ══════════════════════════════════════════════════════════════
    BANNER CAROUSEL
@@ -210,14 +319,12 @@
 .bannerCard {
   position: relative;
   width: 100%;
-  /* Rasio asli galeri-banner.jpeg = 1600 x 528px. Disamakan persis
-     supaya object-fit: cover TIDAK pernah memotong gambar. Jika Anda
-     ganti dengan banner lain, sesuaikan angka ini dengan rasio asli
-     gambar tersebut (width / height). */
+  /* Rasio asli galeri-banner.jpeg = 1600 x 528px */
   aspect-ratio: 1600 / 528;
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(7, 61, 47, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 24px rgba(7, 61, 47, 0.16);
 }
 .bannerImg { object-fit: cover; }
 
@@ -231,7 +338,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--border);
+  background: #d5dde3;
   border: none;
   padding: 0;
   cursor: pointer;
@@ -239,8 +346,13 @@
 }
 .dotActive {
   width: 18px;
+  height: 6px;
   border-radius: 4px;
   background: var(--teal-1);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.2s, background 0.2s;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -255,23 +367,27 @@
 .sectionHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.7rem;
   min-width: 0;
 }
+
+/* Icon galeri — BULAT */
 .sectionIconBox {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
-  border-radius: 11px;
-  background: var(--teal-1);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal-1) 0%, var(--teal-2) 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 3px solid var(--green-light);
+  box-shadow: 0 6px 14px rgba(14, 124, 95, 0.28);
 }
 .sectionTitleWrap { min-width: 0; }
 .sectionTitle {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: var(--ink);
   margin: 0;
@@ -286,17 +402,28 @@
 .seeAllLink {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.1rem;
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: var(--teal-1);
-  background: none;
-  border: none;
+  background: var(--green-lighter);
+  border: 1px solid var(--green-light);
+  border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
-  padding: 0;
+  padding: 0.38rem 0.6rem 0.38rem 0.8rem;
+  transition: background 0.15s;
 }
+.seeAllLink:hover { background: var(--green-light); }
+
+.resultInfo {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray);
+  margin: -0.6rem 0 0;
+}
+.resultInfo strong { color: var(--teal-1); }
 
 /* ══════════════════════════════════════════════════════════════
    GRID GALERI
@@ -304,7 +431,7 @@
 .galleryGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.1rem 0.85rem;
+  gap: 1rem 0.85rem;
 }
 
 .galleryCard {
@@ -312,29 +439,38 @@
   flex-direction: column;
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: visible;
   padding: 0;
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
-  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
 }
 .galleryCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+  transform: translateY(-3px);
+  border-color: var(--green-light);
+  box-shadow: 0 12px 24px rgba(7, 61, 47, 0.12);
 }
+.galleryCard:active { transform: scale(0.98); }
 
 .galleryThumbWrap {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
   background: var(--green-lighter);
-  border-radius: 14px 14px 0 0;
+  border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
-.galleryThumbImg { object-fit: cover; }
+.galleryThumbImg { object-fit: cover; transition: transform 0.35s; }
+.galleryCard:hover .galleryThumbImg { transform: scale(1.05); }
+.galleryThumbShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 26, 20, 0.35) 0%, transparent 45%);
+  pointer-events: none;
+}
 .galleryThumbFallback {
   width: 100%;
   height: 100%;
@@ -345,28 +481,48 @@
   background: var(--green-lighter);
 }
 
+/* Pill jumlah foto di pojok thumbnail */
+.photoPill {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(7, 26, 20, 0.55);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* Badge kategori — bulat gradient, tumpang tindih thumbnail */
 .galleryBadge {
   width: 38px;
   height: 38px;
-  margin: -19px 0 0 14px;
+  margin: -19px 0 0 12px;
   position: relative;
   z-index: 3;
   border-radius: 50%;
-  background: #fff;
+  background: linear-gradient(135deg, var(--teal-1) 0%, var(--teal-2) 100%);
   border: 3px solid #fff;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 5px 12px rgba(7, 61, 47, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--teal-1);
+  color: #fff;
 }
 
 .galleryCardBody {
-  padding: 0.4rem 0.7rem 0.65rem;
+  padding: 0.45rem 0.75rem 0.7rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  border-radius: 0 0 14px 14px;
+  border-radius: 0 0 16px 16px;
 }
 .galleryCardTitle {
   font-size: 0.82rem;
@@ -374,13 +530,17 @@
   color: var(--ink);
   margin: 0;
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .galleryCardDesc {
   font-size: 0.7rem;
   font-weight: 500;
   color: var(--gray);
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -390,17 +550,24 @@
 .galleryCardFooter {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.3rem;
   margin-top: 0.4rem;
-  padding-top: 0.45rem;
-  border-top: 1px solid var(--border);
-  color: var(--gray-light);
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
 }
-.galleryCardFooter svg { flex-shrink: 0; }
-.galleryCardFooterText {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--gray);
+.categoryTag {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--teal-1);
+  background: var(--green-lighter);
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+}
+.viewMore {
+  display: flex;
+  align-items: center;
+  color: var(--gray-light);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -412,40 +579,69 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 3rem 1rem;
+  padding: 2.5rem 1rem;
+  background: #fff;
+  border: 1px dashed #cfd9e0;
+  border-radius: 16px;
   color: var(--gray-light);
+  text-align: center;
 }
-.emptyIcon { font-size: 2.2rem; }
-.emptyText { font-size: 0.85rem; font-weight: 600; margin: 0; }
-.emptyHint { font-size: 0.74rem; font-weight: 500; margin: 0; color: var(--gray-light); }
+.emptyIconWrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--green-lighter);
+  color: var(--teal-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+}
+.emptyText { font-size: 0.88rem; font-weight: 700; margin: 0; color: var(--ink); }
+.emptyHint { font-size: 0.74rem; font-weight: 500; margin: 0; color: var(--gray); }
 
 /* ══════════════════════════════════════════════════════════════
-   CTA BANNER — Kirim Dokumentasi
+   CTA BANNER
    ══════════════════════════════════════════════════════════════ */
 .ctaBanner {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 0.9rem;
   background: linear-gradient(120deg, var(--teal-1) 0%, var(--teal-2) 60%, var(--teal-3) 100%);
-  border-radius: 18px;
-  padding: 1.1rem 1.1rem;
-  box-shadow: 0 8px 22px rgba(7, 61, 47, 0.18);
+  border-radius: 20px;
+  padding: 1.15rem;
+  box-shadow: 0 10px 24px rgba(7, 61, 47, 0.2);
+}
+.ctaBanner::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -40px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 193, 120, 0.22) 0%, transparent 70%);
+  pointer-events: none;
 }
 .ctaIconBox {
-  width: 42px;
-  height: 42px;
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--gold-1);
 }
-.ctaTextWrap { flex: 1; min-width: 0; }
+.ctaTextWrap { position: relative; z-index: 1; flex: 1; min-width: 0; }
 .ctaTitle {
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #fff;
   margin: 0;
@@ -459,6 +655,8 @@
   line-height: 1.4;
 }
 .ctaButton {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -485,7 +683,7 @@
   position: fixed;
   inset: 0;
   background: rgba(7, 26, 20, 0.82);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -500,20 +698,26 @@
   width: 100%;
   max-width: 440px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
+  animation: popIn 0.2s ease-out;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .lightboxCloseBtn {
   position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
+  top: 0.7rem;
+  right: 0.7rem;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   background: rgba(7, 26, 20, 0.55);
-  border: none;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   display: flex;
   align-items: center;
@@ -531,34 +735,51 @@
 .lightboxImg { object-fit: cover; }
 
 .lightboxCaption {
-  padding: 0.9rem 1rem 1.1rem;
+  padding: 1rem 1.1rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
+.lightboxTag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--teal-1);
+  background: var(--green-lighter);
+  border: 1px solid var(--green-light);
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem 0.22rem 0.5rem;
+}
+.lightboxTag svg { width: 13px; height: 13px; }
 .lightboxTitle {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--ink);
-  margin: 0;
+  margin: 0.2rem 0 0;
+  line-height: 1.3;
 }
 .lightboxDesc {
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--slate);
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .lightboxFooter {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.3rem;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border);
   color: var(--gray-light);
 }
 .lightboxFooter svg { flex-shrink: 0; }
 .lightboxFooterText {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--gray);
 }
